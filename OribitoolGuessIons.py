@@ -3,8 +3,15 @@ import re
 from bintrees import FastRBTree
 from pyteomics import mass
 
+from OribitoolFormula import Formula
 
-class calcFormula(object):
+p_elements = ['C', 'H', 'O', 'N', 'Na']
+p_isotopes = ['C[13]', 'O[18]']
+n_elements = ['C', 'H', 'O', 'N', 'S']
+n_isotopes = ['C[13]', 'O[18]', 'S[34]']
+
+
+class IonCalculator(object):
     def __init__(self):
         # key: left of a interval. value: right of a interval
         self._cover_RBTree = FastRBTree()
@@ -13,20 +20,15 @@ class calcFormula(object):
 
         self.errppm = 1e-6
 
-        self.elements = ['C', 'H', 'O', 'N', 'S', 'Na']
-        self.elements_set = set(self.elements)
-        self.isotopes = ['C[13]', 'O[18]', 'S[34]']
-        self.isotopes_set = set(self.isotopes)
-        self.isotopes_map = {'C[13]': 'C', 'O[18]': 'O', 'S[34]': 'S'}
-
-        self.constrain = \ 
-            {'C': (0, 20), 'H': (0, 40), 'O': (1, 10), 'N': (0, 3), 'S': (0, 1),
+        self.constrain = \
+            {'elements': n_elements, 'isotopes': n_isotopes,
+             'C': (0, 20), 'H': (0, 40), 'O': (1, 15), 'N': (0, 4), 'S': (0, 1), 'Na': (0, 1),
              'C[13]': (0, 3), 'O[18]': (0, 2),
              'DBE': (0, 8),
-              'OCratioMax': 3, 'ONratioMax': 3, 'OSratioMax': 4,
-              'NitrogenRule': False, charge = -1}
+             'OCratioMax': 3, 'ONratioMax': 3, 'OSratioMax': 4,
+             'NitrogenRule': False, 'charge': -1}
 
-    def calc(self, M: float, queue=None) -> List[Ion]:
+    def calc(self, M: float, queue=None) -> list:
         """
         @M : mass
         @queue : communicate cross process
@@ -44,65 +46,141 @@ class calcFormula(object):
         Hmass = mass.calculate_mass(formula='H')
         Nmass = mass.calculate_mass(formula='N')
         Omass = mass.calculate_mass(formula='O')
-        formula = Ion()
-        Crange = range(
-            max(0, self['C'][0]),
-            min(int(math.floor(M/12)), self['C'][1])+1)
-        # 改成递归的形式，使用栈
-        for Cnum in Crange:
-            formula['C'] = Cnum
-            for Nnum in range(self['Nmin'], self['Nmax'] + 1):
-                formula['N'] = Nnum
-                if formula.mass() > Mmax:
-                    break
-                for Snum in range(self['Smin'], self['Smax'] + 1):
-                    formula['S'] = Snum
-                    m = formula.mass()
-                    Orange = range(
-                        max(self['Omin'],
-                            int(math.ceil((Mmin - m - Hmass * formula.Hmax()) / Omass))),
-                        min(self['Omax'],
-                            self['OCratioMax'] * Cnum + self['ONratioMax'] *
-                            Nnum + self['OSratioMax'] * Snum,
-                            int(math.floor((Mmax - m - Hmass*formula.Hmin()) / Omass)))
-                        + 1)
+        ion = Formula()
+        ion.charge = self['charge']
+        if self['charge'] == -1:
+            Crange = range(
+                max(0, self['C'][0]),
+                min(int(math.floor(M/12)), self['C'][1])+1)
+            for Cnum in Crange:
+                ion['C'] = Cnum
+                for Nnum in range(self['N'][0], self['N'][1] + 1):
+                    ion['N'] = Nnum
+                    if ion.mass() > Mmax:
+                        break
+                    for Snum in range(self['S'][0], self['S'][1] + 1):
+                        ion['S'] = Snum
+                        m = ion.mass()
+                        Orange = range(
+                            max(self['O'][0],
+                                int(math.ceil((Mmin - m - Hmass * ion.Hmax()) / Omass))),
+                            min(self['O'][1],
+                                self['OCratioMax'] * Cnum + self['ONratioMax'] *
+                                Nnum + self['OSratioMax'] * Snum,
+                                int(math.floor((Mmax - m - Hmass*ion.Hmin()) / Omass)))
+                            + 1)
 
-                    for Onum in Orange:
-                        formula['O'] = Onum
-                        m = formula.mass()
-                        Hmin = max(
-                            formula.Hmin(),
-                            self['Hmin'],
-                            int(math.ceil((Mmin - m) / Hmass)))
-                        Hmax = min(
-                            formula.Hmax(),
-                            self['Hmax'],
-                            int(math.floor((Mmax - m) / Hmass)))
-                        formula['H'] = Hmax
-                        if formula.DBE() > self['DBEmax']:
-                            break
-                        for Hnum in range(Hmin, Hmax + 1):
-                            formula['H'] = Hnum
-                            if formula.DBE() < self['DBEmin']:
+                        for Onum in Orange:
+                            ion['O'] = Onum
+                            m = ion.mass()
+                            Hmin = max(
+                                ion.Hmin(),
+                                self['H'][0],
+                                int(math.ceil((Mmin - m) / Hmass)))
+                            Hmax = min(
+                                ion.Hmax(),
+                                self['H'][1],
+                                int(math.floor((Mmax - m) / Hmass)))
+                            ion['H'] = Hmax
+                            if ion.DBE() > self['DBE'][1]:
                                 break
-                            if formula.DBE() > self['DBEmax'] or self['NitrogenRule'] and (formula['H'] + formula['N']) % 2 != 1:
-                                continue
-                            f_copy = formula.copy()
-                            ans.append(f_copy)
-                            self._calced_insert(f_copy)
+                            for Hnum in range(Hmin, Hmax + 1):
+                                ion['H'] = Hnum
+                                if ion.DBE() < self['DBE'][0]:
+                                    break
+                                if ion.DBE() > self['DBE'][1] or self['NitrogenRule'] and (ion['H'] + ion['N']) % 2 != 1:
+                                    continue
+                                f_copy = ion.copy()
+                                ans.append(f_copy)
+                                self._calced_insert(f_copy)
 
-                            isotope.extend(
-                                self._find_and_insert_isotope(formula))
+                                isotope.extend(
+                                    self._find_and_insert_isotope(ion))
 
-                        formula['H'] = 0
-                    formula['O'] = 0
-                formula['S'] = 0
+                            ion['H'] = 0
+                        ion['O'] = 0
+                    ion['S'] = 0
+                ion['N'] = 0
+        elif self['charge'] == 1:
+            Crange = range(
+                max(0, self['C'][0]),
+                min(int(math.floor(M/12)), self['C'][1])+1)
+            for Cnum in Crange:
+                ion['C'] = Cnum
+                for Nnum in range(self['N'][0], self['N'][1] + 1):
+                    ion['N'] = Nnum
+                    if ion.mass() > Mmax:
+                        break
+                    for Nanum in range(self['Na'][0], self['Na'][1] + 1):
+                        ion['Na'] = Nanum
+                        m = ion.mass()
+                        Orange = range(
+                            max(self['O'][0],
+                                int(math.ceil((Mmin - m - Hmass*ion.Hmax()) / Omass))),
+                            min(self['O'][1],
+                                self['OCratioMax']*Cnum +
+                                self['ONratioMax']*Nnum,
+                                int(math.floor((Mmax - m - Hmass*ion.Hmin()) / Omass)))
+                            + 1)
+
+                        for Onum in Orange:
+                            ion['O'] = Onum
+                            m = ion.mass()
+                            Hmin = max(
+                                ion.Hmin()-Nanum,
+                                self['H'][0],
+                                int(math.ceil((Mmin-m)/Hmass)))
+                            Hmax = min(
+                                ion.Hmax()-Nanum,
+                                self['H'][1],
+                                int(math.floor((Mmax-m)/Hmass)))
+                            ion['H'] = Hmax
+                            if ion.DBE() > self['DBE'][1]:
+                                break
+                            for Hnum in range(Hmin, Hmax + 1):
+                                ion['H'] = Hnum
+                                DBE = ion.DBE()
+                                if DBE < self['DBE'][0]:
+                                    break
+                                if DBE > self['DBE'][1] or self['NitrogenRule'] and (Hnum+Nnum+Nanum) % 2 != 1:
+                                    continue
+                                i_copy = ion.copy()
+                                ans.append(i_copy)
+                                self._calced_insert(i_copy)
+
+                                isotope.extend(
+                                    self._find_and_insert_isotope(ion))
+                            ion['H'] = 0
+                        ion['O'] = 0
+                    ion['Na'] = 0
+                ion['N'] = 0
 
         self._cover(Mmin, Mmax)
         if queue is not None:
             isotope.extend(ans)
             queue.put(((Mmin, Mmax), isotope))
         return ans
+
+    def calc_future(self, M: float, queue=None) -> list:
+        '''
+        @para
+            M : mass
+            queue : communicate across process
+        '''
+        (Mmin, Mmax) = (M / (1 + self.errppm), M / (1 - self.errppm))
+
+        if self._covered(Mmin, Mmax):
+            if queue is not None:
+                queue.put(((Mmin, Mmax), []))
+            return self._calced_get(M)
+
+        ans = []
+        isotope = []
+        # 改成递归的形式，使用栈
+
+    def clear(self):
+        self._cover_RBTree.clear()
+        self._calced_RBTree.clear()
 
     def _covered(self, left, right):
         try:
@@ -134,23 +212,23 @@ class calcFormula(object):
             max_r = right
         self._cover_RBTree.insert(min_l, max_r)
 
-    def _calced_insert(self, formula):
-        m = formula.mass()
+    def _calced_insert(self, ion):
+        m = ion.mass()
         e = False
         try:
             mm, f = self._calced_RBTree.floor_item(m)
-            if formula == f:
+            if ion == f:
                 e = True
         except KeyError:
             pass
         try:
             mm, f = self._calced_RBTree.ceiling_item(m)
-            if formula == f:
+            if ion == f:
                 e = True
         except KeyError:
             pass
         if not e:
-            self._calced_RBTree.insert(m, formula)
+            self._calced_RBTree.insert(m, ion)
 
     def _calced_get(self, m):
         ans = []
@@ -172,51 +250,54 @@ class calcFormula(object):
             pass
         return ans
 
-    def _find_and_insert_isotope(self, formula):
+    def _find_and_insert_isotope(self, ion):
+        '''
+        couldn't produce isotope ion like CC[13]H6O[18], whick have 2 different isotope
+        '''
         ans = []
-        for isotope in _isotopes:
-            origin_e = _isotopes_map[isotope]
-            if not origin_e in formula:
+        for isotope in self['isotopes']:
+            origin_e = re.match(r"[A-Z][a-z]{0,2}", isotope).group()
+            if origin_e not in ion:
                 continue
             isomax = None
-            if isotope+'max' in self.restriction:
+            if isotope+'max' in self.constrain:
                 isomax = min(
-                    self.restriction[isotope+'max'], formula[origin_e])
+                    self.constrain[isotope][1], ion[origin_e])
             else:
-                isomax = formula[origin_e]
+                isomax = ion[origin_e]
             for isonum in range(1, isomax + 1):
-                f = formula.copy()
-                f[origin_e] = formula[origin_e] - isonum
+                f = ion.copy()
+                f[origin_e] = ion[origin_e] - isonum
                 f[isotope] = isonum
                 self._calced_insert(f)
                 ans.append(f)
         return ans
 
     def __setitem__(self, key, value):
-        if self.restriction[key] == value:
+        if self.constrain[key] == value:
             return
         if type(value) not in {int, bool}:
             raise ValueError('number constrain should be integer')
         self._cover_RBTree.clear()
         self._calced_RBTree.clear()
-        self.restriction[key] = value
+        self.constrain[key] = value
 
     def __getitem__(self, key):
-        return self.restriction[key]
+        return self.constrain[key]
 
 
 if __name__ == '__main__':
-    calc = calcFormula()
-    calc.errppm = 2e-6
-    l = calc.calc(mass.calculate_mass(formula="HN2O6")+0.0005486)
-    for ll in l:
-        print(str(ll), mass.calculate_mass(
-            formula=str(ll)))
-    samples = ['HNO3NO3-', 'C6H3O2NNO3-', 'C6H5O3NNO3-',
-               'C6H4O5N2NO3-', 'C8H12O10N2NO3-', 'C10H17O10N3NO3-']
+    calcr = IonCalculator()
+    calcr['charge'] = -1
+    samples=['HNO3NO3-', 'C6H3O2NNO3-', 'C6H5O3NNO3-',
+                'C6H4O5N2NO3-', 'C8H12O10N2NO3-', 'C10H17O10N3NO3-']
     for s in samples:
-        formula = Ion(s)
-        print(s, str(formula))
+        ion=Formula(s)
+        print(ion, calcr.calc(ion.mass()))
 
-    # a = Formula('C11C[13]2H14O5-')
-    # print(a.relativeAbundance())
+    calcr['charge'] = 1
+    for s in samples:
+        ion=Formula(s)
+        ion.charge=1
+        print(ion, calcr.calc(ion.mass()))
+        # couldn't get C6H3O5N2+ for ion.Hmin()->4

@@ -10,30 +10,30 @@ _print_order = ['C', 'H', 'O', 'N']
 _print_order_set = set(_print_order)
 
 
-class Ion(UserDict):
+class Formula(UserDict):
     '''
     '''
 
-    def __init__(self, ion: str = None, **kwargs):
+    def __init__(self, formula: str = None, **kwargs):
         '''
-        Ion('CC[13]H5O-')
-        Ion({'C':1,'C[13]':1,'H':5,'O':1},charge=-1)
-        Ion({'C':1,'C[13]':1,'H':5,'O':1,'charge'=-1})
-        Ion(C=1,H=2,O=1,charge=-1)
+        Formula('CC[13]H5O-')
+        Formula({'C':1,'C[13]':1,'H':5,'O':1},charge=-1)
+        Formula({'C':1,'C[13]':1,'H':5,'O':1,'charge'=-1})
+        Formula(C=1,H=2,O=1,charge=-1)
         '''
         super().__init__()
         self.charge = 0
         self.isIsotope = False
         try:
-            if type(ion) is str:
-                if not re.fullmatch(r"([A-Z][a-z]{0,2}(\[\d+\])?\d*)+[-+]", ion):
+            if type(formula) is str:
+                if not re.fullmatch(r"([A-Z][a-z]{0,2}(\[\d+\])?\d*)+[-+]?", formula):
                     raise ValueError()
-                charge = ion[-1]
+                charge = formula[-1]
                 if charge == '+':
                     self.charge = 1
                 elif charge == '-':
                     self.charge = -1
-                for match in re.finditer(r"([A-Z][a-z]{0,2})(\[\d+\])?(\d*)", ion):
+                for match in re.finditer(r"([A-Z][a-z]{0,2})(\[\d+\])?(\d*)", formula):
                     e = match.group(1)
                     m = match.group(2)  # if dismatch, None
                     num = match.group(3)
@@ -41,8 +41,8 @@ class Ion(UserDict):
                 return
 
             dic=kwargs.copy()
-            if type(ion) is dict:
-                for k, v in ion.items():
+            if type(formula) is dict:
+                for k, v in formula.items():
                     dic[k] = v
 
             for k, v in dic.items():
@@ -55,10 +55,8 @@ class Ion(UserDict):
                     self.charge = v
                 else:
                     raise ValueError('wrong kwargs'+k)
-            if len(dic)>0 and self.charge == 0:
-                raise ValueError('wrong kwargs, charge must be provided')
         except ValueError as e:
-            raise ValueError('wrong ion:' + str(e))
+            raise ValueError('wrong formula:' + str(e))
 
     def mass(self) -> float:
         return mass.calculate_mass(composition=self.data) - 0.0005486 * self.charge
@@ -102,37 +100,45 @@ class Ion(UserDict):
     def Hmin(self) -> int:
         if self.isIsotope:
             return self.findOrigin().Hmin()
-        Hmin = None
+        pHmin = None
         if self['C'] == 0:
-            Hmin = 0
+            pHmin = 0
         elif self['C'] <= 2:
-            Hmin = 4 - self['N'] - 1
+            pHmin = 4 - self['N'] 
         elif self['C'] <= 6:
-            Hmin = 6 - self['N'] - 1
+            pHmin = 6 - self['N'] 
         elif self['C'] <= 10:
-            Hmin = 8 - self['N'] - 1
+            pHmin = 8 - self['N'] 
         elif self['C'] <= 16:
-            Hmin = 10 - self['N'] - 1
+            pHmin = 10 - self['N'] 
         elif self['C'] <= 24:
-            Hmin = 12 - self['N'] - 1
+            pHmin = 12 - self['N'] 
         elif self['C'] <= 32:
-            Hmin = 14 - self['N'] - 1
+            pHmin = 14 - self['N'] 
         elif self['C'] <= 42:
-            Hmin = 16 - self['N'] - 1
+            pHmin = 16 - self['N'] 
         elif self['C'] <= 54:
-            Hmin = 18 - self['N'] - 1
+            pHmin = 18 - self['N'] 
         else:
-            Hmin = int(math.ceil(0.3 * self['C'] - self['N'] - 1))
-        return max(Hmin, 0)
+            pHmin = int(math.ceil(0.3 * self['C'] - self['N'] ))
+        if self.charge == -1:
+            return max(pHmin - 1, 0)
+        elif self.charge==1:
+            return max(pHmin,0)
 
     def Hmax(self) -> int:
         if self.isIsotope:
             return self.findOrigin().Hmax()
-        return 2 * self['C'] + 2 + self['N']
+        if self.charge==-1:
+            return 2 * self['C'] + 2 + self['N']
+        else:
+            return 2 * self['C'] + 3 + self['N']
+
 
     def Hpossible(self, NitrogenRule) -> bool:
         '''
         return Boolean indicating whether Hnum is possible
+        should be changed to add Cl or Na etc
         '''
         if self.isIsotope:
             return self.findOrigin().Hpossible(NitrogenRule)
@@ -140,7 +146,7 @@ class Ion(UserDict):
         if self['H'] > self.Hmax():
             return False
 
-        return self['H'] >= self.Hmin() and (not NitrogenRule or (self['H'] + self['N']) % 2 == 1)
+        return self['H'] >= self.Hmin() and (not NitrogenRule or (self['H'] + self['N'] + self['Na']) % 2 == 1)
 
     def DBE(self) -> float:
         """
@@ -148,7 +154,7 @@ class Ion(UserDict):
         """
         if self.isIsotope:
             return self.findOrigin().DBE()
-        return 1.0 + self['C'] + 0.5 * (self['N'] - self['H'] - self.charge)
+        return 1.0 + self['C'] + 0.5 * (self['N']+ self.charge - self['H'] -self['Na'])
 
     def findOrigin(self):
         '''
@@ -209,7 +215,7 @@ class Ion(UserDict):
                 s.append(tmp)
 
         if withCharge:
-            return ''.join(s) + ('+' if self.charge == 1 else '-')
+            return ''.join(s) + ('+' if self.charge == 1 else '-' if self.charge ==-1 else '')
         return ''.join(s)
 
     def __setitem__(self, key, value):
@@ -275,11 +281,11 @@ class Ion(UserDict):
     def __repr__(self):
         return self.toStr(False, True)
 
-    def __eq__(self, ion):
-        if type(ion) != type(self) or len(self.data) != len(ion.data) or self.charge != ion.charge:
+    def __eq__(self, formula):
+        if type(formula) != type(self) or len(self.data) != len(formula.data) or self.charge != formula.charge:
             return False
         for e, v in self.items():
-            if v != ion[e]:
+            if v != formula[e]:
                 return False
         return True
 
@@ -292,6 +298,6 @@ class Ion(UserDict):
 
 
 if __name__ == "__main__":
-    a = Ion({'C':2,'H':4,'H[2]':2,'O':1,'charge':-1,'C[13]':1})
+    a = Formula({'C':2,'H':4,'H[2]':2,'O':1,'charge':-1,'C[13]':1})
     b = a.findOrigin()
     print(b,b.isIsotope)
