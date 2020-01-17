@@ -11,10 +11,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvas, NavigationToolbar2Q
 import matplotlib.figure
 import matplotlib.axes
 import matplotlib.ticker
+import matplotlib.animation
 
 
 import OribitoolOptions
-import OribitoolWorkspace
 import OribitoolFormula
 import OribitoolFunc
 
@@ -24,7 +24,7 @@ import OribitoolClass
 
 class QThread(QtCore.QThread):
     finished = QtCore.pyqtSignal(tuple)
-    sendStatus = QtCore.pyqtSignal(OribitoolClass.File, str, int, int)
+    sendStatus = QtCore.pyqtSignal(str, str, int, int)
 
     def __init__(self, func, args: tuple):
         super(QtCore.QThread, self).__init__(None)
@@ -35,8 +35,17 @@ class QThread(QtCore.QThread):
         result = self.func(*self.args, self.sendStatusFunc)
         self.finished.emit((result, self.args))
 
-    def sendStatusFunc(self, file, msg, index, length):
-        self.sendStatus.emit(file, msg, index, length)
+    def sendStatusFunc(self, filepath, msg, index, length):
+        self.sendStatus.emit(filepath, msg, index, length)
+
+
+def QMultiProcess(func, argsList: list, filepath: Union[list, str], cpu=None) -> QThread:
+    return QThread(OribitoolFunc.multiProcess, (func, argsList, filepath, cpu))
+
+
+def showInfo(content: str, cap=None):
+    QtWidgets.QMessageBox.information(
+        None, cap if cap is not None else 'info', str(content))
 
 
 class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
@@ -53,8 +62,17 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.averageAllPushButton.clicked.connect(self.qAverageAllFile)
         self.spectra1TableWidget.itemDoubleClicked.connect(
             self.qSpectra1DoubleClicked)
-        self.fitPeakPushButton.clicked.connect(self.qfitPeakUseCurrentSpectrum)
-        self.peakFitCancelPushButton.clicked.connect(self.qPeakFitRmCancel)
+        self.fitPeakPushButton.clicked.connect(self.qfitPeak1UseCurrentSpectrum)
+        self.peakFit1CancelPushButton.clicked.connect(self.qPeakFitRmCancel)
+        self.peakFit1FinishPushButton.clicked.connect(self.qPeakFit1Finish)
+        self.calibrationAddIonToolButton.clicked.connect(
+            self.qCalibrationAddIon)
+        self.calibrationDelIonToolButton.clicked.connect(
+            self.qCalibrationRmIon)
+        self.calibratePushButton.clicked.connect(self.qInitCalibration)
+        self.calibrationShowedSelectedPushButton.clicked.connect(self.qCalibrationShowSelected)
+        self.calibrationShowAllPushButton.clicked.connect(self.qCalibrationShowAll)
+        self.calibrationFinishPushButton.clicked.connect(self.qCalibrationFinish)
 
         self.fileTableWidget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeToContents)
@@ -79,31 +97,39 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.spectra1Canvas.figure.subplots_adjust(
             left=0.1, right=0.999, top=0.999, bottom=0.05)
 
-        self.peakFitWidget.setLayout(QtWidgets.QVBoxLayout())
-        self.peakFitCanvas: matplotlib.backend_bases.FigureCanvasBase = FigureCanvas(
+        self.peakFit1Widget.setLayout(QtWidgets.QVBoxLayout())
+        self.peakFit1Canvas: matplotlib.backend_bases.FigureCanvasBase = FigureCanvas(
             matplotlib.figure.Figure(figsize=(20, 20)))
-        self.peakFitWidget.layout().addWidget(self.peakFitCanvas)
-        self.peakFitAx: matplotlib.axes.Axes = self.peakFitCanvas.figure.subplots()
-        self.peakFitAx.autoscale(True)
-        self.peakFitCanvas.mpl_connect(
-            'button_press_event', self.qPeakFitMouseToggle)
-        self.peakFitCanvas.mpl_connect(
-            'button_release_event', self.qPeakFitMouseToggle)
-        self.peakFitCanvas.mpl_connect(
-            'motion_notify_event', self.qPeakFitMouseMove)
-        self.peakFitNormLine:matplotlib.lines.Line2D=None
-        self.peakFitMouseStartPoint = None
-        self.peakFitMouseLine: matplotlib.lines.Line2D = None
+        self.peakFit1Widget.layout().addWidget(self.peakFit1Canvas)
+        self.peakFit1Ax: matplotlib.axes.Axes = self.peakFit1Canvas.figure.subplots()
+        self.peakFit1Ax.autoscale(True)
+        self.peakFit1Canvas.mpl_connect(
+            'button_press_event', self.qPeakFit1MouseToggle)
+        self.peakFit1Canvas.mpl_connect(
+            'button_release_event', self.qPeakFit1MouseToggle)
+        self.peakFit1Canvas.mpl_connect(
+            'motion_notify_event', self.qPeakFit1MouseMove)
+        self.peakFit1NormLine: matplotlib.lines.Line2D = None
+        self.peakFit1MouseStartPoint = None
+        self.peakFit1MouseEndPoint = None
+        self.peakFit1MouseLine: matplotlib.lines.Line2D = None
+        self.peakFit1MouseLineAni: matplotlib.animation.FuncAnimation = None
 
+        self.calibrationWidget.setLayout(QtWidgets.QVBoxLayout())
+        self.calibrationCanvas: matplotlib.backend_bases.FigureCanvasBase = FigureCanvas(
+            matplotlib.figure.Figure(figsize=(20, 20)))
+        self.calibrationWidget.layout().addWidget(self.calibrationCanvas)
+        self.calibrationAx: matplotlib.axes.Axes = self.calibrationCanvas.figure.subplots()
+        self.calibrationAx.autoscale(True)
 
-        self.tabWidget.setCurrentIndex(0)
-
+        self.fileList = OribitoolClass.FileList()
         self.workspace = OribitoolClass.Workspace()
 
         self.threads = []
         self.windows = []
 
         self.busy = False
+        self.tabWidget.setCurrentWidget(self.filesTab)
 
     def rmFinished(self):
         self.threads = [t for t in self.threads if not t.isFinished()]
@@ -117,18 +143,18 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     def qSetBusy(self, busy=True):
         if self.busy and busy:
-            QtWidgets.QMessageBox.information(
-                None, 'busy', "wait for processing")
+            showInfo("wait for processing", 'busy')
             return False
         self.busy = busy
         self.widget.setDisabled(busy)
         self.progressBar.setHidden(not busy)
         return True
 
-    def qShowStatus(self, file: OribitoolClass.File, msg: str, current: int, total: int):
+    def qShowStatus(self, filepath, msg: str, current: int, total: int):
         showedMsg = None
         if current >= 0:
-            showedMsg = file.name + '\t\t|\t' + msg + '\t|\t\t' + str(current)
+            showedMsg = self.fileList.filedict[filepath].name + \
+                '\t\t|\t' + msg + '\t|\t\t' + str(current)
             if total > 0:
                 showedMsg += '/' + str(total)
                 self.progressBar.setValue(round(100 * current / total))
@@ -148,13 +174,13 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             return time.strftime(r'%m/%d %X')
 
         setValue(0, os.path.split(f)[1])
-        fh: OribitoolClass.FileHeader = self.workspace.files.filedict[f].header
+        fh: OribitoolClass.FileHeader = self.fileList.filedict[f].header
         setValue(1, date2str(fh.creationDate + fh.startTime))
         setValue(2, date2str(fh.creationDate + fh.endTime))
         setValue(3, f)
 
     def qShowFileTimeRange(self):
-        timeRange = self.workspace.files.timeRange()
+        timeRange = self.fileList.timeRange()
         if timeRange:
             self.averageStartDateTimeEdit.setDateTime(timeRange[0])
             self.averageEndDateTimeEdit.setDateTime(timeRange[1])
@@ -170,22 +196,22 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             caption="Select one folder")
         table = self.fileTableWidget
         try:
-            files = self.workspace.addFileFromFolder(
-                folder, self.recurrenceCheckBox.isChecked())
+            files = self.fileList.addFileFromFolder(
+                folder, self.recurrenceCheckBox.isChecked(), '.raw')
             count = table.rowCount()
             table.setRowCount(count+len(files))
             for index, f in enumerate(files):
                 self.qShowFile(f, count+index)
 
         except ValueError as e:
-            QtWidgets.QMessageBox.information(
-                None, 'Error', 'file "%s" and "%s" have crossed scan time' % (e.args[0], e.args[1]))
-            self.workspace.files.clear()
+            showInfo('file "%s" and "%s" have crossed scan time' %
+                     (e.args[0], e.args[1]), 'Error')
+            self.fileList.clear()
             table.clearContents()
             table.setRowCount(0)
 
-        except:
-            pass
+        # except:
+        #     pass
 
         self.qShowFileTimeRange()
         self.qSetBusy(False)
@@ -201,7 +227,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
             addedFiles = []
             for f in files[0]:
-                if self.workspace.files.addFile(f):
+                if self.fileList.addFile(f):
                     addedFiles.append(f)
 
             table = self.fileTableWidget
@@ -211,8 +237,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 self.qShowFile(f, count+index)
 
         except ValueError as e:
-            QtWidgets.QMessageBox.information(
-                None, 'Error', 'file "%s" and "%s" have crossed scan time' % (e.args[0], e.args[1]))
+            showInfo('file "%s" and "%s" have crossed scan time' %
+                     (e.args[0], e.args[1]), 'Error')
 
         self.qShowFileTimeRange()
         self.qSetBusy(False)
@@ -220,12 +246,13 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     def qRemoveFile(self):
         if not self.qSetBusy(True):
             return
-        # indexes = []
-        # for srange in self.fileTableWidget.selectedRanges:
-        #     for row in range(srange.topRow(), srange.bottomRow()+1):
-        #         indexes.append(row)
-        # indexes.reverse()
-        # for index in indexes:
+        table = self.fileTableWidget
+        indexes = table.selectedIndexes
+        indexes = [index.row() for index in indexes]
+        indexes.sort(reverse=True)
+        for index in indexes:
+            self.fileList.rmFile(table.item(index, 3).text())
+            table.removeRow(index)
         self.qShowFileTimeRange()
         self.qSetBusy(False)
 
@@ -238,7 +265,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 raise ValueError('No file was selected')
             fileIndex = fileIndex[0].row()
             filepath = self.fileTableWidget.item(fileIndex, 3).text()
-            f: OribitoolClass.File = self.workspace.files.filedict[filepath]
+            f: OribitoolClass.File = self.fileList.filedict[filepath]
             infoList = f.getSpectrumInfoList()
 
             table = self.spectra1TableWidget
@@ -254,12 +281,12 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 setValue(1, info.retentionTime.total_seconds()/60)
 
             self.workspace.showedSpectra1Type = OribitoolClass.ShowedSpectraType.File
-            self.workspace.showedSpectra1File = f
+            self.workspace.showedSpectra1Filepath = f.path
 
-            self.tabWidget.setCurrentIndex(1)
+            self.tabWidget.setCurrentWidget(self.spectra1Tab)
 
         except ValueError as v:
-            QtWidgets.QMessageBox.information(None, 'info', str(v))
+            showInfo(str(v))
         self.qSetBusy(False)
 
     def qAverageSelectedFile(self):
@@ -280,7 +307,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             if not fileIndexes:
                 raise ValueError('No file was selected')
 
-            fileList = workspace.files.subList(
+            fileList = self.fileList.subList(
                 [table.item(index.row(), 3).text() for index in fileIndexes])
 
             thread = QThread(OribitoolClass.AveragedSpectra,
@@ -290,7 +317,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             self.threads.append(thread)
             thread.start()
         except ValueError as v:
-            QtWidgets.QMessageBox.information(None, 'info', str(v))
+            showInfo(str(v))
             self.qSetBusy(False)
 
     def qAverageAllFile(self):
@@ -308,14 +335,14 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                     minutes=self.averageNMinutesDoubleSpinBox.value())
 
             thread = QThread(OribitoolClass.AveragedSpectra,
-                             (copy.copy(workspace.files), time, N))
+                             (copy.copy(self.fileList), time, N))
             thread.sendStatus.connect(self.qShowStatus)
             thread.finished.connect(self.qAverageFinished)
             self.threads.append(thread)
             thread.start()
 
         except ValueError as v:
-            QtWidgets.QMessageBox.information(None, 'info', str(v))
+            showinfo(str(v))
             self.qSetBusy(False)
 
     def qAverageFinished(self, args):
@@ -336,7 +363,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.workspace.showedSpectra1Type = OribitoolClass.ShowedSpectraType.Averaged
         self.workspace.showedAveragedSpectra1 = averagedSpectra
 
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentWidget(self.spectra1Tab)
 
         self.rmFinished()
         self.qSetBusy(False)
@@ -365,7 +392,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         spectrum = None
         self.spectrum1PropertyTableWidget.clearContents()
         if workspace.showedSpectra1Type == OribitoolClass.ShowedSpectraType.File:
-            f = workspace.showedSpectra1File
+            f = self.fileList.filedict[workspace.showedSpectra1Filepath]
             index += f.header.firstScanNumber
             info = f.getSpectrumInfo(index)
 
@@ -383,8 +410,9 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             table.setRowCount(5)
 
             value = []
-            for f in spectrum.files:
-                value.append(('files', f.name))
+            filedict = self.fileList.filedict
+            for path in spectrum.filepaths:
+                value.append(('files', filedict[path].name))
             startTime, endTime = spectrum.timeRange
             value.append(('start', startTime.strftime(r'%Y%m%d %H:%M:%S')))
             value.append(('end', endTime.strftime(r'%Y%m%d %H:%M:%S')))
@@ -409,36 +437,39 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
         self.qSetBusy(False)
 
-    def qfitPeakPlotNormPeakWithoutDraw(self):
-        if self.peakFitNormLine is not None:
-            self.peakFitNormLine.remove()
-            del self.peakFitNormLine
-        ax=self.peakFitAx
+    def qfitPeak1PlotNormPeakWithoutDraw(self):
+        if self.peakFit1NormLine is not None:
+            self.peakFit1NormLine.remove()
+            del self.peakFit1NormLine
+        ax = self.peakFit1Ax
         normMz = np.linspace(-2e-5, 2e-5, 500)
         peakFitFunc = self.workspace.peakFitFunc
         func = peakFitFunc.func
         if func is None:
-            return 
+            return
         normIntensity = func.normFunc(normMz)
-        lines=ax.plot(normMz, normIntensity, color='black', linewidth=3,
-            label="Fit, Res = " + str(int(func.peakResFit)))
-        self.peakFitNormLine = lines[-1]
+        lines = ax.plot(normMz, normIntensity, color='black', linewidth=3,
+                        label="Fit, Res = " + str(int(func.peakResFit)))
+        self.peakFit1NormLine = lines[-1]
         ax.legend()
-        
 
-    def qfitPeakUseCurrentSpectrum(self):
+    def qfitPeak1UseCurrentSpectrum(self):
         if not self.qSetBusy(True):
             return
         try:
             workspace = self.workspace
-            if workspace.showedSpectra1Type is None:
+            if workspace.showedSpectrum1 is None:
                 raise(ValueError())
 
             spectrum = workspace.showedSpectrum1
             peakFitFunc = OribitoolClass.PeakFitFunc(spectrum, 100)
 
-            ax = self.peakFitAx
+            ax = self.peakFit1Ax
             ax.clear()
+            self.peakFit1MouseStartPoint = None
+            self.peakFit1MouseEndPoint = None
+            self.peakFit1MouseLine = None
+            self.peakFit1MouseLineAni = None
             ax.xaxis.set_major_formatter(
                 matplotlib.ticker.FormatStrFormatter(r"%.1e"))
             for normPeak in peakFitFunc.normPeaks:
@@ -446,65 +477,268 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 ax.plot(normPeak.mz, normPeak.intensity)
 
             self.workspace.peakFitFunc = peakFitFunc
-            self.qfitPeakPlotNormPeakWithoutDraw()
-           
-            self.peakFitCanvas.draw()
-            self.tabWidget.setCurrentIndex(2)
+            self.qfitPeak1PlotNormPeakWithoutDraw()
 
+            self.peakFit1Canvas.draw()
+            self.tabWidget.setCurrentWidget(self.peakFit1Tab)
 
         except ValueError as e:
             pass
         self.qSetBusy(False)
 
-    def qPeakFitMouseToggle(self, event: matplotlib.backend_bases.MouseEvent):
-        if event.button is matplotlib.backend_bases.MouseButton.LEFT and event.name=='button_press_event':
-            self.peakFitMouseStartPoint = (event.xdata, event.ydata)
-        elif self.peakFitMouseStartPoint is not None and event.name=='button_release_event':
+    def qPeakFit1MouseToggle(self, event: matplotlib.backend_bases.MouseEvent):
+        if event.button is matplotlib.backend_bases.MouseButton.LEFT and event.name == 'button_press_event':
+            self.peakFit1MouseStartPoint = (event.xdata, event.ydata)
+            self.peakFit1MouseEndPoint = self.peakFit1MouseStartPoint
+            lines = self.peakFit1Ax.plot([], [], color='red')
+            self.peakFit1MouseLine = lines[-1]
+            self.peakFit1MouseLineAni = matplotlib.animation.FuncAnimation(
+                self.peakFit1Canvas.figure, self.qPeakFit1PrintMouseMove, interval=20, blit=True, repeat=False)
+        elif self.peakFit1MouseStartPoint is not None and event.name == 'button_release_event':
             workspace = self.workspace
             if workspace.peakFitFunc is not None and event.xdata is not None:
-                line = (self.peakFitMouseStartPoint, (event.xdata, event.ydata))
-                ax=self.peakFitAx
+                line = (self.peakFit1MouseStartPoint, self.peakFit1MouseEndPoint)
+                ax = self.peakFit1Ax
                 func = workspace.peakFitFunc
-                peaks=func.normPeaks
-                indexes = [index for index in range(len(func.normPeaks)) if OribitoolFunc.linePeakCrossed(line, peaks[index])]
+                peaks = func.normPeaks
+                indexes = [index for index in range(
+                    len(func.normPeaks)) if OribitoolFunc.linePeakCrossed(line, peaks[index])]
                 if len(indexes) == len(peaks):
-                    QtWidgets.QMessageBox.information(
-                        None,'Error',"couldn't delete all peaks")
-                else:
+                    showInfo("couldn't delete all peaks")
+                elif len(indexes) > 0:
+                    func.rm(indexes)
                     indexes.reverse()
                     for index in indexes:
-                        func.rm(index) # 相交需要优化...
-                        ax.lines.pop(index)
-                    self.qfitPeakPlotNormPeakWithoutDraw()
- 
-                
-            
-            self.peakFitMouseStartPoint = None
-            self.peakFitMouseLine.remove()
-            del self.peakFitMouseLine
-            self.peakFitMouseLine = None
-            self.peakFitCanvas.draw()
+                        line = ax.lines.pop(index)
+                        del line
+                    self.qfitPeak1PlotNormPeakWithoutDraw()
 
-    def qPeakFitMouseMove(self, event: matplotlib.backend_bases.MouseEvent):
-        if event.button is not matplotlib.backend_bases.MouseButton.LEFT:
-            return
-        if self.peakFitMouseLine is not None:
-            self.peakFitMouseLine.remove()
-            del self.peakFitMouseLine
-            self.peakFitMouseLine=None
+            self.peakFit1MouseLineAni._stop()
+            del self.peakFit1MouseLineAni
+            self.peakFit1MouseLineAni = None
+            self.peakFit1MouseLine.remove()
+            del self.peakFit1MouseLine
+            self.peakFit1MouseLine = None
+            self.peakFit1Canvas.draw()
 
-        x1, y1 = self.peakFitMouseStartPoint
-        x2 = event.xdata
-        y2 = event.ydata
-        lines = self.peakFitAx.plot([x1, x2], [y1, y2], color='red')
-        self.peakFitMouseLine=lines[-1]
-        self.peakFitCanvas.draw()
+    def qPeakFit1MouseMove(self, event: matplotlib.backend_bases.MouseEvent):
+        if event.button == matplotlib.backend_bases.MouseButton.LEFT:
+            self.peakFit1MouseEndPoint = (event.xdata, event.ydata)
+
+    def qPeakFit1PrintMouseMove(self, frame):
+        line = self.peakFit1MouseLine
+        if line is not None:
+            start = self.peakFit1MouseStartPoint
+            end = self.peakFit1MouseEndPoint
+            if start is not None and end is not None:
+                line.set_data([[start[0], end[0]], [start[1], end[1]]])
+            return line,
+        return ()
 
     def qPeakFitRmCancel(self):
-        peak = self.workspace.peakFitFunc.cancel()
-        if peak is None:
+        peaks = self.workspace.peakFitFunc.cancel()
+        ax = self.peakFit1Ax
+        for peak in peaks:
+            ax.plot(peak.mz, peak.intensity)
+        self.qfitPeak1PlotNormPeakWithoutDraw()
+        self.peakFit1Canvas.draw()
+
+    def qPeakFit1Finish(self):
+        if self.workspace.peakFitFunc is not None:
+            self.tabWidget.setCurrentWidget(self.calibrationTab)
+        else:
+            showInfo('Please fit peak first')
+
+    def qCalibrationAddIon(self):
+        if not self.qSetBusy(True):
             return
-        ax = self.peakFitAx
-        ax.plot(peak.mz, peak.intensity)
-        self.qfitPeakPlotNormPeakWithoutDraw()
-        self.peakFitCanvas.draw()
+        try:
+            ions = self.calibrationLineEdit.text().split(',')
+            for ion in ions:
+                tmp = ion.strip()
+                if len(tmp) == 0:
+                    continue
+                formula = OribitoolFormula.Formula(tmp)
+                workspace = self.workspace
+                ionList = workspace.calibrationIonList
+                for text, f in ionList:
+                    if formula == f:
+                        raise ValueError('There is same ion added')
+                ionList.append((tmp, formula))
+                table = self.calibrationIonsTableWidget
+                row = table.rowCount()
+
+                def setValue(column, s):
+                    table.setItem(
+                        row, column, QtWidgets.QTableWidgetItem(str(s)))
+                table.setRowCount(table.rowCount()+1)
+                setValue(0, ion)
+                setValue(1, formula.mass())
+
+        except ValueError as e:
+            showInfo(str(e))
+        self.qSetBusy(False)
+
+    def qCalibrationRmIon(self):
+        if not self.qSetBusy(True):
+            return
+        try:
+            indexes = self.calibrationIonsTableWidget.selectedIndexes()
+            indexes = sorted([index.row() for index in indexes], reverse=True)
+            table = self.calibrationIonsTableWidget
+            ionList = self.workspace.calibrationIonList
+            for index in indexes:
+                table.removeRow(index)
+                ionList.pop(index)
+
+        except ValueError as e:
+            showInfo(str(e))
+        self.qSetBusy(False)
+
+    def qInitCalibration(self):
+        if not self.qSetBusy(True):
+            return
+        try:
+            fileList = self.fileList
+            workspace = self.workspace
+            peakFitFunc = workspace.peakFitFunc
+            ionList = [f for _, f in workspace.calibrationIonList]
+            ppm = 1
+            useNIons = 3
+
+            pathList = None
+            spectraList = None
+            if workspace.showedSpectra1Type is OribitoolClass.ShowedSpectraType.Averaged:
+                pathList = workspace.showedAveragedSpectra1.filepathTimeSorted
+                spectraList = [
+                    workspace.showedAveragedSpectra1.filepathSpectraMap[path] for path in pathList]
+            else:
+                pathList = [workspace.showedSpectra1Filepath]
+                spectraList = [[info.getSpectrum(
+                ) for info in fileList.filedict[workspace.showedSpectra1Filepath].getSpectrumInfoList()]]
+            argsList = [(spectra, peakFitFunc, ionList, (2,), ppm, useNIons)
+                        for spectra in spectraList]
+
+            thread = QMultiProcess(
+                OribitoolClass.CalibrateMass, argsList, pathList, 1)
+
+            thread.sendStatus.connect(self.qShowStatus)
+            thread.finished.connect(self.qInitCalibrationFinished)
+            self.threads.append(thread)
+            thread.start()
+            # thread.run()
+
+        except ValueError as e:
+            showInfo(str(e))
+            self.qSetBusy(False)
+
+    def qShowCalibrationAll(self):
+        fileList = self.fileList
+        workspace = self.workspace
+        calibrations=[cali for cali in workspace.fileCalibrations.values()]
+        x = [fileList.filedict[cali.filepath].header.creationDate for cali in calibrations]
+
+        table = self.calibrationResultTableWidget
+        table.clearContents()
+        table.setColumnCount(len(workspace.calibrationIonList))
+        table.setHorizontalHeaderLabels(
+            [s for s, _ in workspace.calibrationIonList])
+        table.setRowCount(len(calibrations))
+        table.setVerticalHeaderLabels(
+            [time.strftime(r'%y%m%d %H') for time in x])
+        data = []
+        for i, cali in enumerate(calibrations):
+            data.append(cali.ionsPpm)
+        data: np.ndarray = np.array(data) * 1e6
+        
+        for i in range(data.shape[0]):
+            for j in range(data.shape[1]):
+                table.setItem(
+                    i, j, QtWidgets.QTableWidgetItem(format(data[i,j],".5f")))
+
+        ax = self.calibrationAx
+        ax.clear()
+        ax.axhline(color='black',linewidth=0.5)
+        for ionIndex in range(data.shape[1]):
+            ax.plot(x, data[:, ionIndex], label='ion: ' +
+                    workspace.calibrationIonList[ionIndex][0])
+        ax.xaxis.set_tick_params(rotation=45)
+        ax.set_ylabel('ppm')
+        ax.legend()
+        ax.relim()
+        ax.autoscale_view(True,True,True)
+        self.calibrationCanvas.draw()
+
+    def qInitCalibrationFinished(self, args):
+        calibrations, argsList = args
+        calibrations: List[OribitoolClass.CalibrateMass]
+        workspace = self.workspace
+        workspace.fileCalibrations = dict(
+            [(cali.filepath, cali) for cali in calibrations])
+
+        self.qShowCalibrationAll()
+
+        self.rmFinished()
+        self.qSetBusy(False)
+
+    def qCalibrationShowSelected(self):
+        
+        workspace=self.workspace
+        table = self.calibrationResultTableWidget
+        indexes = table.selectedIndexes()
+        if len(indexes) == 0:
+            return
+        if not self.qSetBusy(True):
+            return
+        index=indexes[0].row()
+
+        table.clear()
+        table.setColumnCount(5)
+        table.setHorizontalHeaderLabels(
+            ['formula', 'theoretic mz', 'mz', 'ppm', 'use for calibration'])
+        massCali = list(workspace.fileCalibrations.values())[0] if len(workspace.fileCalibrations) == 1 else \
+             workspace.fileCalibrations[workspace.showedAveragedSpectra1.filepathTimeSorted[index]]
+        ionList = workspace.calibrationIonList
+
+        table.setRowCount(len(ionList))
+        for i in range(len(ionList)):
+            def setValue(column, s):
+                table.setItem(i,column,QtWidgets.QTableWidgetItem(str(s)))
+            setValue(0,ionList[i][0])
+            setValue(1, massCali.ionsMz[i, 1])
+            setValue(2, massCali.ionsMz[i, 0])
+            setValue(3, massCali.ionsPpm[i])
+            setValue(4,'True' if i in massCali.minIndex else 'False')
+
+        r = (50, 1000)
+        X = np.linspace(*r, 1000)
+        XX = massCali.func.predictPpm(X) * 1e6
+        ax = self.calibrationAx
+        ax.clear()
+
+        ax.axhline(color='black',linewidth=0.5)
+        ax.plot(X, XX)
+        
+        ionsMz = massCali.ionsMz
+        ionsPpm = massCali.ionsPpm
+        minIndex = massCali.minIndex
+        maxIndex = massCali.maxIndex
+        x = ionsMz[minIndex, 0]
+        y = ionsPpm[minIndex]*1e6
+        ax.scatter(x,y,c='black')
+        x = ionsMz[maxIndex, 0]
+        y = ionsPpm[maxIndex]*1e6
+        ax.scatter(x, y, c='red')
+        
+        ax.set_ylabel('ppm')
+
+        self.qSetBusy(False)
+
+    def qCalibrationShowAll(self):
+        if not self.qSetBusy(True):
+            return
+        self.qShowCalibrationAll()
+        self.qSetBusy(False)
+
+    def qCalibrationFinish(self):
+        pass

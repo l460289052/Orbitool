@@ -196,31 +196,6 @@ class AveragedSpectrum(OribitoolAbstract.AveragedSpectrum):
         self._mz = np.array(list(averaged.Positions))
         self._intensity = np.array(list(averaged.Intensities))
 
-    @property
-    def mz(self) -> np.ndarray:
-        return self._mz
-
-    @property
-    def intensity(self) -> np.ndarray:
-        return self._intensity
-
-    @property
-    def num(self) -> int:
-        return self._num
-
-    @property
-    def timeRange(self) -> (datetime.datetime, datetime.datetime):
-        return self._timeRange
-
-    @property
-    def timeRanges(self) -> List[Tuple[datetime.datetime, datetime.datetime]]:
-        return self._timeRanges
-
-    @property
-    def numRanges(self) -> List[Tuple[int, int]]:
-        return self._numRanges
-
-
 class File(OribitoolAbstract.File):
     def __init__(self, fullname):
         rawfile = RawFileReaderAdapter.FileFactory(fullname)

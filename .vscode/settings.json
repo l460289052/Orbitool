@@ -1,3 +1,5 @@
 {
-    "python.pythonPath": "C:\\Users\\l4602\\.conda\\envs\\spectra\\python.exe"
+    "python.pythonPath": "C:\\Users\\l4602\\.conda\\envs\\spectra\\python.exe",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true
 }
