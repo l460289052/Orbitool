@@ -7,3 +7,5 @@ ref
 ref/*
 ref/*.*
 test*.py
+error.txt
+*.wks

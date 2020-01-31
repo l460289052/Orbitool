@@ -1,18 +1,19 @@
+# -*- coding = utf8 -*-
 from typing import List, Union, Tuple, Dict
 import os
 import datetime
-import gzip
+import math
 from enum import Enum
 import copy
 import heapq
 
 import scipy.optimize
 import numpy as np
-import jsonpickle
 from bintrees import FastRBTree
 
 import OribitoolAbstract
 import OribitoolFormula
+import OribitoolGuessIons
 import OribitoolFunc
 import OribitoolDll
 
@@ -20,51 +21,9 @@ import OribitoolDll
 readFileModule = OribitoolDll
 
 
-def objToFile(path: str, obj):
-    with open(path, 'w') as writer:
-        # with gzip.open(path, 'wb') as writer:
-        writer.write(jsonpickle.encode(obj))
-
-
-def objFromFile(path: str):
-    with open(path, 'r') as reader:
-        # with gzip.open(path, 'rb') as reader:
-        return jsonpickle.decode(reader.read())
-
-
 class ShowedSpectraType(Enum):
     File = 0
     Averaged = 1
-
-
-class FileHeader(OribitoolAbstract.FileHeader):
-    def __init__(self, file: OribitoolAbstract.File):
-        self._file = file
-        self.header = readFileModule.FileHeader(file._file)
-
-    @property
-    def file(self):
-        return self._file
-
-    @property
-    def creationDate(self) -> datetime.datetime:
-        return self.header.creationDate
-
-    @property
-    def startTime(self) -> datetime.timedelta:
-        return self.header.startTime
-
-    @property
-    def endTime(self) -> datetime.timedelta:
-        return self.header.endTime
-
-    @property
-    def firstScanNumber(self) -> int:
-        return self.header.firstScanNumber
-
-    @property
-    def lastScanNumber(self) -> int:
-        return self.header.lastScanNumber
 
 
 class Spectrum(OribitoolAbstract.Spectrum):
@@ -90,157 +49,123 @@ class SpectrumInfo(OribitoolAbstract.SpectrumInfo):
         return Spectrum(self.info.scanNum, *self.info.getSpectrum())
 
 
-class AveragedSpectrum(OribitoolAbstract.AveragedSpectrum):
-    def __init__(self, files: List[OribitoolAbstract.File], timeRanges: List[Tuple[datetime.timedelta, datetime.timedelta]] = None, numRanges: List[Tuple[int, int]] = None):
-        self.filepaths = [file.path for file in files]
+class AveragedSpectrum(Spectrum, OribitoolAbstract.AveragedSpectrum):
+    def __init__(self, file: OribitoolAbstract.File, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None):
+        self.fileTime = file.creationDate
         averaged = readFileModule.AveragedSpectrum(
-            [f._file for f in files], timeRanges, numRanges)
+            file._file, timeRange, numRange)
 
-        self._timeRange = averaged._timeRange
-        self._num = averaged.num
-        self._timeRanges = averaged.timeRanges
-        self._numRanges = averaged.numRanges
+        self._timeRange = averaged.timeRange
+        self._numRange = averaged.numRange
         self._mz = averaged.mz
         self._intensity = averaged.intensity
 
 
 class AveragedSpectra(OribitoolAbstract.AveragedSpectra):
-    def __init__(self, fileList, time: datetime.timedelta = None, N: int = None, sendStatus=OribitoolFunc.nullSendStatus):
+    def __init__(self, fileList, time: datetime.timedelta = None, N: int = None, timeLimit: Tuple[datetime.datetime, datetime.datetime] = None, sendStatus=OribitoolFunc.nullSendStatus):
         if type(fileList) is not FileList:
             raise TypeError()
         fileList: FileList
         tree = fileList.filetree
-        filepathTimeSorted = []
+        fileTimeSorted = []
         spectra = []
         msg = "average peaks"
-        total = None
+
+        if timeLimit is None:
+            timeLimit = fileList.timeRange()
+        tmpDelta = datetime.timedelta(seconds=1)
+        startTime = timeLimit[0] - tmpDelta
+        endTime = timeLimit[1] + tmpDelta
+        indexRange = None
+        numCount = None
+        average = None
+        delta = None
         if N is not None:
-            total = sum([(f.header.lastScanNumber-f.header.firstScanNumber+1)
-                         for f in fileList.filedict.values()])/N+1
-            toBeProcessed = None
-            numRanges = None
-            try:
-                k, f = tree.min_item()
-                f: File
-                h = f.header
-                index = h.firstScanNumber
-                left = h.lastScanNumber - index + 1
-                filepathTimeSorted.append(f.path)
-                while True:
-                    toBeProcessed = [f]
-                    numRanges = []
-                    if left < N:
-                        numRanges.append((index, h.lastScanNumber))
-                        Nleft = N-left
-                        while Nleft > 0:
-                            k, f = tree.succ_item(k)
-                            h = f.header
-                            index = h.firstScanNumber
-                            left = h.lastScanNumber - index + 1
-                            filepathTimeSorted.append(f.path)
+            def indexRange(f: File):
+                retentionStartTime = startTime - f.creationDate
+                retentionEndTime = endTime-f.creationDate
+                if f.startTime > retentionStartTime and f.endTime < retentionEndTime:
+                    return (f.firstScanNumber, f.lastScanNumber + 1)
+                if f.creationDate + f.endTime < startTime or f.creationDate+f.startTime > endTime:
+                    return (f.lastScanNumber+1, f.lastScanNumber+1)
+                else:
+                    start = None
+                    end = None
+                    infoList = f.getSpectrumInfoList()
+                    if f.startTime > retentionStartTime:
+                        start = f.firstScanNumber
+                    else:
+                        start = f.firstScanNumber + OribitoolFunc.indexFindFirstNotSmallerThan(
+                            infoList, retentionStartTime, method=(lambda array, index: array[index].retentionTime))
+                    if f.endTime < retentionEndTime:
+                        end = f.lastScanNumber + 1
+                    else:
+                        end = f.firstScanNumber+OribitoolFunc.indexFindFirstBiggerThan(
+                            infoList, retentionEndTime, method=(lambda array, index: array[index].retentionTime))
+                    return (start, end)
 
-                            toBeProcessed.append(f)
-                            if left < Nleft:
-                                numRanges.append((index, h.lastScanNumber))
-                                Nleft -= left
-                            elif left == Nleft:
-                                numRanges.append((index, h.lastScanNumber))
-                                Nleft = 0
-                                k, f = tree.succ_item(k)
-                                h = f.header
-                                index = h.firstScanNumber
-                                left = h.lastScanNumber - index + 1
-                                filepathTimeSorted.append(f.path)
-                            else:  # left > Nleft
-                                numRanges.append((index, index + Nleft - 1))
-                                index += Nleft
-                                left -= Nleft
-                                Nleft = 0
+            def numCount(f: File):
+                start, end = indexRange(f)
+                return math.ceil((end-start+1)/N)
 
-                    elif left == N:
-                        numRanges.append((index, h.lastScanNumber))
-                        k, f = tree.succ_item(k)
-                        h = f.header
-                        index = h.firstScanNumber
-                        left = h.lastScanNumber-index+1
-                        filepathTimeSorted.append(f.path)
-                    else:  # left > N
-                        numRanges.append((index, index+N-1))
-                        index += N
-                        left -= N
+            def average(f: File, left, end):
+                right = left + N - 1
+                if right > end:
+                    right = end
+                return AveragedSpectrum(f, numRange=(left, right))
+            delta = N
 
-                    sendStatus(f.path, msg, len(spectra), total)
-                    spectra.append(AveragedSpectrum(
-                        toBeProcessed, numRanges=numRanges))
-                    # if want to use multi-process, u can add a process pool
-                    # and add this to the pool
-            except KeyError:
-                sendStatus(f.path, msg, len(spectra), total)
-                spectra.append(AveragedSpectrum(
-                    toBeProcessed, numRanges=numRanges))
         elif time is not None:
-            total = datetime.timedelta()
-            for f in fileList.filedict.values():
-                total += f.header.endTime
-            total = int(total/time)+1
-            toBeProcessed = None
-            timeRanges = None
-            try:
-                k, f = tree.min_item()
-                f: File
-                h = f.header
-                now = datetime.timedelta()
-                left = h.endTime
-                filepathTimeSorted.append(f.path)
-                while True:
-                    toBeProcessed = [f]
-                    timeRanges = []
-                    if left < time:
-                        timeRanges.append((now, h.endTime))
-                        Tleft = time - left
-                        while Tleft > datetime.timedelta():
-                            k, f = tree.succ_item(k)
-                            h = f.header
-                            now = datetime.timedelta()
-                            left = h.endTime
-                            filepathTimeSorted.append(f.path)
+            def indexRange(f: File):
+                retentionStartTime = startTime - f.creationDate
+                retentionEndTime = endTime-f.creationDate
+                if f.startTime > retentionStartTime and f.endTime < retentionEndTime:
+                    return (datetime.timedelta(), f.endTime)
+                elif f.creationDate + f.endTime < startTime or f.creationDate + f.startTime > endTime:
+                    return (f.endTime + tmpDelta, f.endTime + tmpDelta)
+                else:
+                    start = datetime.timedelta() if f.startTime > retentionStartTime else retentionStartTime
+                    end = endTime if f.endTime < retentionEndTime else retentionEndTime
+                    return (start, end)
 
-                            toBeProcessed.append(f)
-                            if left < Tleft:
-                                timeRanges.append((now, h.endTime))
-                                Tleft -= left
-                            else:  # left > Tleft
-                                timeRanges.append((now, now + Tleft))
-                                now += Tleft
-                                left -= Tleft
-                                Tleft = datetime.timedelta(minutes=-1)
-                    else:  # left > time
-                        timeRanges.append((now, now + time))
-                        now += time
-                        left -= time
+            def numCount(f: File):
+                start, end = indexRange(f)
+                return math.ceil((end-start)/time)
 
-                    sendStatus(f.path, msg, len(spectra), total)
-                    spectra.append(AveragedSpectrum(
-                        toBeProcessed, timeRanges=timeRanges))
-            except KeyError:
-                sendStatus(f.path, msg, len(spectra), total)
-                spectra.append(AveragedSpectrum(
-                    toBeProcessed, timeRanges=timeRanges))
+            def average(f: File, left, end):
+                right = left + time
+                if right > end:
+                    right = end
+                return AveragedSpectrum(f, timeRange=(left, right))
+            delta = time
 
-        sendStatus(f.path, msg, len(spectra), len(spectra))
+        total = sum([numCount(f) for f in fileList.pathdict.values()])
+        k, f = tree.min_item()
+        f: File
+        try:
+            while True:
+                fileTimeSorted.append(f.creationDate)
+                index, end = indexRange(f)
+                while index < end:
+                    sendStatus(f.creationDate, msg, len(spectra), total)
+                    spectra.append(average(f, index, end))
+                    index += delta
+                k, f = tree.succ_item(k)
+        except KeyError:
+            pass
 
-        filepathSpectraMap = {}
-        for filepath in filepathTimeSorted:
-            filepathSpectraMap[filepath] = []
+        sendStatus(f.creationDate, msg, len(spectra), len(spectra))
+
+        fileTimeSpectraMap = {}
+        for fileTime in fileTimeSorted:
+            fileTimeSpectraMap[fileTime] = []
         for spectrum in spectra:
-            paths = spectrum.filepaths
-            if len(paths) == 1:
-                filepathSpectraMap[paths[0]].append(spectrum)
+            fileTimeSpectraMap[spectrum.fileTime].append(spectrum)
 
         self.time = time
         self.N = N
-        self.filepathTimeSorted = filepathTimeSorted
-        self.filepathSpectraMap = filepathSpectraMap
+        self.fileTimeSorted = fileTimeSorted
+        self.fileTimeSpectraMap = fileTimeSpectraMap
         self.spectra = spectra
 
     def __len__(self):
@@ -252,35 +177,50 @@ class File(OribitoolAbstract.File):
         self.path = fullname
         self.name = os.path.split(fullname)[1]
         self._file = readFileModule.File(fullname)
-        self._header = FileHeader(self._file.header)
-
-    @property
-    def header(self) -> FileHeader:
-        return self._header
 
     def getSpectrumInfo(self, scanNum) -> SpectrumInfo:
         return SpectrumInfo(self._file.getSpectrumInfo(scanNum))
 
     def getSpectrumInfoList(self) -> List[SpectrumInfo]:
-        h = self.header
-        return [self.getSpectrumInfo(scanNum) for scanNum in range(h.firstScanNumber, h.lastScanNumber+1)]
+        return [self.getSpectrumInfo(scanNum) for scanNum in range(self.firstScanNumber, self.lastScanNumber+1)]
+
+    @property
+    def creationDate(self) -> datetime.datetime:
+        return self._file.creationDate
+
+    @property
+    def startTime(self) -> datetime.timedelta:
+        return self._file.startTime
+
+    @property
+    def endTime(self) -> datetime.timedelta:
+        return self._file.endTime
+
+    @property
+    def firstScanNumber(self) -> int:
+        return self._file.firstScanNumber
+
+    @property
+    def lastScanNumber(self) -> int:
+        return self._file.lastScanNumber
 
 
 class FileList(object):
     '''
-    file header list
+    file list
     '''
 
     def __init__(self):
         # sorted by start time
         self.filetree = FastRBTree()
-        # path -> File
-        self.filedict = {}
+        # datetime -> File
+        self.timedict: Dict[datetime.datetime, File] = {}
+        self.pathdict: Dict[str, File] = {}
 
     def crossed(self, left: datetime.datetime, right: datetime.datetime) -> (bool, File):
         try:
             k, v = self.filetree.floor_item(left)
-            if v.header.creationDate + v.header.endTime > left:
+            if v.creationDate + v.endTime > left:
                 return (True, v)
         except KeyError:
             pass
@@ -292,112 +232,117 @@ class FileList(object):
             pass
         return (False, None)
 
-    def addFile(self, filePath) -> bool:
+    def addFile(self, filepath) -> bool:
         '''
-        if add same file with file in filedict, return false
-        if added file have crossed time range with file in fiedict, raise ValueError
+        if add same file with file in timedict, return false
+        if added file have crossed time range with file in timedict, raise ValueError
         else return True
         '''
-        if filePath in self.filedict:
+        if filepath in self.pathdict:
             return False
-        f = File(filePath)
-        h = f.header
+        f = File(filepath)
         crossed, crossedFile = self.crossed(
-            h.creationDate + h.startTime, h.creationDate + h.endTime)
+            f.creationDate + f.startTime, f.creationDate + f.endTime)
         if crossed:
-            raise ValueError(filePath, crossedFile.path)
+            raise ValueError('file "%s" and "%s" have crossed scan time' % (
+                filepath, crossedFile.path))
 
-        self.filetree.insert(h.creationDate + h.startTime, f)
-        self.filedict[filePath] = f
+        self.filetree.insert(f.creationDate + f.startTime, f)
+        self.timedict[f.creationDate] = f
+        self.pathdict[f.path] = f
         return True
 
     def _addFile(self, f: File) -> bool:
-        if f.path in self.filedict:
+        if f.path in self.pathdict:
             return False
-        h = f.header
         crossed, crossedFile = self.crossed(
-            h.creationDate+h.startTime, h.creationDate+h.endTime)
+            f.creationDate+f.startTime, f.creationDate+f.endTime)
         if crossed:
             raise ValueError(f.path, crossedFile.path)
-        self.filetree.insert(h.creationDate + h.startTime, f)
-        self.filedict[f.path] = f
+        self.filetree.insert(f.creationDate + f.startTime, f)
+        self.timedict[f.creationDate] = f
+        self.pathdict[f.path] = f
         return True
 
-    def addFileFromFolder(self, folder, recurrent, ext):
-        files = []
+    def addFileFromFolder(self, folder, recurrent, ext) -> List[datetime.datetime]:
+        fileTimes = []
         for f in os.listdir(folder):
             if os.path.splitext(f)[1].lower() == ext:
                 fullname = os.path.join(folder, f)
                 if self.addFile(fullname):
-                    files.append(fullname)
+                    time = self.pathdict[fullname].creationDate
+                    fileTimes.append(time)
 
         if recurrent:
             for f in os.listdir(folder):
                 if os.path.isdir(os.path.join(folder, f)):
-                    files.extend(self.addFileFromFolder(
+                    fileTimes.extend(self.addFileFromFolder(
                         os.path.join(folder, f), recurrent, ext))
 
-        return files
+        return fileTimes
 
-    def rmFile(self, fullFileName):
-        f: File = self.filedict.pop(fullFileName, None)
+    def rmFile(self, filepath):
+        f: File = self.pathdict.pop(filepath, None)
         if f == None:
             return
-        self.filetree.remove(f.header.creationDate + f.header.startTime)
+        self.filetree.remove(f.creationDate + f.startTime)
+        self.timedict.pop(f.creationDate)
 
-    def subList(self, filePaths: List[str]):
+    def subList(self, filepaths: List[str]):
         subList = FileList()
-        for fpath in filePaths:
-            if fpath in self.filedict:
-                subList._addFile(self.filedict[fpath])
+        for fpath in filepaths:
+            if fpath in self.pathdict:
+                subList._addFile(self.pathdict[fpath])
         return subList
-
-    def averageByNum(self, N: int):
-        pass
-
-    def averageByTime(self, time: float):
-        '''
-        `time`:minutes
-        '''
-        pass
 
     def clear(self):
         self.filetree.clear()
-        self.filedict.clear()
+        self.pathdict.clear()
+        self.timedict.clear()
 
     def timeRange(self):
-        if len(self.filedict) > 0:
+        if len(self.timedict) > 0:
             l: File = self.filetree.min_item()[1]
             r: File = self.filetree.max_item()[1]
-            l = l.header
-            r = r.header
             return (l.creationDate + l.startTime, r.creationDate + r.endTime)
         else:
             return None
 
+    def __getitem__(self, timeOrPath: Union[datetime.datetime, str]):
+        if isinstance(timeOrPath, datetime.datetime):
+            return self.timedict[timeOrPath]
+        elif isinstance(timeOrPath, str):
+            return self.pathdict[timeOrPath]
+        else:
+            raise TypeError(timeOrPath)
+
+    def __contains__(self, timeOrPath: Union[datetime.datetime, str]):
+        if isinstance(timeOrPath, datetime.datetime):
+            return timeOrPath in self.timedict
+        elif isinstance(timeOrPath, str):
+            return timeOrPath in self.pathdict
+        else:
+            raise TypeError(timeOrPath)
+
 
 class Peak(OribitoolAbstract.Peak):
-    def __init__(self, spectrum: Spectrum, subscripts: Tuple[int, int], copyMz=False):
+    def __init__(self, spectrum: Spectrum, indexRange: range, mz=None, intensity=None):
         '''
+        not copy mz
         `subscripts`: (lindex,rindex), both mz[lindex] and mz[rindex] are belong to this peak
         '''
         self._spectrum = spectrum
-        l, r = subscripts
-        r += 1
-        self._mz: np.ndarray = spectrum.mz[l:r].copy()
-        if copyMz:
-            self._mz=self._mz.copy()
-        self._intensity: np.ndarray = spectrum.intensity[l:r]
+        self._indexRange = indexRange
+        self._mz = mz if mz is not None else spectrum.mz
+        self._intensity = intensity if intensity is not None else spectrum.intensity
 
     @property
-    def intensity(self):
-        return self._intensity
+    def mz(self) -> np.ndarray:
+        return self._mz[self._indexRange]
 
-    @intensity.setter
-    def intensity(self, intensity):
-        self._intensity = intensity
-        if hasattr(self, '_maxIntensity'):
-            delattr(self, '_maxIntensity')
+    @property
+    def intensity(self) -> np.ndarray:
+        return self._intensity[self._indexRange]
 
     @property
     def maxIntensity(self):
@@ -423,6 +368,7 @@ class Peak(OribitoolAbstract.Peak):
         self._peakAt = a
         return a
 
+    @property
     def peaksNum(self) -> int:
         if hasattr(self, '_peaksNum'):
             return getattr(self, '_peaksNum')
@@ -430,33 +376,36 @@ class Peak(OribitoolAbstract.Peak):
         return self._peaksNum
 
 
-def getPeaks(spectrum: OribitoolAbstract.Spectrum, indexRange=None, mzRange=None, copyMz=False):
+def getPeaks(spectrum: OribitoolAbstract.Spectrum, indexRange: (int, int) = None, mzRange: (float, float) = None):
     peaks = []
-    begin = None
+    start = None
     stop = None
     if indexRange is not None:
-        begin, stop = indexRange
+        start, stop = indexRange
     elif mzRange is not None:
         r = OribitoolFunc.indexBetween(spectrum.mz, mzRange)
-        begin = r.start
+        start = r.start
         stop = r.stop
     else:
-        begin = 0
+        start = 0
         stop = len(spectrum.mz)
     index = 0
-    while begin < stop:
-        l, r = OribitoolFunc.findPeak(
-            spectrum.mz, spectrum.intensity, begin, stop)
-        if l < stop:
-            peaks.append(Peak(spectrum, (l, r), copyMz))
+    while start < stop:
+        r = OribitoolFunc.findPeak(
+            spectrum.mz, spectrum.intensity, range(start, stop))
+        if r.start < stop:
+            peaks.append(Peak(spectrum, r))
             index += 1
-        begin = r
+        start = r.stop
 
     return peaks
 
 
-class FittedPeak(OribitoolAbstract.FittedPeak):
-    def __init__(self, originalPeak: Peak, fitPeakFunc: OribitoolAbstract.FitPeakFunc, mz=None, fittedParam=None):
+class FittedPeak(Peak, OribitoolAbstract.FittedPeak):
+    def __init__(self, originalPeak: Peak, fitPeakFunc: OribitoolAbstract.FitPeakFunc, peaksNum, mz=None, fittedParam=None):
+        '''
+        all fitted peak from the same original peak should have same mz
+        '''
         self.originalPeak = originalPeak
         if mz is None:
             mz = originalPeak.mz
@@ -466,9 +415,12 @@ class FittedPeak(OribitoolAbstract.FittedPeak):
         delta = 1e-6
         intensity = fitPeakFunc._funcFit(mz, *fittedParam)
         select = intensity > delta
+        # stretch
         select[:-1] |= select[1:]
         select[1:] |= select[:-1]
 
+        self._spectrum = originalPeak.spectrum
+        self._peaksNum = peaksNum
         self._mz = mz[select]
         self._intensity = intensity[select]
         self._param = fittedParam
@@ -477,24 +429,29 @@ class FittedPeak(OribitoolAbstract.FittedPeak):
         self._area = fitPeakFunc.getArea(self)
 
     @property
-    def spectrum(self) -> Spectrum:
-        return self.originalPeak.spectrum
+    def mz(self) -> np.ndarray:
+        return self._mz
+
+    @property
+    def intensity(self) -> np.ndarray:
+        return self._intensity
 
     @property
     def maxIntensity(self):
         return self._peakIntensity
 
-    def peakAt(self):
-        return Peak.peakAt(self)
-
+    @property
     def peaksNum(self):
-        return Peak.peaksNum(self)
+        '''
+        return the number of original peak split (not equal to originalpeak's peaksnum)
+        '''
+        return self._peaksNum
 
 
 class PeakFitFunc(object):
     def __init__(self, spectrum: OribitoolAbstract.Spectrum, num: int):
         peaks = getPeaks(spectrum)
-        peaks = [peak for peak in peaks if peak.peaksNum() == 1]
+        peaks = [peak for peak in peaks if peak.peaksNum == 1]
         num = max(0, min(num, len(peaks)))
 
         peaks = sorted(
@@ -502,18 +459,19 @@ class PeakFitFunc(object):
         peaks = peaks[0:num]
         Func = OribitoolFunc.NormalDistributionFunc
         params: list = [Func.getParam(peak) for peak in peaks]
-        normPeaks: List[Peak] = [Func.getNormalizedPeak(
+        normPeaks: List[Tuple[np.ndarray, np.ndarray]] = [Func.getNormalizedPeak(
             peaks[index], params[index]) for index in range(num)]
 
         self.Func = Func
         self.peaks = peaks
         self.params = params
         self.normPeaks = normPeaks
-        self.canceled: List[List[Tuple[Peak, tuple, normPeaks]]] = []
+        self.canceled: List[List[Tuple[Peak, tuple,
+                                       Tuple[np.ndarray, np.ndarray]]]] = []
         self._func = None
 
     def rm(self, index: Union[int, List]):
-        indexes = index if type(index) is list else [index]
+        indexes = index if isinstance(index, list) else [index]
         indexes = sorted(copy.copy(indexes), reverse=True)
         removed = []
         for i in indexes:
@@ -525,7 +483,7 @@ class PeakFitFunc(object):
 
         self._func = None
 
-    def cancel(self) -> List[Peak]:
+    def cancel(self) -> List[Tuple[np.ndarray, np.ndarray]]:
         if len(self.canceled) == 0:
             return []
         removed = self.canceled.pop()
@@ -548,13 +506,15 @@ class PeakFitFunc(object):
     def fitPeak(self, peak: Peak, num: int = None) -> List[FittedPeak]:
         params = self.func.splitPeakAsParams(peak, num)
         peaks = []
+        num = len(params)
         for param in params:
-            peaks.append(FittedPeak(peak, self.func, fittedParam=param))
+            peaks.append(FittedPeak(peak, self.func,
+                                    fittedParam=param, peaksNum=num))
         if len(peaks) > 1:
             peaks.sort(key=lambda peak: peak.peakPosition)
         return peaks
 
-    def fitPeaks(self, peaks: List[Peak]) -> List[FittedPeak]:
+    def fitPeaks(self, peaks: List[Peak], sendStatus=OribitoolFunc.nullSendStatus) -> List[FittedPeak]:
         '''
         if peaks are sorted, ret will be sorted be peakPosition
         '''
@@ -569,7 +529,7 @@ class CalibrateMass(object):
     calibrate for file
     '''
 
-    def __init__(self, filepath, averagedSpectra: List[OribitoolAbstract.Spectrum], peakFitFunc: PeakFitFunc, ionList: List[OribitoolFormula.Formula], funcArgs, ppm=1, useNIons=None):
+    def __init__(self, fileTime, averagedSpectra: List[OribitoolAbstract.Spectrum], peakFitFunc: PeakFitFunc, ionList: List[OribitoolFormula.Formula], funcArgs, ppm=1, useNIons=None):
         ppm *= 1e-6
         ionsMz = []
         ionsMzTho = np.zeros(len(ionList))
@@ -609,7 +569,7 @@ class CalibrateMass(object):
         Func = OribitoolFunc.PolynomialRegressionFunc
         func = Func(ionsMz[minIndex, 0], ionsPpm[minIndex], *funcArgs)
 
-        self.filepath = filepath
+        self.fileTime = fileTime
         self.ionsMz = ionsMz
         self.ionsPpm = ionsPpm
         self.minIndex = minIndex
@@ -622,50 +582,156 @@ class CalibrateMass(object):
         return self._func
 
 
+class CalibratedPeak(Peak, OribitoolAbstract.CalibratedPeak):
+    def __init__(self, mz: np.ndarray, intensity: np.ndarray, indexRange: range, originalPeak: Peak):
+        self.originalpeak = originalPeak
+        self._indexRange = indexRange
+        self._mz = mz
+        self._intensity = intensity
+        self._spectrum = originalPeak.spectrum
+
+
 class CalibratedSpectrum(OribitoolAbstract.CalibratedSpectrum):
-    def __init__(self, originalSpectrum: OribitoolAbstract.Spectrum, timeRange: Tuple[datetime.datetime, datetime.datetime], massCalibrator: CalibrateMass):
+    '''
+    before calibrate: split spectrum into peaks
+    '''
+
+    def __init__(self, fileTime, originalSpectrum: OribitoolAbstract.Spectrum, timeRange: Tuple[datetime.datetime, datetime.datetime], massCalibrator: CalibrateMass):
+        '''
+        before calibrate: split spectrum into peaks
+        '''
+        self._fileTime = fileTime
         self._origin = originalSpectrum
-        self._peaks = getPeaks(originalSpectrum, copyMz=True)
-        self._mz = np.concatenate([peak.mz for peak in self._peaks])
-        self._intensity = np.concatenate([peak.intensity for peak in self._peaks])
-        self._origin = spectrum
+
+        peaks = getPeaks(originalSpectrum)
+        mz = np.concatenate([peak.mz for peak in peaks])
+        intensity = np.concatenate([peak.intensity for peak in peaks])
+        calibratedPeaks = []
+        start = 0
+
+        for peak in peaks:
+            stop = start + len(peak.mz)
+            calibratedPeak = CalibratedPeak(
+                mz, intensity, range(start, stop), peak)
+            calibratedPeaks.append(calibratedPeak)
+            start = stop
+        self._mz = mz
+        self._intensity = intensity
+        self._peaks = calibratedPeaks
         self._startTime = timeRange[0]
         self._endTime = timeRange[1]
         self.calibrator = massCalibrator
         self.calibrated = False
-    
+
+    @property
     def mz(self):
         if not self.calibrated:
             self._mz = self.calibrator.func.predictMz(self._mz)
             self.calibrated = True
         return self._mz
 
+    @property
     def peaks(self):
         if not self.calibrated:
             self._mz = self.calibrator.func.predictMz(self._mz)
             self.calibrated = True
         return self._peaks
 
+    @property
+    def intensity(self):
+        return self._intensity
 
-class StardardPeak(OribitoolAbstract.StandardPeak):
+
+class StandardPeak(OribitoolAbstract.StandardPeak):
     pass
+
+
+class MassList(OribitoolAbstract.MassList):
+    def addPeaks(self, peaks: Union[StandardPeak, List[StandardPeak]]):
+        if isinstance(peaks, OribitoolAbstract.StandardPeak):
+            peaks = [peaks]
+        else:
+            peaks = peaks.copy()
+        peaks.sort(key=lambda peak: peak.peakPosition)
+        peaks1 = self._peaks
+        peaks2 = peaks
+        iter1 = OribitoolFunc.iterator(peaks1)
+        iter2 = OribitoolFunc.iterator(peaks2)
+        peaks = []
+        ppm = self.ppm
+        while not (iter1.end and iter2.end):
+            if iter1.end:
+                peaks.extend(peaks2[iter2.index:])
+                break
+            elif iter2.end:
+                peaks.extend(peaks1[iter1.index:])
+                break
+            elif abs(peak2.peakPosition / peak1.peakPosition - 1) < ppm:
+                peak1 = iter1.value
+                peak2 = iter2.value
+                if peak1.handled and not peak2.handled:
+                    peaks.append(peak1)
+                    next(iter1)
+                elif not peak1.handled and peak2.handled:
+                    peaks.append(peak2)
+                    next(iter2)
+                else:
+                    if peak1.formulaList == peak2.formulaList:
+                        peak = StandardPeak((peak1.peakPosition + peak2.peakPosition) / 2,
+                                            peak1.formulaList.copy, max(peak1.subpeaks, peak2.subpeaks), not(peak1.isStart or peak2.isStart), peak1.handled)
+                        peaks.append(peak)
+                    elif peak1.handled and peak2.handled:
+                        raise ValueError("can't merge peak in mass list at %.5f with peak at %.5f" % (
+                            peak1.peakPosition, peak2.peakPosition))
+                    elif len(peak1.formulaList) < len(peak2.formulaList):
+                        peaks.append(peak1)
+                    elif len(peak1.formulaList) > len(peak2.formulaList):
+                        peaks.append(peak2)
+                    else:
+                        formulaList = list(
+                            set(peak1.formulaList) & set(peak2.formulaList))
+                        formulaList.sort(key=lambda formula: formula.mass())
+                        position = formulaList[0].mass() if len(formulaList) == 1 else(
+                            peak1.peakPosition + peak2.peakPosition) / 2
+                        peak = StandardPeak(position, formulaList, max(
+                            peak1.subpeaks, peak2.subpeaks), not(peak1.isStart or peak2.isStart))
+                        peaks.append(peak)
+                    next(iter1)
+                    next(iter2)
+        self._peaks = peaks
 
 
 class Workspace(object):
     def __init__(self):
-        self.filepaths: List[str] = None
+        # @showFormulaOption
+        self.ionCalculator = OribitoolGuessIons.IonCalculator()
+
         # only differ in this step
         self.showedSpectra1Type: ShowedSpectraType = None
-        self.showedSpectra1Filepath: File = None
-        self.showedSpectra1: List(Spectrum) = []
+        # @showFileSpectra1
+        self.showedSpectra1FileTime = None
+        # @showAveragedSpectra1
         self.showedAveragedSpectra1: AveragedSpectra = None
+
+        # @showSpectrum1
         self.showedSpectrum1: OribitoolAbstract.Spectrum = None
 
+        # @showPeakFitFunc
         self.peakFitFunc: PeakFitFunc = None
+        # @showCalibrationIon
         self.calibrationIonList: List[(str, OribitoolFormula.Formula)] = []
-        # filepath ->
+        # fileTime ->
         # HNO3NO3-,C6H3O2NNO3-,C6H5O3NNO3-,C6H4O5N2NO3-,C8H12O10N2NO3-,C10H17O10N3NO3-
-        self.fileCalibrations: Dict[str, CalibrateMass] = {}
+        self.fileTimeCalibrations: Dict[datetime.datetime, CalibrateMass] = {}
+        # @showSpectra2
+        self.calibratedSpectra2: List[CalibratedSpectrum] = None
+        self.showedSpectrum2Index: int = None
+        # @showSpectra2Peaks
+        self.showedSpectrum2Peaks: List[Tuple[FittedPeak, StandardPeak]] = None
 
-        self.calibratedSpectra: List[CalibratedSpectrum] = None
-        
+        # @showSpectra2Peak
+        self.showedSpectrum2PeakRange: range = None
+        self.showedSpectrum2Peak: List[Tuple[FittedPeak, StandardPeak]] = None
+
+        # @showSpectra2MassList
+        self.massList: MassList = None

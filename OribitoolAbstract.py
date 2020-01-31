@@ -2,7 +2,7 @@
 
 import abc
 from datetime import datetime, timedelta
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 
@@ -14,25 +14,8 @@ class File(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def header(self):
-        return self._header
-
-    @abc.abstractmethod
     def getSpectrumInfo(self, scanNum):
         pass
-
-    def __del__(self):
-        pass
-
-
-class FileHeader(abc.ABC):
-    @abc.abstractmethod
-    def __init__(self, file):
-        pass
-
-    @property
-    def file(self):
-        return self._file
 
     @property
     @abc.abstractmethod
@@ -57,6 +40,9 @@ class FileHeader(abc.ABC):
     @property
     @abc.abstractmethod
     def lastScanNumber(self) -> int:
+        pass
+
+    def __del__(self):
         pass
 
 
@@ -96,27 +82,22 @@ class SpectrumInfo(abc.ABC):
 
 class AveragedSpectrum(Spectrum):
     @abc.abstractmethod
-    def __init__(self, files: List[File], timeRanges: List[Tuple[timedelta, timedelta]] = None, numRanges: List[Tuple[int, int]] = None):
+    def __init__(self, file: File, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None):
+        '''
+        numRange include left and right spectrum
+        '''
         pass
-
-    @property
-    def num(self) -> int:
-        return self._num
 
     @property
     def timeRange(self) -> (datetime, datetime):
         return self._timeRange
 
     @property
-    def timeRanges(self) -> List[Tuple[datetime, datetime]]:
-        return self._timeRanges
-
-    @property
-    def numRanges(self) -> List[Tuple[int, int]]:
-        return self._numRanges
+    def numRange(self) -> Tuple[int, int]:
+        return self._numRange
 
 
-def nullSendStatus(filepath, msg, index, length):
+def nullSendStatus(fileTime, msg, index, length):
     pass
 
 
@@ -128,7 +109,7 @@ class AveragedSpectra(abc.ABC):
 
 class Peak(abc.ABC):
     @abc.abstractmethod
-    def __init__(self, spectrum: Spectrum, subscripts: Tuple[int, int]):
+    def __init__(self, spectrum: Spectrum, indexRange: range, mz=None, intensity=None):
         pass
 
     @property
@@ -137,19 +118,11 @@ class Peak(abc.ABC):
 
     @property
     def mz(self) -> np.ndarray:
-        return self._mz
-
-    @mz.setter
-    def mz(self, mz):
-        self._mz = mz
+        return self._mz[self._indexRange]
 
     @property
     def intensity(self) -> np.ndarray:
-        return self._intensity
-
-    @intensity.setter
-    def intensity(self, intensity):
-        self._intensity = intensity
+        return self._intensity[self._indexRange]
 
     @property
     @abc.abstractmethod
@@ -160,6 +133,7 @@ class Peak(abc.ABC):
     def peakAt(self) -> np.ndarray:
         pass
 
+    @property
     @abc.abstractmethod
     def peaksNum(self) -> int:
         pass
@@ -182,7 +156,7 @@ class FitPeakFunc(abc.ABC):
 
     @staticmethod
     @abc.abstractmethod
-    def getNormalizedPeak(peak: Peak, param: tuple) -> Peak:
+    def getNormalizedPeak(peak: Peak, param: tuple) -> Tuple[np.ndarray,np.ndarray]:
         pass
 
     @abc.abstractmethod
@@ -211,7 +185,7 @@ class FitPeakFunc(abc.ABC):
 
     @abc.abstractmethod
     def splitPeakAsParams(self, peak: Peak, num=None):
-        if issubclass(type(peak), FittedPeak):
+        if isinstance(peak, FittedPeak):
             raise ValueError('please use original peak')
         pass
 
@@ -255,7 +229,12 @@ class MassCalibrationFunc(abc.ABC):
     def __str__(self):
         pass
 
+
 class CalibratedSpectrum(Spectrum):
+
+    @property
+    def fileTime(self) -> str:
+        return self._fileTime
 
     @property
     def originalSpectrum(self) -> Spectrum:
@@ -267,32 +246,37 @@ class CalibratedSpectrum(Spectrum):
         warning: not fitted peak
         '''
         return self._peaks
-        
+
     @property
-    def startTime(self)->datetime:
+    def startTime(self) -> datetime:
         return self._startTime
 
     @property
-    def endTime(self)->datetime:
+    def endTime(self) -> datetime:
         return self._endTime
 
     @property
     @abc.abstractmethod
-    def mz(self)->np.ndarray:
+    def mz(self) -> np.ndarray:
         pass
 
     @property
     @abc.abstractmethod
-    def intensity(self)->np.ndarray:
+    def intensity(self) -> np.ndarray:
         pass
-        
 
+class CalibratedPeak(Peak):
+    @abc.abstractmethod
+    def __init__(self, mz: np.ndarray, intensity: np.ndarray, indexRange: range, originalPeak: Peak):
+        pass
 
 class StandardPeak(abc.ABC):
-    def __init__(self, peakPosition, formula, subpeaks):
+    def __init__(self, peakPosition: float, formulaList: list,subpeaks:int, isStart:bool=True, handled=False):
         self._peakPosition = peakPosition
-        self._formula = formula
+        self._formulaList = formulaList
         self._subpeaks=subpeaks
+        self._isStart = isStart
+        self._handled = handled
 
     @property
     def peakPosition(self) -> float:
@@ -303,12 +287,28 @@ class StandardPeak(abc.ABC):
         self._peakPosition = peakPosition
 
     @property
-    def formula(self):
-        return self._formula
+    def formulaList(self):
+        return self._formulaList
 
-    @formula.setter
-    def formula(self, formula):
-        self._formula = formula
+    @formulaList.setter
+    def formulaList(self, formulaList):
+        self._formulaList = formulaList
+
+    @property
+    def isStart(self) -> int:
+        '''
+        fitted peaks are crossed, if it's the first peak of fitted peaks
+        isStart will be true, else false.
+        peak1           :True
+          peak2         :False
+           peak3        :False
+                 peak4  :True
+        '''
+        return self._isStart
+
+    @isStart.setter
+    def isStart(self, isStart):
+        self._isStart = isStart
 
     @property
     def subpeaks(self) -> int:
@@ -317,3 +317,42 @@ class StandardPeak(abc.ABC):
     @subpeaks.setter
     def subpeaks(self, subpeaks):
         self._subpeaks = subpeaks
+
+    @property
+    def handled(self):
+        return self._handled
+    
+    @handled.setter
+    def handled(self, handled):
+        self._handled = handled
+
+class MassList(abc.ABC):
+    def __init__(self, ppm=5e-7):
+        self.ppm = 1e-6
+        self._peaks: List[StandardPeak] = []
+
+    @abc.abstractmethod
+    def addPeaks(self, peaks:Union[StandardPeak,List[StandardPeak]]):
+        pass
+
+    def popPeaks(self, indexes: Union[int, List[int]]):
+        if isinstance(indexes, int):
+            indexes = [indexes]
+        indexes.sort(reverse=True)
+        poped = []
+        for index in indexes:
+            poped.append(indexes.pop(index))
+        poped.reverse()
+        return poped
+
+    def __getitem__(self, index: Union[int, slice, range]) -> Union[StandardPeak, List[StandardPeak]]:
+        if isinstance(index, (int, slice)):
+            return self._peaks[index]
+        elif isinstance(index, range):
+            return self._peaks[index.start:index.stop:index.step]
+
+    def __iter__(self):
+        return iter(self._peaks)
+
+    def __len__(self):
+        return len(self._peaks)

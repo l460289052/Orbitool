@@ -2,9 +2,13 @@
 
 import math
 import os
+import gzip
 from copy import copy
-from typing import List, Tuple
+from typing import List, Tuple, Iterable
+import datetime
+import traceback
 import multiprocessing
+import pickle
 
 import numpy as np
 import scipy.optimize
@@ -20,24 +24,44 @@ def nullSendStatus(file, msg: str, index: int, length: int):
     '''
     pass
 
+def indexFindFirstNotSmallerThan(array, value, indexRange: (int, int) = None, method=(lambda array, index: array[index])):
+    l, r = (0, len(array)) if indexRange is None else indexRange
+    while l < r:
+        t = (l + r) >> 1
+        if method(array, t) < value:
+            l = t + 1
+        else:
+            r = t
+    return l
+
+def indexFindFirstBiggerThan(array, value, indexRange: (int, int) = None, method=(lambda array, index: array[index])):
+    l, r = (0, len(array)) if indexRange is None else indexRange
+    while l < r:
+        t = (l + r) >> 1
+        if method(array, t) <= value:
+            l = t + 1
+        else:
+            r = t
+    return l
+        
+def valueFindFirstNotSmallerThan(array, value, indexRange: (int, int) = None, method=(lambda array, index: array[index])):
+    return method(array, indexFindFirstNotSmallerThan(array, value, indexRange, method))
+
+def valueFindFirstBiggerThan(array, value, indexRange: (int, int) = None, method=(lambda array, index: array[index])):
+    return method(array, indexFindFirstBiggerThan(array, value, indexRange, method))
+
 
 def indexFindNearest(array, value, indexRange: (int, int) = None, method=(lambda array, index: array[index])) -> int:
     '''
     `indexRange`: default=(0,len(array))
     '''
-    ll, rr = (0, len(array)) if indexRange is None else indexRange
-    l = ll
-    r = rr
-    while l + 1 < r:
-        t = (l + r) >> 1
-        if method(array, t) < value:
-            l = t
-        else:
-            r = t
-    if r == rr or abs(method(array, l)-value) < abs(method(array, r)-value):
-        return l
+    l, r = (0, len(array)) if indexRange is None else indexRange
+    i = indexFindFirstBiggerThan(array, value, indexRange, method)
+    
+    if i == r or abs(method(array, i-1)-value) < abs(method(array, i)-value):
+        return i-1
     else:
-        return r
+        return i
 
 
 def valueFindNearest(array, value, indexRange: (int, int) = None, method=(lambda array, index: array[index])):
@@ -54,28 +78,14 @@ def indexBetween(array, valueRange, indexRange: (int, int) = None, method=(lambd
     make list = [index for index, item in enumerate(array) if l<item and item<r]
     """
     lvalue, rvalue = valueRange
-    l, r = (0, len(array)) if indexRange is None else indexRange
-    ll = l
-    t = r
-    while ll < t:
-        tt = (t + ll) >> 1
-        if method(array, tt) < lvalue:
-            ll = tt+1
-        else:
-            t = tt
-    rr = r
-    t = ll
-    while t < rr:
-        tt = (t + rr) >> 1
-        if method(array, tt) < rvalue:
-            t = tt + 1
-        else:
-            rr = tt
-    rr = t
-    if ll < rr:
-        return range(ll, rr)
+    if indexRange is None:
+        indexRange = (0, len(array))
+    l = indexFindFirstNotSmallerThan(array, lvalue, indexRange, method)
+    r = indexFindFirstBiggerThan(array, rvalue, indexRange, method)
+    if l < r:
+        return range(l, r)
     else:
-        return range(ll, ll)
+        return range(l, l)
 
 
 def valueBetween(array, valueRange, indexRange: (int, int) = None, method=(lambda array, index: array[index])):
@@ -86,97 +96,155 @@ def valueBetween(array, valueRange, indexRange: (int, int) = None, method=(lambd
     return [method(array, x) for x in indexBetween(array, valueRange, indexRange, method)]  # [ll:t-1]->[ll:t)
 
 
-def findPeak(mz: np.ndarray, intensity: np.ndarray, begin: int, stop: int) -> (int, int):
+def findPeak(mz: np.ndarray, intensity: np.ndarray, indexRange:range) -> range:
     '''
     intensity[`stop`] must less than 1e-6, or `stop` == len(mz)
     find the first peak after begin
     if mz[begin] > 0, will find the first peak after first mz[i]=0, while i > begin
     seem to the end
     return the peak with begin,xxx,xxx,xxx,end
-    if don't find peak, return (`stop`,`stop`)
+    if don't find peak, return range(`stop`,`stop`)
     '''
+    l = indexRange.start
+    stop = indexRange.stop
     if stop > len(mz):
         stop = len(mz)
     delta = 1e-6
-    l = begin
     while l < stop and intensity[l] > delta:
         l += 1
     while l < stop and intensity[l] < delta:
         l += 1
     if l == stop:
-        return (stop, stop)
+        return range(stop, stop)
     r = l
     l -= 1
     while r < stop and intensity[r] > delta:
         r += 1
     if intensity[r] > delta:
-        return (stop, stop)
-    return (l, r)
+        return range(stop, stop)
+    return range(l, r+1)
 
 
-def multiProcess(func, argsList: List[Tuple], filepath, cpu=None, sendStatusFunc=nullSendStatus):
+def processWithTime(func, fileTime, args, signalQueue):
+    result=None
+    try:
+        result = func(fileTime, *args)
+    except Exception as e:
+        with open('error.txt', 'a') as file:
+            print('', datetime.datetime.now, str(e), sep='\n', file=file)
+            traceback.print_exc(file=file)
+            print(str(e))
+            traceback.print_exc()
+    signalQueue.put(fileTime)
+    return result
+
+
+def processWithoutPath(func, args, signalQueue):
+    result=None
+    try:
+        result = func(*args)
+    except Exception as e:
+        with open('error.txt', 'a') as file:
+            print('', datetime.datetime.now, str(e), sep='\n', file=file)
+            traceback.print_exc(file=file)
+            print(str(e))
+            traceback.print_exc()
+    signalQueue.put(True)
+    return result
+
+
+def multiProcess(func, argsList: List[Tuple], fileTime, cpu=None, sendStatusFunc=nullSendStatus):
     '''
     multi process
     the first line of func.__doc__ will be showed message
+    if fileTime is a list, func's first arguement must be fileTime
     '''
-    if type(filepath) is list:
-        if len(argsList) != len(filepath):
-            raise ValueError('len(filepath)!=len(argsList)')
-    if cpu is None or cpu > multiprocessing.cpu_count():
-        cpu = multiprocessing.cpu_count()
+    if type(fileTime) is list:
+        if len(argsList) != len(fileTime):
+            raise ValueError('len(fileTime)!=len(argsList)')
+    if cpu is None or cpu >= multiprocessing.cpu_count():
+        cpu = multiprocessing.cpu_count() - 1
+    if cpu <= 0:
+        cpu = 1
     msg = ''
-    for line in func.__doc__.splitlines():
-        strip = line.strip()
-        if len(strip) > 0:
-            msg = strip
+    if func.__doc__ is not None:
+        for line in func.__doc__.splitlines():
+            strip = line.strip()
+            if len(strip) > 0:
+                msg = strip
+                break
     length = len(argsList)
     if cpu == 1:
         results = []
-        if type(filepath) is list:
+        if type(fileTime) is list:
             for i, args in enumerate(argsList):
-                sendStatusFunc(filepath[i], msg, i, length)
-                results.append(func(filepath[i], *args))
-            sendStatusFunc(filepath[-1], msg, length, length)
+                sendStatusFunc(fileTime[i], msg, i, length)
+                results.append(func(fileTime[i], *args))
+            sendStatusFunc(fileTime[-1], msg, length, length)
         else:
             for i, args in enumerate(argsList):
-                sendStatusFunc(filepath, msg, i, length)
+                sendStatusFunc(fileTime, msg, i, length)
                 results.append(func(*args))
-            sendStatusFunc(filepath, msg, length, length)
+            sendStatusFunc(fileTime, msg, length, length)
         return results
     else:
         with multiprocessing.Manager() as manager:
             queue = manager.Queue()
             with multiprocessing.Pool(cpu) as pool:
-                if type(filepath) is list:
-                    def process(func, filepath, args, signalQueue):
-                        result = func(filepath, *args)
-                        signalQueue.put(filepath)
-                        return result
+                if type(fileTime) is list:
                     results: multiprocessing.pool.MapResult = pool.starmap_async(
-                        process, [(func, path, args, queue) for path, args in zip(filepath, argsList)])
+                        processWithTime, [(func, time, args, queue) for time, args in zip(fileTime, argsList)])
                     pool.close()
-                    sendStatusFunc(filepath[0], msg, 0, length)
+                    sendStatusFunc(fileTime[0], msg, 0, length)
                     for i in range(length):
-                        path = queue.get()
-                        sendStatusFunc(path, msg, i, length)
+                        time = queue.get()
+                        sendStatusFunc(time, msg, i, length)
                     return results.get()
                 else:
-                    def process(func, args, signalQueue):
-                        result = func(*args)
-                        signalQueue.put(True)
-                        return result
                     results: multiprocessing.pool.MapResult = pool.starmap_async(
-                        process, [(func, args, queue) for args in argsList])
+                        processWithTime, [(func, args, queue) for args in argsList])
                     pool.close()
                     for i in range(length):
-                        sendStatusFunc(filepath, msg, i, length)
+                        sendStatusFunc(filetime, msg, i, length)
                         queue.get()
-                    sendStatusFunc(filepath, msg, length, length)
+                    sendStatusFunc(filetime, msg, length, length)
                     return results.get()
+
+class iterator(object):
+    def __init__(self,l: Iterable):
+        self._iter = iter(l)
+        try:
+            self._value = next(self._iter)
+            self._end=False
+        except StopIteration:
+            self._value = None
+            self._end=True
+        self._index = 0
+
+    @property
+    def index(self):
+        return self._index
+
+    @property
+    def value(self):
+        return self._value if not self.end else None
+
+    @property
+    def end(self)->bool:
+        return self._end
+
+    def next(self):
+        if not self.end:
+            try:
+                self._value = next(self._iter)
+            except StopIteration:
+                self._end=True
+            self._index += 1
+        
 
 
 class NormalDistributionFunc(OribitoolAbstract.FitPeakFunc):
-    maxFitNum={1:100,2:200,3:1000,4:4000,5:6000,6:10000}
+    maxFitNum = {1: 100, 2: 200, 3: 1000, 4: 4000, 5: 6000, 6: 10000}
 
     def __init__(self, params: List[tuple]):
         params = np.array(params)
@@ -198,18 +266,18 @@ class NormalDistributionFunc(OribitoolAbstract.FitPeakFunc):
         intensity: np.ndarray = peak.intensity
         mzmean = mz.mean()
         param0 = (intensity.max() * mzmean / 56000, mzmean, mzmean / 140000)
-        return scipy.optimize.curve_fit(NormalDistributionFunc._func, mz, intensity, param0,maxfev=100)[0]
+        return scipy.optimize.curve_fit(NormalDistributionFunc._func, mz, intensity, param0, maxfev=100)[0]
 
     @staticmethod
-    def getNormalizedPeak(peak: OribitoolAbstract.Peak, param) -> OribitoolAbstract.Peak:
+    def getNormalizedPeak(peak: OribitoolAbstract.Peak, param) -> Tuple[np.ndarray, np.ndarray]:
+        '''
+        return (mz, intensity)`
+        '''
         mz: np.ndarray = peak.mz
         intensity: np.ndarray = peak.intensity
         peakArea, peakPosition, peakSigma = param
         peakHeight = NormalDistributionFunc._func(peakPosition, *param)
-        ret = copy(peak)
-        ret.mz = (mz / peakPosition - 1) / math.sqrt(peakPosition / 200)
-        ret.intensity = intensity / peakHeight
-        return ret
+        return ((mz / peakPosition - 1) / math.sqrt(peakPosition / 200), intensity / peakHeight)
 
     def normFunc(self, x):
         y = self._func(x, 1, 0, self.peakSigmaFit) / \
@@ -240,31 +308,40 @@ class NormalDistributionFunc(OribitoolAbstract.FitPeakFunc):
         super().splitPeakAsParams(peak, splitNum)
         peakAt = peak.peakAt()
 
-        peaksNum=peak.peaksNum() if splitNum is None else splitNum
+        peaksNum = peak.peaksNum if splitNum is None else splitNum
 
-        u: np.ndarray = peak.mz[1:-1][peakAt]
-        uu = [u[-1] + i + 1 for i in range(peaksNum - len(u))]
-        u = np.concatenate((u, uu))
+        u: np.ndarray = np.stack(
+            (peak.mz[1:-1][peakAt], peak.intensity[1:-1][peakAt]), axis=1)
+        uu = [(u[-1, 0] + i + 1, 0) for i in range(peaksNum - u.shape[0])]
+        if len(uu) > 0:
+            u = np.concatenate((u, uu), axis=0)
 
-        param = []
-        for i in range(peaksNum):
-            param.append(i)
-            param.append(u[i])
+        index = np.argsort(u[:, 1])
+        u = u[np.flip(index)]
 
-        for num in range(peaksNum,0,-1):
+        param = np.flip(u,axis=1).reshape(-1)
+
+        mz = peak.mz
+        intensity = peak.intensity
+        mzMin = mz[0] # mz.min()
+        mzMax = mz[-1]  # mz.max()
+        for num in range(peaksNum, 0, -1):
             try:
                 def funcFit(mz: np.ndarray, *args):
                     return sum([self._funcFit(mz, args[2 * i], args[2 * i + 1]) for i in range(num)])
-                param = scipy.optimize.curve_fit(
-                    funcFit, peak.mz, peak.intensity, p0=param,maxfev=self.maxFitNum[num])[0]
-                params = [(param[2*i],param[2*i+1]) for i in range(num)]
+                fittedParam = scipy.optimize.curve_fit(
+                    funcFit, mz, intensity, p0=param, maxfev=self.maxFitNum[num])[0]
+                params = [(fittedParam[2*i], fittedParam[2*i+1]) for i in range(num)]
+                for p in params:
+                    if p[1] < mzMin or p[1] > mzMax:
+                        raise Exception()
                 return params
             except:
                 if splitNum is not None:
-                    raise ValueError("can't fit use peaks num as "+str(splitNum))
-            param.pop()
-            param.pop()
-        raise ValueError("can't fit use peaks num")
+                    raise ValueError(
+                        "can't fit use peaks num as "+str(splitNum))
+            param=param[:-2]
+        raise ValueError("can't fit peak  at (%.5f,%.5f)" % (mz[0],mz[-1]))
 
 
 def linePeakCrossed(line: ((float, float), (float, float)), peak: OribitoolAbstract.Peak):
@@ -312,3 +389,16 @@ class PolynomialRegressionFunc(OribitoolAbstract.MassCalibrationFunc):
 
     def __str__(self):
         pass
+
+
+
+def obj2File(path: str, obj):
+    # with open(path, 'wb') as writer:
+    with gzip.open(path, 'wb', compresslevel=2) as writer:
+        pickle.dump(obj,writer)
+
+
+def file2Obj(path: str):
+    # with open(path, 'rb') as reader:
+    with gzip.open(path, 'rb') as reader:
+        return pickle.load(reader)

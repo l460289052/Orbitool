@@ -20,12 +20,12 @@ class IonCalculator(object):
 
         self.errppm = 1e-6
 
-        self.constrain = \
+        self._constrain = \
             {'elements': n_elements, 'isotopes': n_isotopes,
              'C': (0, 20), 'H': (0, 40), 'O': (1, 15), 'N': (0, 4), 'S': (0, 1), 'Na': (0, 1),
-             'C[13]': (0, 3), 'O[18]': (0, 2),
+             'C[13]': (0, 3), 'O[18]': (0, 2), 'S[34]': (0, 1),
              'DBE': (0, 8),
-             'OCratioMax': 3, 'ONratioMax': 3, 'OSratioMax': 4,
+             'OCRatioMax': 3, 'ONRatioMax': 3, 'OSRatioMax': 4,
              'NitrogenRule': False, 'charge': -1}
 
     def calc(self, M: float, queue=None) -> list:
@@ -65,8 +65,8 @@ class IonCalculator(object):
                             max(self['O'][0],
                                 int(math.ceil((Mmin - m - Hmass * ion.Hmax()) / Omass))),
                             min(self['O'][1],
-                                self['OCratioMax'] * Cnum + self['ONratioMax'] *
-                                Nnum + self['OSratioMax'] * Snum,
+                                self['OCRatioMax'] * Cnum + self['ONRatioMax'] *
+                                Nnum + self['OSRatioMax'] * Snum,
                                 int(math.floor((Mmax - m - Hmass*ion.Hmin()) / Omass)))
                             + 1)
 
@@ -118,8 +118,8 @@ class IonCalculator(object):
                             max(self['O'][0],
                                 int(math.ceil((Mmin - m - Hmass*ion.Hmax()) / Omass))),
                             min(self['O'][1],
-                                self['OCratioMax']*Cnum +
-                                self['ONratioMax']*Nnum,
+                                self['OCRatioMax']*Cnum +
+                                self['ONRatioMax']*Nnum,
                                 int(math.floor((Mmax - m - Hmass*ion.Hmin()) / Omass)))
                             + 1)
 
@@ -160,23 +160,6 @@ class IonCalculator(object):
             isotope.extend(ans)
             queue.put(((Mmin, Mmax), isotope))
         return ans
-
-    def calc_future(self, M: float, queue=None) -> list:
-        '''
-        @para
-            M : mass
-            queue : communicate across process
-        '''
-        (Mmin, Mmax) = (M / (1 + self.errppm), M / (1 - self.errppm))
-
-        if self._covered(Mmin, Mmax):
-            if queue is not None:
-                queue.put(((Mmin, Mmax), []))
-            return self._calced_get(M)
-
-        ans = []
-        isotope = []
-        # 改成递归的形式，使用栈
 
     def clear(self):
         self._cover_RBTree.clear()
@@ -260,9 +243,9 @@ class IonCalculator(object):
             if origin_e not in ion:
                 continue
             isomax = None
-            if isotope+'max' in self.constrain:
+            if isotope+'max' in self._constrain:
                 isomax = min(
-                    self.constrain[isotope][1], ion[origin_e])
+                    self._constrain[isotope][1], ion[origin_e])
             else:
                 isomax = ion[origin_e]
             for isonum in range(1, isomax + 1):
@@ -274,30 +257,65 @@ class IonCalculator(object):
         return ans
 
     def __setitem__(self, key, value):
-        if self.constrain[key] == value:
+        if self._constrain[key] == value:
             return
-        if type(value) not in {int, bool}:
-            raise ValueError('number constrain should be integer')
-        self._cover_RBTree.clear()
-        self._calced_RBTree.clear()
-        self.constrain[key] = value
+        if len(self._cover_RBTree) > 0:
+            self._cover_RBTree.clear()
+        if len(self._calced_RBTree) > 0:
+            self._calced_RBTree.clear()
+        self._constrain[key] = value
+        if key == 'charge':
+            if value == 1:
+                self._constrain['elements'] = n_elements
+                self._constrain['isotopes'] = n_isotopes
+            elif value == -1:
+                self._constrain['elements'] = p_elements
+                self._constrain['isotopes'] = p_isotopes
 
     def __getitem__(self, key):
-        return self.constrain[key]
+        return self._constrain[key]
+
+
+class IonCalculator_fulture(object):
+    def __init__(self):
+        self._calced_RBTree = FastRBTree()
+
+        self.ppm = 1e-6
+        # need to change
+        self._constrain = \
+            {'elements': n_elements, 'isotopes': n_isotopes,
+             'C': (0, 20), 'H': (0, 40), 'O': (1, 15), 'N': (0, 4), 'S': (0, 1), 'Na': (0, 1),
+             'C[13]': (0, 3), 'O[18]': (0, 2),
+             'DBE': (0, 8),
+             'OCRatioMax': 3, 'ONRatioMax': 3, 'OSRatioMax': 4, 'mass': (1, 999),
+             'NitrogenRule': False, 'charge': -1}
+
+    def init(self):
+        pass
+    '''
+     有两种方案
+     一、先枚举出所有可能的化学式，枚举时注意剪枝，再添加
+     二、选取一些元素作为基础，记录可用的连接数，例如C(4)、N(3)等（括号内表示可用的连接数）
+         ，再枚举其他类似官能团的东西，例如C(4)，则为C(4)+C(4)=C2(6)或C2(4)或C2(2)。
+         其余还有SO3H(1)、N(3)、NO2(1)、X(1)（卤素）、O(2)、ONa(1)、O-(1)。最后以氢填充。注意查重。
+    '''
+
+    def calc(self):
+        pass
 
 
 if __name__ == '__main__':
     calcr = IonCalculator()
     calcr['charge'] = -1
-    samples=['HNO3NO3-', 'C6H3O2NNO3-', 'C6H5O3NNO3-',
-                'C6H4O5N2NO3-', 'C8H12O10N2NO3-', 'C10H17O10N3NO3-']
+    samples = ['HNO3NO3-', 'C6H3O2NNO3-', 'C6H5O3NNO3-',
+               'C6H4O5N2NO3-', 'C8H12O10N2NO3-', 'C10H17O10N3NO3-']
     for s in samples:
-        ion=Formula(s)
+        ion = Formula(s)
         print(ion, calcr.calc(ion.mass()))
 
     calcr['charge'] = 1
     for s in samples:
-        ion=Formula(s)
-        ion.charge=1
+        ion = Formula(s)
+        ion.charge = 1
         print(ion, calcr.calc(ion.mass()))
         # couldn't get C6H3O5N2+ for ion.Hmin()->4
