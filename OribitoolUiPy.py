@@ -620,6 +620,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         thread.finished.connect(self.averageFinished)
         self.threads.append(thread)
         thread.start()
+        # thread.run()
 
     @threadBegin
     @withoutArgs
@@ -1204,7 +1205,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 
 
 
-    @threadEnd
+    @threadEnd(False)
     def showSpectra2PeakFinished(self, result, args):
         mz, intensity, residual = result
         ax = self.spectrum2Ax

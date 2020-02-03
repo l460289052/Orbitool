@@ -10,7 +10,7 @@ import heapq
 import scipy.optimize
 import numpy as np
 from numba import njit
-from bintrees import FastRBTree
+from sortedcontainers import SortedDict
 
 import OribitoolAbstract
 import OribitoolFormula
@@ -67,7 +67,7 @@ class AveragedSpectra(OribitoolAbstract.AveragedSpectra):
         if type(fileList) is not FileList:
             raise TypeError()
         fileList: FileList
-        tree = fileList.filetree
+        timedict=fileList.timedict
         fileTimeSorted = []
         spectra = []
         msg = "average peaks"
@@ -110,7 +110,7 @@ class AveragedSpectra(OribitoolAbstract.AveragedSpectra):
                 return math.ceil((end-start+1)/N)
 
             def average(f: File, left, end):
-                right = left + N - 1
+                right = left + N
                 if right > end:
                     right = end
                 return AveragedSpectrum(f, numRange=(left, right))
@@ -141,19 +141,14 @@ class AveragedSpectra(OribitoolAbstract.AveragedSpectra):
             delta = time
 
         total = sum([numCount(f) for f in fileList.pathdict.values()])
-        k, f = tree.min_item()
-        f: File
-        try:
-            while True:
-                fileTimeSorted.append(f.creationDate)
-                index, end = indexRange(f)
-                while index < end:
-                    sendStatus(f.creationDate, msg, len(spectra), total)
-                    spectra.append(average(f, index, end))
-                    index += delta
-                k, f = tree.succ_item(k)
-        except KeyError:
-            pass
+
+        for f in timedict.values():
+            fileTimeSorted.append(f.creationDate)
+            index, end = indexRange(f)
+            while index < end:
+                sendStatus(f.creationDate, msg, len(spectra), total)
+                spectra.append(average(f, index, end))
+                index += delta
 
         sendStatus(f.creationDate, msg, len(spectra), len(spectra))
 
@@ -212,25 +207,21 @@ class FileList(object):
     '''
 
     def __init__(self):
-        # sorted by start time
-        self.filetree = FastRBTree()
         # datetime -> File
-        self.timedict: Dict[datetime.datetime, File] = {}
+        self.timedict = SortedDict()
         self.pathdict: Dict[str, File] = {}
 
-    def crossed(self, left: datetime.datetime, right: datetime.datetime) -> (bool, File):
-        try:
-            k, v = self.filetree.floor_item(left)
-            if v.creationDate + v.endTime > left:
+    def crossed(self, start: datetime.datetime, end: datetime.datetime) -> (bool, File):
+        timedict=self.timedict
+        index = timedict.bisect_left(start)
+        if index > 0:
+            k, v = timedict.peekitem(index - 1)
+            if v.creationDate + v.endTime > start:
                 return (True, v)
-        except KeyError:
-            pass
-        try:
-            k, v = self.filetree.ceiling_item(left)
-            if k < right:
+        if index < len(timedict):
+            k, v = timedict.peekitem(index)
+            if k < end:
                 return (True, v)
-        except KeyError:
-            pass
         return (False, None)
 
     def addFile(self, filepath) -> bool:
@@ -248,7 +239,6 @@ class FileList(object):
             raise ValueError('file "%s" and "%s" have crossed scan time' % (
                 filepath, crossedFile.path))
 
-        self.filetree.insert(f.creationDate + f.startTime, f)
         self.timedict[f.creationDate] = f
         self.pathdict[f.path] = f
         return True
@@ -260,7 +250,6 @@ class FileList(object):
             f.creationDate+f.startTime, f.creationDate+f.endTime)
         if crossed:
             raise ValueError(f.path, crossedFile.path)
-        self.filetree.insert(f.creationDate + f.startTime, f)
         self.timedict[f.creationDate] = f
         self.pathdict[f.path] = f
         return True
@@ -286,7 +275,6 @@ class FileList(object):
         f: File = self.pathdict.pop(filepath, None)
         if f == None:
             return
-        self.filetree.remove(f.creationDate + f.startTime)
         self.timedict.pop(f.creationDate)
 
     def subList(self, filepaths: List[str]):
@@ -297,14 +285,14 @@ class FileList(object):
         return subList
 
     def clear(self):
-        self.filetree.clear()
         self.pathdict.clear()
         self.timedict.clear()
 
     def timeRange(self):
+        timedict=self.timedict
         if len(self.timedict) > 0:
-            l: File = self.filetree.min_item()[1]
-            r: File = self.filetree.max_item()[1]
+            l: File = timedict.peekitem(0)[1]
+            r: File = timedict.peekitem(1)[1]
             return (l.creationDate + l.startTime, r.creationDate + r.endTime)
         else:
             return None

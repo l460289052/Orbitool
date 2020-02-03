@@ -1,6 +1,7 @@
 import math
 import re
-from bintrees import FastRBTree
+
+from sortedcontainers import SortedDict
 from pyteomics import mass
 
 from OribitoolFormula import Formula
@@ -13,10 +14,10 @@ n_isotopes = ['C[13]', 'O[18]', 'S[34]']
 
 class IonCalculator(object):
     def __init__(self):
-        # key: left of a interval. value: right of a interval
-        self._cover_RBTree = FastRBTree()
+        # key: left value of a interval. value: right of a interval
+        self._cover_ = SortedDict()
         # key: mass. value: formula
-        self._calced_RBTree = FastRBTree()
+        self._calced_ = SortedDict()
 
         self.errppm = 1e-6
 
@@ -162,76 +163,64 @@ class IonCalculator(object):
         return ans
 
     def clear(self):
-        self._cover_RBTree.clear()
-        self._calced_RBTree.clear()
+        self._cover_.clear()
+        self._calced_.clear()
 
     def _covered(self, left, right):
-        try:
-            l, r = self._cover_RBTree.floor_item(left)
-            return right <= r
-        except KeyError:
-            return False
+        index = self._cover_.bisect_left(left)
+        if index > 0:
+            return right <= self._cover_.peekitem(index - 1)[1]
+        return False
 
     def _cover(self, left, right):
         if self._covered(left, right):
             return
-        (min_l, max_r) = (left, left)
-        try:
-            l, r = self._cover_RBTree.floor_item(left)
+        cover = self._cover_
+        min_l = left
+        max_r = left
+        index = cover.bisect_left(left) - 1
+        if index >= 0:
+            l, r = cover.peekitem(index)
             if r > min_l:
-                self._cover_RBTree.remove(l)
+                cover.popitem(index)
                 min_l = l
-        except KeyError:
-            pass
-        try:
-            l, r = self._cover_RBTree.ceiling_item(left)
-            while l < right:
-                self._cover_RBTree.remove(l)
-                max_r = r
-                l, r = self._cover_RBTree.ceiling_item(left)
-        except KeyError:
-            pass
+
+        while True:
+            index = cover.bisect_right(left)
+            if index < len(cover):
+                l, r = cover.peekitem(index)
+                if l < right:
+                    cover.popitem(index)
+                    max_r = r
+                else:
+                    break
+            else:
+                break
         if max_r < right:
             max_r = right
-        self._cover_RBTree.insert(min_l, max_r)
+        cover[min_l] = max_r
 
     def _calced_insert(self, ion):
         m = ion.mass()
-        e = False
-        try:
-            mm, f = self._calced_RBTree.floor_item(m)
+        calced = self._calced_
+        index = calced.bisect_left(m)
+        if index > 0:
+            mm, f = calced.peekitem(index - 1)
             if ion == f:
-                e = True
-        except KeyError:
-            pass
-        try:
-            mm, f = self._calced_RBTree.ceiling_item(m)
+                return
+        if index < len(calced):
+            mm, f = calced.peekitem(index)
             if ion == f:
-                e = True
-        except KeyError:
-            pass
-        if not e:
-            self._calced_RBTree.insert(m, ion)
+                return
+        calced[m]=ion
+            
 
     def _calced_get(self, m):
-        ans = []
-        mi = m/(1+self.errppm)
-        ma = m/(1-self.errppm)
-        try:
-            mm, f = self._calced_RBTree.floor_item(m)
-            while mm > mi:
-                ans.append(f)
-                mm, f = self._calced_RBTree.prev_item(mm)
-        except KeyError:
-            pass
-        try:
-            mm, f = self._calced_RBTree.ceiling_item(m)
-            while mm < ma:
-                ans.append(f)
-                mm, f = self._calced_RBTree.succ_item(mm)
-        except KeyError:
-            pass
-        return ans
+        mi = m / (1 + self.errppm)
+        ma = m / (1 - self.errppm)
+        calced=self._calced_
+        return [calced[mm] for mm in calced.irange(mi, ma)]
+        
 
     def _find_and_insert_isotope(self, ion):
         '''
@@ -259,10 +248,7 @@ class IonCalculator(object):
     def __setitem__(self, key, value):
         if self._constrain[key] == value:
             return
-        if len(self._cover_RBTree) > 0:
-            self._cover_RBTree.clear()
-        if len(self._calced_RBTree) > 0:
-            self._calced_RBTree.clear()
+        self.clear()
         self._constrain[key] = value
         if key == 'charge':
             if value == 1:
@@ -278,7 +264,7 @@ class IonCalculator(object):
 
 class IonCalculator_fulture(object):
     def __init__(self):
-        self._calced_RBTree = FastRBTree()
+        self._calced_=SortedDict()
 
         self.ppm = 1e-6
         # need to change
@@ -302,4 +288,3 @@ class IonCalculator_fulture(object):
 
     def calc(self):
         pass
-

@@ -100,7 +100,7 @@ class AveragedSpectrum(Spectrum):
     @abc.abstractmethod
     def __init__(self, file: File, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None):
         '''
-        numRange include left and right spectrum
+        numRange include left spectrum, exclude right spectrum
         '''
         pass
 

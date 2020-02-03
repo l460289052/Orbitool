@@ -63,7 +63,7 @@ class SpectrumInfo(OribitoolAbstract.SpectrumInfo):
 
 
 class AveragedSpectrum(OribitoolAbstract.AveragedSpectrum):
-    def __init__(self, file:OribitoolAbstract.File, timeRange: List[Tuple[datetime.timedelta, datetime.timedelta]] = None, numRange: List[Tuple[int, int]] = None):
+    def __init__(self, file:OribitoolAbstract.File, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None):
         averaged = None
 
         def method(f, index: int) -> datetime.timedelta:
@@ -78,18 +78,19 @@ class AveragedSpectrum(OribitoolAbstract.AveragedSpectrum):
                                                     file.lastScanNumber + 1),
                                                     method=method)
             start = r.start
-            end = r.stop-1
+            end = r.stop
         elif numRange is not None and timeRange is None:
             start, end = numRange
         else:
             raise ValueError(
                 "`timeRange` or `numRange` must be provided and only one can be provided")
         scanfilter = IScanFilter(file.rawfile.GetFilterForScanNumber(start))
+        last = end - 1
         averaged = Extensions.AverageScansInScanRange(
-            file.rawfile, start, end, scanfilter).SegmentedScan
+            file.rawfile, start, last, scanfilter).SegmentedScan
 
         sTime = file.creationDate + file.getSpectrumInfo(start).retentionTime
-        eTime = file.creationDate + file.getSpectrumInfo(end).retentionTime
+        eTime = file.creationDate + file.getSpectrumInfo(last).retentionTime
 
         self._timeRange = (sTime, eTime)
 

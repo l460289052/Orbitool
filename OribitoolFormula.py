@@ -11,6 +11,7 @@ _print_order = ['C', 'H', 'O', 'N']
 _print_order_set = set(_print_order)
 
 
+# 抽时间用njit重写一下
 class Formula(UserDict, OribitoolAbstract.Formula):
     '''
     '''
