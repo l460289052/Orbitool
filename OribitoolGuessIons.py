@@ -303,19 +303,3 @@ class IonCalculator_fulture(object):
     def calc(self):
         pass
 
-
-if __name__ == '__main__':
-    calcr = IonCalculator()
-    calcr['charge'] = -1
-    samples = ['HNO3NO3-', 'C6H3O2NNO3-', 'C6H5O3NNO3-',
-               'C6H4O5N2NO3-', 'C8H12O10N2NO3-', 'C10H17O10N3NO3-']
-    for s in samples:
-        ion = Formula(s)
-        print(ion, calcr.calc(ion.mass()))
-
-    calcr['charge'] = 1
-    for s in samples:
-        ion = Formula(s)
-        ion.charge = 1
-        print(ion, calcr.calc(ion.mass()))
-        # couldn't get C6H3O5N2+ for ion.Hmin()->4

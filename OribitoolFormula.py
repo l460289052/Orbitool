@@ -5,12 +5,13 @@ import re
 from pyteomics import mass
 from collections import UserDict
 
+import OribitoolAbstract
 
 _print_order = ['C', 'H', 'O', 'N']
 _print_order_set = set(_print_order)
 
 
-class Formula(UserDict):
+class Formula(UserDict, OribitoolAbstract.Formula):
     '''
     '''
 

@@ -11,6 +11,7 @@ import multiprocessing
 import pickle
 
 import numpy as np
+from numba import jit, njit, numpy_extensions
 import scipy.optimize
 import sklearn.preprocessing
 import sklearn.linear_model
@@ -24,7 +25,12 @@ def nullSendStatus(file, msg: str, index: int, length: int):
     '''
     pass
 
-def indexFindFirstNotSmallerThan(array, value, indexRange: (int, int) = None, method=(lambda array, index: array[index])):
+def defaultMethod(array, index):
+    return array[index]
+
+defaultMethod_njit=njit(defaultMethod)
+
+def indexFirstNotSmallerThan(array, value, indexRange: (int, int) = None, method=defaultMethod):
     l, r = (0, len(array)) if indexRange is None else indexRange
     while l < r:
         t = (l + r) >> 1
@@ -34,7 +40,18 @@ def indexFindFirstNotSmallerThan(array, value, indexRange: (int, int) = None, me
             r = t
     return l
 
-def indexFindFirstBiggerThan(array, value, indexRange: (int, int) = None, method=(lambda array, index: array[index])):
+@njit(cache=True)
+def indexFirstNotSmallerThan_njit(array, value, indexRange: (int, int) = None, method=defaultMethod_njit):
+    l, r = (0, len(array)) if indexRange is None else indexRange
+    while l < r:
+        t = (l + r) >> 1
+        if method(array, t) < value:
+            l = t + 1
+        else:
+            r = t
+    return l
+
+def indexFirstBiggerThan(array, value, indexRange: (int, int) = None, method=defaultMethod):
     l, r = (0, len(array)) if indexRange is None else indexRange
     while l < r:
         t = (l + r) >> 1
@@ -43,35 +60,57 @@ def indexFindFirstBiggerThan(array, value, indexRange: (int, int) = None, method
         else:
             r = t
     return l
-        
-def valueFindFirstNotSmallerThan(array, value, indexRange: (int, int) = None, method=(lambda array, index: array[index])):
-    return method(array, indexFindFirstNotSmallerThan(array, value, indexRange, method))
 
-def valueFindFirstBiggerThan(array, value, indexRange: (int, int) = None, method=(lambda array, index: array[index])):
-    return method(array, indexFindFirstBiggerThan(array, value, indexRange, method))
+@njit(cache=True)
+def indexFirstBiggerThan_njit(array, value, indexRange: (int, int) = None, method=defaultMethod_njit):
+    l, r = (0, len(array)) if indexRange is None else indexRange
+    while l < r:
+        t = (l + r) >> 1
+        if method(array, t) <= value:
+            l = t + 1
+        else:
+            r = t
+    return l
 
-
-def indexFindNearest(array, value, indexRange: (int, int) = None, method=(lambda array, index: array[index])) -> int:
+def indexNearest(array, value, indexRange: (int, int) = None, method=defaultMethod) -> int:
     '''
     `indexRange`: default=(0,len(array))
     '''
     l, r = (0, len(array)) if indexRange is None else indexRange
-    i = indexFindFirstBiggerThan(array, value, indexRange, method)
-    
+    i = indexFirstBiggerThan(array, value, indexRange, method)
+
     if i == r or abs(method(array, i-1)-value) < abs(method(array, i)-value):
         return i-1
     else:
         return i
 
-
-def valueFindNearest(array, value, indexRange: (int, int) = None, method=(lambda array, index: array[index])):
+@njit(cache=True)
+def indexNearest_njit(array, value, indexRange: (int, int) = None, method=defaultMethod_njit) -> int:
     '''
     `indexRange`: default=(0,len(array))
     '''
-    return method(array, indexFindNearest(array, value, indexRange, method))
+    l, r = (0, len(array)) if indexRange is None else indexRange
+    i = indexFirstBiggerThan_njit(array, value, indexRange, method)
 
+    if i == r or abs(method(array, i-1)-value) < abs(method(array, i)-value):
+        return i-1
+    else:
+        return i
 
-def indexBetween(array, valueRange, indexRange: (int, int) = None, method=(lambda array, index: array[index])) -> range:
+def valueNearest(array, value, indexRange: (int, int) = None, method=defaultMethod):
+    '''
+    `indexRange`: default=(0,len(array))
+    '''
+    return method(array, indexNearest(array, value, indexRange, method))
+
+@njit(cache=True)
+def valueNearest_njit(array, value, indexRange: (int, int) = None, method=defaultMethod_njit):
+    '''
+    `indexRange`: default=(0,len(array))
+    '''
+    return method(array, indexNearest_njit(array, value, indexRange, method))
+
+def indexBetween(array, valueRange, indexRange: (int, int) = None, method=defaultMethod) -> range:
     """
     get list from sorted array for value in (l,r)
     `indexRange`: (start,stop), contain array[start] to array[stop-1]
@@ -80,15 +119,27 @@ def indexBetween(array, valueRange, indexRange: (int, int) = None, method=(lambd
     lvalue, rvalue = valueRange
     if indexRange is None:
         indexRange = (0, len(array))
-    l = indexFindFirstNotSmallerThan(array, lvalue, indexRange, method)
-    r = indexFindFirstBiggerThan(array, rvalue, indexRange, method)
+    l = indexFirstNotSmallerThan(array, lvalue, indexRange, method)
+    r = indexFirstBiggerThan(array, rvalue, indexRange, method)
     if l < r:
         return range(l, r)
     else:
         return range(l, l)
 
+@njit(cache=True)
+def indexBetween_njit(array, valueRange, indexRange: (int, int) = None, method=defaultMethod_njit) -> (int, int):
+    lvalue, rvalue = valueRange
+    if indexRange is None:
+        indexRange = (0, len(array))
+    l = indexFirstNotSmallerThan_njit(array, lvalue, indexRange, method)
+    r = indexFirstBiggerThan_njit(array, rvalue, indexRange, method)
+    if l < r:
+        return (l, r)
+    else:
+        return (l, l)
 
-def valueBetween(array, valueRange, indexRange: (int, int) = None, method=(lambda array, index: array[index])):
+
+def valueBetween(array, valueRange, indexRange: (int, int) = None, method=defaultMethod):
     """
     get list from sorted array for value in (l,r)
     make list = [item for item in array if l<item and item<r]
@@ -96,7 +147,8 @@ def valueBetween(array, valueRange, indexRange: (int, int) = None, method=(lambd
     return [method(array, x) for x in indexBetween(array, valueRange, indexRange, method)]  # [ll:t-1]->[ll:t)
 
 
-def findPeak(mz: np.ndarray, intensity: np.ndarray, indexRange:range) -> range:
+@njit(cache=True)
+def findPeak(mz: np.ndarray, intensity: np.ndarray, indexRange: (int, int)) -> (int, int):
     '''
     intensity[`stop`] must less than 1e-6, or `stop` == len(mz)
     find the first peak after begin
@@ -105,28 +157,28 @@ def findPeak(mz: np.ndarray, intensity: np.ndarray, indexRange:range) -> range:
     return the peak with begin,xxx,xxx,xxx,end
     if don't find peak, return range(`stop`,`stop`)
     '''
-    l = indexRange.start
-    stop = indexRange.stop
+    start, stop = indexRange
     if stop > len(mz):
         stop = len(mz)
     delta = 1e-6
+    l = start
     while l < stop and intensity[l] > delta:
         l += 1
     while l < stop and intensity[l] < delta:
         l += 1
     if l == stop:
-        return range(stop, stop)
+        return (stop,stop)
     r = l
     l -= 1
     while r < stop and intensity[r] > delta:
         r += 1
     if intensity[r] > delta:
-        return range(stop, stop)
-    return range(l, r+1)
+        return (stop,stop)
+    return (l, r + 1)
 
 
 def processWithTime(func, fileTime, args, signalQueue):
-    result=None
+    result = None
     try:
         result = func(fileTime, *args)
     except Exception as e:
@@ -140,7 +192,7 @@ def processWithTime(func, fileTime, args, signalQueue):
 
 
 def processWithoutPath(func, args, signalQueue):
-    result=None
+    result = None
     try:
         result = func(*args)
     except Exception as e:
@@ -210,15 +262,16 @@ def multiProcess(func, argsList: List[Tuple], fileTime, cpu=None, sendStatusFunc
                     sendStatusFunc(filetime, msg, length, length)
                     return results.get()
 
+
 class iterator(object):
-    def __init__(self,l: Iterable):
+    def __init__(self, l: Iterable):
         self._iter = iter(l)
         try:
             self._value = next(self._iter)
-            self._end=False
+            self._end = False
         except StopIteration:
             self._value = None
-            self._end=True
+            self._end = True
         self._index = 0
 
     @property
@@ -230,7 +283,7 @@ class iterator(object):
         return self._value if not self.end else None
 
     @property
-    def end(self)->bool:
+    def end(self) -> bool:
         return self._end
 
     def next(self):
@@ -238,9 +291,8 @@ class iterator(object):
             try:
                 self._value = next(self._iter)
             except StopIteration:
-                self._end=True
+                self._end = True
             self._index += 1
-        
 
 
 class NormalDistributionFunc(OribitoolAbstract.FitPeakFunc):
@@ -257,8 +309,9 @@ class NormalDistributionFunc(OribitoolAbstract.FitPeakFunc):
         self.peakResFit = 1/(2*math.sqrt(2*math.log(2))*self.peakSigmaFit)
 
     @staticmethod
+    @njit(cache=True)
     def _func(mz: np.ndarray, a, mu, sigma):
-        return a / (math.sqrt(2 * math.pi) * sigma) * np.exp(-0.5 * ((mz - mu) / sigma) ** 2)
+        return a / (np.sqrt(2 * np.pi) * sigma) * np.exp(-0.5 * ((mz - mu) / sigma) ** 2)
 
     @staticmethod
     def getParam(peak: OribitoolAbstract.Peak):
@@ -304,65 +357,71 @@ class NormalDistributionFunc(OribitoolAbstract.FitPeakFunc):
     def getArea(self, fittedPeak: OribitoolAbstract.FittedPeak):
         return fittedPeak.fittedParam[0]
 
-    def splitPeakAsParams(self, peak: OribitoolAbstract.Peak, splitNum=None) -> List[tuple]:
+    def splitPeakAsParams(self, peak: OribitoolAbstract.Peak, splitNum=None, force=False) -> List[tuple]:
         super().splitPeakAsParams(peak, splitNum)
         peakAt = peak.peakAt()
 
-        peaksNum = peak.peaksNum if splitNum is None else splitNum
+        if splitNum is None:
+            splitNum = peak.peaksNum
 
         u: np.ndarray = np.stack(
             (peak.mz[1:-1][peakAt], peak.intensity[1:-1][peakAt]), axis=1)
-        uu = [(u[-1, 0] + i + 1, 0) for i in range(peaksNum - u.shape[0])]
+        uu = [(u[-1, 0] + i + 1, 0) for i in range(splitNum - u.shape[0])]
         if len(uu) > 0:
             u = np.concatenate((u, uu), axis=0)
 
         index = np.argsort(u[:, 1])
         u = u[np.flip(index)]
 
-        param = np.flip(u,axis=1).reshape(-1)
+        param = np.flip(u, axis=1).reshape(-1)
 
         mz = peak.mz
         intensity = peak.intensity
-        mzMin = mz[0] # mz.min()
+        mzMin = mz[0]  # mz.min()
         mzMax = mz[-1]  # mz.max()
-        for num in range(peaksNum, 0, -1):
+        for num in range(splitNum, 0, -1):
             try:
                 def funcFit(mz: np.ndarray, *args):
                     return sum([self._funcFit(mz, args[2 * i], args[2 * i + 1]) for i in range(num)])
                 fittedParam = scipy.optimize.curve_fit(
                     funcFit, mz, intensity, p0=param, maxfev=self.maxFitNum[num])[0]
-                params = [(fittedParam[2*i], fittedParam[2*i+1]) for i in range(num)]
+                params = [(fittedParam[2*i], fittedParam[2*i+1])
+                          for i in range(num)]
                 for p in params:
                     if p[1] < mzMin or p[1] > mzMax:
                         raise Exception()
                 return params
             except:
-                if splitNum is not None:
+                if force:
                     raise ValueError(
                         "can't fit use peaks num as "+str(splitNum))
-            param=param[:-2]
-        raise ValueError("can't fit peak  at (%.5f,%.5f)" % (mz[0],mz[-1]))
+            param = param[:-2]
+        raise ValueError("can't fit peak  at (%.5f,%.5f)" % (mz[0], mz[-1]))
 
-
-def linePeakCrossed(line: ((float, float), (float, float)), peak: OribitoolAbstract.Peak):
-    p1, p2 = np.array(line)
+@njit(cache=True)
+def linePeakCrossed(line: ((float, float), (float, float)), peak: Tuple[np.ndarray,np.ndarray]):
+    line = np.array(line)
+    p1 = line[0]
+    p2 = line[1]
     if p1[0] > p2[0]:
         t = p1
         p1 = p2
         p2 = t
-    mz = peak.mz
-    intensity = peak.intensity
-    r: range = indexBetween(mz, (p1[0], p2[0]))
-    start = (r.start - 1) if r.start > 0 else 0
-    stop = r.stop if r.stop < len(mz) else len(mz) - 1
+    mz = peak[0]
+    intensity = peak[1]
+    start, stop = indexBetween_njit(mz,(p1[0],p2[0]))
+    start = (start - 1) if start > 0 else 0
+    if stop >= len(mz):
+        stop = len(mz) - 1
     for index in range(start, stop):
-        tmp = np.stack([peak.mz[index:index + 2],
-                        peak.intensity[index:index + 2]], axis=1)
-        p3, p4 = tmp
+        tmp = np.stack((mz[index:index + 2],
+                        intensity[index:index + 2]), axis=1)
+        p3 = tmp[0]
+        p4 = tmp[1]
         l = p2 - p1
-        c1 = (np.cross(l, p3 - p1) > 0) ^ (np.cross(l, p4 - p1) > 0)
+        c1 = (numpy_extensions.cross2d(l, p3 - p1) > 0) ^ (numpy_extensions.cross2d(l, p4 - p1) > 0)
         l = p4 - p3
-        c2 = (np.cross(l, p1 - p3) > 0) ^ (np.cross(l, p2 - p3) > 0)
+        c2 = (numpy_extensions.cross2d(l, p1 - p3) > 0) ^ (numpy_extensions.cross2d(l, p2 - p3) > 0)
         if c1 and c2:
             return True
     return False
@@ -391,14 +450,36 @@ class PolynomialRegressionFunc(OribitoolAbstract.MassCalibrationFunc):
         pass
 
 
-
 def obj2File(path: str, obj):
     # with open(path, 'wb') as writer:
     with gzip.open(path, 'wb', compresslevel=2) as writer:
-        pickle.dump(obj,writer)
+        pickle.dump(obj, writer)
 
 
 def file2Obj(path: str):
     # with open(path, 'rb') as reader:
     with gzip.open(path, 'rb') as reader:
         return pickle.load(reader)
+
+
+def standardPeakFittedPeakSimpleMatch(speaks: List[OribitoolAbstract.StandardPeak], fpeaks: List[OribitoolAbstract.FittedPeak], ppm, srange: range = None, frange: range = None) -> List[Tuple[OribitoolAbstract.FittedPeak, OribitoolAbstract.StandardPeak]]:
+    if srange is not None:
+        speaks = speaks[srange.start:srange.stop:srange.step]
+    if frange is not None:
+        fpeaks = fpeaks[frange.start:frange.stop:frange.step]
+    lf = 0
+    rf = len(speaks)
+    ret=[]
+    for speak in speaks:
+        lf = indexNearest(fpeaks, speak.peakPosition, (lf, rf), (lambda fpeaks, index: fpeaks[index].peakPosition))
+        if lf == rf:
+            continue
+        fpeak = fpeaks[lf]
+        if abs(fpeak.peakPosition / speak.peakPosition - 1) < ppm:
+            ret.append((fpeak,speak))
+    return ret
+
+        
+
+def standardPeakFittedPeakHungaryMatch(speaks: List[OribitoolAbstract.StandardPeak], fpeaks: List[OribitoolAbstract.FittedPeak], ppm, srange: range = None, frange: range = None):
+    pass

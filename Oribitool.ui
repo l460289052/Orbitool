@@ -62,6 +62,12 @@
          </item>
          <item>
           <widget class="QPushButton" name="pushButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Import Option</string>
            </property>
@@ -93,6 +99,12 @@
          </item>
          <item>
           <widget class="QPushButton" name="pushButton_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Export Option</string>
            </property>
@@ -112,7 +124,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>5</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideNone</enum>
@@ -154,6 +166,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="addFolderPushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Open/Add folder</string>
                </property>
@@ -161,6 +179,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="addFilePushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Add file</string>
                </property>
@@ -168,6 +192,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="removeFilePushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Remove selected
 file from list</string>
@@ -178,6 +208,9 @@ file from list</string>
               <spacer name="verticalSpacer">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Preferred</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
@@ -254,6 +287,12 @@ file from list</string>
                </item>
                <item row="1" column="1">
                 <widget class="QSpinBox" name="averageNSpectraSpinBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimum">
                   <number>1</number>
                  </property>
@@ -277,6 +316,12 @@ file from list</string>
                </item>
                <item row="2" column="1">
                 <widget class="QDoubleSpinBox" name="averageNMinutesDoubleSpinBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimum">
                   <double>0.010000000000000</double>
                  </property>
@@ -296,7 +341,14 @@ file from list</string>
                 </widget>
                </item>
                <item row="3" column="1">
-                <widget class="QDateTimeEdit" name="averageStartDateTimeEdit"/>
+                <widget class="QDateTimeEdit" name="averageStartDateTimeEdit">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                </widget>
                </item>
                <item row="4" column="0">
                 <widget class="QLabel" name="label_8">
@@ -306,12 +358,25 @@ file from list</string>
                 </widget>
                </item>
                <item row="4" column="1">
-                <widget class="QDateTimeEdit" name="averageEndDateTimeEdit"/>
+                <widget class="QDateTimeEdit" name="averageEndDateTimeEdit">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>
              <item>
               <widget class="QPushButton" name="showFilePushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Show selected file without averaging</string>
                </property>
@@ -319,6 +384,12 @@ file from list</string>
              </item>
              <item>
               <widget class="QPushButton" name="averageSelectedPushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Average selected file</string>
                </property>
@@ -326,6 +397,12 @@ file from list</string>
              </item>
              <item>
               <widget class="QPushButton" name="averageAllPushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Average all</string>
                </property>
@@ -577,7 +654,7 @@ file from list</string>
              <item>
               <widget class="QLabel" name="label_11">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
@@ -605,6 +682,12 @@ file from list</string>
              </item>
              <item>
               <widget class="QPushButton" name="peak1CancelPushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Cancel remove</string>
                </property>
@@ -612,6 +695,12 @@ file from list</string>
              </item>
              <item>
               <widget class="QPushButton" name="peak1FinishPushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Finish pre-fit</string>
                </property>
@@ -813,6 +902,12 @@ file from list</string>
              </item>
              <item>
               <widget class="QPushButton" name="calibratePushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Calc calibrate info</string>
                </property>
@@ -820,6 +915,12 @@ file from list</string>
              </item>
              <item>
               <widget class="QPushButton" name="calibrationFinishPushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Calibrate ALL SPECTRA use info</string>
                </property>
@@ -853,6 +954,12 @@ file from list</string>
              </item>
              <item>
               <widget class="QPushButton" name="calibrationShowedSelectedPushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Show selected file's info</string>
                </property>
@@ -860,6 +967,12 @@ file from list</string>
              </item>
              <item>
               <widget class="QPushButton" name="calibrationShowAllPushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Show calibration info across files</string>
                </property>
@@ -901,14 +1014,14 @@ file from list</string>
                 <item>
                  <widget class="QTableWidget" name="spectra2TableWidget">
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                   <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>200</width>
+                    <width>16777215</width>
                     <height>16777215</height>
                    </size>
                   </property>
@@ -976,101 +1089,6 @@ file from list</string>
                </layout>
               </widget>
              </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_2">
-               <property name="title">
-                <string>Mass list</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_17">
-                <item>
-                 <widget class="QTableWidget" name="spectra2MassListTableWidget">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>200</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                  <property name="editTriggers">
-                   <set>QAbstractItemView::NoEditTriggers</set>
-                  </property>
-                  <property name="verticalScrollMode">
-                   <enum>QAbstractItemView::ScrollPerPixel</enum>
-                  </property>
-                  <property name="horizontalScrollMode">
-                   <enum>QAbstractItemView::ScrollPerPixel</enum>
-                  </property>
-                  <attribute name="horizontalHeaderStretchLastSection">
-                   <bool>true</bool>
-                  </attribute>
-                  <column>
-                   <property name="text">
-                    <string>mz</string>
-                   </property>
-                  </column>
-                  <column>
-                   <property name="text">
-                    <string>formula</string>
-                   </property>
-                  </column>
-                  <column>
-                   <property name="text">
-                    <string>subpeak</string>
-                   </property>
-                  </column>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="spectra2MassListDeletePushButton">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="text">
-                   <string>Delete selected</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_13">
-                  <item>
-                   <widget class="QPushButton" name="spectra2MassListImportPushButton">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string>Import</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="spectra2MassListExportPushButton">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string>Export</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-             </item>
             </layout>
            </item>
            <item>
@@ -1095,7 +1113,7 @@ file from list</string>
              <item>
               <widget class="QTableWidget" name="spectrum2PeakListTableWidget">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
@@ -1141,6 +1159,12 @@ file from list</string>
              </item>
              <item>
               <widget class="QPushButton" name="spectrum2PeaksAddPushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Add selected peak(s) to mass list</string>
                </property>
@@ -1148,6 +1172,12 @@ file from list</string>
              </item>
              <item>
               <widget class="QPushButton" name="spectrum2PeaksAddAllPushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Add all peaks to mass list</string>
                </property>
@@ -1173,6 +1203,9 @@ file from list</string>
              <layout class="QVBoxLayout" name="verticalLayout_13">
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_10">
+                <property name="sizeConstraint">
+                 <enum>QLayout::SetDefaultConstraint</enum>
+                </property>
                 <item>
                  <widget class="QLabel" name="label_18">
                   <property name="text">
@@ -1201,9 +1234,9 @@ file from list</string>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="spectrum2PeakDiffCheckBox">
+                 <widget class="QCheckBox" name="spectrum2PeakResidualCheckBox">
                   <property name="text">
-                   <string>diff</string>
+                   <string>residual</string>
                   </property>
                   <property name="checked">
                    <bool>true</bool>
@@ -1222,7 +1255,7 @@ file from list</string>
               <item>
                <widget class="QWidget" name="spectrum2PeakWidget" native="true">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -1242,7 +1275,7 @@ file from list</string>
                   <item>
                    <widget class="QTableWidget" name="spectrum2PeakTableWidget">
                     <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
@@ -1288,6 +1321,12 @@ file from list</string>
                     </item>
                     <item>
                      <widget class="QSpinBox" name="spectrum2PeakNumSpinBox">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="minimum">
                        <number>1</number>
                       </property>
@@ -1297,6 +1336,12 @@ file from list</string>
                   </item>
                   <item>
                    <widget class="QPushButton" name="spectrum2PeakRefitPushButton">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="text">
                      <string>Re-fit</string>
                     </property>
@@ -1316,7 +1361,7 @@ file from list</string>
                   <item>
                    <widget class="QTableWidget" name="spectrum2PeakPropertyTableWidget">
                     <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
@@ -1328,7 +1373,7 @@ file from list</string>
                      <enum>QAbstractItemView::ScrollPerPixel</enum>
                     </property>
                     <attribute name="horizontalHeaderDefaultSectionSize">
-                     <number>60</number>
+                     <number>70</number>
                     </attribute>
                     <attribute name="horizontalHeaderStretchLastSection">
                      <bool>true</bool>
@@ -1367,6 +1412,12 @@ file from list</string>
                     </item>
                     <item>
                      <widget class="QPushButton" name="spectrum2PeakSavePushButton">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="text">
                        <string>Save</string>
                       </property>
@@ -1392,40 +1443,269 @@ file from list</string>
           </attribute>
           <layout class="QHBoxLayout" name="horizontalLayout_7">
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout_15">
+            <layout class="QVBoxLayout" name="verticalLayout_17">
              <item>
-              <widget class="QListWidget" name="listWidget_5">
+              <widget class="QGroupBox" name="groupBox_2">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="title">
+                <string>Show time series at</string>
+               </property>
+               <layout class="QFormLayout" name="formLayout_2">
+                <item row="2" column="0">
+                 <widget class="QRadioButton" name="radioButton">
+                  <property name="text">
+                   <string>mz</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="0">
+                 <widget class="QRadioButton" name="radioButton_2">
+                  <property name="text">
+                   <string>formula</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="7" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximum">
+                   <double>999.990000000000009</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximum">
+                   <double>999.990000000000009</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="0">
+                 <widget class="QRadioButton" name="radioButton_3">
+                  <property name="text">
+                   <string>mz range</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximum">
+                   <double>999.990000000000009</double>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="1">
+                 <widget class="QLineEdit" name="lineEdit_2">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item row="8" column="0" colspan="2">
+                 <widget class="QRadioButton" name="radioButton_4">
+                  <property name="text">
+                   <string>mass list selected peak(s)</string>
+                  </property>
+                  <property name="checked">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="9" column="0" colspan="2">
+                 <widget class="QRadioButton" name="radioButton_5">
+                  <property name="text">
+                   <string>mass list all peaks</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="formLayout_4">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_22">
+                 <property name="text">
+                  <string>ppm</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimum">
+                  <double>0.010000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>9.990000000000000</double>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_3">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Show time series</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QTableWidget" name="tableWidget">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>mz min</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>mz max</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>hint</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_4">
+               <property name="text">
+                <string>Remove selected</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_19">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
-                <string>PushButton</string>
+                <string>Export</string>
                </property>
               </widget>
              </item>
             </layout>
            </item>
            <item>
-            <widget class="QWidget" name="widget_5" native="true"/>
+            <layout class="QVBoxLayout" name="verticalLayout_15">
+             <item>
+              <widget class="QCheckBox" name="checkBox">
+               <property name="text">
+                <string>use retention time</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QTableWidget" name="tableWidget_2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>time</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>intensity</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QWidget" name="widget_5" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="formulaGroupBox">
+        <widget class="QToolBox" name="toolBox">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>230</width>
+           <height>0</height>
+          </size>
          </property>
          <property name="maximumSize">
           <size>
@@ -1433,249 +1713,411 @@ file from list</string>
            <height>16777215</height>
           </size>
          </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
+         <property name="currentIndex">
+          <number>0</number>
          </property>
-         <property name="title">
-          <string>Formula</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_18">
-          <item>
-           <widget class="QScrollArea" name="scrollArea_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="widgetResizable">
-             <bool>true</bool>
-            </property>
-            <widget class="QWidget" name="scrollAreaWidgetContents_2">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>208</width>
-               <height>473</height>
-              </rect>
+         <widget class="QWidget" name="page_3">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>230</width>
+            <height>563</height>
+           </rect>
+          </property>
+          <attribute name="label">
+           <string>Formula</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_20">
+           <item>
+            <widget class="QScrollArea" name="scrollArea_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
-             <layout class="QFormLayout" name="formLayout_3">
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_14">
-                <property name="text">
-                 <string>Charge</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QRadioButton" name="formulaPlusRadioButton">
-                <property name="text">
-                 <string>Plus(+1)</string>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QRadioButton" name="formulaMinusRadioButton">
-                <property name="text">
-                 <string>Minus(-1)</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_5">
-                <property name="text">
-                 <string>ppm</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QDoubleSpinBox" name="formulaPpmDoubleSpinBox">
-                <property name="minimum">
-                 <double>0.010000000000000</double>
-                </property>
-                <property name="value">
-                 <double>1.000000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0" colspan="2">
-               <widget class="QTableWidget" name="formulaTableWidget">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="verticalScrollMode">
-                 <enum>QAbstractItemView::ScrollPerPixel</enum>
-                </property>
-                <attribute name="horizontalHeaderDefaultSectionSize">
-                 <number>50</number>
-                </attribute>
-                <attribute name="horizontalHeaderStretchLastSection">
-                 <bool>true</bool>
-                </attribute>
-                <column>
+             <property name="widgetResizable">
+              <bool>true</bool>
+             </property>
+             <widget class="QWidget" name="scrollAreaWidgetContents_2">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>219</width>
+                <height>526</height>
+               </rect>
+              </property>
+              <layout class="QFormLayout" name="formLayout_3">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_14">
                  <property name="text">
-                  <string>Min</string>
+                  <string>Charge</string>
                  </property>
-                </column>
-                <column>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QRadioButton" name="formulaPlusRadioButton">
                  <property name="text">
-                  <string>Max</string>
+                  <string>Plus(+1)</string>
                  </property>
-                </column>
-               </widget>
-              </item>
-              <item row="5" column="0">
-               <widget class="QLabel" name="label_6">
-                <property name="text">
-                 <string>Nitrogen rule</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="1">
-               <widget class="QCheckBox" name="formulaNitrogenRuleCheckBox">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="0" colspan="2">
-               <widget class="QLabel" name="label_2">
-                <property name="text">
-                 <string>O ≤ cC + nN + sS</string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="0" colspan="2">
-               <layout class="QGridLayout" name="gridLayout">
-                <item row="0" column="1">
-                 <widget class="QLabel" name="label_16">
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QRadioButton" name="formulaMinusRadioButton">
+                 <property name="text">
+                  <string>Minus(-1)</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_5">
+                 <property name="text">
+                  <string>ppm</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QDoubleSpinBox" name="formulaPpmDoubleSpinBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimum">
+                  <double>0.010000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>1.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0" colspan="2">
+                <widget class="QTableWidget" name="formulaTableWidget">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>100</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>200</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="verticalScrollMode">
+                  <enum>QAbstractItemView::ScrollPerPixel</enum>
+                 </property>
+                 <attribute name="horizontalHeaderDefaultSectionSize">
+                  <number>50</number>
+                 </attribute>
+                 <attribute name="horizontalHeaderStretchLastSection">
+                  <bool>true</bool>
+                 </attribute>
+                 <column>
                   <property name="text">
-                   <string>n</string>
+                   <string>Min</string>
                   </property>
-                 </widget>
-                </item>
-                <item row="0" column="2">
-                 <widget class="QLabel" name="label_15">
+                 </column>
+                 <column>
                   <property name="text">
-                   <string>s</string>
+                   <string>Max</string>
                   </property>
-                 </widget>
-                </item>
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label_17">
-                  <property name="text">
-                   <string>c</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QSpinBox" name="formulaOCRatioSpinBox">
-                  <property name="value">
-                   <number>3</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QSpinBox" name="formulaONRatioSpinBox">
-                  <property name="value">
-                   <number>3</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="2">
-                 <widget class="QSpinBox" name="formulaOSRatioSpinBox">
-                  <property name="value">
-                   <number>4</number>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="8" column="0" colspan="2">
-               <widget class="QPushButton" name="formulaApplyPushButton">
-                <property name="text">
-                 <string>Apply</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+                 </column>
+                </widget>
+               </item>
+               <item row="5" column="0">
+                <widget class="QLabel" name="label_6">
+                 <property name="text">
+                  <string>Nitrogen rule</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="1">
+                <widget class="QCheckBox" name="formulaNitrogenRuleCheckBox">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="0" colspan="2">
+                <widget class="QLabel" name="label_2">
+                 <property name="text">
+                  <string>O ≤ cC + nN + sS</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="0" colspan="2">
+                <layout class="QGridLayout" name="gridLayout">
+                 <item row="0" column="1">
+                  <widget class="QLabel" name="label_16">
+                   <property name="text">
+                    <string>n</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QLabel" name="label_15">
+                   <property name="text">
+                    <string>s</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_17">
+                   <property name="text">
+                    <string>c</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QSpinBox" name="formulaOCRatioSpinBox">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="value">
+                    <number>3</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QSpinBox" name="formulaONRatioSpinBox">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="value">
+                    <number>3</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QSpinBox" name="formulaOSRatioSpinBox">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="value">
+                    <number>4</number>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="8" column="0" colspan="2">
+                <widget class="QPushButton" name="formulaApplyPushButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Apply</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="9" column="0" colspan="2">
+                <widget class="QGroupBox" name="groupBox_3">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="title">
+                  <string>Caculator</string>
+                 </property>
+                 <layout class="QFormLayout" name="formLayout_5">
+                  <item row="0" column="0" colspan="2">
+                   <widget class="QLabel" name="label_19">
+                    <property name="font">
+                     <font>
+                      <pointsize>7</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>input formula or mass</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QPushButton" name="formulaCalcPushButton">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>40</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Calc</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="label_12">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Result:</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QLineEdit" name="formulaResultLineEdit">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QLineEdit" name="formulaInputLineEdit"/>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
             </widget>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupBox_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="title">
-             <string>Caculator</string>
-            </property>
-            <layout class="QFormLayout" name="formLayout_5">
-             <item row="0" column="0" colspan="2">
-              <widget class="QLabel" name="label_19">
-               <property name="font">
-                <font>
-                 <pointsize>7</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>input formula or mass</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QPushButton" name="formulaCalcPushButton">
-               <property name="text">
-                <string>Calc</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_12">
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_4">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>230</width>
+            <height>563</height>
+           </rect>
+          </property>
+          <attribute name="label">
+           <string>Mass list</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_18">
+           <item>
+            <widget class="QTableWidget" name="massListTableWidget">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>200</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+             <property name="verticalScrollMode">
+              <enum>QAbstractItemView::ScrollPerPixel</enum>
+             </property>
+             <property name="horizontalScrollMode">
+              <enum>QAbstractItemView::ScrollPerPixel</enum>
+             </property>
+             <attribute name="horizontalHeaderStretchLastSection">
+              <bool>true</bool>
+             </attribute>
+             <column>
+              <property name="text">
+               <string>mz</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>formula</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>subpeak</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="massListRemovePushButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Remove selected</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_13">
+             <item>
+              <widget class="QPushButton" name="massListImportPushButton">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Result:</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                <string>Import</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
-              <widget class="QLineEdit" name="formulaResultLineEdit">
-               <property name="enabled">
-                <bool>true</bool>
+             <item>
+              <widget class="QPushButton" name="massListExportPushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Export</string>
                </property>
               </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="formulaInputLineEdit"/>
              </item>
             </layout>
-           </widget>
-          </item>
-         </layout>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
       </layout>

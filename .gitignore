@@ -1,4 +1,3 @@
-
 __pycache__
 .vscode/.*
 *.dll
@@ -6,6 +5,8 @@ __pycache__
 ref
 ref/*
 ref/*.*
-test*.py
+test*.*
 error.txt
 *.wks
+*.Oribit*
+

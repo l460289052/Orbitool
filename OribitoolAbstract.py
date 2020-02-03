@@ -6,6 +6,22 @@ from typing import List, Tuple, Union
 
 import numpy as np
 
+class Formula(abc.ABC):
+    @abc.abstractmethod
+    def __init__(self, formula: str = None):
+        pass
+
+    @abc.abstractmethod
+    def mass(self) -> float:
+        pass
+
+    @abc.abstractmethod
+    def __eq__(self, formula):
+        pass
+
+    @abc.abstractmethod
+    def __hash__(self):
+        pass
 
 class File(abc.ABC):
     @abc.abstractmethod
@@ -184,7 +200,7 @@ class FitPeakFunc(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def splitPeakAsParams(self, peak: Peak, num=None):
+    def splitPeakAsParams(self, peak: Peak, num=None, force=False):
         if isinstance(peak, FittedPeak):
             raise ValueError('please use original peak')
         pass
@@ -287,7 +303,7 @@ class StandardPeak(abc.ABC):
         self._peakPosition = peakPosition
 
     @property
-    def formulaList(self):
+    def formulaList(self) -> List[Formula]:
         return self._formulaList
 
     @formulaList.setter
@@ -338,7 +354,9 @@ class MassList(abc.ABC):
     def popPeaks(self, indexes: Union[int, List[int]]):
         if isinstance(indexes, int):
             indexes = [indexes]
-        indexes.sort(reverse=True)
+        else:
+            indexes=indexes.copy()
+            indexes.sort(reverse=True)
         poped = []
         for index in indexes:
             poped.append(indexes.pop(index))
