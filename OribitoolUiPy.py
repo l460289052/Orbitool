@@ -139,6 +139,58 @@ def timer(func):
         return func(self, *args)
     return decorator
 
+def openfile(caption, filter = None, multi=False, folder=False):
+    if isinstance(caption, types.FunctionType):
+        raise TypeError()
+    def f(func):
+        if multi:
+            if folder:
+                raise ValueError()
+            else:
+                @wraps(func)
+                def forfiles(self):
+                    files, typ = QtWidgets.QFileDialog.getOpenFileNames(
+                        caption=caption, filter=filter)
+                    if len(files) > 0:
+                        return func(self, files)
+                return forfiles
+                        
+        else:
+            if folder:
+                @wraps(func)
+                def forfolder(self):
+                    folder = QtWidgets.QFileDialog.getExistingDirectory(
+                        caption=caption)
+                    if os.path.isdir(folder):
+                        return func(self, folder)
+                return forfolder
+            else:
+                @wraps(func)
+                def forfile(self):
+                    file, typ = QtWidgets.QFileDialog.getOpenFileName(
+                        caption=caption,filter=filter)
+                    if os.path.isfile(file):
+                        return func(self, file)
+                return forfile
+    return f
+
+def savefile(caption, filter):
+    if isinstance(caption, types.FunctionType):
+        raise TypeError()
+    def f(func):
+        @wraps(func)
+        def decorator(self):
+            path, typ = QtWidgets.QFileDialog.getSaveFileName(
+                caption=caption,
+                initialFilter=filter,
+                filter=filter,
+                options=QtWidgets.QFileDialog.DontConfirmOverwrite)
+            return func(self, path)
+        return decorator
+    return f
+
+                
+
 
 class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     '''
@@ -341,12 +393,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @threadBegin
     @withoutArgs
-    def qWorkspaceImport(self):
-        file, typ = QtWidgets.QFileDialog.getOpenFileName(
-            caption="Select Work file",
-            directory=".",
-            filter="Work file(*.OribitWork)")
-
+    @openfile(caption="Select Work file",filter="Work file(*.OribitWork)")
+    def qWorkspaceImport(self, file):
         def process(filepath, sendStatus):
             return OribitoolFunc.file2Obj(filepath)
 
@@ -390,15 +438,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @threadBegin
     @withoutArgs
-    def qWorkspaceExport(self):
-        path, typ = QtWidgets.QFileDialog.getSaveFileName(
-            caption="Save as",
-            directory=".",
-            initialFilter="Work file(*.OribitWork)",
-            filter="Work file(*.OribitWork)",
-            options=QtWidgets.QFileDialog.DontConfirmOverwrite)
-
-        fileList = self.fileList
+    @savefile("Save as", "Work file(*.OribitWork)")
+    def qWorkspaceExport(self, path):
         workspace = self.workspace
         fileTimePaths = []
         for (time, file) in fileList.timedict.items():
@@ -512,10 +553,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    def qAddFolder(self):
-
-        folder = QtWidgets.QFileDialog.getExistingDirectory(
-            caption="Select one folder")
+    @openfile("Select one folder", folder=True)
+    def qAddFolder(self, folder):
         table = self.fileTableWidget
         fileTimes = self.fileList.addFileFromFolder(
             folder, self.recurrenceCheckBox.isChecked(), '.raw')
@@ -528,14 +567,10 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    def qAddFile(self):
-        files = QtWidgets.QFileDialog.getOpenFileNames(
-            caption="Select one or more files",
-            directory='.',
-            filter="RAW files(*.RAW)")
-
+    @openfile("Select one or more files","RAW files(*.RAW)")
+    def qAddFile(self, files):
         addedFiles = []
-        for path in files[0]:
+        for path in files:
             if self.fileList.addFile(path):
                 addedFiles.append(path)
 
@@ -1520,12 +1555,9 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    def qMassListImport(self):
+    @openfile("Select Mass list","Mass list file(*.OribitMassList)")
+    def qMassListImport(self,file):
         workspace = self.workspace
-        file, typ = QtWidgets.QFileDialog.getOpenFileName(
-            caption="Select Mass list",
-            directory=".",
-            filter="Mass list file(*.OribitMassList)")
         massList: OribitoolClass = OribitoolFunc.file2Obj(file)
         if not isinstance(massList, OribitoolClass.MassList):
             raise ValueError('wrong file')
@@ -1534,11 +1566,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    def qMassListExport(self):
-        path, typ = QtWidgets.QFileDialog.getSaveFileName(
-            caption="Save as",
-            directory=".",
-            initialFilter="Mass list file(*.OribitMassList)",
-            filter="Mass list file(*.OribitMassList)",
-            options=QtWidgets.QFileDialog.DontConfirmOverwrite)
+    @savefile("Save as","Mass list file(*.OribitMassList)")
+    def qMassListExport(self, path):
         OribitoolFunc.obj2File(path, self.workspace.massList)
