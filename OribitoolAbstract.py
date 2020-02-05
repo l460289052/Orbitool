@@ -98,7 +98,7 @@ class SpectrumInfo(abc.ABC):
 
 class AveragedSpectrum(Spectrum):
     @abc.abstractmethod
-    def __init__(self, file: File, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None):
+    def __init__(self, file: File, ppm, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None):
         '''
         numRange include left spectrum, exclude right spectrum
         '''
@@ -119,7 +119,7 @@ def nullSendStatus(fileTime, msg, index, length):
 
 class AveragedSpectra(abc.ABC):
     @abc.abstractmethod
-    def __init__(self, fileList, time: timedelta = None, N: int = None, sendStatus=nullSendStatus):
+    def __init__(self, fileList, ppm, time: timedelta = None, N: int = None, sendStatus=nullSendStatus):
         pass
 
 
@@ -227,6 +227,26 @@ class FittedPeak(Peak):
     def area(self):
         return self._area
 
+class PeakFitFunc(abc.ABC):
+    @abc.abstractmethod
+    def __init__(self, spectrum:Spectrum, num:int):
+        pass
+
+    @abc.abstractmethod
+    def rm(self, index: Union[int, List[int]]):
+        pass
+
+    @abc.abstractmethod
+    def cancel(self) -> List[Tuple[np.ndarray, np.ndarray]]:
+        pass
+
+    @abc.abstractmethod
+    def fitPeak(self, peak: Peak, num: int = None, force: bool = False) -> List[FittedPeak]:
+        pass
+
+    @abc.abstractmethod
+    def fitPeak(self, peaks: List[Peak], sendStatus=nullSendStatus):
+        pass
 
 class MassCalibrationFunc(abc.ABC):
     @abc.abstractmethod
@@ -363,6 +383,10 @@ class MassList(abc.ABC):
         poped.reverse()
         return poped
 
+    @abc.abstractmethod
+    def fit(self, spectrum: CalibratedSpectrum, peakFitFunc: PeakFitFunc, ppm, sendStatus=nullSendStatus):
+        pass
+
     def __getitem__(self, index: Union[int, slice, range]) -> Union[StandardPeak, List[StandardPeak]]:
         if isinstance(index, (int, slice)):
             return self._peaks[index]
@@ -374,3 +398,23 @@ class MassList(abc.ABC):
 
     def __len__(self):
         return len(self._peaks)
+
+class TimeSeries(abc.ABC):
+    @abc.abstractmethod
+    def __init__(self, mz:float, ppm:float, spectra: List[CalibratedSpectrum], peakFitFunc: PeakFitFunc, tag:str, sendStatus: nullSendStatus):
+        pass
+
+    @property
+    def time(self) -> np.ndarray:
+        '''
+        np.datetime64
+        '''
+        return self._time
+
+    @property
+    def intensity(self)->np.ndarray:
+        return self._intensity
+
+    @property
+    def tag(self):
+        return self._tag

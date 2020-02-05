@@ -49,70 +49,6 @@
         <number>0</number>
        </property>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Setting</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Import Option</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QScrollArea" name="scrollArea">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="widgetResizable">
-            <bool>true</bool>
-           </property>
-           <widget class="QWidget" name="scrollAreaWidgetContents">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>84</width>
-              <height>535</height>
-             </rect>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_2"/>
-           </widget>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Export Option</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
         <widget class="QTabWidget" name="tabWidget">
          <property name="enabled">
           <bool>true</bool>
@@ -124,7 +60,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>4</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideNone</enum>
@@ -364,6 +300,39 @@ file from list</string>
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="0">
+                <widget class="QLabel" name="averagePpmLabel">
+                 <property name="text">
+                  <string>ppm</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="1">
+                <widget class="QDoubleSpinBox" name="averagePpmDoubleSpinBox">
+                 <property name="minimum">
+                  <double>0.010000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>9.990000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>1.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="0" colspan="2">
+                <widget class="Line" name="line">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
                  </property>
                 </widget>
                </item>
@@ -607,16 +576,16 @@ file from list</string>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_8">
+              <widget class="QPushButton" name="fitPeakPushButton">
                <property name="text">
-                <string>PushButton</string>
+                <string>Fit peak use this spectrum</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="fitPeakPushButton">
+              <widget class="QPushButton" name="pushButton">
                <property name="text">
-                <string>Fit peak use this spectrum</string>
+                <string>Export as csv file</string>
                </property>
               </widget>
              </item>
@@ -727,6 +696,9 @@ file from list</string>
                </property>
                <property name="editTriggers">
                 <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <property name="horizontalScrollMode">
+                <enum>QAbstractItemView::ScrollPerPixel</enum>
                </property>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
@@ -901,6 +873,79 @@ file from list</string>
               </layout>
              </item>
              <item>
+              <layout class="QFormLayout" name="formLayout_6">
+               <item row="0" column="0">
+                <widget class="QLabel" name="calibrationPpmLabel">
+                 <property name="text">
+                  <string>ppm</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QDoubleSpinBox" name="calibrationPpmDoubleSpinBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimum">
+                  <double>0.010000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>5.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="calibrationDegreeLabel">
+                 <property name="text">
+                  <string>degree</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QSpinBox" name="calibrationDegreeSpinBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                 <property name="maximum">
+                  <number>4</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="calibrationNIonsLabel">
+                 <property name="text">
+                  <string>use best N ions</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QSpinBox" name="calibrationNIonsSpinBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                 <property name="value">
+                  <number>3</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
               <widget class="QPushButton" name="calibratePushButton">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1003,7 +1048,7 @@ file from list</string>
               <widget class="QGroupBox" name="groupBox">
                <property name="minimumSize">
                 <size>
-                 <width>150</width>
+                 <width>0</width>
                  <height>0</height>
                 </size>
                </property>
@@ -1014,10 +1059,16 @@ file from list</string>
                 <item>
                  <widget class="QTableWidget" name="spectra2TableWidget">
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>0</height>
+                   </size>
                   </property>
                   <property name="maximumSize">
                    <size>
@@ -1029,7 +1080,7 @@ file from list</string>
                    <set>QAbstractItemView::NoEditTriggers</set>
                   </property>
                   <property name="verticalScrollMode">
-                   <enum>QAbstractItemView::ScrollPerPixel</enum>
+                   <enum>QAbstractItemView::ScrollPerItem</enum>
                   </property>
                   <property name="horizontalScrollMode">
                    <enum>QAbstractItemView::ScrollPerPixel</enum>
@@ -1052,35 +1103,67 @@ file from list</string>
                 <item>
                  <widget class="QLabel" name="label_20">
                   <property name="text">
-                   <string>Fit selected spectrum use</string>
+                   <string>Fit selected spectrum</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="spectra2FitDefaultPushButton">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>default</string>
                   </property>
                  </widget>
                 </item>
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_14">
                   <item>
-                   <widget class="QPushButton" name="spectra2FitDefaultPushButton">
+                   <widget class="QPushButton" name="spectra2FitUseMassListPushButton">
                     <property name="sizePolicy">
-                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
                     <property name="text">
-                     <string>default</string>
+                     <string>use mass list</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="spectra2FitUseMassListPushButton">
+                   <widget class="QLabel" name="label">
                     <property name="sizePolicy">
-                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
                     <property name="text">
-                     <string>mass list</string>
+                     <string>with ppm</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QDoubleSpinBox" name="spectra2MassListFitPpmDoubleSpinBox">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimum">
+                     <double>0.010000000000000</double>
+                    </property>
+                    <property name="maximum">
+                     <double>9.990000000000000</double>
+                    </property>
+                    <property name="value">
+                     <double>1.000000000000000</double>
                     </property>
                    </widget>
                   </item>
@@ -1180,6 +1263,13 @@ file from list</string>
                </property>
                <property name="text">
                 <string>Add all peaks to mass list</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_2">
+               <property name="text">
+                <string>Export as csv file</string>
                </property>
               </widget>
              </item>
@@ -1466,7 +1556,7 @@ file from list</string>
                </property>
                <layout class="QFormLayout" name="formLayout_2">
                 <item row="2" column="0">
-                 <widget class="QRadioButton" name="radioButton">
+                 <widget class="QRadioButton" name="timeSeriesMzRadioButton">
                   <property name="text">
                    <string>mz</string>
                   </property>
@@ -1476,19 +1566,22 @@ file from list</string>
                  </widget>
                 </item>
                 <item row="5" column="0">
-                 <widget class="QRadioButton" name="radioButton_2">
+                 <widget class="QRadioButton" name="timeSeriesFormulaRadioButton">
                   <property name="text">
                    <string>formula</string>
                   </property>
                  </widget>
                 </item>
                 <item row="7" column="1">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox">
+                 <widget class="QDoubleSpinBox" name="timeSeriesMzRangeRDoubleSpinBox">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="decimals">
+                   <number>3</number>
                   </property>
                   <property name="maximum">
                    <double>999.990000000000009</double>
@@ -1496,12 +1589,15 @@ file from list</string>
                  </widget>
                 </item>
                 <item row="6" column="1">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+                 <widget class="QDoubleSpinBox" name="timeSeriesMzRangeLDoubleSpinBox">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="decimals">
+                   <number>3</number>
                   </property>
                   <property name="maximum">
                    <double>999.990000000000009</double>
@@ -1509,19 +1605,22 @@ file from list</string>
                  </widget>
                 </item>
                 <item row="6" column="0">
-                 <widget class="QRadioButton" name="radioButton_3">
+                 <widget class="QRadioButton" name="timeSeriesMzRangeRadioButton">
                   <property name="text">
                    <string>mz range</string>
                   </property>
                  </widget>
                 </item>
                 <item row="2" column="1">
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+                 <widget class="QDoubleSpinBox" name="timeSeriesMzDoubleSpinBox">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="decimals">
+                   <number>3</number>
                   </property>
                   <property name="maximum">
                    <double>999.990000000000009</double>
@@ -1529,7 +1628,7 @@ file from list</string>
                  </widget>
                 </item>
                 <item row="5" column="1">
-                 <widget class="QLineEdit" name="lineEdit_2">
+                 <widget class="QLineEdit" name="timeSeriesFormulaLineEdit">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -1538,8 +1637,8 @@ file from list</string>
                   </property>
                  </widget>
                 </item>
-                <item row="8" column="0" colspan="2">
-                 <widget class="QRadioButton" name="radioButton_4">
+                <item row="9" column="0" colspan="2">
+                 <widget class="QRadioButton" name="timeSeriesSelectedMassListRadioButton">
                   <property name="text">
                    <string>mass list selected peak(s)</string>
                   </property>
@@ -1548,10 +1647,17 @@ file from list</string>
                   </property>
                  </widget>
                 </item>
-                <item row="9" column="0" colspan="2">
-                 <widget class="QRadioButton" name="radioButton_5">
+                <item row="10" column="0" colspan="2">
+                 <widget class="QRadioButton" name="timeSeriesMassListRadioButton">
                   <property name="text">
                    <string>mass list all peaks</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="8" column="0" colspan="2">
+                 <widget class="QRadioButton" name="timeSeriesSelectedPeaksRadioButton">
+                  <property name="text">
+                   <string>selected peak(s) in peak list</string>
                   </property>
                  </widget>
                 </item>
@@ -1563,14 +1669,14 @@ file from list</string>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_22">
                  <property name="text">
-                  <string>ppm</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ppm&lt;/p&gt;&lt;p&gt;when use mz,formula,peak&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
+                <widget class="QDoubleSpinBox" name="timeSeriesPpmDoubleSpinBox">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
@@ -1581,12 +1687,15 @@ file from list</string>
                  <property name="maximum">
                   <double>9.990000000000000</double>
                  </property>
+                 <property name="value">
+                  <double>1.000000000000000</double>
+                 </property>
                 </widget>
                </item>
               </layout>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_3">
+              <widget class="QPushButton" name="timeSeriesCalcPushButton">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -1594,47 +1703,71 @@ file from list</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Show time series</string>
+                <string>Calc time series</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QTableWidget" name="tableWidget">
+              <widget class="QTableWidget" name="timeSeriesesTableWidget">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <property name="horizontalScrollMode">
+                <enum>QAbstractItemView::ScrollPerPixel</enum>
+               </property>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
                </attribute>
                <column>
                 <property name="text">
-                 <string>mz min</string>
+                 <string>mz</string>
                 </property>
                </column>
                <column>
                 <property name="text">
-                 <string>mz max</string>
+                 <string>ppm</string>
                 </property>
                </column>
                <column>
                 <property name="text">
-                 <string>hint</string>
+                 <string>tag</string>
                 </property>
                </column>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_4">
-               <property name="text">
-                <string>Remove selected</string>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="horizontalLayout_16">
+               <item>
+                <widget class="QLabel" name="label_23">
+                 <property name="text">
+                  <string>Remove</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="timeSeriesRemoveSelectedPushButton">
+                 <property name="text">
+                  <string>selected</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="timeSeriesRemoveAllPushButton">
+                 <property name="text">
+                  <string>all</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_19">
+              <widget class="QPushButton" name="timeSeriesExportPushButton">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -1642,7 +1775,7 @@ file from list</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Export</string>
+                <string>Export as csv file</string>
                </property>
               </widget>
              </item>
@@ -1651,19 +1784,28 @@ file from list</string>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_15">
              <item>
-              <widget class="QCheckBox" name="checkBox">
+              <widget class="QCheckBox" name="timeSeriesUseRetentionTimeCheckBox">
                <property name="text">
                 <string>use retention time</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QTableWidget" name="tableWidget_2">
+              <widget class="QTableWidget" name="timeSeriesTableWidget">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <property name="verticalScrollMode">
+                <enum>QAbstractItemView::ScrollPerItem</enum>
+               </property>
+               <property name="horizontalScrollMode">
+                <enum>QAbstractItemView::ScrollPerPixel</enum>
                </property>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
@@ -1680,10 +1822,17 @@ file from list</string>
                </column>
               </widget>
              </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_3">
+               <property name="text">
+                <string>Export as csv file</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
            <item>
-            <widget class="QWidget" name="widget_5" native="true">
+            <widget class="QWidget" name="timeSeriesWidget" native="true">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -2051,7 +2200,7 @@ file from list</string>
               <set>QAbstractItemView::NoEditTriggers</set>
              </property>
              <property name="verticalScrollMode">
-              <enum>QAbstractItemView::ScrollPerPixel</enum>
+              <enum>QAbstractItemView::ScrollPerItem</enum>
              </property>
              <property name="horizontalScrollMode">
               <enum>QAbstractItemView::ScrollPerPixel</enum>
@@ -2151,7 +2300,15 @@ file from list</string>
     <addaction name="workspaceImportAction"/>
     <addaction name="workspaceExportAction"/>
    </widget>
+   <widget class="QMenu" name="menuOption">
+    <property name="title">
+     <string>Option</string>
+    </property>
+    <addaction name="optionActionImport"/>
+    <addaction name="optionActionExport"/>
+   </widget>
    <addaction name="workspaceMenu"/>
+   <addaction name="menuOption"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="workspaceImportAction">
@@ -2160,6 +2317,16 @@ file from list</string>
    </property>
   </action>
   <action name="workspaceExportAction">
+   <property name="text">
+    <string>Export</string>
+   </property>
+  </action>
+  <action name="optionActionImport">
+   <property name="text">
+    <string>Import</string>
+   </property>
+  </action>
+  <action name="optionActionExport">
    <property name="text">
     <string>Export</string>
    </property>

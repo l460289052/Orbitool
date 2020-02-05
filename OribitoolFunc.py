@@ -17,12 +17,10 @@ import sklearn.preprocessing
 import sklearn.linear_model
 
 import OribitoolAbstract
+import OribitoolGuessIons
 
 
-def nullSendStatus(file, msg: str, index: int, length: int):
-    '''
-    `file`:type is `File`
-    '''
+def nullSendStatus(fileTime: datetime.datetime, msg: str, index: int, length: int):
     pass
 
 def defaultMethod(array, index):
@@ -483,3 +481,27 @@ def standardPeakFittedPeakSimpleMatch(speaks: List[OribitoolAbstract.StandardPea
 
 def standardPeakFittedPeakHungaryMatch(speaks: List[OribitoolAbstract.StandardPeak], fpeaks: List[OribitoolAbstract.FittedPeak], ppm, srange: range = None, frange: range = None):
     pass
+
+def recalcFormula(peaks: List[Tuple[OribitoolAbstract.FittedPeak, OribitoolAbstract.StandardPeak]], ionCalc: OribitoolGuessIons.IonCalculator):
+    ppm = ionCalc.errppm
+    minratio = 1 - ppm
+    maxratio = 1 + ppm
+    for fpeak, speak in peaks:
+        if speak.handled:
+            continue
+        intensity = fpeak.peakIntensity
+        formulaList = ionCalc.calc(speak.peakPosition)
+        def correct(formula: OribitoolGuessIons.Formula):
+            if not formula.isIsotope:
+                return True
+            ratio = formula.relativeAbundance() * 1.5
+            origin = formula.findOrigin()
+            mz = origin.mass()
+            r: range = indexBetween(peaks, (mz * minratio, mz * maxratio), method=(lambda peaks, index: peaks[index][1].peakPosition))
+            for i in r:
+                fp, sp = peaks[i]
+                for f in s.formulaList:
+                    if origin == f and fp.peakIntensity * ratio > intensity:
+                        return True
+            return False
+        speak.formulaList = [f for f in formulaList if correct(f)]

@@ -22,11 +22,12 @@ clr.AddReference(os.path.join(
 
 clr.AddReference('System.Collections')
 
-from ThermoFisher.CommonCore.Data import ToleranceUnits
-from ThermoFisher.CommonCore.Data import Extensions
-from ThermoFisher.CommonCore.Data.Business import ChromatogramSignal, ChromatogramTraceSettings, DataUnits, Device, GenericDataTypes, SampleType, Scan, TraceType
+from ThermoFisher.CommonCore.Data import ToleranceUnits, Extensions
+from ThermoFisher.CommonCore.Data.Business import ChromatogramSignal, ChromatogramTraceSettings, \
+     DataUnits, Device, GenericDataTypes, SampleType, Scan, TraceType, MassOptions
 from ThermoFisher.CommonCore.Data.FilterEnums import IonizationModeType, MSOrderType
-from ThermoFisher.CommonCore.Data.Interfaces import IChromatogramSettings, IScanEventBase, IScanFilter, RawFileClassification
+from ThermoFisher.CommonCore.Data.Interfaces import IChromatogramSettings, IScanEventBase, \
+     IScanFilter, RawFileClassification
 from ThermoFisher.CommonCore.MassPrecisionEstimator import PrecisionEstimate
 from ThermoFisher.CommonCore.RawFileReader import RawFileReaderAdapter
 
@@ -63,7 +64,7 @@ class SpectrumInfo(OribitoolAbstract.SpectrumInfo):
 
 
 class AveragedSpectrum(OribitoolAbstract.AveragedSpectrum):
-    def __init__(self, file:OribitoolAbstract.File, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None):
+    def __init__(self, file:OribitoolAbstract.File, ppm, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None):
         averaged = None
 
         def method(f, index: int) -> datetime.timedelta:
@@ -86,8 +87,9 @@ class AveragedSpectrum(OribitoolAbstract.AveragedSpectrum):
                 "`timeRange` or `numRange` must be provided and only one can be provided")
         scanfilter = IScanFilter(file.rawfile.GetFilterForScanNumber(start))
         last = end - 1
+        massOption = MassOptions(ppm, ToleranceUnits.ppm)
         averaged = Extensions.AverageScansInScanRange(
-            file.rawfile, start, last, scanfilter).SegmentedScan
+            file.rawfile, start, last, scanfilter, massOption).SegmentedScan
 
         sTime = file.creationDate + file.getSpectrumInfo(start).retentionTime
         eTime = file.creationDate + file.getSpectrumInfo(last).retentionTime
