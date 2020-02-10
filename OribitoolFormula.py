@@ -5,14 +5,13 @@ import re
 from pyteomics import mass
 from collections import UserDict
 
-import OribitoolAbstract
 
 _print_order = ['C', 'H', 'O', 'N']
 _print_order_set = set(_print_order)
 
 
 # 抽时间用njit重写一下
-class Formula(UserDict, OribitoolAbstract.Formula):
+class Formula(UserDict):
     '''
     '''
 
@@ -170,7 +169,7 @@ class Formula(UserDict, OribitoolAbstract.Formula):
             if len(e) > 3:
                 match = re.match(r"[A-Z][a-z]{0,2}", e)
                 origin = match.group()
-                formula.data[origin] += self[e]
+                formula[origin] += self[e]
                 formula.pop(e)
         return formula
 
@@ -184,13 +183,13 @@ class Formula(UserDict, OribitoolAbstract.Formula):
             mass.isotopic_composition_abundance(
                 formula=self.findOrigin().toStr(True, False))
 
-    def toStr(self, showAllProton: bool = False, withCharge: bool = True) -> str:
+    def toStr(self, showProton: bool = False, withCharge: bool = True) -> str:
         s = []
         elements = list(self.keys())
         for e in _print_order:
             v = self[e]
             if v > 0:
-                tmp = e
+                tmp = f"{e}[{int(round(mass.nist_mass[e][0][0]))}]" if showProton else e
                 if v > 1:
                     tmp += str(v)
                 s.append(tmp)
@@ -211,7 +210,7 @@ class Formula(UserDict, OribitoolAbstract.Formula):
         for e in elements:
             v = self[e]
             if v > 0:
-                tmp = e
+                tmp = f"{e}[{int(round(mass.nist_mass[e][0][0]))}]" if showProton and len(e) <= 3 else e
                 if v > 1:
                     tmp += str(v)
                 s.append(tmp)

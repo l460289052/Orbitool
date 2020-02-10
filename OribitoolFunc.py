@@ -1,22 +1,26 @@
 # -*- coding: utf-8 -*-
 
-import math
-import os
-import gzip
-from copy import copy
-from typing import List, Tuple, Iterable
+import csv
 import datetime
-import traceback
+import gzip
+import math
 import multiprocessing
+import os
 import pickle
+import traceback
+from collections.abc import Iterable
+from copy import copy
+from typing import List, Tuple
 
+import numba
+import numba.numpy_extensions
 import numpy as np
-from numba import jit, njit, numpy_extensions
 import scipy.optimize
-import sklearn.preprocessing
 import sklearn.linear_model
+import sklearn.preprocessing
+import statsmodels.nonparametric.smoothers_lowess as lowess
 
-import OribitoolAbstract
+import OribitoolBase
 import OribitoolGuessIons
 
 
@@ -26,7 +30,7 @@ def nullSendStatus(fileTime: datetime.datetime, msg: str, index: int, length: in
 def defaultMethod(array, index):
     return array[index]
 
-defaultMethod_njit=njit(defaultMethod)
+defaultMethod_njit=numba.njit(defaultMethod)
 
 def indexFirstNotSmallerThan(array, value, indexRange: (int, int) = None, method=defaultMethod):
     l, r = (0, len(array)) if indexRange is None else indexRange
@@ -38,7 +42,7 @@ def indexFirstNotSmallerThan(array, value, indexRange: (int, int) = None, method
             r = t
     return l
 
-@njit(cache=True)
+@numba.njit(cache=True)
 def indexFirstNotSmallerThan_njit(array, value, indexRange: (int, int) = None, method=defaultMethod_njit):
     l, r = (0, len(array)) if indexRange is None else indexRange
     while l < r:
@@ -59,7 +63,7 @@ def indexFirstBiggerThan(array, value, indexRange: (int, int) = None, method=def
             r = t
     return l
 
-@njit(cache=True)
+@numba.njit(cache=True)
 def indexFirstBiggerThan_njit(array, value, indexRange: (int, int) = None, method=defaultMethod_njit):
     l, r = (0, len(array)) if indexRange is None else indexRange
     while l < r:
@@ -82,7 +86,7 @@ def indexNearest(array, value, indexRange: (int, int) = None, method=defaultMeth
     else:
         return i
 
-@njit(cache=True)
+@numba.njit(cache=True)
 def indexNearest_njit(array, value, indexRange: (int, int) = None, method=defaultMethod_njit) -> int:
     '''
     `indexRange`: default=(0,len(array))
@@ -101,7 +105,7 @@ def valueNearest(array, value, indexRange: (int, int) = None, method=defaultMeth
     '''
     return method(array, indexNearest(array, value, indexRange, method))
 
-@njit(cache=True)
+@numba.njit(cache=True)
 def valueNearest_njit(array, value, indexRange: (int, int) = None, method=defaultMethod_njit):
     '''
     `indexRange`: default=(0,len(array))
@@ -110,7 +114,7 @@ def valueNearest_njit(array, value, indexRange: (int, int) = None, method=defaul
 
 def indexBetween(array, valueRange, indexRange: (int, int) = None, method=defaultMethod) -> range:
     """
-    get list from sorted array for value in (l,r)
+    get range from sorted array for value in (l,r)
     `indexRange`: (start,stop), contain array[start] to array[stop-1]
     make list = [index for index, item in enumerate(array) if l<item and item<r]
     """
@@ -124,7 +128,7 @@ def indexBetween(array, valueRange, indexRange: (int, int) = None, method=defaul
     else:
         return range(l, l)
 
-@njit(cache=True)
+@numba.njit(cache=True)
 def indexBetween_njit(array, valueRange, indexRange: (int, int) = None, method=defaultMethod_njit) -> (int, int):
     lvalue, rvalue = valueRange
     if indexRange is None:
@@ -144,37 +148,6 @@ def valueBetween(array, valueRange, indexRange: (int, int) = None, method=defaul
     """
     return [method(array, x) for x in indexBetween(array, valueRange, indexRange, method)]  # [ll:t-1]->[ll:t)
 
-
-@njit(cache=True)
-def findPeak(mz: np.ndarray, intensity: np.ndarray, indexRange: (int, int)) -> (int, int):
-    '''
-    intensity[`stop`] must less than 1e-6, or `stop` == len(mz)
-    find the first peak after begin
-    if mz[begin] > 0, will find the first peak after first mz[i]=0, while i > begin
-    seem to the end
-    return the peak with begin,xxx,xxx,xxx,end
-    if don't find peak, return range(`stop`,`stop`)
-    '''
-    start, stop = indexRange
-    if stop > len(mz):
-        stop = len(mz)
-    delta = 1e-6
-    l = start
-    while l < stop and intensity[l] > delta:
-        l += 1
-    while l < stop and intensity[l] < delta:
-        l += 1
-    if l == stop:
-        return (stop,stop)
-    r = l
-    l -= 1
-    while r < stop and intensity[r] > delta:
-        r += 1
-    if intensity[r] > delta:
-        return (stop,stop)
-    return (l, r + 1)
-
-
 def processWithTime(func, fileTime, args, signalQueue):
     result = None
     try:
@@ -189,7 +162,7 @@ def processWithTime(func, fileTime, args, signalQueue):
     return result
 
 
-def processWithoutPath(func, args, signalQueue):
+def processWithoutTime(func, args, signalQueue):
     result = None
     try:
         result = func(*args)
@@ -209,7 +182,7 @@ def multiProcess(func, argsList: List[Tuple], fileTime, cpu=None, sendStatusFunc
     the first line of func.__doc__ will be showed message
     if fileTime is a list, func's first arguement must be fileTime
     '''
-    if type(fileTime) is list:
+    if isinstance(fileTime, Iterable):
         if len(argsList) != len(fileTime):
             raise ValueError('len(fileTime)!=len(argsList)')
     if cpu is None or cpu >= multiprocessing.cpu_count():
@@ -226,7 +199,7 @@ def multiProcess(func, argsList: List[Tuple], fileTime, cpu=None, sendStatusFunc
     length = len(argsList)
     if cpu == 1:
         results = []
-        if type(fileTime) is list:
+        if isinstance(fileTime, Iterable):
             for i, args in enumerate(argsList):
                 sendStatusFunc(fileTime[i], msg, i, length)
                 results.append(func(fileTime[i], *args))
@@ -241,7 +214,7 @@ def multiProcess(func, argsList: List[Tuple], fileTime, cpu=None, sendStatusFunc
         with multiprocessing.Manager() as manager:
             queue = manager.Queue()
             with multiprocessing.Pool(cpu) as pool:
-                if type(fileTime) is list:
+                if isinstance(fileTime, Iterable):
                     results: multiprocessing.pool.MapResult = pool.starmap_async(
                         processWithTime, [(func, time, args, queue) for time, args in zip(fileTime, argsList)])
                     pool.close()
@@ -252,49 +225,145 @@ def multiProcess(func, argsList: List[Tuple], fileTime, cpu=None, sendStatusFunc
                     return results.get()
                 else:
                     results: multiprocessing.pool.MapResult = pool.starmap_async(
-                        processWithTime, [(func, args, queue) for args in argsList])
+                        processWithoutTime, [(func, args, queue) for args in argsList])
                     pool.close()
                     for i in range(length):
-                        sendStatusFunc(filetime, msg, i, length)
+                        sendStatusFunc(fileTime, msg, i, length)
                         queue.get()
-                    sendStatusFunc(filetime, msg, length, length)
+                    sendStatusFunc(fileTime, msg, length, length)
                     return results.get()
 
+@numba.njit(cache=True, parallel=True)
+def _getPeaks_njit(mz: np.ndarray, intensity: np.ndarray, indexRange, mzRange) -> np.ndarray:
+    start = 0
+    stop = len(mz)
+    if indexRange is not None:
+        start, stop = indexRange
+    elif mzRange is not None:
+        start, stop = indexBetween_njit(mz, mzRange)
+    mz = mz[start:stop]
+    intensity = intensity[start:stop]
+    index = np.arange(start,stop)
 
-class iterator(object):
-    def __init__(self, l: Iterable):
-        self._iter = iter(l)
-        try:
-            self._value = next(self._iter)
-            self._end = False
-        except StopIteration:
-            self._value = None
-            self._end = True
-        self._index = 0
+    delta = 1e-6
+    peaksIndex = intensity > delta
+    l = index[:-1][peaksIndex[1:] > peaksIndex[:-1]]
+    r = index[1:][peaksIndex[:-1] > peaksIndex[1:]] + 1
+    if l[0] + 1 >= r[0]:
+        l = np.append((start,), l)
+    if l[-1] + 1 >= r[-1]:
+        r = np.append(r, np.array((stop,)))
+    return np.stack((l, r), 1)
+    
 
-    @property
-    def index(self):
-        return self._index
+def getPeaks(spectrum: OribitoolBase.Spectrum, indexRange: (int, int) = None, mzRange: (float, float) = None)->List[OribitoolBase.Peak]:
+    '''
+    get peak divided by 0, result peak may have many peakPoint
+    '''
+    peaksRange = _getPeaks_njit(spectrum.mz, spectrum.intensity, indexRange, mzRange)
+    return [OribitoolBase.Peak(spectrum, range(rstart, rstop)) for rstart, rstop in peaksRange ]
 
-    @property
-    def value(self):
-        return self._value if not self.end else None
+@numba.njit(cache=True)
+def peakAt_njit(intensity: np.ndarray) -> np.ndarray:
+    peakAt = intensity
+    peakAt = peakAt[:-1] < peakAt[1:]
+    peakAt = peakAt[:-1] > peakAt[1:]
+    return peakAt
 
-    @property
-    def end(self) -> bool:
-        return self._end
+@numba.njit(cache=True, parallel=True)
+def _getNoise_njit(mz, intensity, step, quantile) -> np.ndarray:
+    minMz = np.floor(mz.min()) # float
+    maxMz = np.ceil(mz.max())  # float
+    peakAt = peakAt_njit(intensity)
+    mz = mz[1:-1][peakAt]
+    intensity = intensity[1:-1][peakAt]
+    x = np.arange(minMz, maxMz, step)
+    y = np.zeros_like(x)
+    for index in numba.prange(len(x)):
+        xx = x[index]
+        l, r = indexBetween_njit(mz, (xx, xx + step))
+        if r - l > 0:
+            y[index] = np.quantile(intensity[l:r], quantile)
+        else:
+            y[index] = 0
+    return peakAt, x, y
 
-    def next(self):
-        if not self.end:
-            try:
-                self._value = next(self._iter)
-            except StopIteration:
-                self._end = True
-            self._index += 1
+def getNoise(spectrum: OribitoolBase.Spectrum, step=1.0, quantile=0.5, sendStatus = nullSendStatus) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    @quantile: sort peaks by intensity, select num*quantile-th biggest peak
+    """
+    fileTime = spectrum.fileTime
+    msg = "calc noise"
+    sendStatus(fileTime, msg, -1, 0)
+    peakAt, x, y = _getNoise_njit(spectrum.mz, spectrum.intensity, step, quantile)
+    y = lowess.lowess(y, x, frac=0.2, is_sorted=True, return_sorted=False)
+    return peakAt, (x, y)
 
+@numba.njit(cache=True, parallel=True)
+def _denoiseWithNoise_njit(mz: np.ndarray, intensity: np.ndarray, noise: (np.ndarray, np.ndarray), peakAt: np.ndarray, minus = True) -> (np.ndarray, np.ndarray):
+    length = len(mz)
+    index = np.arange(0, length)[1:-1][peakAt]
+    peakMz = mz[1:-1][peakAt]
+    peakIntensity = intensity[1:-1][peakAt]
+    newIntensity = np.zeros_like(intensity)
+    x, y = noise
+    step = x[1] - x[0]
+    for i in numba.prange(len(x)):
+        xx = x[i]
+        l, r = indexBetween_njit(peakMz, (xx, xx + step))
+        subInt = peakIntensity[l:r]
+        subInd = index[l:r]
+        arg = subInt.argsort()
+        subInt = subInt[arg]
+        subInd = subInd[arg]
+        subSplit = indexFirstBiggerThan_njit(subInt, y[i])
+        subInd = subInd[subSplit:]
+        for j in numba.prange(len(subInd)):
+            pInd = subInd[j]
+            l = pInd - 1
+            while l > 0 and intensity[l] > intensity[l - 1]:
+                l -= 1
+            r = pInd + 1
+            while r < length and intensity[r] > intensity[r + 1]:
+                r += 1
+            if minus:
+                peakI = intensity[pInd]
+                newIntensity[l:r + 1] = intensity[l:r + 1] / peakI * (peakI - y[i])
+            else:
+                newIntensity[l:r + 1] = intensity[l:r + 1]
+    
+    delta = 1e-6
+    select = newIntensity > delta
+    select[1:] = select[1:] | select[:-1]
+    select[:-1] = select[:-1] | select[1:]
+    mz = mz[select]
+    newIntensity = newIntensity[select]
+    return mz ,newIntensity
+    
 
-class NormalDistributionFunc(OribitoolAbstract.FitPeakFunc):
-    maxFitNum = {1: 100, 2: 200, 3: 1000, 4: 4000, 5: 6000, 6: 10000}
+def denoiseWithNoise(spectrum: OribitoolBase.Spectrum, noise: (np.ndarray, np.ndarray), peakAt: np.ndarray=None, minus=False, sendStatus=OribitoolBase.nullSendStatus) -> OribitoolBase.Spectrum:
+    fileTime = spectrum.fileTime
+    msg = "denoising"
+    sendStatus(fileTime, msg, -1, 0)
+
+    newSpectrum = copy(spectrum)
+    if peakAt is None:
+        peakAt = peakAt_njit(intensity)
+    mz, intensity = _denoiseWithNoise_njit(spectrum.mz, spectrum.intensity, noise, peakAt, minus)
+    newSpectrum.mz = mz
+    newSpectrum.intensity = intensity
+    newSpectrum.peaks = getPeaks(newSpectrum)
+    return newSpectrum
+        
+def denoise(spectrum: OribitoolBase.Spectrum, step=1.0, quantile=0.5, minus=False, sendStatus=OribitoolBase.nullSendStatus):
+    peakAt, noise = getNoise(spectrum, step, quantile, sendStatus)
+    return noise, denoiseWithNoise(spectrum, noise, peakAt, minus, sendStatus)
+
+class NormalDistributionFunc:
+    @staticmethod
+    @numba.njit(cache=True)
+    def maxFitNum(num):
+        return int(np.arctan((num-5)/20)*20000+4050)
 
     def __init__(self, params: List[tuple]):
         params = np.array(params)
@@ -307,12 +376,12 @@ class NormalDistributionFunc(OribitoolAbstract.FitPeakFunc):
         self.peakResFit = 1/(2*math.sqrt(2*math.log(2))*self.peakSigmaFit)
 
     @staticmethod
-    @njit(cache=True)
+    @numba.njit(cache=True)
     def _func(mz: np.ndarray, a, mu, sigma):
         return a / (np.sqrt(2 * np.pi) * sigma) * np.exp(-0.5 * ((mz - mu) / sigma) ** 2)
 
     @staticmethod
-    def getParam(peak: OribitoolAbstract.Peak):
+    def getParam(peak: OribitoolBase.Peak):
         mz: np.ndarray = peak.mz
         intensity: np.ndarray = peak.intensity
         mzmean = mz.mean()
@@ -320,7 +389,7 @@ class NormalDistributionFunc(OribitoolAbstract.FitPeakFunc):
         return scipy.optimize.curve_fit(NormalDistributionFunc._func, mz, intensity, param0, maxfev=100)[0]
 
     @staticmethod
-    def getNormalizedPeak(peak: OribitoolAbstract.Peak, param) -> Tuple[np.ndarray, np.ndarray]:
+    def getNormalizedPeak(peak: OribitoolBase.Peak, param) -> OribitoolBase.Peak:
         '''
         return (mz, intensity)`
         '''
@@ -328,7 +397,9 @@ class NormalDistributionFunc(OribitoolAbstract.FitPeakFunc):
         intensity: np.ndarray = peak.intensity
         peakArea, peakPosition, peakSigma = param
         peakHeight = NormalDistributionFunc._func(peakPosition, *param)
-        return ((mz / peakPosition - 1) / math.sqrt(peakPosition / 200), intensity / peakHeight)
+        peak = OribitoolBase.Peak(peak.spectrum, mz=(mz / peakPosition - 1) / math.sqrt(peakPosition / 200), intensity=intensity / peakHeight, originalPeak=peak)
+        peak.addFittedParam(param)
+        return peak
 
     def normFunc(self, x):
         y = self._func(x, 1, 0, self.peakSigmaFit) / \
@@ -339,29 +410,23 @@ class NormalDistributionFunc(OribitoolAbstract.FitPeakFunc):
         sigma = self.peakSigmaFit*math.sqrt(mu/200)*mu
         return NormalDistributionFunc._func(mz, a, mu, sigma)
 
-    def getFittedParam(self, peak: OribitoolAbstract.Peak):
+    def getFittedParam(self, peak: OribitoolBase.Peak):
         mz: np.ndarray = peak.mz
         intensity: np.ndarray = peak.intensity
         mzmean = mz.mean()
         param = (intensity.max() * mzmean * self.peakSigmaFit * 2, mzmean)
         return scipy.optimize.curve_fit(self._funcFit, mz, intensity, param, maxfev=100)[0]
 
-    def getPeakPosition(self, fittedPeak: OribitoolAbstract.FittedPeak):
-        return fittedPeak.fittedParam[1]
+    def getIntensity(self, mz: np.ndarray, peak: OribitoolBase.Peak):
+        return self._funcFit(mz, *peak.fittedParam)
 
-    def getPeakIntensity(self, fittedPeak: OribitoolAbstract.FittedPeak):
-        return self._funcFit(fittedPeak.fittedParam[1], *fittedPeak.fittedParam)
-
-    def getArea(self, fittedPeak: OribitoolAbstract.FittedPeak):
-        return fittedPeak.fittedParam[0]
-
-    def splitPeakAsParams(self, peak: OribitoolAbstract.Peak, splitNum=None, force=False) -> List[tuple]:
-        super().splitPeakAsParams(peak, splitNum)
+    def splitPeak(self, peak: OribitoolBase.Peak, splitNum=None, force=False) -> List[OribitoolBase.Peak]:
         peakAt = peak.peakAt()
 
         if splitNum is None:
-            splitNum = peak.peaksNum
-
+            splitNum = peak.splitNum
+        if splitNum > 20:
+            splitNum = 20
         u: np.ndarray = np.stack(
             (peak.mz[1:-1][peakAt], peak.intensity[1:-1][peakAt]), axis=1)
         uu = [(u[-1, 0] + i + 1, 0) for i in range(splitNum - u.shape[0])]
@@ -382,22 +447,44 @@ class NormalDistributionFunc(OribitoolAbstract.FitPeakFunc):
                 def funcFit(mz: np.ndarray, *args):
                     return sum([self._funcFit(mz, args[2 * i], args[2 * i + 1]) for i in range(num)])
                 fittedParam = scipy.optimize.curve_fit(
-                    funcFit, mz, intensity, p0=param, maxfev=self.maxFitNum[num])[0]
-                params = [(fittedParam[2*i], fittedParam[2*i+1])
-                          for i in range(num)]
+                    funcFit, mz, intensity, p0=param, maxfev=self.maxFitNum(num))[0]
+                params = np.stack((fittedParam[::2], fittedParam[1::2]), 1)
+                m = params[:, 1]
+                if m.min() < mzMin or m.max() > mzMax:
+                    raise RuntimeError()
+                
+                peaks = []
                 for p in params:
-                    if p[1] < mzMin or p[1] > mzMax:
-                        raise Exception()
-                return params
-            except:
+                    peakIntensity = self._funcFit(p[1], *p)
+                    if peakIntensity < 0:
+                        raise RuntimeError()
+                    intensity = self._funcFit(mz, *p)
+                    select = intensity > 1e-6
+                    select[:-1] = select[:-1] | select[1:]
+                    select[1:] = select[1:] | select[:-1]
+                    newPeak = OribitoolBase.Peak(
+                        peak.spectrum, mz=mz[select], intensity=intensity[select], originalPeak=peak, splitNum=num)
+                    newPeak.addFittedParam(p, p[1], peakIntensity, fittedParam[0])
+                    peaks.append(newPeak)
+                    if len(peaks) > 1:
+                        peaks.sort(key=lambda peak: peak.peakPosition)
+                return peaks
+
+            except RuntimeError:
                 if force:
                     raise ValueError(
                         "can't fit use peaks num as "+str(splitNum))
             param = param[:-2]
-        raise ValueError("can't fit peak  at (%.5f,%.5f)" % (mz[0], mz[-1]))
+        with open('errorpeak.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['mz', 'intensity'])
+            for row in np.stack((mz, intensity), 1):
+                writer.writerow(row)
+        raise ValueError("can't fit peak in (%.5f,%.5f) at spectrum %s" % (mz[0], mz[-1], peak.spectrum.timeRange[0].strftime(r"%m.%d %H:%M:%S")))
 
-@njit(cache=True)
-def linePeakCrossed(line: ((float, float), (float, float)), peak: Tuple[np.ndarray,np.ndarray]):
+
+@numba.njit(cache=True)
+def linePeakCrossed(line: ((float, float), (float, float)), mz:np.ndarray, intensity:np.ndarray):
     line = np.array(line)
     p1 = line[0]
     p2 = line[1]
@@ -405,8 +492,6 @@ def linePeakCrossed(line: ((float, float), (float, float)), peak: Tuple[np.ndarr
         t = p1
         p1 = p2
         p2 = t
-    mz = peak[0]
-    intensity = peak[1]
     start, stop = indexBetween_njit(mz,(p1[0],p2[0]))
     start = (start - 1) if start > 0 else 0
     if stop >= len(mz):
@@ -417,15 +502,15 @@ def linePeakCrossed(line: ((float, float), (float, float)), peak: Tuple[np.ndarr
         p3 = tmp[0]
         p4 = tmp[1]
         l = p2 - p1
-        c1 = (numpy_extensions.cross2d(l, p3 - p1) > 0) ^ (numpy_extensions.cross2d(l, p4 - p1) > 0)
+        c1 = (numba.numpy_extensions.cross2d(l, p3 - p1) > 0) ^ (numba.numpy_extensions.cross2d(l, p4 - p1) > 0)
         l = p4 - p3
-        c2 = (numpy_extensions.cross2d(l, p1 - p3) > 0) ^ (numpy_extensions.cross2d(l, p2 - p3) > 0)
+        c2 = (numba.numpy_extensions.cross2d(l, p1 - p3) > 0) ^ (numba.numpy_extensions.cross2d(l, p2 - p3) > 0)
         if c1 and c2:
             return True
     return False
 
 
-class PolynomialRegressionFunc(OribitoolAbstract.MassCalibrationFunc):
+class PolynomialRegressionFunc:
     def __init__(self, mz: np.ndarray, ppm: np.ndarray, degree):
         featurizer = sklearn.preprocessing.PolynomialFeatures(degree=degree)
         regressor = sklearn.linear_model.LinearRegression()
@@ -460,7 +545,7 @@ def file2Obj(path: str):
         return pickle.load(reader)
 
 
-def standardPeakFittedPeakSimpleMatch(speaks: List[OribitoolAbstract.StandardPeak], fpeaks: List[OribitoolAbstract.FittedPeak], ppm, srange: range = None, frange: range = None) -> List[Tuple[OribitoolAbstract.FittedPeak, OribitoolAbstract.StandardPeak]]:
+def standardPeakFittedPeakSimpleMatch(speaks: List[OribitoolBase.Peak], fpeaks: List[OribitoolBase.Peak], ppm, srange: range = None, frange: range = None) -> List[OribitoolBase.Peak]:
     if srange is not None:
         speaks = speaks[srange.start:srange.stop:srange.step]
     if frange is not None:
@@ -474,34 +559,38 @@ def standardPeakFittedPeakSimpleMatch(speaks: List[OribitoolAbstract.StandardPea
             continue
         fpeak = fpeaks[lf]
         if abs(fpeak.peakPosition / speak.peakPosition - 1) < ppm:
-            ret.append((fpeak,speak))
+            ret.append(speak)
     return ret
 
         
 
-def standardPeakFittedPeakHungaryMatch(speaks: List[OribitoolAbstract.StandardPeak], fpeaks: List[OribitoolAbstract.FittedPeak], ppm, srange: range = None, frange: range = None):
-    pass
-
-def recalcFormula(peaks: List[Tuple[OribitoolAbstract.FittedPeak, OribitoolAbstract.StandardPeak]], ionCalc: OribitoolGuessIons.IonCalculator):
+def recalcFormula(peaks: List[OribitoolBase.Peak], ionCalc: OribitoolGuessIons.IonCalculator, sendStatus=nullSendStatus):
     ppm = ionCalc.errppm
     minratio = 1 - ppm
     maxratio = 1 + ppm
-    for fpeak, speak in peaks:
-        if speak.handled:
+    time = peaks[0].spectrum.fileTime if len(peaks) > 0 else None
+    length = len(peaks)
+    msg = "calc isotope"
+    for index, peak in enumerate(peaks):
+        if index % 100 == 0:
+            sendStatus(time, msg, index, length)
+        if peak.handled:
             continue
-        intensity = fpeak.peakIntensity
-        formulaList = ionCalc.calc(speak.peakPosition)
+        intensity = peak.peakIntensity
+        formulaList = ionCalc.calc(peak.peakPosition)
         def correct(formula: OribitoolGuessIons.Formula):
             if not formula.isIsotope:
                 return True
             ratio = formula.relativeAbundance() * 1.5
             origin = formula.findOrigin()
             mz = origin.mass()
-            r: range = indexBetween(peaks, (mz * minratio, mz * maxratio), method=(lambda peaks, index: peaks[index][1].peakPosition))
+            r: range = indexBetween(peaks, (mz * minratio, mz * maxratio), method=(lambda peaks, index: peaks[index].peakPosition))
             for i in r:
-                fp, sp = peaks[i]
-                for f in s.formulaList:
-                    if origin == f and fp.peakIntensity * ratio > intensity:
+                p = peaks[i]
+                for f in p.formulaList:
+                    if origin == f and p.peakIntensity * ratio > intensity:
                         return True
             return False
-        speak.formulaList = [f for f in formulaList if correct(f)]
+        peak.formulaList = [f for f in formulaList if correct(f)]
+
+    sendStatus(time, msg, length, length)

@@ -6,7 +6,8 @@ ref
 ref/*
 ref/*.*
 test*.*
+test
 error.txt
 *.wks
 *.Oribit*
-
+*.csv

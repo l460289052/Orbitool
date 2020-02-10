@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import OribitoolAbstract
+import OribitoolBase
 import OribitoolFunc
 
 import os
@@ -32,51 +32,51 @@ from ThermoFisher.CommonCore.MassPrecisionEstimator import PrecisionEstimate
 from ThermoFisher.CommonCore.RawFileReader import RawFileReaderAdapter
 
 
-class SpectrumInfo(OribitoolAbstract.SpectrumInfo):
-    def __init__(self, file, scanNum):
-        self.file = file
-        self.rawfile = file.rawfile
-        self.scanNum = scanNum
-
-    @property
-    def retentionTime(self) -> datetime.timedelta:
-        '''
-        return minutes from begin
-        '''
-        return datetime.timedelta(minutes=self.rawfile.RetentionTimeFromScanNumber(self.scanNum))
-
-    @property
-    def scanFilter(self):
-        pass
-        # return IScanFilter(self.rawfile.GetFilterForScanNumber(self.scanNum))
-
-    def getSpectrum(self) -> (np.ndarray, np.ndarray):
-        '''
-        return (mz, intensity)
-        '''
+class File:
+    def __init__(self, fullname):
+        rawfile = RawFileReaderAdapter.FileFactory(fullname)
+        rawfile.SelectInstrument(Device.MS, 1)
+        self.path = fullname
+        self.name = os.path.split(fullname)[1]
+        self.rawfile = rawfile
+        time = self.rawfile.FileHeader.CreationDate
+        self.creationDate = datetime.datetime(year=time.Year, month=time.Month, day=time.Day, hour=time.Hour,
+                              minute=time.Minute, second=time.Second, microsecond=time.Millisecond*1000)
+        self.startTime = datetime.timedelta(minutes=self.rawfile.RunHeader.StartTime)
+        self.endTime = datetime.timedelta(minutes=self.rawfile.RunHeader.EndTime)
+        self.firstScanNumber = self.rawfile.RunHeader.FirstSpectrum
+        self.lastScanNumber = self.rawfile.RunHeader.LastSpectrum
+        
+    def getSpectrumRetentionTime(self, scanNum):
+        return datetime.timedelta(minutes=self.rawfile.RetentionTimeFromScanNumber(scanNum))
+    
+    def getSpectrumRetentionTimes(self):
+        return [self.getSpectrumRetentionTime(scanNum) for scanNum in range(self.firstScanNumber, self.lastScanNumber + 1)]
+        
+    def getSpectrum(self, scanNum):
         rawfile = self.rawfile
-        scanNum = self.scanNum
+        retentimeTime = datetime.timedelta(minutes=rawfile.RetentionTimeFromScanNumber(scanNum))
         scanStatistics = rawfile.GetScanStatsForScanNumber(scanNum)
-
         segmentedScan = rawfile.GetSegmentedScanFromScanNumber(
             scanNum, scanStatistics)
-        return np.array(list(segmentedScan.Positions)), np.array(list(segmentedScan.Intensities))
-
-
-class AveragedSpectrum(OribitoolAbstract.AveragedSpectrum):
-    def __init__(self, file:OribitoolAbstract.File, ppm, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None):
+        mz = np.array(list(segmentedScan.Positions))
+        intensity = np.array(list(segmentedScan.Intensities))
+        time = retentimeTime+self.creationDate
+        return OribitoolBase.Spectrum(self.creationDate, mz, intensity, (time, time), (scanNum, scanNum))
+        
+    def getAveragedSpectrum(self, ppm, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None):
         averaged = None
 
+        rawfile = self.rawfile
         def method(f, index: int) -> datetime.timedelta:
-            return f.getSpectrumInfo(index).retentionTime
-
+            return f.getSpectrumRetentionTime(index)
 
         start = None
         end = None
         if timeRange is not None and numRange is None:
-            r: range = OribitoolFunc.indexBetween(file, timeRange,
-                                                    (file.firstScanNumber,
-                                                    file.lastScanNumber + 1),
+            r: range = OribitoolFunc.indexBetween(self, timeRange,
+                                                    (self.firstScanNumber,
+                                                    self.lastScanNumber + 1),
                                                     method=method)
             start = r.start
             end = r.stop
@@ -85,58 +85,21 @@ class AveragedSpectrum(OribitoolAbstract.AveragedSpectrum):
         else:
             raise ValueError(
                 "`timeRange` or `numRange` must be provided and only one can be provided")
-        scanfilter = IScanFilter(file.rawfile.GetFilterForScanNumber(start))
+        scanfilter = IScanFilter(rawfile.GetFilterForScanNumber(start))
         last = end - 1
         massOption = MassOptions(ppm, ToleranceUnits.ppm)
         averaged = Extensions.AverageScansInScanRange(
-            file.rawfile, start, last, scanfilter, massOption).SegmentedScan
+            rawfile, start, last, scanfilter, massOption).SegmentedScan
 
-        sTime = file.creationDate + file.getSpectrumInfo(start).retentionTime
-        eTime = file.creationDate + file.getSpectrumInfo(last).retentionTime
+        sTime = self.creationDate +  self.getSpectrumRetentionTime(start)
+        eTime = self.creationDate + self.getSpectrumRetentionTime(last)
 
-        self._timeRange = (sTime, eTime)
+        timeRange = (sTime, eTime)
 
-        self.file = file
-        self._numRange = (start,end)
-        self._mz = np.array(list(averaged.Positions))
-        self._intensity = np.array(list(averaged.Intensities))
-
-class File(OribitoolAbstract.File):
-    def __init__(self, fullname):
-        rawfile = RawFileReaderAdapter.FileFactory(fullname)
-        rawfile.SelectInstrument(Device.MS, 1)
-        self._rawfile = rawfile
-
-    @property
-    def rawfile(self):
-        return self._rawfile
-
-    def getSpectrumInfo(self, scanNum):
-        return SpectrumInfo(self, scanNum)
-
-    @property
-    def creationDate(self) -> datetime.datetime:
-        time = self.rawfile.FileHeader.CreationDate
-        d = datetime.datetime(year=time.Year, month=time.Month, day=time.Day, hour=time.Hour,
-                              minute=time.Minute, second=time.Second, microsecond=time.Millisecond*1000)
-        return d
-        # self.creationDate=datetime.datetime.min+datetime.timedelta(milliseconds=f.FileHeader.CreationDate.Ticks/10)
-
-    @property
-    def startTime(self) -> datetime.timedelta:
-        return datetime.timedelta(minutes=self.rawfile.RunHeader.StartTime)
-
-    @property
-    def endTime(self) -> datetime.timedelta:
-        return datetime.timedelta(minutes=self.rawfile.RunHeader.EndTime)
-
-    @property
-    def firstScanNumber(self) -> int:
-        return self.rawfile.RunHeader.FirstSpectrum
-
-    @property
-    def lastScanNumber(self) -> int:
-        return self.rawfile.RunHeader.LastSpectrum
+        numRange = (start,end)
+        mz = np.array(list(averaged.Positions))
+        intensity = np.array(list(averaged.Intensities))
+        return OribitoolBase.Spectrum(self.creationDate, mz, intensity, timeRange, numRange)
 
     def __del__(self):
-        self._rawfile.Dispose()
+        self.rawfile.Dispose()

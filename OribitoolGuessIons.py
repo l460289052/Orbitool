@@ -1,7 +1,7 @@
 import math
 import re
 
-from sortedcontainers import SortedDict
+from sortedcontainers import SortedDict, SortedSet
 from pyteomics import mass
 
 from OribitoolFormula import Formula
@@ -42,7 +42,7 @@ class IonCalculator(object):
                 queue.put(((Mmin, Mmax), []))
             return self._calced_get(M)
 
-        ans = []
+        ans = set()
         isotope = []
         Hmass = mass.calculate_mass(formula='H')
         Nmass = mass.calculate_mass(formula='N')
@@ -92,7 +92,7 @@ class IonCalculator(object):
                                 if ion.DBE() > self['DBE'][1] or self['NitrogenRule'] and (ion['H'] + ion['N']) % 2 != 1:
                                     continue
                                 f_copy = ion.copy()
-                                ans.append(f_copy)
+                                ans.add(f_copy)
                                 self._calced_insert(f_copy)
 
                                 isotope.extend(
@@ -146,7 +146,7 @@ class IonCalculator(object):
                                 if DBE > self['DBE'][1] or self['NitrogenRule'] and (Hnum+Nnum+Nanum) % 2 != 1:
                                     continue
                                 i_copy = ion.copy()
-                                ans.append(i_copy)
+                                ans.add(i_copy)
                                 self._calced_insert(i_copy)
 
                                 isotope.extend(
@@ -160,7 +160,9 @@ class IonCalculator(object):
         if queue is not None:
             isotope.extend(ans)
             queue.put(((Mmin, Mmax), isotope))
-        return ans
+
+        ans.update(self._calced_get(M))
+        return list(ans)
 
     def clear(self):
         self._cover_.clear()
@@ -232,7 +234,7 @@ class IonCalculator(object):
             if origin_e not in ion:
                 continue
             isomax = None
-            if isotope+'max' in self._constrain:
+            if isotope in self._constrain:
                 isomax = min(
                     self._constrain[isotope][1], ion[origin_e])
             else:

@@ -12,193 +12,11 @@ import numpy as np
 from numba import njit
 from sortedcontainers import SortedDict
 
-import OribitoolAbstract
+import OribitoolBase
 import OribitoolFormula
 import OribitoolGuessIons
 import OribitoolFunc
-import OribitoolDll
-
-
-readFileModule = OribitoolDll
-
-
-class ShowedSpectraType(Enum):
-    File = 0
-    Averaged = 1
-
-
-class Spectrum(OribitoolAbstract.Spectrum):
-    def __init__(self, scanNum, mz, intensity):
-        self.scanNum = scanNum
-        self._mz: np.ndarray = mz
-        self._intensity: np.ndarray = intensity
-
-
-class SpectrumInfo(OribitoolAbstract.SpectrumInfo):
-    def __init__(self, info):
-        self.info = info
-
-    @property
-    def retentionTime(self) -> datetime.timedelta:
-        return self.info.retentionTime
-
-    @property
-    def scanFilter(self):
-        pass
-
-    def getSpectrum(self) -> Spectrum:
-        return Spectrum(self.info.scanNum, *self.info.getSpectrum())
-
-
-class AveragedSpectrum(Spectrum, OribitoolAbstract.AveragedSpectrum):
-    def __init__(self, file: OribitoolAbstract.File, ppm, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None):
-        self.fileTime = file.creationDate
-        averaged = readFileModule.AveragedSpectrum(
-            file._file, ppm, timeRange, numRange)
-
-        self._timeRange = averaged.timeRange
-        self._numRange = averaged.numRange
-        self._mz = averaged.mz
-        self._intensity = averaged.intensity
-
-
-class AveragedSpectra(OribitoolAbstract.AveragedSpectra):
-    def __init__(self, fileList, ppm, time: datetime.timedelta = None, N: int = None, timeLimit: Tuple[datetime.datetime, datetime.datetime] = None, sendStatus=OribitoolFunc.nullSendStatus):
-        if type(fileList) is not FileList:
-            raise TypeError()
-        fileList: FileList
-        timedict=fileList.timedict
-        fileTimeSorted = []
-        spectra = []
-        msg = "average peaks"
-
-        if timeLimit is None:
-            timeLimit = fileList.timeRange()
-        tmpDelta = datetime.timedelta(seconds=1)
-        startTime = timeLimit[0] - tmpDelta
-        endTime = timeLimit[1] + tmpDelta
-        indexRange = None
-        numCount = None
-        average = None
-        delta = None
-        if N is not None:
-            def indexRange(f: File):
-                retentionStartTime = startTime - f.creationDate
-                retentionEndTime = endTime-f.creationDate
-                if f.startTime > retentionStartTime and f.endTime < retentionEndTime:
-                    return (f.firstScanNumber, f.lastScanNumber + 1)
-                if f.creationDate + f.endTime < startTime or f.creationDate+f.startTime > endTime:
-                    return (f.lastScanNumber+1, f.lastScanNumber+1)
-                else:
-                    start = None
-                    end = None
-                    infoList = f.getSpectrumInfoList()
-                    if f.startTime > retentionStartTime:
-                        start = f.firstScanNumber
-                    else:
-                        start = f.firstScanNumber + OribitoolFunc.indexFirstNotSmallerThan(
-                            infoList, retentionStartTime, method=(lambda array, index: array[index].retentionTime))
-                    if f.endTime < retentionEndTime:
-                        end = f.lastScanNumber + 1
-                    else:
-                        end = f.firstScanNumber+OribitoolFunc.indexFirstBiggerThan(
-                            infoList, retentionEndTime, method=(lambda array, index: array[index].retentionTime))
-                    return (start, end)
-
-            def numCount(f: File):
-                start, end = indexRange(f)
-                return math.ceil((end-start+1)/N)
-
-            def average(f: File, left, end):
-                right = left + N
-                if right > end:
-                    right = end
-                return AveragedSpectrum(f, ppm, numRange=(left, right))
-            delta = N
-
-        elif time is not None:
-            def indexRange(f: File):
-                retentionStartTime = startTime - f.creationDate
-                retentionEndTime = endTime-f.creationDate
-                if f.startTime > retentionStartTime and f.endTime < retentionEndTime:
-                    return (datetime.timedelta(), f.endTime)
-                elif f.creationDate + f.endTime < startTime or f.creationDate + f.startTime > endTime:
-                    return (f.endTime + tmpDelta, f.endTime + tmpDelta)
-                else:
-                    start = datetime.timedelta() if f.startTime > retentionStartTime else retentionStartTime
-                    end = endTime if f.endTime < retentionEndTime else retentionEndTime
-                    return (start, end)
-
-            def numCount(f: File):
-                start, end = indexRange(f)
-                return math.ceil((end-start)/time)
-
-            def average(f: File, left, end):
-                right = left + time
-                if right > end:
-                    right = end
-                return AveragedSpectrum(f, ppm, timeRange=(left, right))
-            delta = time
-
-        total = sum([numCount(f) for f in fileList.pathdict.values()])
-
-        for f in timedict.values():
-            fileTimeSorted.append(f.creationDate)
-            index, end = indexRange(f)
-            while index < end:
-                sendStatus(f.creationDate, msg, len(spectra), total)
-                spectra.append(average(f, index, end))
-                index += delta
-
-        sendStatus(f.creationDate, msg, len(spectra), len(spectra))
-
-        fileTimeSpectraMap = {}
-        for fileTime in fileTimeSorted:
-            fileTimeSpectraMap[fileTime] = []
-        for spectrum in spectra:
-            fileTimeSpectraMap[spectrum.fileTime].append(spectrum)
-
-        self.time = time
-        self.N = N
-        self.fileTimeSorted = fileTimeSorted
-        self.fileTimeSpectraMap = fileTimeSpectraMap
-        self.spectra = spectra
-
-    def __len__(self):
-        return len(self.spectra)
-
-
-class File(OribitoolAbstract.File):
-    def __init__(self, fullname):
-        self.path = fullname
-        self.name = os.path.split(fullname)[1]
-        self._file = readFileModule.File(fullname)
-
-    def getSpectrumInfo(self, scanNum) -> SpectrumInfo:
-        return SpectrumInfo(self._file.getSpectrumInfo(scanNum))
-
-    def getSpectrumInfoList(self) -> List[SpectrumInfo]:
-        return [self.getSpectrumInfo(scanNum) for scanNum in range(self.firstScanNumber, self.lastScanNumber+1)]
-
-    @property
-    def creationDate(self) -> datetime.datetime:
-        return self._file.creationDate
-
-    @property
-    def startTime(self) -> datetime.timedelta:
-        return self._file.startTime
-
-    @property
-    def endTime(self) -> datetime.timedelta:
-        return self._file.endTime
-
-    @property
-    def firstScanNumber(self) -> int:
-        return self._file.firstScanNumber
-
-    @property
-    def lastScanNumber(self) -> int:
-        return self._file.lastScanNumber
+from OribitoolDll import File
 
 
 class FileList(object):
@@ -212,7 +30,7 @@ class FileList(object):
         self.pathdict: Dict[str, File] = {}
 
     def crossed(self, start: datetime.datetime, end: datetime.datetime) -> (bool, File):
-        timedict=self.timedict
+        timedict = self.timedict
         index = timedict.bisect_left(start)
         if index > 0:
             k, v = timedict.peekitem(index - 1)
@@ -277,11 +95,15 @@ class FileList(object):
             return
         self.timedict.pop(f.creationDate)
 
-    def subList(self, filepaths: List[str]):
+    def subList(self, filepathsOrTime: List[Union[str, datetime.datetime]]):
         subList = FileList()
-        for fpath in filepaths:
-            if fpath in self.pathdict:
-                subList._addFile(self.pathdict[fpath])
+        for pot in filepathsOrTime:
+            if isinstance(pot, str):
+                if pot in self.pathdict:
+                    subList._addFile(self.pathdict[pot])
+            elif isinstance(pot, datetime.datetime):
+                if pot in self.timedict:
+                    subList._addFile(self.pathdict[pot])
         return subList
 
     def clear(self):
@@ -289,10 +111,10 @@ class FileList(object):
         self.timedict.clear()
 
     def timeRange(self):
-        timedict=self.timedict
+        timedict = self.timedict
         if len(self.timedict) > 0:
             l: File = timedict.peekitem(0)[1]
-            r: File = timedict.peekitem(1)[1]
+            r: File = timedict.peekitem(-1)[1]
             return (l.creationDate + l.startTime, r.creationDate + r.endTime)
         else:
             return None
@@ -314,147 +136,148 @@ class FileList(object):
             raise TypeError(timeOrPath)
 
 
-class Peak(OribitoolAbstract.Peak):
-    def __init__(self, spectrum: Spectrum, indexRange: range, mz=None, intensity=None):
-        '''
-        not copy mz
-        `subscripts`: (lindex,rindex), both mz[lindex] and mz[rindex] are belong to this peak
-        '''
-        self._spectrum = spectrum
-        self._indexRange = indexRange
-        self._mz = mz if mz is not None else spectrum.mz
-        self._intensity = intensity if intensity is not None else spectrum.intensity
+class GetSpectrum(OribitoolBase.Operator):
+    def __init__(self, file: File, scanNum):
+        self.fileTime = file.creationDate
+        self.scanNum = scanNum
+        self.time: datetime.timedelta = file.getSpectrumRetentionTime(scanNum)
+        tmp = format(self.time.total_seconds(), '.2f')
+        self.showedTime = (tmp, tmp)
 
-    @property
-    def mz(self) -> np.ndarray:
-        return self._mz[self._indexRange]
-
-    @property
-    def intensity(self) -> np.ndarray:
-        return self._intensity[self._indexRange]
-
-    @property
-    def maxIntensity(self):
-        if hasattr(self, '_maxIntensity'):
-            return getattr(self, '_maxIntensity')
-        self._maxIntensity = self.intensity.max()
-        return self._maxIntensity
-
-    def peakAt(self) -> np.ndarray:
-        '''
-        if len(mz)=11,
-        len(result)=9
-        mz    0  1  2  3  4  3  4  3  2  1  0
-        result   F  F  F  T  F  T  F  F  F  
-        '''
-        if hasattr(self, '_peakAt'):
-            return getattr(self, '_peakAt')
-        a=self.intensity
-        length = len(a)
-        a = a[0:length - 1] < a[1:length]
-        length = len(a)
-        a = a[0:length - 1] > a[1:length]
-        self._peakAt = a
-        return a
-
-    @property
-    def peaksNum(self) -> int:
-        if hasattr(self, '_peaksNum'):
-            return getattr(self, '_peaksNum')
-        self._peaksNum = np.sum(self.peakAt())
-        return self._peaksNum
+    def __call__(self, fileList: FileList, sendStatus=OribitoolBase.nullSendStatus):
+        fileTime = self.fileTime
+        file: File = fileList.timedict[fileTime]
+        msg = "get spectrum"
+        sendStatus(fileTime, msg, -1, 0)
+        ret = file.getSpectrum(self.scanNum)
+        return ret
 
 
-def getPeaks(spectrum: OribitoolAbstract.Spectrum, indexRange: (int, int) = None, mzRange: (float, float) = None):
-    peaks = []
-    start = None
-    stop = None
-    if indexRange is not None:
-        start, stop = indexRange
-    elif mzRange is not None:
-        start, stop = OribitoolFunc.indexBetween_njit(spectrum.mz, mzRange)
-    else:
-        start = 0
-        stop = len(spectrum.mz)
-    index = 0
-    while start < stop:
-        rstart, rstop = OribitoolFunc.findPeak(
-            spectrum.mz, spectrum.intensity,(start, stop))
-        if rstart < stop:
-            peaks.append(Peak(spectrum, range(rstart, rstop)))
-            index += 1
-        start = rstop
+class AverageSpectrum(OribitoolBase.Operator):
+    def __init__(self, file: File, ppm: float, numRange: (int, int) = None, timeRange: (datetime.timedelta, datetime.timedelta) = None):
+        self.fileTime = file.creationDate
+        self.ppm = ppm
+        self.numRange = numRange
+        self.timeRange = timeRange
+        t1 = None
+        t2 = None
+        if timeRange is None:
+            t1 = file.creationDate + file.getSpectrumRetentionTime(numRange[0])
+            t2 = file.creationDate + \
+                file.getSpectrumRetentionTime(numRange[1]-1)
+        else:
+            t1, t2 = timeRange
+            t1 += file.creationDate
+            t2 += file.creationDate
+        self.showedTime = (t1.strftime(r"%m.%d %H:%M:%S"),
+                           t2.strftime(r"%m.%d %H:%M:%S"))
 
-    return peaks
-
-
-class FittedPeak(Peak, OribitoolAbstract.FittedPeak):
-    def __init__(self, originalPeak: Peak, fitPeakFunc: OribitoolAbstract.FitPeakFunc, peaksNum, mz=None, fittedParam=None):
-        '''
-        all fitted peak from the same original peak should have same mz
-        '''
-        self.originalPeak = originalPeak
-        if mz is None:
-            mz = originalPeak.mz
-        if fittedParam is None:
-            fittedParam = fitPeakFunc.getFittedParam(originalPeak)
-
-        delta = 1e-6
-        intensity = fitPeakFunc._funcFit(mz, *fittedParam)
-        select = intensity > delta
-        # stretch
-        select[:-1] |= select[1:]
-        select[1:] |= select[:-1]
-
-        self._spectrum = originalPeak.spectrum
-        self._peaksNum = peaksNum
-        self._mz = mz[select]
-        self._intensity = intensity[select]
-        self._param = fittedParam
-        self._peakPosition = fitPeakFunc.getPeakPosition(self)
-        self._peakIntensity = fitPeakFunc.getPeakIntensity(self)
-        self._area = fitPeakFunc.getArea(self)
-
-    @property
-    def mz(self) -> np.ndarray:
-        return self._mz
-
-    @property
-    def intensity(self) -> np.ndarray:
-        return self._intensity
-
-    @property
-    def maxIntensity(self):
-        return self._peakIntensity
-
-    @property
-    def peaksNum(self):
-        '''
-        return the number of original peak split (not equal to originalpeak's peaksnum)
-        '''
-        return self._peaksNum
+    def __call__(self, fileList: FileList, sendStatus=OribitoolBase.nullSendStatus):
+        fileTime = self.fileTime
+        file: File = fileList.timedict[fileTime]
+        msg = "averaging"
+        sendStatus(fileTime, msg, -1, 0)
+        ret = file.getAveragedSpectrum(self.ppm, self.timeRange, self.numRange)
+        return ret
 
 
-class PeakFitFunc(OribitoolAbstract.PeakFitFunc):
-    def __init__(self, spectrum: OribitoolAbstract.Spectrum, num: int):
-        peaks = getPeaks(spectrum)
-        peaks = [peak for peak in peaks if peak.peaksNum == 1]
+def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N: int = None, timeLimit: Tuple[datetime.datetime, datetime.datetime] = None) -> List[AverageSpectrum]:
+    timedict = fileList.timedict
+    averageSpectra = []
+
+    if timeLimit is None:
+        timeLimit = fileList.timeRange()
+    tmpDelta = datetime.timedelta(seconds=1)
+    startTime = timeLimit[0] - tmpDelta
+    endTime = timeLimit[1] + tmpDelta
+    indexRange = None
+    numCount = None
+    average = None
+    delta = None
+    if N is not None:
+        def indexRange(f: File):
+            retentionStartTime = startTime - f.creationDate
+            retentionEndTime = endTime - f.creationDate
+            if f.startTime > retentionStartTime and f.endTime < retentionEndTime:
+                return (f.firstScanNumber, f.lastScanNumber + 1)
+            if f.creationDate + f.endTime < startTime or f.creationDate+f.startTime > endTime:
+                return (f.lastScanNumber+1, f.lastScanNumber+1)
+            else:
+                start = None
+                end = None
+                infoList = f.getSpectrumInfoList()
+                if f.startTime > retentionStartTime:
+                    start = f.firstScanNumber
+                else:
+                    start = f.firstScanNumber + OribitoolFunc.indexFirstNotSmallerThan(
+                        infoList, retentionStartTime, method=(lambda array, index: array[index].retentionTime))
+                if f.endTime < retentionEndTime:
+                    end = f.lastScanNumber + 1
+                else:
+                    end = f.firstScanNumber+OribitoolFunc.indexFirstBiggerThan(
+                        infoList, retentionEndTime, method=(lambda array, index: array[index].retentionTime))
+                return (start, end)
+
+        def numCount(f: File):
+            start, end = indexRange(f)
+            return math.ceil((end-start+1)/N)
+
+        def average(f: File, left, end):
+            right = left + N
+            if right > end:
+                right = end
+            return AverageSpectrum(f, ppm, numRange=(left, right))
+        delta = N
+
+    elif time is not None:
+        def indexRange(f: File):
+            retentionStartTime = startTime - f.creationDate
+            retentionEndTime = endTime-f.creationDate
+            if f.startTime > retentionStartTime and f.endTime < retentionEndTime:
+                return (datetime.timedelta(), f.endTime)
+            elif f.creationDate + f.endTime < startTime or f.creationDate + f.startTime > endTime:
+                return (f.endTime + tmpDelta, f.endTime + tmpDelta)
+            else:
+                start = datetime.timedelta() if f.startTime > retentionStartTime else retentionStartTime
+                end = endTime if f.endTime < retentionEndTime else retentionEndTime
+                return (start, end)
+
+        def numCount(f: File):
+            start, end = indexRange(f)
+            return math.ceil((end-start)/time)
+
+        def average(f: File, left, end):
+            right = left + time
+            if right > end:
+                right = end
+            return AverageSpectrum(f, ppm, timeRange=(left, right))
+        delta = time
+
+    for f in timedict.values():
+        index, end = indexRange(f)
+        while index < end:
+            averageSpectra.append(average(f, index, end))
+            index += delta
+
+    return averageSpectra
+
+
+class PeakFitFunc:
+    def __init__(self, spectrum: OribitoolBase.Spectrum, num: int):
+        peaks = spectrum.peaks if spectrum.peaks is not None else OribitoolFunc.getPeaks(spectrum)
+        peaks = [peak for peak in peaks if peak.splitNum == 1]
         num = max(0, min(num, len(peaks)))
 
         peaks = sorted(
             peaks, key=lambda peak: peak.maxIntensity, reverse=True)
         peaks = peaks[0:num]
         Func = OribitoolFunc.NormalDistributionFunc
-        params: list = [Func.getParam(peak) for peak in peaks]
-        normPeaks: List[Tuple[np.ndarray, np.ndarray]] = [Func.getNormalizedPeak(
-            peaks[index], params[index]) for index in range(num)]
+        normPeaks: List[OribitoolBase.Peak] = [Func.getNormalizedPeak(
+            peak, Func.getParam(peak)) for peak in peaks]
 
         self.Func = Func
-        self.peaks = peaks
-        self.params = params
         self.normPeaks = normPeaks
-        self.canceled: List[List[Tuple[Peak, tuple,
-                                       Tuple[np.ndarray, np.ndarray]]]] = []
+        self.canceled: List[List[OribitoolBase.Peak]] = []
         self._func = None
 
     def rm(self, index: Union[int, List]):
@@ -462,46 +285,34 @@ class PeakFitFunc(OribitoolAbstract.PeakFitFunc):
         indexes = sorted(copy.copy(indexes), reverse=True)
         removed = []
         for i in indexes:
-            peak = self.peaks.pop(i)
-            param = self.params.pop(i)
             normPeak = self.normPeaks.pop(i)
-            removed.append((peak, param, normPeak))
+            removed.append(normPeak)
         self.canceled.append(removed)
 
         self._func = None
 
-    def cancel(self) -> List[Tuple[np.ndarray, np.ndarray]]:
+    def cancel(self) -> List[OribitoolBase.Peak]:
         if len(self.canceled) == 0:
             return []
         removed = self.canceled.pop()
         normPeaks = []
-        for r in removed:
-            peak, param, normPeak = r
-            self.peaks.append(peak)
-            self.params.append(param)
+        for peak in removed:
             self.normPeaks.append(normPeak)
             normPeaks.append(normPeak)
         self._func = None
         return normPeaks
 
     @property
-    def func(self) -> OribitoolAbstract.FitPeakFunc:
-        if self._func is None and len(self.params) > 0:
-            self._func = self.Func(self.params)
+    def func(self) -> OribitoolFunc.NormalDistributionFunc:
+        if self._func is None and len(self.normPeaks) > 0:
+            self._func = self.Func(
+                [peak.fittedParam for peak in self.normPeaks])
         return self._func
 
-    def fitPeak(self, peak: Peak, num: int = None, force:bool=False) -> List[FittedPeak]:
-        params = self.func.splitPeakAsParams(peak, num, force)
-        peaks = []
-        num = len(params)
-        for param in params:
-            peaks.append(FittedPeak(peak, self.func,
-                                    fittedParam=param, peaksNum=num))
-        if len(peaks) > 1:
-            peaks.sort(key=lambda peak: peak.peakPosition)
-        return peaks
+    def fitPeak(self, peak: OribitoolBase.Peak, num: int = None, force: bool = False) -> List[OribitoolBase.Peak]:
+        return self.func.splitPeak(peak, num, force)
 
-    def fitPeaks(self, peaks: List[Peak], sendStatus=OribitoolFunc.nullSendStatus) -> List[FittedPeak]:
+    def fitPeaks(self, peaks: List[OribitoolBase.Peak], sendStatus=OribitoolFunc.nullSendStatus) -> List[OribitoolBase.Peak]:
         '''
         if peaks are sorted, ret will be sorted be peakPosition
         '''
@@ -511,13 +322,12 @@ class PeakFitFunc(OribitoolAbstract.PeakFitFunc):
         return fittedPeaks
 
 
-class CalibrateMass(object):
+class CalibrateMass:
     '''
     calibrate for file
     '''
 
-    def __init__(self, fileTime, averagedSpectra: List[OribitoolAbstract.Spectrum], peakFitFunc: PeakFitFunc, ionList: List[OribitoolFormula.Formula], funcArgs, ppm=5e-6, useNIons=None):
-        ppm *= 1e-6
+    def __init__(self, fileTime, averagedSpectra: List[OribitoolBase.Spectrum], peakFitFunc: PeakFitFunc, ionList: List[OribitoolFormula.Formula], funcArgs, ppm=5e-6, useNIons=None):
         ionsMz = []
         ionsMzTho = np.zeros(len(ionList))
         for index, ion in enumerate(ionList):
@@ -526,8 +336,10 @@ class CalibrateMass(object):
             maxDelta = 0.1
             mzRange = (mass-maxDelta, mass+maxDelta)
 
-            def process(spectrum: OribitoolAbstract.Spectrum):
-                peaks = getPeaks(spectrum, mzRange=mzRange)
+            def process(spectrum: OribitoolBase.Spectrum):
+                r = OribitoolFunc.indexBetween(spectrum.peaks, mzRange, method=(
+                    lambda peaks, index: peaks[index].mz.min()))
+                peaks = spectrum.peaks[r.start:r.stop]
                 peaks = peakFitFunc.fitPeaks(peaks)
                 if len(peaks) == 0:
                     return mass-2*maxDelta
@@ -564,246 +376,146 @@ class CalibrateMass(object):
         self._Func = Func
         self._func = func
 
-    @property
-    def func(self) -> OribitoolAbstract.MassCalibrationFunc:
-        return self._func
-
-
-class CalibratedPeak(Peak, OribitoolAbstract.CalibratedPeak):
-    def __init__(self, mz: np.ndarray, intensity: np.ndarray, indexRange: range, originalPeak: Peak):
-        self.originalpeak = originalPeak
-        self._indexRange = indexRange
-        self._mz = mz
-        self._intensity = intensity
-        self._spectrum = originalPeak.spectrum
-
-
-class CalibratedSpectrum(OribitoolAbstract.CalibratedSpectrum):
-    '''
-    before calibrate: split spectrum into peaks
-    '''
-
-    def __init__(self, fileTime, originalSpectrum: OribitoolAbstract.Spectrum, timeRange: Tuple[datetime.datetime, datetime.datetime], massCalibrator: CalibrateMass):
-        '''
-        before calibrate: split spectrum into peaks
-        '''
-        self._fileTime = fileTime
-        self._origin = originalSpectrum
-
-        peaks = getPeaks(originalSpectrum)
-        mz = np.concatenate([peak.mz for peak in peaks])
-        intensity = np.concatenate([peak.intensity for peak in peaks])
-        calibratedPeaks = []
+    def fitSpectrum(self, spectrum: OribitoolBase.Spectrum) -> OribitoolBase.Spectrum:
+        newSpectrum = copy.copy(spectrum)
+        peaks = newSpectrum.peaks
+        newSpectrum.mz = self._func.predictMz(
+            np.concatenate([peak.mz for peak in peaks]))
+        newSpectrum.intensity = np.concatenate(
+            [peak.intensity for peak in peaks])
+        newPeaks = []
         start = 0
-
-        for peak in peaks:
+        for peak in newSpectrum.peaks:
             stop = start + len(peak.mz)
-            calibratedPeak = CalibratedPeak(
-                mz, intensity, range(start, stop), peak)
-            calibratedPeaks.append(calibratedPeak)
+            newPeak: OribitoolBase.Peak = peak.copy(
+                newSpectrum, range(start, stop))
+            newPeaks.append(newPeak)
             start = stop
-        self._mz = mz
-        self._intensity = intensity
-        self._peaks = calibratedPeaks
-        self._startTime = timeRange[0]
-        self._endTime = timeRange[1]
-        self.calibrator = massCalibrator
-        self.calibrated = False
-
-    @property
-    def mz(self):
-        if not self.calibrated:
-            self._mz = self.calibrator.func.predictMz(self._mz)
-            self.calibrated = True
-        return self._mz
-
-    @property
-    def peaks(self):
-        if not self.calibrated:
-            self._mz = self.calibrator.func.predictMz(self._mz)
-            self.calibrated = True
-        return self._peaks
-
-    @property
-    def intensity(self):
-        return self._intensity
+        newSpectrum.peaks = newPeaks
+        return newSpectrum
+    
+    @staticmethod
+    def fitSpectra(fileTime:datetime.datetime, massCalibrate, spectra: List[OribitoolBase.Spectrum]) -> List[OribitoolBase.Spectrum]:
+        return [massCalibrate.fitSpectrum(spectrum) for spectrum in spectra]
 
 
-class StandardPeak(OribitoolAbstract.StandardPeak):
-    pass
 
+def fitUseMassList(massList: OribitoolBase.MassList, spectrum: OribitoolBase.Spectrum, peakFitFunc: PeakFitFunc, sendStatus=OribitoolBase.nullSendStatus):
+    '''
+    len(ret)==len(massList)
+    '''
+    peaks = spectrum.peaks
+    fileTime = spectrum.fileTime
+    lsIndex = 0
+    lIndex = 0
+    length = len(peaks)
+    sLength = len(self)
+    ppm = massList.ppm
+    minRatio = 1 - ppm
+    maxRatio = 1 + ppm
 
-class MassList(OribitoolAbstract.MassList):
-    def addPeaks(self, peaks: Union[StandardPeak, List[StandardPeak]]):
-        if isinstance(peaks, OribitoolAbstract.StandardPeak):
-            peaks = [copy.copy(peaks)]
-        else:
-            peaks = [copy.copy(peak) for peak in peaks]
-        peaks.sort(key=lambda peak: peak.peakPosition)
-        for peak in peaks:
-            if len(peak.formulaList) == 1:
-                peak.peakPosition=peak.formulaList[0].mass()
-        peaks1 = self._peaks
-        peaks2 = peaks
-        iter1 = OribitoolFunc.iterator(peaks1)
-        iter2 = OribitoolFunc.iterator(peaks2)
-        peaks = []
-        ppm = self.ppm
-        while not (iter1.end and iter2.end):
-            if iter1.end:
-                peaks.extend(peaks2[iter2.index:])
+    msg = 'fit using mass list'
+
+    fittedPeaks = []
+    while lsIndex < sLength:
+        rsIndex = lsIndex + 1
+        sendStatus(fileTime, msg, lsIndex, sLength)
+        lIndex = OribitoolFunc.indexFirstNotSmallerThan(
+            peaks, massList[lsIndex].peakPosition * minRatio, (lIndex, length), (lambda peaks, index: peaks[index].mz.max()))
+        rIndex = None
+        while True:
+            rIndex = OribitoolFunc.indexFirstBiggerThan(
+                peaks, massList[rsIndex-1].peakPosition * maxRatio, (lIndex, length), (lambda peaks, index: peaks[index].mz.min()))
+            tmp = OribitoolFunc.indexFirstBiggerThan(massList, peaks[rIndex-1].mz.max(
+            ) * maxRatio, (rsIndex, sLength), (lambda seaks, index: peaks[index].peakPosition))
+            if tmp == rsIndex:
                 break
-            if iter2.end:
-                peaks.extend(peaks1[iter1.index:])
-                break
-            peak1:StandardPeak = iter1.value
-            peak2 :StandardPeak= iter2.value
-            if abs(peak2.peakPosition / peak1.peakPosition - 1) < ppm:
-                if peak1.handled and not peak2.handled:
-                    peaks.append(peak1)
-                    iter1.next()
-                elif not peak1.handled and peak2.handled:
-                    peaks.append(peak2)
-                    iter2.next()
-                else:
-                    if peak1.formulaList == peak2.formulaList:
-                        peak = StandardPeak((peak1.peakPosition + peak2.peakPosition) / 2,
-                                            peak1.formulaList.copy, max(peak1.subpeaks, peak2.subpeaks), not(peak1.isStart or peak2.isStart), peak1.handled)
-                        peaks.append(peak)
-                    elif peak1.handled and peak2.handled:
-                        raise ValueError("can't merge peak in mass list at %.5f with peak at %.5f" % (
-                            peak1.peakPosition, peak2.peakPosition))
-                    elif len(peak1.formulaList) < len(peak2.formulaList):
-                        peaks.append(peak1)
-                    elif len(peak1.formulaList) > len(peak2.formulaList):
-                        peaks.append(peak2)
-                    else:
-                        formulaList = list(
-                            set(peak1.formulaList) & set(peak2.formulaList))
-                        formulaList.sort(key=lambda formula: formula.mass())
-                        position = formulaList[0].mass() if len(formulaList) == 1 else(
-                            peak1.peakPosition + peak2.peakPosition) / 2
-                        peak = StandardPeak(position, formulaList, max(
-                            peak1.subpeaks, peak2.subpeaks), not(peak1.isStart or peak2.isStart))
-                        peaks.append(peak)
-                    iter1.next()
-                    iter2.next()
-            elif peak1.peakPosition < peak2.peakPosition:
-                peaks.append(peak1)
-                iter1.next()
-            else:
-                peaks.append(peak2)
-                iter2.next()
-        self._peaks = peaks
+            rsIndex = tmp
+        fpeaks = peakFitFunc.fitPeaks(peaks[lIndex:rIndex])
+        fittedPeaks.extend(OribitoolFunc.standardPeakFittedPeakSimpleMatch(
+            massList, fpeaks, ppm, srange=range(lsIndex, rsIndex)))
+        lsIndex = rsIndex
 
-    def fit(self, spectrum: CalibratedSpectrum, peakFitFunc: PeakFitFunc, ppm=1e-6, sendStatus=OribitoolFunc.nullSendStatus) -> List[Tuple[FittedPeak,StandardPeak]]:
-        '''
-        len(ret)==len(massList)
-        '''
-        peaks = spectrum.peaks
-        fileTime=spectrum.fileTime
-        lsIndex = 0
-        lIndex = 0
-        length = len(peaks)
-        sLength = len(self)
-        minRatio = 1 - ppm
-        maxRatio = 1 + ppm
+    sendStatus(fileTime, msg, sLength, sLength)
+    return fittedPeaks
 
-        msg = 'fit using mass list'
 
-        fittedPeaks=[]
-        while lsIndex < sLength:
-            rsIndex = lsIndex + 1
-            sendStatus(fileTime,msg,lsIndex,sLength)
-            lIndex = OribitoolFunc.indexFirstNotSmallerThan(peaks, self[lsIndex].peakPosition * minRatio, (lIndex, length), (lambda peaks, index: peaks[index].mz.max()))
-            rIndex = None
-            while True:
-                rIndex = OribitoolFunc.indexFirstBiggerThan(peaks, self[rsIndex-1].peakPosition * maxRatio, (lIndex, length), (lambda peaks, index: peaks[index].mz.min()))
-                tmp = OribitoolFunc.indexFirstBiggerThan(self, peaks[rIndex-1].mz.max() * maxRatio, (rsIndex, sLength), (lambda speaks, index: speaks[index].peakPosition))
-                if tmp == rsIndex:
-                    break
-                rsIndex = tmp
-            fpeaks = peakFitFunc.fitPeaks(peaks[lIndex:rIndex])
-            fittedPeaks.extend(OribitoolFunc.standardPeakFittedPeakSimpleMatch(self, fpeaks, ppm, srange=range(lsIndex, rsIndex)))
-            lsIndex = rsIndex
-        
-        sendStatus(fileTime,msg,sLength,sLength)
-        return fittedPeaks
+def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OribitoolBase.Spectrum], peakFitFunc: PeakFitFunc, tag: str, sendStatus=OribitoolFunc.nullSendStatus):
+    '''
+    @mz:
+    @ppm: example 1e-6
+    '''
+    time = []
+    fmz = []
+    intensity = []
+    minmz = mz * (1 - ppm)
+    maxmz = mz * (1 + ppm)
 
-class TimeSeries(OribitoolAbstract.TimeSeries):
-    def __init__(self, mz:float, ppm:float, spectra: List[CalibratedSpectrum], peakFitFunc: PeakFitFunc, tag: str, sendStatus=OribitoolFunc.nullSendStatus):
-        '''
-        @mz:
-        @ppm: example 1e-6
-        '''
-        time = []
-        fmz = []
-        intensity = []
-        minmz = mz * (1 - ppm)
-        maxmz = mz * (1 + ppm)
+    length = len(calibratedSpectra)
+    msg = "calc peak at %f" % mz
+    for index, calibratedSpectrum in enumerate(calibratedSpectra):
+        sendStatus(calibratedSpectrum.fileTime, msg, index, length)
 
-        length = len(spectra)
-        msg = "calc peak at %f" % mz
-        for index, spectrum in enumerate(spectra):
-            sendStatus(spectrum.fileTime, msg, index, length)
+        peaks = calibratedSpectrum.peaks
+        lIndex = OribitoolFunc.indexFirstNotSmallerThan(
+            peaks, minmz, method=(lambda peaks, i: peaks[i].mz.max()))
+        rIndex = OribitoolFunc.indexFirstBiggerThan(
+            peaks, maxmz, method=(lambda peaks, i: peaks[i].mz.min()))
+        peaks = peakFitFunc.fitPeaks(peaks[lIndex:rIndex])
+        if len(peaks) > 0:
+            i = 0 if len(peaks) == 1 else OribitoolFunc.indexNearest(
+                peaks, mz, method=(lambda peaks, i: peaks[i].peakPosition))
+            peak: FittedPeak = peaks[i]
+            if peak.peakPosition > minmz and peak.peakPosition < maxmz:
+                time.append(calibratedSpectrum.timeRange[0])  # use start time
+                fmz.append(peak.peakPosition)
+                intensity.append(peak.peakIntensity)
+    time = np.array(time, dtype=np.datetime64)
+    fmz = np.array(fmz)
+    intensity = np.array(intensity)
 
-            peaks=spectrum.peaks
-            lIndex = OribitoolFunc.indexFirstNotSmallerThan(peaks, minmz, method=(lambda peaks, i: peaks[i].mz.max()))
-            rIndex = OribitoolFunc.indexFirstBiggerThan(peaks, maxmz, method=(lambda peaks, i: peaks[i].mz.min()))
-            fpeaks = peakFitFunc.fitPeaks(peaks[lIndex:rIndex])
-            if len(fpeaks) > 0:
-                i = 0 if len(fpeaks) == 1 else OribitoolFunc.indexNearest(fpeaks, mz, method=(lambda fpeaks, i: fpeaks[i].peakPosition))
-                fpeak:FittedPeak = fpeaks[i]
-                if fpeak.peakPosition > minmz and fpeak.peakPosition < maxmz:
-                    time.append(spectrum.startTime)  # use start time
-                    fmz.append(fpeak.peakPosition)
-                    intensity.append(fpeak.peakIntensity)
-        time=np.array(time, dtype=np.datetime64)
-        fmz = np.array(fmz)
-        intensity = np.array(intensity)
+    sendStatus(calibratedSpectrum.fileTime, msg, index, length)
 
-        sendStatus(spectrum.fileTime, msg, index, length)
-
-        self.mzAt = mz
-        self.ppm = ppm
-        
-        self._time = time
-        self._intensity = intensity
-        self._mz = fmz
-        self._tag = tag
+    return OribitoolBase.TimeSeries(time, intensity, mz, ppm, tag)
 
 
 class Workspace(object):
     def __init__(self):
-        # only differ in this step
-        self.showedSpectra1Type: ShowedSpectraType = None
-        # @showFileSpectra1
-        self.showedSpectra1FileTime = None
-        # @showAveragedSpectra1
-        self.showedAveragedSpectra1: AveragedSpectra = None
-
+        # @showSpectra1
+        self.spectra1Operators: List[Union[GetSpectrum,
+                                           AverageSpectrum]] = None
         # @showSpectrum1
-        self.showedSpectrum1: OribitoolAbstract.Spectrum = None
+        self.spectrum1: OribitoolBase.Spectrum = None
+        self.noise: (np.ndarray, np.ndarray) = None
+        self.denoisedSpectrum1: OribitoolBase.Spectrum = None
+        
+        # @showPeakFit2Spectra
+        self.spectra2Noises: List[np.ndarray] = None
+        self.denoisedSpectra2: List[OribitoolBase.Spectrum] = None
+        # datetime.datetime, List[Spectrum]
+        self.fileTimeSpectraMaps: SortedDict = None
 
         # @showPeakFitFunc
         self.peakFitFunc: PeakFitFunc = None
         # @showCalibrationInfoAll
-        # fileTime ->
+        # datetime.datetime, CalibrateMass
         # HNO3NO3-,C6H3O2NNO3-,C6H5O3NNO3-,C6H4O5N2NO3-,C8H12O10N2NO3-,C10H17O10N3NO3-
-        self.fileTimeCalibrations: Dict[datetime.datetime, CalibrateMass] = {}
-        # @showSpectra2
-        self.calibratedSpectra2: List[CalibratedSpectrum] = None
-        self.showedSpectrum2Index: int = None
-        # @showSpectra2Peaks
-        self.showedSpectrum2Peaks: List[Tuple[FittedPeak, StandardPeak]] = None
+        self.fileTimeCalibrations: SortedDict = None
 
-        # @showSpectra2Peak
-        self.showedSpectrum2PeakRange: range = None
-        self.showedSpectrum2Peak: List[Tuple[FittedPeak, StandardPeak]] = None
+        # @showSpectra3
+        self.calibratedSpectra3: List[OribitoolBase.Spectrum] = None
+        self.showedSpectrum3Index: int = None
+        # @showSpectra3Peaks
+        self.spectrum3Peaks: List[OribitoolBase.Peak] = None
+        self.spectrum3Residual:np.ndarray = None
+
+        # @showSpectra3Peak
+        self.showedSpectrum3PeakRange: range = None
+        self.showedSpectrum3Peak: List[OribitoolBase.Peak] = None
 
         # @showMassList
         self.massList: MassList = None
 
         # @showTimeSerieses
-        self.showedTimeSerieses: List[TimeSeries] = []
-        self.showedTimeSeriesIndex = None
+        self.timeSerieses: List[TimeSeries] = []
+        self.timeSeriesIndex = None
