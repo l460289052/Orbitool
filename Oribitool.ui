@@ -60,7 +60,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideNone</enum>
@@ -587,37 +587,14 @@ file from list</string>
                 <string>Background</string>
                </property>
                <layout class="QFormLayout" name="formLayout_7">
-                <item row="1" column="1">
-                 <widget class="QDoubleSpinBox" name="denoiseStepDoubleSpinBox">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimum">
-                   <double>0.010000000000000</double>
-                  </property>
-                  <property name="value">
-                   <double>1.000000000000000</double>
-                  </property>
-                 </widget>
-                </item>
                 <item row="1" column="0">
-                 <widget class="QLabel" name="label_24">
-                  <property name="text">
-                   <string>block width</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
                  <widget class="QLabel" name="label_25">
                   <property name="text">
                    <string>quantile</string>
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="1">
+                <item row="1" column="1">
                  <widget class="QDoubleSpinBox" name="denoiseQuantileDoubleSpinBox">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -633,38 +610,14 @@ file from list</string>
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="0">
-                 <widget class="QLabel" name="label_26">
-                  <property name="text">
-                   <string>times</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="1">
-                 <widget class="QDoubleSpinBox" name="denoiseTimesDoubleSpinBox">
-                  <property name="minimum">
-                   <double>0.010000000000000</double>
-                  </property>
-                  <property name="value">
-                   <double>3.000000000000000</double>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="0">
+                <item row="2" column="0">
                  <widget class="QLabel" name="label_27">
                   <property name="text">
                    <string>strategy</string>
                   </property>
                  </widget>
                 </item>
-                <item row="8" column="0" colspan="2">
-                 <widget class="QPushButton" name="denoiseFinishPushButton">
-                  <property name="text">
-                   <string>Denoising for every spectrum</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="1">
+                <item row="2" column="1">
                  <widget class="QRadioButton" name="denoiseRemoveOnlyRadioButton">
                   <property name="text">
                    <string>remove background peaks</string>
@@ -674,7 +627,7 @@ file from list</string>
                   </property>
                  </widget>
                 </item>
-                <item row="5" column="1">
+                <item row="3" column="1">
                  <widget class="QRadioButton" name="denoiseRemoveMinusRadioButton">
                   <property name="text">
                    <string>remove and minus</string>
@@ -684,7 +637,7 @@ file from list</string>
                   </property>
                  </widget>
                 </item>
-                <item row="6" column="0" colspan="2">
+                <item row="4" column="0" colspan="2">
                  <layout class="QHBoxLayout" name="horizontalLayout_19">
                   <item>
                    <widget class="QPushButton" name="denoiseRecalcPushButton">
@@ -701,6 +654,13 @@ file from list</string>
                    </widget>
                   </item>
                  </layout>
+                </item>
+                <item row="6" column="0" colspan="2">
+                 <widget class="QPushButton" name="denoiseFinishPushButton">
+                  <property name="text">
+                   <string>Denoising for every spectrum</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </widget>

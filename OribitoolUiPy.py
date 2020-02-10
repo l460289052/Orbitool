@@ -842,13 +842,12 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
         operator = workspace.spectra1Operators[index]
 
-        step = self.denoiseStepDoubleSpinBox.value()
         quantile = self.denoiseQuantileDoubleSpinBox.value()
 
         def process(sendStatus):
             spectrum = operator(fileList, sendStatus)
             peakAt, noise = OribitoolFunc.getNoise(
-                spectrum, step, quantile, sendStatus)
+                spectrum, quantile, sendStatus)
             denoisedSpectrum = OribitoolFunc.denoiseWithNoise(
                 spectrum, noise, peakAt, minus, sendStatus)
             return (spectrum, noise, denoisedSpectrum)
@@ -868,7 +867,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @restore
     def showSpectrum1(self, spectrum: OribitoolBase.Spectrum, noise: (np.ndarray, np.ndarray), denoisedSpectrum1: OribitoolBase.Spectrum):
-        times = self.denoiseTimesDoubleSpinBox.value()
         table = self.spectrum1PropertyTableWidget
         value = [('file', self.fileList[spectrum.fileTime].name)]
         table.setRowCount(len(value))
@@ -903,7 +901,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 linewidth=1, color='b', label='origin')
         ax.plot(denoisedSpectrum1.mz, denoisedSpectrum1.intensity,
                 linewidth=1, color='g', label='denoised')#, linestyle='--')
-        ax.plot(noise[0], noise[1] * times,
+        ax.plot(noise[0], noise[1],
                 linewidth=0.5, color='r', label='LOD')
 
         ax.legend()
@@ -925,14 +923,13 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @threadBegin
     @withoutArgs
     def qDenoiseRecalc(self):
-        step = self.denoiseStepDoubleSpinBox.value()
         quantile = self.denoiseQuantileDoubleSpinBox.value()
         minus = self.denoiseRemoveMinusRadioButton.isChecked()
         workspace = self.workspace
         spectrum = workspace.spectrum1
 
         thread = QThread(OribitoolFunc.denoise,
-                         (spectrum, step, quantile, minus))
+                         (spectrum, quantile, minus))
         thread.finished.connect(self.qDenoiseRecalcFinished)
         return thread
 
@@ -946,7 +943,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @threadBegin
     def qDenoise(self, withDenoising=True):
-        step = self.denoiseStepDoubleSpinBox.value()
         quantile = self.denoiseQuantileDoubleSpinBox.value()
         minus = self.denoiseRemoveMinusRadioButton.isChecked()
         fileList = self.fileList
@@ -978,7 +974,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                             sendStatus(operator.fileTime, msg, index, length)
                             spectrum = operator(fileList)
                             rets.append(pool.apply_async(
-                                OribitoolFunc.denoise, (spectrum, step, quantile, minus)))
+                                OribitoolFunc.denoise, (spectrum, quantile, minus)))
 
                         msg = "denoising"
                         for index, ret in enumerate(rets):

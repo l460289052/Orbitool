@@ -20,12 +20,31 @@ def checkPathExt(ext):
 	return f
 def checkOpenCsv(func):
 	@wraps(func)
-	def decorator(path, *args):
+	def decorator(path, *args, **kwargs):
 		if len(path) > 0:
 			with open(os.path.splitext(path)[0] + '.csv', 'w', newline='') as csvfile:
 				csvwriter = csv.writer(csvfile)
-				return func(csvwriter, *args)
+				return func(csvwriter, *args, **kwargs)
 	return decorator
+
+@checkOpenCsv
+def exportCsv(writer: csv.writer, *args, header: Iterable = None):
+	'''
+	all args should have same length
+	eg. exportCsv('tmp.csv', mz ,intensity, ['mz','intensity'])
+	'''
+	if len(args) == 0:
+		return
+	length = len(args[0])
+	for arg in args:
+		if len(arg) != length:
+			raise ValueError('all args should have same length')
+	if header is not None and len(header) > 0:
+		writer.writerow(header)
+	for index in range(length):
+		writer.writerow([arg[index] for arg in args])
+	print('finish exporting')
+
 
 @checkOpenCsv
 def exportSpectrum(writer:csv.writer, spectrum: Spectrum, sendStatus=nullSendStatus):

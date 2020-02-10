@@ -271,32 +271,33 @@ def peakAt_njit(intensity: np.ndarray) -> np.ndarray:
     return peakAt
 
 @numba.njit(cache=True, parallel=True)
-def _getNoise_njit(mz, intensity, step, quantile) -> np.ndarray:
+def _getNoise_njit(mz, intensity,  quantile) -> np.ndarray:
     minMz = np.floor(mz.min()) # float
     maxMz = np.ceil(mz.max())  # float
     peakAt = peakAt_njit(intensity)
     mz = mz[1:-1][peakAt]
     intensity = intensity[1:-1][peakAt]
-    x = np.arange(minMz, maxMz, step)
+    x = np.arange(minMz, maxMz)
     y = np.zeros_like(x)
     for index in numba.prange(len(x)):
         xx = x[index]
-        l, r = indexBetween_njit(mz, (xx, xx + step))
+        l, r = indexBetween_njit(mz, (xx + 0.5, xx + 0.8))
         if r - l > 0:
-            y[index] = np.quantile(intensity[l:r], quantile)
+            ints = intensity[l:r]
+            y[index] = np.quantile(ints, quantile) + 3 * np.std(ints)
         else:
             y[index] = 0
     return peakAt, x, y
 
-def getNoise(spectrum: OribitoolBase.Spectrum, step=1.0, quantile=0.5, sendStatus = nullSendStatus) -> Tuple[np.ndarray, np.ndarray]:
+def getNoise(spectrum: OribitoolBase.Spectrum,  quantile=0.5, sendStatus = nullSendStatus) -> Tuple[np.ndarray, np.ndarray]:
     """
     @quantile: sort peaks by intensity, select num*quantile-th biggest peak
     """
     fileTime = spectrum.fileTime
     msg = "calc noise"
     sendStatus(fileTime, msg, -1, 0)
-    peakAt, x, y = _getNoise_njit(spectrum.mz, spectrum.intensity, step, quantile)
-    y = lowess.lowess(y, x, frac=0.2, is_sorted=True, return_sorted=False)
+    peakAt, x, y = _getNoise_njit(spectrum.mz, spectrum.intensity,  quantile)
+    # y = lowess.lowess(y, x, frac=0.2, is_sorted=True, return_sorted=False)
     return peakAt, (x, y)
 
 @numba.njit(cache=True, parallel=True)
@@ -307,10 +308,9 @@ def _denoiseWithNoise_njit(mz: np.ndarray, intensity: np.ndarray, noise: (np.nda
     peakIntensity = intensity[1:-1][peakAt]
     newIntensity = np.zeros_like(intensity)
     x, y = noise
-    step = x[1] - x[0]
     for i in numba.prange(len(x)):
         xx = x[i]
-        l, r = indexBetween_njit(peakMz, (xx, xx + step))
+        l, r = indexBetween_njit(peakMz, (xx, xx + 1))
         subInt = peakIntensity[l:r]
         subInd = index[l:r]
         arg = subInt.argsort()
@@ -355,8 +355,8 @@ def denoiseWithNoise(spectrum: OribitoolBase.Spectrum, noise: (np.ndarray, np.nd
     newSpectrum.peaks = getPeaks(newSpectrum)
     return newSpectrum
         
-def denoise(spectrum: OribitoolBase.Spectrum, step=1.0, quantile=0.5, minus=False, sendStatus=OribitoolBase.nullSendStatus):
-    peakAt, noise = getNoise(spectrum, step, quantile, sendStatus)
+def denoise(spectrum: OribitoolBase.Spectrum,  quantile=0.5, minus=False, sendStatus=OribitoolBase.nullSendStatus):
+    peakAt, noise = getNoise(spectrum,  quantile, sendStatus)
     return noise, denoiseWithNoise(spectrum, noise, peakAt, minus, sendStatus)
 
 class NormalDistributionFunc:
