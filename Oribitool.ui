@@ -60,7 +60,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>4</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideNone</enum>
@@ -1050,7 +1050,7 @@ file from list</string>
                   <double>0.010000000000000</double>
                  </property>
                  <property name="value">
-                  <double>5.000000000000000</double>
+                  <double>2.000000000000000</double>
                  </property>
                 </widget>
                </item>
@@ -1074,6 +1074,9 @@ file from list</string>
                  </property>
                  <property name="maximum">
                   <number>4</number>
+                 </property>
+                 <property name="value">
+                  <number>2</number>
                  </property>
                 </widget>
                </item>
@@ -1353,12 +1356,12 @@ and continue</string>
                </column>
                <column>
                 <property name="text">
-                 <string>intensity</string>
+                 <string>formula</string>
                 </property>
                </column>
                <column>
                 <property name="text">
-                 <string>formula</string>
+                 <string>intensity</string>
                 </property>
                </column>
                <column>
@@ -1627,17 +1630,17 @@ and continue</string>
                     </attribute>
                     <column>
                      <property name="text">
+                      <string>formula</string>
+                     </property>
+                    </column>
+                    <column>
+                     <property name="text">
                       <string>position</string>
                      </property>
                     </column>
                     <column>
                      <property name="text">
                       <string>intensity</string>
-                     </property>
-                    </column>
-                    <column>
-                     <property name="text">
-                      <string>formula</string>
                      </property>
                     </column>
                    </widget>
@@ -1869,6 +1872,9 @@ and continue</string>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="sizeAdjustPolicy">
+                <enum>QAbstractScrollArea::AdjustIgnored</enum>
+               </property>
                <property name="editTriggers">
                 <set>QAbstractItemView::NoEditTriggers</set>
                </property>
@@ -1880,17 +1886,17 @@ and continue</string>
                </attribute>
                <column>
                 <property name="text">
+                 <string>tag</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
                  <string>mz</string>
                 </property>
                </column>
                <column>
                 <property name="text">
                  <string>ppm</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>tag</string>
                 </property>
                </column>
               </widget>
@@ -1951,6 +1957,12 @@ and continue</string>
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>200</width>
+                 <height>0</height>
+                </size>
                </property>
                <property name="editTriggers">
                 <set>QAbstractItemView::NoEditTriggers</set>
@@ -2340,7 +2352,7 @@ and continue</string>
             <widget class="QLineEdit" name="massListLineEdit"/>
            </item>
            <item>
-            <widget class="QPushButton" name="massListPushButton">
+            <widget class="QPushButton" name="massListAddPushButton">
              <property name="text">
               <string>Add</string>
              </property>

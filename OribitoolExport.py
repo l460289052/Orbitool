@@ -109,7 +109,7 @@ def exportTimeSerieses(writer:csv.writer, timeSerieses: List[TimeSeries], sendSt
 		raise ValueError('No time serieses (selected)')
 	time = []
 	now = datetime.now()
-	deltaTime = np.timedelta64(timedelta(milliseconds=1))
+	deltaTime = np.timedelta64(timedelta(seconds=1))
 	for index, timeSeries in enumerate(timeSerieses):
 		sendStatus(now, msg, index, slength)
 		time.extend(timeSeries.time)
@@ -131,8 +131,10 @@ def exportTimeSerieses(writer:csv.writer, timeSerieses: List[TimeSeries], sendSt
 	for index in range(length):
 		if index % 10 == 0:
 			sendStatus(now, msg, index, length)
+		current = time[index]
 		select = indexes < maxIndexes
-		row = [time[index].astype(datetime).strftime(r"%Y%m%d %H:%M:%S")]
+		select &= np.array([(np.abs(timeSerieses[i].time[indexes[i]] - current) < deltaTime) if select[i] else False for i in range(slength)])
+		row = [current.astype(datetime).strftime(OribitoolBase.timeFormat)]
 		row.extend([timeSerieses[i].intensity[indexes[i]] if select[i] else '' for i in range(slength) ])
 		indexes[select] += 1
 		writer.writerow(row)
@@ -187,7 +189,7 @@ def exportCalibrationInfo(writer:csv.writer, fileList:FileList, ionList:List[Tup
 	for index, (fileTime, calibrator) in enumerate(calibrators.items()):
 		sendStatus(fileTime, msg, index, length)
 		file = fileList[fileTime]
-		row = [file.name, fileTime.strftime(r"%Y%m%d %H:%M:%S")]
+		row = [file.name, fileTime.strftime(OribitoolBase.timeFormat)]
 		row.extend(list(calibrator.ionsPpm * 1e6))
 		writer.writerow(row)
 

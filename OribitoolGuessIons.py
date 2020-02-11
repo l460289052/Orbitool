@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import math
 import re
 
@@ -169,7 +170,7 @@ class IonCalculator(object):
         self._calced_.clear()
 
     def _covered(self, left, right):
-        index = self._cover_.bisect_left(left)
+        index = self._cover_.bisect_left(left + 1e-6)
         if index > 0:
             return right <= self._cover_.peekitem(index - 1)[1]
         return False

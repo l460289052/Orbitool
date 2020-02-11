@@ -6,6 +6,7 @@ from typing import List, Tuple, Union, Iterable
 
 import numpy as np
 
+timeFormat = r"%Y%m%d %H:%M:%S"
 
 class Formula(abc.ABC):
     @abc.abstractmethod
@@ -24,23 +25,24 @@ class Formula(abc.ABC):
     def __hash__(self):
         pass
 
+
 def nullSendStatus(fileTime: datetime, msg: str, index: int, length: int):
     pass
 
 
 class Spectrum:
-    def __init__(self, fileTime: datetime, mz: np.ndarray, intensity: np.ndarray, timeRange: (datetime, datetime), numRange:(int,int), originalSpectrum = None, peaks = None):
+    def __init__(self, fileTime: datetime, mz: np.ndarray, intensity: np.ndarray, timeRange: (datetime, datetime), numRange: (int, int), originalSpectrum=None, peaks=None):
         self.fileTime = fileTime
         self.mz = mz
         self.intensity = intensity
         self.timeRange = timeRange
         self.numRange = numRange
         self.originalSpectrum = originalSpectrum
-        self.peaks:List[Peak] = peaks
+        self.peaks: List[Peak] = peaks
 
 
 class Peak:
-    def __init__(self, spectrum: Spectrum, indexRange: range = None, mz = None, intensity = None, originalPeak = None, splitNum = None):
+    def __init__(self, spectrum: Spectrum, indexRange: range = None, mz=None, intensity=None, originalPeak=None, splitNum=None):
         self.spectrum = spectrum
         if indexRange is not None:
             self._mz = spectrum.mz
@@ -50,6 +52,10 @@ class Peak:
             self._mz = mz
             self._intensity = intensity
             self._indexRange = range(len(mz))
+        else:
+            self._mz = None
+            self._intensity = None
+            self._indexRange = None
         self.originalPeak = originalPeak
         self._splitNum = splitNum
         self.handled = False
@@ -63,18 +69,18 @@ class Peak:
     def addFormula(self, formulaList: List[Formula]):
         self.formulaList = formulaList
 
-    def copy(self, spectrum=None,indexRange: range = None, mz = None, intensity = None):
-        peak=None
+    def copy(self, spectrum=None, indexRange: range = None, mz=None, intensity=None):
+        peak = None
         if spectrum is None:
             peak = Peak(self.spectrum, self._indexRange, self.originalPeak)
         else:
-            peak = Peak(spectrum, indexRange, mz, intensity,self.originalPeak)
+            peak = Peak(spectrum, indexRange, mz, intensity, self.originalPeak)
         if hasattr(self, 'fittedParam'):
-            peak.addFittedParam(self.fittedParam, self.peakPosition, self.peakIntensity, self.area)
+            peak.addFittedParam(
+                self.fittedParam, self.peakPosition, self.peakIntensity, self.area)
         if hasattr(self, 'formulaList'):
             peak.addFormula(self.formulaList)
         return peak
-
 
     @property
     def mz(self) -> np.ndarray:
@@ -94,7 +100,7 @@ class Peak:
     def peakAt(self) -> np.ndarray:
         if hasattr(self, '_peakAt'):
             return getattr(self, '_peakAt')
-        a=self.intensity
+        a = self.intensity
         a = a[:-1] < a[1:]
         a = a[:-1] > a[1:]
         self._peakAt = a
@@ -106,6 +112,7 @@ class Peak:
         if self._splitNum is None:
             self._splitNum = np.sum(self.peakAt())
         return self._splitNum
+
 
 class iterator:
     def __init__(self, l: Iterable):
@@ -138,26 +145,31 @@ class iterator:
                 self._end = True
             self._index += 1
 
+
+class MassListPeak:
+    def __init__(self, peakPosition, formulaList, splitNum=1, handled=False):
+        self.peakPosition = peakPosition
+        self.formulaList = formulaList
+        self.splitNum = splitNum
+        self.handled = handled
+
+
 class MassList:
     def __init__(self, ppm=5e-7):
         self.ppm = ppm
         self._peaks: List[Peak] = []
 
-    def addPeaks(self, peaks: Union[Peak, List[Peak]]):
-        if isinstance(peaks, Peak):
-            peaks = [peaks.copy()]
-        else:
-            peaks = [peak.copy() for peak in peaks]
-        peaks.sort(key=lambda peak: peak.peakPosition)
+    def addPeaks(self, peaks: Union[Peak, List[Peak], MassListPeak, List[MassListPeak]]):
+        if not isinstance(peaks, Iterable):
+            peaks = [peaks]
         newPeaks = []
         for peak in peaks:
-            newPeak = Peak(None, splitNum=peak.splitNum)
-            newPeak.addFittedParam(peak.fittedParam, peak.peakPosition, peak.peakIntensity, peak.area)
-            newPeak.addFormula(peak.formulaList)
-            newPeak.handled = peak.handled
+            newPeak = MassListPeak(
+                peak.peakPosition, peak.formulaList, peak.splitNum, peak.handled)
             if len(newPeak.formulaList) == 1:
-                newPeak.peakPosition=newPeak.formulaList[0].mass()
+                newPeak.peakPosition = newPeak.formulaList[0].mass()
             newPeaks.append(newPeak)
+        newPeaks.sort(key=lambda peak: peak.peakPosition)
         peaks1 = self._peaks
         peaks2 = newPeaks
         iter1 = iterator(peaks1)
@@ -171,8 +183,8 @@ class MassList:
             if iter2.end:
                 peaks.extend(peaks1[iter1.index:])
                 break
-            peak1:Peak = iter1.value
-            peak2 :Peak= iter2.value
+            peak1: Peak = iter1.value
+            peak2: Peak = iter2.value
             if abs(peak2.peakPosition / peak1.peakPosition - 1) < ppm:
                 if peak1.handled and not peak2.handled:
                     peaks.append(peak1)
@@ -183,8 +195,9 @@ class MassList:
                 else:
                     if peak1.formulaList == peak2.formulaList:
                         peak = peak(None, max(peak1.subpeaks, peak2.subpeaks))
-                        peak.addFittedParam(None, (peak1.peakPosition + peak2.peakPosition) / 2)
-                        peak.handled=peak1.handled
+                        peak.addFittedParam(
+                            None, (peak1.peakPosition + peak2.peakPosition) / 2)
+                        peak.handled = peak1.handled
                         peaks.append(peak)
                     elif peak1.handled and peak2.handled:
                         raise ValueError("can't merge peak in mass list at %.5f with peak at %.5f using ppm = %.2f" % (
@@ -197,8 +210,9 @@ class MassList:
                         formulaList = list(
                             set(peak1.formulaList) & set(peak2.formulaList))
                         formulaList.sort(key=lambda formula: formula.mass())
-                        peak = Peak(None,max( peak1.subpeaks, peak2.subpeaks))
-                        peak.addFittedParam(None, formulaList[0].mass() if len(formulaList) == 1 else(peak1.peakPosition + peak2.peakPosition) / 2)
+                        peak = Peak(None, max(peak1.subpeaks, peak2.subpeaks))
+                        peak.addFittedParam(None, formulaList[0].mass() if len(
+                            formulaList) == 1 else(peak1.peakPosition + peak2.peakPosition) / 2)
                         peak.addFormula(formulaList)
                         peaks.append(peak)
                     iter1.next()
@@ -211,16 +225,16 @@ class MassList:
                 iter2.next()
         self._peaks = peaks
 
-
     def popPeaks(self, indexes: Union[int, List[int]]):
         if isinstance(indexes, int):
             indexes = [indexes]
         else:
-            indexes=indexes.copy()
+            indexes = indexes.copy()
             indexes.sort(reverse=True)
         poped = []
+        peaks = self._peaks
         for index in indexes:
-            poped.append(indexes.pop(index))
+            poped.append(peaks.pop(index))
         poped.reverse()
         return poped
 
@@ -238,7 +252,7 @@ class MassList:
 
 
 class TimeSeries:
-    def __init__(self, time:np.ndarray, intensity:np.ndarray, mz: float, ppm:float, tag:str):
+    def __init__(self, time: np.ndarray, intensity: np.ndarray, mz: float, ppm: float, tag: str):
         # np.datetime64
         self.time = time
         self.intensity = intensity
@@ -247,12 +261,11 @@ class TimeSeries:
         self.tag = tag
 
 
-
 class Operator(abc.ABC):
     @abc.abstractmethod
     def __init__(self, *args):
         pass
 
     @abc.abstractmethod
-    def __call__(self, sendStatus = nullSendStatus):
+    def __call__(self, sendStatus=nullSendStatus):
         return self.process(sendStatus)
