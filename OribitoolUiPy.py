@@ -164,7 +164,7 @@ def openfile(caption, filter=None, multi=False, folder=False):
                 @wraps(func)
                 def forfiles(self):
                     files, typ = QtWidgets.QFileDialog.getOpenFileNames(
-                        caption=caption, filter=filter)
+                        caption=caption, directory='./..', filter=filter)
                     if len(files) > 0:
                         return func(self, files)
                 return forfiles
@@ -174,7 +174,7 @@ def openfile(caption, filter=None, multi=False, folder=False):
                 @wraps(func)
                 def forfolder(self):
                     folder = QtWidgets.QFileDialog.getExistingDirectory(
-                        caption=caption)
+                        caption=caption, directory='./..')
                     if len(folder) > 0 and os.path.isdir(folder):
                         return func(self, folder)
                 return forfolder
@@ -182,7 +182,7 @@ def openfile(caption, filter=None, multi=False, folder=False):
                 @wraps(func)
                 def forfile(self):
                     file, typ = QtWidgets.QFileDialog.getOpenFileName(
-                        caption=caption, filter=filter)
+                        caption=caption, directory='./..', filter=filter)
                     if len(file) > 0 and os.path.isfile(file):
                         return func(self, file)
                 return forfile
@@ -200,6 +200,7 @@ def savefile(caption, filter):
         def decorator(self):
             path, typ = QtWidgets.QFileDialog.getSaveFileName(
                 caption=caption,
+                directory='./..',
                 initialFilter=filter,
                 filter=filter,
                 options=QtWidgets.QFileDialog.DontConfirmOverwrite)
@@ -271,6 +272,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.spectrum1ExportPushButton.clicked.connect(self.qSpectrum1Export)
         self.denoiseExportPushButton.clicked.connect(
             self.qSpectrum1NoiseExport)
+        self.spectrum1DenoisedExportPushButton.clicked.connect(self.qSpectrum1DenoisedExport)
 
         self.spectra1TableWidget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeToContents)
@@ -582,14 +584,14 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    @openfile(caption="Select Work file", filter="Option file(*.OribitOption)")
+    @openfile(caption="Select Option file", filter="Option file(*.OribitOption)")
     def qOptionImport(self, file):
         option = OribitoolFunc.file2Obj(file)
         self.qSetOption(option)
 
     @busy
     @withoutArgs
-    @savefile(caption="Select Work file", filter="Option file(*.OribitOption)")
+    @savefile(caption="Save as", filter="Option file(*.OribitOption)")
     def qOptionExport(self, file):
         option = self.qGetOption()
         OribitoolFunc.obj2File(file, option)
@@ -746,11 +748,14 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         try:
             mass = float(text)
             formulaList = self.ionCalculator.calc(mass)
-            self.formulaResultLineEdit.setText(
-                ', '.join([str(f) for f in formulaList]))
+            if len(formulaList)>0:
+                self.formulaResultLineEdit.setText(
+                    ', '.join([str(f) for f in formulaList]))
+            else:
+                self.formulaResultLineEdit.setText('None')
         except ValueError:
             formula = OribitoolFormula.Formula(text)
-            self.formulaResultLineEdit.setText(formula.mass())
+            self.formulaResultLineEdit.setText(str(formula.mass()))
 
     def showFile(self, time: datetime.datetime, index: int):
         table = self.fileTableWidget
@@ -1077,7 +1082,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @savefile('Save as', 'csv file(*.csv)')
     def qSpectrum1NoiseExport(self, path):
         if self.workspace.noise is None:
-            raise ValueError()
+            raise ValueError('There is no noise showed')
         thread = QThread(OribitoolExport.exportNoise,
                          (path, self.workspace.spectrum1.fileTime, self.workspace.noise))
         thread.finished.connect(self.csvExportFinished)
@@ -1088,11 +1093,23 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @savefile('Save as', 'csv file(*.csv)')
     def qSpectrum1Export(self, path):
         if self.workspace.spectrum1 is None:
-            raise ValueError()
+            raise ValueError('There is no spectrum showed')
         thread = QThread(OribitoolExport.exportSpectrum,
                          (path, self.workspace.spectrum1))
         thread.finished.connect(self.csvExportFinished)
         return thread
+
+    @threadBegin
+    @withoutArgs
+    @savefile("Save as", "csv file(*.csv)")
+    def qSpectrum1DenoisedExport(self, path):
+        if self.workspace.denoisedSpectrum1 is None:
+            raise ValueError('There is no spectrum showed')
+        thread = QThread(OribitoolExport.exportSpectrum,
+                         (path, self.workspace.denoisedSpectrum1))
+        thread.finished.connect(self.csvExportFinished)
+        return thread
+
 
     @threadEnd
     def qDenoiseFinished(self, result, args):
@@ -1416,7 +1433,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     def qCalibrationInfoExport(self, path):
         workspace = self.workspace
         if workspace.fileTimeCalibrations is None:
-            raise ValueError()
+            raise ValueError('There is no calibration infomation calculated')
         thread = QThread(OribitoolExport.exportCalibrationInfo,
                          (path, self.fileList, self.calibrationIonList, workspace.fileTimeCalibrations))
         thread.finished.connect(self.csvExportFinished)
@@ -1843,7 +1860,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     def qSpectrum3PeaksExport(self, path):
         workspace = self.workspace
         if workspace.showedSpectrum3Index is None:
-            raise ValueError()
+            raise ValueError('There is no spectrum showed')
         thread = QThread(OribitoolExport.exportPeakList, (path,
                                                           workspace.calibratedSpectra3[workspace.showedSpectrum3Index].fileTime, workspace.spectrum3fittedPeaks))
         thread.finished.connect(self.csvExportFinished)
@@ -1855,7 +1872,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     def qSpectrum3IsotopeExport(self, path):
         workspace = self.workspace
         if workspace.showedSpectrum3Index is None:
-            raise ValueError()
+            raise ValueError('There is no spectrum showed')
         thread = QThread(OribitoolExport.exportIsotope, (path,
                                                          workspace.calibratedSpectra3[workspace.showedSpectrum3Index].fileTime, workspace.spectrum3fittedPeaks))
         thread.finished.connect(self.csvExportFinished)
@@ -2033,7 +2050,9 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             lines = ax.plot(timeSeries.time,
                             timeSeries.intensity, label=timeSeries.tag)
             maps[timeSeries.tag] = lines[-1]
+        ax.xaxis.set_tick_params(rotation=30)
         ax.legend()
+        self.timeSeriesCanvas.draw()
 
     @busy
     @withoutArgs
@@ -2046,6 +2065,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             del line
         self.timeSeriesTag2Line.clear()
         self.timeSeriesAx.legend()
+        self.timeSeriesCanvas.draw()
         self.timeSeriesTableWidget.clearContents()
         self.timeSeriesTableWidget.setRowCount(0)
         self.workspace.timeSeriesIndex = None
@@ -2067,6 +2087,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 line.remove()
                 del line
         self.timeSeriesAx.legend()
+        self.timeSeriesCanvas.draw()
         self.timeSeriesTableWidget.clearContents()
         self.timeSeriesTableWidget.setRowCount(0)
 
@@ -2121,7 +2142,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @savefile("Save as", "csv file(*.csv)")
     def qTimeSeriesExport(self, path):
         if self.workspace.timeSeriesIndex is None:
-            raise ValueError()
+            raise ValueError('There is no time series showed')
         thread = QThread(OribitoolExport.exportTimeSerieses, (path, [
                          self.workspace.timeSerieses[self.workspace.timeSeriesIndex]]))
         thread.finished.connect(self.csvExportFinished)

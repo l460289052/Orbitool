@@ -166,6 +166,8 @@ class MassList:
         for peak in peaks:
             newPeak = MassListPeak(
                 peak.peakPosition, peak.formulaList, peak.splitNum, peak.handled)
+            if newPeak.formulaList is None:
+                newPeak.formulaList = []
             if len(newPeak.formulaList) == 1:
                 newPeak.peakPosition = newPeak.formulaList[0].mass()
             newPeaks.append(newPeak)

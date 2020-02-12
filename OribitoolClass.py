@@ -297,7 +297,7 @@ class PeakFitFunc:
             return []
         removed = self.canceled.pop()
         normPeaks = []
-        for peak in removed:
+        for normPeak in removed:
             self.normPeaks.append(normPeak)
             normPeaks.append(normPeak)
         self._func = None
@@ -435,14 +435,19 @@ def fitUseMassList(massList: OribitoolBase.MassList, spectrum: OribitoolBase.Spe
     for index, peak in enumerate(massList):
         sendStatus(fileTime, msg, index, length)
         frIndex = OribitoolFunc.indexNearest(fittedPeaks, peak.peakPosition, (flIndex, fLength), method=(lambda peaks, index: peaks[index].peakPosition))
-        if frIndex >= fLength:
+        if frIndex < 0 or frIndex >= fLength:
             break
         fpeak = fittedPeaks[frIndex]
         if abs(fpeak.peakPosition / peak.peakPosition - 1) < ppm:
             fpeak.addFormula(peak.formulaList)
         flIndex = frIndex
 
-    return OribitoolFunc.calculateResidual(fittedPeaks, peakFitFunc.func, spectrum.fileTime, sendStatus)
+    for fpeak in fittedPeaks:
+        if not hasattr(fpeak, 'formulaList'):
+            fpeak.addFormula([])
+    sendStatus(fileTime, msg, length, length)
+
+    return fittedPeaks, OribitoolFunc.calculateResidual(fittedPeaks, peakFitFunc.func, spectrum.fileTime, sendStatus)
 
 
 def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OribitoolBase.Spectrum], peakFitFunc: PeakFitFunc, tag: str, sendStatus=OribitoolFunc.nullSendStatus):

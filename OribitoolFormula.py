@@ -28,7 +28,7 @@ class Formula(UserDict):
         try:
             if type(formula) is str:
                 if not re.fullmatch(r"([A-Z][a-z]{0,2}(\[\d+\])?\d*)+[-+]?", formula):
-                    raise ValueError()
+                    raise ValueError(str(formula))
                 charge = formula[-1]
                 if charge == '+':
                     self.charge = 1

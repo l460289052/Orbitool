@@ -304,13 +304,13 @@ def _getNoise_njit(mz, intensity,  quantile) -> np.ndarray:
     select = noiseInt < (noiseInt.mean() + noiseInt.std() * 3)
     noiseMz = noiseMz[select]
     noiseInt = noiseInt[select]
-    noiseMean = noiseInt.mean()
+    noiseQuantile = np.quantile(noiseInt, quantile)
     noiseStd = np.std(noiseInt)
 
-    return peakAt, (noiseMz, noiseInt), (noiseMean, noiseStd)
+    return peakAt, (noiseMz, noiseInt), (noiseQuantile, noiseStd)
 
 
-def getNoise(spectrum: OribitoolBase.Spectrum,  quantile=0.5, sendStatus=nullSendStatus) -> Tuple[np.ndarray, np.ndarray]:
+def getNoise(spectrum: OribitoolBase.Spectrum,  quantile=0.7, sendStatus=nullSendStatus) -> Tuple[np.ndarray, np.ndarray]:
     """
     @quantile: sort peaks by intensity, select num*quantile-th biggest peak
     """
@@ -380,7 +380,7 @@ def denoiseWithLOD(spectrum: OribitoolBase.Spectrum, LOD: (float, float), peakAt
     return newSpectrum
 
 
-def denoise(spectrum: OribitoolBase.Spectrum,  quantile=0.5, minus=False, sendStatus=OribitoolBase.nullSendStatus):
+def denoise(spectrum: OribitoolBase.Spectrum,  quantile=0.7, minus=False, sendStatus=OribitoolBase.nullSendStatus):
     peakAt, noise, LOD = getNoise(spectrum,  quantile, sendStatus)
     return noise, LOD, denoiseWithLOD(spectrum, LOD, peakAt, minus, sendStatus)
 
