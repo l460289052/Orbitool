@@ -1400,7 +1400,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             setValue(0, ionList[i][0])
             setValue(1, massCali.ionsMz[i, 1])
             setValue(2, massCali.ionsMz[i, 0])
-            setValue(3, massCali.ionsPpm[i])
+            setValue(3, massCali.ionsPpm[i] * 1e6)
             setValue(4, 'True' if i in massCali.minIndex else 'False')
 
         r = (50, 1000)

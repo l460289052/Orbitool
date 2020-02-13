@@ -11,3 +11,6 @@ error.txt
 *.wks
 *.Oribit*
 *.csv
+*.pdf
+img
+img/*
