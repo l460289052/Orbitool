@@ -1358,7 +1358,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuOption.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         self.toolBox.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -1384,8 +1384,9 @@ class Ui_MainWindow(object):
         self.label_7.setText(_translate("MainWindow", "From"))
         self.label_8.setText(_translate("MainWindow", "To"))
         self.averagePpmLabel.setText(_translate("MainWindow", "ppm"))
-        self.showFilePushButton.setText(_translate("MainWindow", "Show selected file without averaging"))
-        self.averageSelectedPushButton.setText(_translate("MainWindow", "Average selected file"))
+        self.showFilePushButton.setText(_translate("MainWindow", "Show selected file(s)\n"
+"without averaging"))
+        self.averageSelectedPushButton.setText(_translate("MainWindow", "Average selected file(s)"))
         self.averageAllPushButton.setText(_translate("MainWindow", "Average all"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.filesTab), _translate("MainWindow", "Files"))
         self.label_10.setText(_translate("MainWindow", "Spectra List"))

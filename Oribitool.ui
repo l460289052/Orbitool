@@ -60,7 +60,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <property name="elideMode">
           <enum>Qt::ElideNone</enum>
@@ -347,7 +347,8 @@ file from list</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Show selected file without averaging</string>
+                <string>Show selected file(s)
+without averaging</string>
                </property>
               </widget>
              </item>
@@ -360,7 +361,7 @@ file from list</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Average selected file</string>
+                <string>Average selected file(s)</string>
                </property>
               </widget>
              </item>

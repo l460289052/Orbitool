@@ -91,7 +91,27 @@ you can add an item to mass list like those:
 
 #### Input&Output
 
+##### OribitMassList file
+
 *.OribitMassList
+
+##### csv file
+
+format:
+
+| formula/mz      |
+| --------------- |
+| mz1 or formula1 |
+| mz2 or formula2 |
+| ...             |
+
+example:
+
+| formula/mz |
+| ---------- |
+| 199.09763  |
+| C6H5O8N2-  |
+| C4H8O12N3- |
 
 ## Tabs
 
@@ -238,8 +258,26 @@ Time series will be showed right. If you want to check a specific time series, d
 If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Oribitool.exe'.
 
 ## log
+**2020.02.15  version 1.0.1**
 
-2020.02.12 version 1.0
+Bug fix
+
++ ppm when show single file's calibration information
++ wrong elements showed in formula. eg. Na when negative and S when positive
+  rewrite formula interface logic
++ "'NoneType' object has no attribute 'addPeaks'" when add peak to mass list without initialize in 'Spectra&Peak fit'
+  
+
+Appended
+
++ It's possible to show multi files' spectra without averaging
++ Mass list: Export to or import from csv file
+
+Change
+
++ show multi ions in a time when show time series
+
+**2020.02.12 version 1.0.0**
 
   have functions:
 

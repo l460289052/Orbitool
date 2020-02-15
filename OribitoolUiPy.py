@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import copy
+import csv
 import datetime
 import os
 import re
@@ -192,8 +193,15 @@ def openfile(caption, filter=None, multi=False, folder=False):
 def savefile(caption, filter):
     if isinstance(caption, types.FunctionType):
         raise TypeError()
-    ext = re.fullmatch(r'.*\(\*(\.[^.*]*)\)', filter)
-    ext = ext.group(1)
+    # single ext
+    # ext = re.fullmatch(r'.*\(\*(\.[^.*]*)\)', filter)
+    # ext = ext.group(1)
+    
+    "music(*.mp3);;image(*.jpg)"
+    matches = list(re.finditer(r"[^;]*\(\*(\.[^.*]+)\)", filter))
+    if not matches:
+        raise ValueError(f"wrong filter {filter}")
+
 
     def f(func):
         @wraps(func)
@@ -201,11 +209,10 @@ def savefile(caption, filter):
             path, typ = QtWidgets.QFileDialog.getSaveFileName(
                 caption=caption,
                 directory='./..',
-                initialFilter=filter,
+                initialFilter=matches[0].group(0),
                 filter=filter,
                 options=QtWidgets.QFileDialog.DontConfirmOverwrite)
             if len(path) > 0:
-                path = os.path.splitext(path)[0] + ext
                 return func(self, path)
         return decorator
     return f
@@ -253,7 +260,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.addFolderPushButton.clicked.connect(self.qAddFolder)
         self.addFilePushButton.clicked.connect(self.qAddFile)
         self.removeFilePushButton.clicked.connect(self.qRemoveFile)
-        self.showFilePushButton.clicked.connect(self.qShowFileSpectra)
+        self.showFilePushButton.clicked.connect(self.qShowFilesSpectra)
         self.averageSelectedPushButton.clicked.connect(
             self.qAverageSelectedFile)
         self.averageAllPushButton.clicked.connect(self.qAverageAllFile)
@@ -680,19 +687,22 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @withoutArgs
     def qFormulaChargeToggle(self):
         ionCalculator = self.ionCalculator
-        if self.formulaMinusRadioButton.isChecked():
-            ionCalculator['charge'] = -1
-        else:
-            ionCalculator['charge'] = 1
         self.showFormulaOption(ionCalculator)
 
     @restore
     def showFormulaOption(self, calculator: OribitoolGuessIons.IonCalculator = None):
-        charge = calculator['charge']
-        if charge == 1:
-            self.formulaPlusRadioButton.setChecked(True)
-        elif charge == -1:
-            self.formulaMinusRadioButton.setChecked(True)
+        charge = None
+        elements = None
+        isotopes = None
+        if self.formulaPlusRadioButton.isChecked():
+            charge = 1
+            elements = OribitoolGuessIons.p_elements
+            isotopes = OribitoolGuessIons.p_isotopes
+        elif self.formulaMinusRadioButton.isChecked():
+            charge = -1
+            elements = OribitoolGuessIons.n_elements
+            isotopes = OribitoolGuessIons.n_isotopes
+
         self.formulaPpmDoubleSpinBox.setValue(calculator.errppm*1e6)
         self.formulaNitrogenRuleCheckBox.setChecked(calculator['NitrogenRule'])
         self.formulaOCRatioSpinBox.setValue(calculator['OCRatioMax'])
@@ -700,9 +710,10 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.formulaOSRatioSpinBox.setValue(calculator['OSRatioMax'])
         values = []
 
-        for e in calculator['elements']:
+        
+        for e in elements:
             values.append((e, calculator[e]))
-        for e in calculator['isotopes']:
+        for e in isotopes:
             values.append((e, calculator[e]))
         values.append(('DBE', calculator['DBE']))
 
@@ -721,7 +732,10 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @withoutArgs
     def qFormulaApply(self):
         calculator = self.ionCalculator
-        charge = calculator['charge']
+        if self.formulaPlusRadioButton.isChecked():
+            calculator['charge'] = 1
+        elif self.formulaMinusRadioButton.isChecked():
+            calculator['charge'] = -1
 
         calculator.errppm = self.formulaPpmDoubleSpinBox.value()/1e6
         calculator['NitrogenRule'] = self.formulaNitrogenRuleCheckBox.isChecked()
@@ -826,19 +840,21 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    def qShowFileSpectra(self):
+    def qShowFilesSpectra(self):
         self.clear(1)
-        fileIndex = self.fileTableWidget.selectedIndexes()
-        if not fileIndex:
+        fileIndexes = self.fileTableWidget.selectedIndexes()
+        if not fileIndexes:
             raise ValueError('No file was selected')
-        fileIndex = fileIndex[0].row()
-        filepath = self.fileTableWidget.item(fileIndex, 3).text()
+        table = self.fileTableWidget
+        fileList = self.fileList.subList(
+            [table.item(index.row(), 3).text() for index in fileIndexes])
 
-        f: OribitoolDll.File = self.fileList[filepath]
-        spectra = [OribitoolClass.GetSpectrum(f, index) for index in range(
-            f.firstScanNumber, f.lastScanNumber + 1)]
-        self.workspace.spectra1Operators = spectra
-        self.showSpectra1(spectra)
+        operators = []
+        for f in fileList.timedict.values():
+            operators.extend([OribitoolClass.GetSpectrum(f, index) for index in range(
+                f.firstScanNumber, f.lastScanNumber + 1)])
+        self.workspace.spectra1Operators = operators
+        self.showSpectra1(operators)
 
         self.tabWidget.setCurrentWidget(self.spectra1Tab)
 
@@ -1835,8 +1851,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     def qSpectra3PeaksAdd(self):
         indexes = self.spectrum3PeakListTableWidget.selectedIndexes()
         workspace = self.workspace
-        if workspace.massList is None:
-            workspace.massList = OribitoolBase.MassList()
         massList = workspace.massList
         peaks = workspace.spectrum3fittedPeaks
         toBeAdded: List[OribitoolBase.Peak] = [
@@ -1848,8 +1862,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @withoutArgs
     def qSpectra3PeaksAddAll(self):
         workspace = self.workspace
-        if workspace.massList is None:
-            workspace.massList = OribitoolBase.MassList()
         massList = workspace.massList
         massList.addPeaks(workspace.spectrum3fittedPeaks)
         self.showMassList(massList)
@@ -1928,20 +1940,48 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    @openfile("Select Mass list", "Mass list file(*.OribitMassList)")
+    @openfile("Select Mass list", "Mass list file(*.OribitMassList);;csv file(*.csv)")
     def qMassListImport(self, file):
         workspace = self.workspace
-        massList: OribitoolClass = OribitoolFunc.file2Obj(file)
-        if not isinstance(massList, OribitoolBase.MassList):
-            raise ValueError('wrong file')
+        ext = os.path.splitext(file)[1].lower()
+        massList = None
+        if ext == '.OribitMassList'.lower():
+            massList: OribitoolClass = OribitoolFunc.file2Obj(file)
+            if not isinstance(massList, OribitoolBase.MassList):
+                raise ValueError('wrong file')
+        elif ext == '.csv':
+            with open(file) as csvfile:
+                reader = csv.reader(csvfile)
+                next(reader)
+                peaks = []
+                for row in reader:
+                    peakPosition = None
+                    formulaList = []
+                    if len(row) != 1:
+                        raise ValueError(f'row "{", ".join(row)}"')
+                    mass = row[0]
+                    try:
+                        peakPosition = float(mass)
+                    except ValueError:
+                        formula = OribitoolFormula.Formula(mass)
+                        formulaList.append(formula)
+                        peakPosition = formula.mass()
+                    peaks.append(OribitoolBase.MassListPeak(peakPosition, formulaList,1,True))
+                massList = OribitoolBase.MassList()
+                massList.addPeaks(peaks)
         workspace.massList = massList
         self.showMassList(massList)
 
     @busy
     @withoutArgs
-    @savefile("Save as", "Mass list file(*.OribitMassList)")
+    @savefile("Save as", "Mass list file(*.OribitMassList);;csv file(*.csv)")
     def qMassListExport(self, path):
-        OribitoolFunc.obj2File(path, self.workspace.massList)
+        ext = os.path.splitext(path)[1].lower()
+        massList = self.workspace.massList
+        if ext == '.OribitMassList'.lower():
+            OribitoolFunc.obj2File(path, massList)
+        elif ext == '.csv':
+            OribitoolExport.exportMassList(path, massList)
 
     @threadBegin
     @withoutArgs
@@ -2041,15 +2081,18 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
         spectra=self.workspace.calibratedSpectra3
         length = 0 if spectra is None else len(spectra)
-        ax = self.timeSeriesAx
+        ax=self.timeSeriesAx
+        msg = ["please check mz or ppm of time series below, I may have no enough infomation about it"]
         for timeSeries in timeSerieses:
             if len(timeSeries.time) < length / 3:
-                showInfo(f'please check mz or ppm of time series "{timeSeries.tag}", I may have no enough infomation about it')
+                msg.append(timeSeries.tag)
                 if len(timeSeries.time) == 0:
                     continue
             lines = ax.plot(timeSeries.time,
                             timeSeries.intensity, label=timeSeries.tag)
             maps[timeSeries.tag] = lines[-1]
+        if len(msg) > 1:
+            showInfo('\n'.join(msg))
         ax.xaxis.set_tick_params(rotation=30)
         ax.legend()
         self.timeSeriesCanvas.draw()

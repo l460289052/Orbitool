@@ -255,11 +255,11 @@ class IonCalculator(object):
         self._constrain[key] = value
         if key == 'charge':
             if value == 1:
-                self._constrain['elements'] = n_elements
-                self._constrain['isotopes'] = n_isotopes
-            elif value == -1:
                 self._constrain['elements'] = p_elements
                 self._constrain['isotopes'] = p_isotopes
+            elif value == -1:
+                self._constrain['elements'] = n_elements
+                self._constrain['isotopes'] = n_isotopes
 
     def __getitem__(self, key):
         return self._constrain[key]

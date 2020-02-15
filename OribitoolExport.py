@@ -194,3 +194,15 @@ def exportCalibrationInfo(writer:csv.writer, fileList:FileList, ionList:List[Tup
 		writer.writerow(row)
 
 	sendStatus(calibrators.peekitem(-1)[0], msg, length, length)
+
+@checkOpenCsv
+def exportMassList(writer: csv.writer, massList: MassList, sendStatus=nullSendStatus):
+	msg = "exporting mass list"
+	header = ['formula/mz']
+	now = datetime.now()
+	writer.writerow(header)
+	length = len(massList)
+	for index, peak in enumerate(massList):
+		sendStatus(now, msg, index, length)
+		writer.writerow([str(peak.formulaList[0] if len(peak.formulaList) == 1 else peak.peakPosition)])
+		

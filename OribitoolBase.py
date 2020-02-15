@@ -157,7 +157,7 @@ class MassListPeak:
 class MassList:
     def __init__(self, ppm=5e-7):
         self.ppm = ppm
-        self._peaks: List[Peak] = []
+        self._peaks: List[MassListPeak] = []
 
     def addPeaks(self, peaks: Union[Peak, List[Peak], MassListPeak, List[MassListPeak]]):
         if not isinstance(peaks, Iterable):

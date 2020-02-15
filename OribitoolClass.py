@@ -525,7 +525,7 @@ class Workspace(object):
         self.showedSpectrum3Peak: List[OribitoolBase.Peak] = None
 
         # @showMassList
-        self.massList: MassList = None
+        self.massList: MassList = OribitoolBase.MassList()
 
         # @showTimeSerieses
         self.timeSerieses: List[TimeSeries] = []
