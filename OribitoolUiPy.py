@@ -140,7 +140,13 @@ def restore(func):
         args0, *args_ = args
         if args0 is None:
             return
-        return func(self, *args)
+        try:
+            return func(self, *args)
+        except Exception as e:
+            showInfo(str(e))
+            with open('error.txt', 'a') as file:
+                print('', datetime.datetime.now(), str(e), sep='\n', file=file)
+                traceback.print_exc(file=file)
     return decorator
 
 
@@ -196,12 +202,11 @@ def savefile(caption, filter):
     # single ext
     # ext = re.fullmatch(r'.*\(\*(\.[^.*]*)\)', filter)
     # ext = ext.group(1)
-    
+
     "music(*.mp3);;image(*.jpg)"
     matches = list(re.finditer(r"[^;]*\(\*(\.[^.*]+)\)", filter))
     if not matches:
         raise ValueError(f"wrong filter {filter}")
-
 
     def f(func):
         @wraps(func)
@@ -216,6 +221,14 @@ def savefile(caption, filter):
                 return func(self, path)
         return decorator
     return f
+
+
+def setSpliterFactor(splitter: QtWidgets.QSplitter, factors: List[int]):
+    '''
+    factors: List[strechfactor]
+    '''
+    for index, factor in enumerate(factors):
+        splitter.setStretchFactor(index, factor)
 
 
 class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
@@ -279,7 +292,14 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.spectrum1ExportPushButton.clicked.connect(self.qSpectrum1Export)
         self.denoiseExportPushButton.clicked.connect(
             self.qSpectrum1NoiseExport)
-        self.spectrum1DenoisedExportPushButton.clicked.connect(self.qSpectrum1DenoisedExport)
+        self.spectrum1DenoisedExportPushButton.clicked.connect(
+            self.qSpectrum1DenoisedExport)
+        self.spectrum1LogScaleCheckBox.toggled.connect(
+            self.qSpectrum1LogScaleToggle)
+        self.spectrum1RescalePushButton.clicked.connect(self.qSpectra1Rescale)
+        self.spectrum1RescaleFlag = False
+
+        setSpliterFactor(self.spectra1Splitter, [1, 1, 3])
 
         self.spectra1TableWidget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeToContents)
@@ -340,7 +360,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.calibrationDelIonToolButton.clicked.connect(
             self.qCalibrationRmIon)
         self.calibratePushButton.clicked.connect(self.qInitCalibration)
-        self.calibrationShowedSelectedPushButton.clicked.connect(
+        self.calibrationShownSelectedPushButton.clicked.connect(
             self.qCalibrationShowSelected)
         self.calibrationShowAllPushButton.clicked.connect(
             self.qCalibrationShowAll)
@@ -348,6 +368,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             self.qCalibrationFinish)
         self.calibrationInfoExportPushButton.clicked.connect(
             self.qCalibrationInfoExport)
+
+        setSpliterFactor(self.calibrationSplitter, [1, 1, 2])
 
         self.calibrationIonsTableWidget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeToContents)
@@ -374,6 +396,13 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             self.qSpectrum3PeaksExport)
         self.spectrum3IsotopeExportPushButton.clicked.connect(
             self.qSpectrum3IsotopeExport)
+
+        self.spectrum3LogScaleCheckBox.toggled.connect(
+            self.qSpectrum3LogScaleToggle)
+        self.spectrum3RescalePushButton.clicked.connect(self.qSpectra3Rescale)
+        self.spectrum3RescaleFlag = False
+
+        setSpliterFactor(self.spectra3Splitter, [1, 1, 3])
 
         self.spectra3TableWidget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeToContents)
@@ -477,6 +506,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
         self.showFormulaOption(self.ionCalculator)
         self.busy = False
+        self.busyLimit = True
         self.tabWidget.setCurrentWidget(self.filesTab)
 
     def rmFinished(self):
@@ -491,6 +521,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     def setBusy(self, busy=True):
         if self.busy and busy:
+            if not self.busyLimit:
+                return True
             showInfo("wait for processing", 'busy')
             return False
         self.busy = busy
@@ -499,18 +531,18 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         return True
 
     def showStatus(self, fileTime: datetime.datetime, msg: str, current: int, total: int):
-        showedMsg = None
+        shownMsg = None
         if current >= 0:
-            showedMsg = f"{self.fileList[fileTime].name if fileTime in self.fileList else ''}\
+            shownMsg = f"{self.fileList[fileTime].name if fileTime in self.fileList else ''}\
                 \t\t|\t{msg}\t|\t\t{current}"
             if total > 0:
-                showedMsg += '/' + str(total)
+                shownMsg += '/' + str(total)
                 self.progressBar.setValue(round(100 * current / total))
             else:
                 self.progressBar.setValue(100)
         else:
-            showedMsg = msg
-        self.statusbar.showMessage(showedMsg)
+            shownMsg = msg
+        self.statusbar.showMessage(shownMsg)
 
     def clear(self, beginFrom=0):
         '''
@@ -522,6 +554,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         5: Time series
         '''
         workspace = self.workspace
+
         def clearAndSetRow(tableWidget):
             tableWidget.clearContents()
             tableWidget.setRowCount(0)
@@ -557,7 +590,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             self.calibrationCanvas.draw()
         if beginFrom <= 4:
             workspace.calibratedSpectra3 = None
-            workspace.showedSpectrum3Index = None
+            workspace.shownSpectrum3Index = None
             workspace.spectrum3fittedPeaks = None
             workspace.spectrum3Residual = None
 
@@ -570,12 +603,11 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             self.timeSeriesTag2Line.clear()
             workspace.timeSerieses = []
             workspace.timeSeriesIndex = None
-            
+
             clearAndSetRow(self.timeSeriesesTableWidget)
             clearAndSetRow(self.timeSeriesTableWidget)
             self.timeSeriesAx.clear()
             self.timeSeriesCanvas.draw()
-
 
     def qGetOption(self):
         option = OribitoolOption.Option()
@@ -584,7 +616,9 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         return option
 
     def qSetOption(self, option: OribitoolOption.Option):
+        self.busyLimit = False
         option.applyWidgets(self)
+        self.busyLimit = True
         option.applyObjects(self)
         self.showFormulaOption(self.ionCalculator)
         self.showCalibrationIon(self.calibrationIonList)
@@ -649,7 +683,9 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.showPeakFitFunc(workspace.peakFitFunc)
         self.showCalibrationInfoAll(workspace.fileTimeCalibrations)
         self.showSpectra3(workspace.calibratedSpectra3)
-        self.showSpectra3Peaks(workspace.calibratedSpectra3[workspace.showedSpectrum3Index], workspace.spectrum3fittedPeaks, workspace.spectrum3Residual)
+        if workspace.calibratedSpectra3 is not None:
+            self.showSpectra3Peaks(
+                workspace.calibratedSpectra3[workspace.shownSpectrum3Index], workspace.spectrum3fittedPeaks, workspace.spectrum3Residual)
         self.showTimeSerieses(workspace.timeSerieses)
         self.showTimeSeries(workspace.timeSeriesIndex)
 
@@ -710,7 +746,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.formulaOSRatioSpinBox.setValue(calculator['OSRatioMax'])
         values = []
 
-        
         for e in elements:
             values.append((e, calculator[e]))
         for e in isotopes:
@@ -762,7 +797,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         try:
             mass = float(text)
             formulaList = self.ionCalculator.calc(mass)
-            if len(formulaList)>0:
+            if len(formulaList) > 0:
                 self.formulaResultLineEdit.setText(
                     ', '.join([str(f) for f in formulaList]))
             else:
@@ -867,8 +902,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 table.setItem(
                     index, column, QtWidgets.QTableWidgetItem(str(s)))
 
-            setValue(0, operator.showedTime[0])
-            setValue(1, operator.showedTime[1])
+            setValue(0, operator.shownTime[0])
+            setValue(1, operator.shownTime[1])
 
     @busy
     @withoutArgs
@@ -981,16 +1016,21 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             setValue(0, "%.6f" % (spectrum.mz[index]))
             setValue(1, "%.2f" % (spectrum.intensity[index]))
 
+        log = self.spectrum1LogScaleCheckBox.isChecked()
         ax = self.spectrum1Ax
         ax.clear()
+
+        ax.set_yscale('log' if log else 'linear')
+
         ax.axhline(color='black', linewidth=0.5)
         ax.yaxis.set_tick_params(rotation=45)
-        ax.yaxis.set_major_formatter(
-            matplotlib.ticker.FormatStrFormatter(r"%.1e"))
+        if not log:
+            ax.yaxis.set_major_formatter(
+                matplotlib.ticker.FormatStrFormatter(r"%.1e"))
         ax.plot(spectrum.mz, spectrum.intensity,
                 linewidth=1, color='b', label='origin')
         ax.plot(denoisedSpectrum1.mz, denoisedSpectrum1.intensity,
-                linewidth=1, color='g', label='denoised')#, linestyle='--')
+                linewidth=1, color='g', label='denoised')  # , linestyle='--')
         ax.axhline(LOD[0] + 3 * LOD[1], color='r', label='LOD')
 
         ax.legend()
@@ -999,15 +1039,35 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @timer
     def qSpectrum1ListFitXAxis(self):
-        if not self.spectrum1AutoScrollCheckBox.isChecked() or self.workspace.spectrum1 is None:
+        if self.busy or self.workspace.spectrum1 is None:
+            return
+        scroll = self.spectrum1AutoScrollCheckBox.isChecked()
+        rescale = self.spectrum1RescaleFlag
+        if not (scroll or rescale):
             return
         l, r = self.spectrum1Ax.get_xlim()
-        if l != self.spectrum1XAxisLeft:
+        scroll &= (l != self.spectrum1XAxisLeft)
+        if scroll or rescale:
             workspace = self.workspace
             self.spectrum1XAxisLeft = l
             start, stop = OribitoolFunc.indexBetween_njit(
                 workspace.spectrum1.mz, (l, r))
-            self.spectrum1TableWidget.verticalScrollBar().setSliderPosition(start)
+            if scroll:
+                self.spectrum1TableWidget.verticalScrollBar().setSliderPosition(start)
+            if rescale:
+                b = 0
+                t = workspace.spectrum1.intensity[start:stop].max()
+
+                if self.spectrum1LogScaleCheckBox.isChecked():
+                    t *= 10
+                    b = 1e-1
+                else:
+                    delta = 0.05 * t
+                    b = - delta
+                    t += delta
+                self.spectrum1Ax.set_ylim(b, t)
+                self.spectrum1RescaleFlag = False
+                self.spectrum1Canvas.draw()
 
     @threadBegin
     @withoutArgs
@@ -1030,6 +1090,22 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         workspace.LOD = LOD
         workspace.denoisedSpectrum1 = denoisedSpectrum1
         self.showSpectrum1(workspace.spectrum1, LOD, denoisedSpectrum1)
+
+    @threadBegin
+    @withoutArgs
+    def qSpectrum1LogScaleToggle(self):
+        log = self.spectrum1LogScaleCheckBox.isChecked()
+        ax = self.spectrum1Ax
+        ax.set_yscale('log' if log else 'linear')
+        if not log:
+            ax.yaxis.set_major_formatter(
+                matplotlib.ticker.FormatStrFormatter(r"%.1e"))
+        self.spectrum1RescaleFlag = True
+
+    @threadBegin
+    @withoutArgs
+    def qSpectra1Rescale(self):
+        self.spectrum1RescaleFlag = True
 
     @threadBegin
     def qDenoise(self, withDenoising=True):
@@ -1058,13 +1134,14 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                         spectra.append(spectrum)
                         maps.setdefault(spectrum.fileTime, []).append(spectrum)
 
-                        rets.append(pool.apply_async(OribitoolFunc.getPeaks, (spectrum, )))
-                    
+                        rets.append(pool.apply_async(
+                            OribitoolFunc.getPeaks, (spectrum, )))
+
                     msg = "spliting peaks"
                     for index, ret in enumerate(rets):
                         sendStatus(spectra[index].fileTime, msg, index, length)
                         spectra[index].peaks = ret.get()
-                    
+
                 else:
                     LODs = []
                     rets = []
@@ -1098,7 +1175,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @savefile('Save as', 'csv file(*.csv)')
     def qSpectrum1NoiseExport(self, path):
         if self.workspace.noise is None:
-            raise ValueError('There is no noise showed')
+            raise ValueError('There is no noise shown')
         thread = QThread(OribitoolExport.exportNoise,
                          (path, self.workspace.spectrum1.fileTime, self.workspace.noise))
         thread.finished.connect(self.csvExportFinished)
@@ -1109,7 +1186,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @savefile('Save as', 'csv file(*.csv)')
     def qSpectrum1Export(self, path):
         if self.workspace.spectrum1 is None:
-            raise ValueError('There is no spectrum showed')
+            raise ValueError('There is no spectrum shown')
         thread = QThread(OribitoolExport.exportSpectrum,
                          (path, self.workspace.spectrum1))
         thread.finished.connect(self.csvExportFinished)
@@ -1120,12 +1197,11 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @savefile("Save as", "csv file(*.csv)")
     def qSpectrum1DenoisedExport(self, path):
         if self.workspace.denoisedSpectrum1 is None:
-            raise ValueError('There is no spectrum showed')
+            raise ValueError('There is no spectrum shown')
         thread = QThread(OribitoolExport.exportSpectrum,
                          (path, self.workspace.denoisedSpectrum1))
         thread.finished.connect(self.csvExportFinished)
         return thread
-
 
     @threadEnd
     def qDenoiseFinished(self, result, args):
@@ -1147,8 +1223,10 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             def setValue(column, s):
                 table.setItem(
                     index, column, QtWidgets.QTableWidgetItem(str(s)))
-            setValue(0, spectrum.timeRange[0].strftime(OribitoolBase.timeFormat))
-            setValue(1, spectrum.timeRange[1].strftime(OribitoolBase.timeFormat))
+            setValue(0, spectrum.timeRange[0].strftime(
+                OribitoolBase.timeFormat))
+            setValue(1, spectrum.timeRange[1].strftime(
+                OribitoolBase.timeFormat))
 
     @busy
     @withoutArgs
@@ -1512,7 +1590,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             raise ValueError('No spectrum was selected')
         workspace = self.workspace
         index = index[0].row()
-        workspace.showedSpectrum3Index = index
+        workspace.shownSpectrum3Index = index
         spectrum: OribitoolBase.Spectrum = workspace.calibratedSpectra3[index]
         peakFitFunc = workspace.peakFitFunc
         calc = self.ionCalculator
@@ -1529,7 +1607,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 peak.addFormula(calc.calc(peak.peakPosition))
             sendStatus(fileTime, msg, length, length)
             OribitoolFunc.recalcFormula(fittedPeaks, calc, sendStatus)
-            
+
             return fittedPeaks, OribitoolFunc.calculateResidual(fittedPeaks, peakFitFunc.func, spectrum.fileTime, sendStatus)
 
         thread = QThread(process, tuple())
@@ -1544,10 +1622,11 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         workspace = self.workspace
         workspace.spectrum3fittedPeaks = peaks
         workspace.spectrum3Residual = residual
-        self.showSpectra3Peaks(workspace.calibratedSpectra3[workspace.showedSpectrum3Index], peaks, residual)
+        self.showSpectra3Peaks(
+            workspace.calibratedSpectra3[workspace.shownSpectrum3Index], peaks, residual)
 
     @restore
-    def showSpectra3Peaks(self, spectrum:OribitoolBase.Spectrum, peaks:List[OribitoolBase.Peak], residual: (np.ndarray, np.ndarray)):
+    def showSpectra3Peaks(self, spectrum: OribitoolBase.Spectrum, peaks: List[OribitoolBase.Peak], residual: (np.ndarray, np.ndarray)):
         table = self.spectrum3PeakListTableWidget
         table.clearContents()
         table.setRowCount(0)
@@ -1559,22 +1638,29 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             setValue(0, format(peak.peakPosition, '.5f'))
             setValue(1, peak.formulaList)
             setValue(2, format(peak.peakIntensity, '.5e'))
-            setValue(3, format(peak.area, '.5e'))
-            setValue(4, peak.splitNum)
+            if len(peak.formulaList) == 1:
+                setValue(
+                    3, format((peak.peakPosition / peak.formulaList[0].mass() - 1) * 1e6, '.3f'))
+            setValue(4, format(peak.area, '.5e'))
+            setValue(5, peak.splitNum)
         workspace = self.workspace
         peakFitFunc = workspace.peakFitFunc
         fileTime = spectrum.fileTime
 
         mz = spectrum.mz
+        log = self.spectrum3LogScaleCheckBox.isChecked()
         ax = self.spectrum3Ax
         ax.clear()
+        ax.set_yscale('log' if log else 'linear')
         ax.axhline(color='black', linewidth=0.5)
         ax.yaxis.set_tick_params(rotation=45)
-        ax.yaxis.set_major_formatter(
-            matplotlib.ticker.FormatStrFormatter(r"%.1e"))
+        if not log:
+            ax.yaxis.set_major_formatter(
+                matplotlib.ticker.FormatStrFormatter(r"%.1e"))
         workspace = self.workspace
         ax.plot(mz, spectrum.intensity, color='black', linewidth=1)
-        ax.plot(residual[0], residual[1], color='red', linewidth=0.5, label='residual')
+        ax.plot(residual[0], residual[1], color='red',
+                linewidth=0.5, label='residual')
         ax.legend()
         workspace = self.workspace
         mi = mz.min()
@@ -1587,60 +1673,83 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         ax.set_xlim(ll, lr)
 
         self.spectrum3Canvas.draw()
+        self.spectrum3PeakFitGroupBox.setHidden(True)
+        self.spectrum3MainWidget.setHidden(False)
 
     @timer
     def qSpectrum3ListFitXAxis(self):
-        if self.busy:
+        if self.busy or self.workspace.spectrum3fittedPeaks is None:
             return
-        if not self.spectrum3AutoScrollCheckBox.isChecked() or self.workspace.spectrum3fittedPeaks is None:
-            return
+        scroll = self.spectrum3AutoScrollCheckBox.isChecked()
+        rescale = self.spectrum3RescaleFlag
+
         ax = self.spectrum3Ax
         l, r = ax.get_xlim()
-        if l == self.spectrum3XAxisLeft:
-            return
-        self.spectrum3XAxisLeft = l
 
-        workspace = self.workspace
-        peaks = workspace.spectrum3fittedPeaks
-        r: range = OribitoolFunc.indexBetween(peaks, (l, r), method=(
-            lambda peaks, index: peaks[index].peakPosition))
-        self.spectrum3PeakListTableWidget.verticalScrollBar().setSliderPosition(r.start)
+        scroll &= (l != self.spectrum3XAxisLeft)
+        if scroll or rescale:
+            workspace = self.workspace
+            self.spectrum3XAxisLeft = l
 
-        yi, ya = ax.get_ylim()
-        peaks = peaks[r.start:r.stop]
+            peaks = workspace.spectrum3fittedPeaks
+            r: range = OribitoolFunc.indexBetween(peaks, (l, r), method=(
+                lambda peaks, index: peaks[index].peakPosition))
+            if scroll:
+                self.spectrum3PeakListTableWidget.verticalScrollBar().setSliderPosition(r.start)
 
-        def show(peak: OribitoolBase.Peak):
-            i = peak.peakIntensity
-            return i > yi and i < ya
-        peaks = [peak for peak in peaks if show(peak)]
-        peakIntensities = np.array([peak.peakIntensity for peak in peaks])
+            if rescale:
+                b = 0
+                t = 0
+                for peak in peaks[r.start:r.stop]:
+                    if t < peak.peakIntensity:
+                        t = peak.peakIntensity
 
-        indexes = np.flip(peakIntensities.argsort())
+                if self.spectrum3LogScaleCheckBox.isChecked():
+                    t *= 10
+                    b = 1e-1
+                else:
+                    delta = 0.05 * t
+                    b = - delta
+                    t += delta
+                ax.set_ylim(b, t)
+                self.spectrum3RescaleFlag = False
 
-        annotations = [child for child in ax.get_children(
-        ) if isinstance(child, matplotlib.text.Annotation)]
-        for i in range(len(annotations)):
-            ann = annotations.pop()
-            ann.remove()
-            del ann
+            yi, ya = ax.get_ylim()
+            peaks = peaks[r.start:r.stop]
 
-        cnt = 0
-        for index in indexes:
-            peak = peaks[index]
-            if len(peak.formulaList) == 0:
-                continue
-            opeak = peak.originalPeak
-            i = OribitoolFunc.indexNearest_njit(opeak.mz, peak.peakPosition)
-            position = opeak.mz[i]
-            intensity = opeak.intensity[i]
-            ax.annotate(','.join([str(f) for f in peak.formulaList]),
-                        xy=(position, intensity), xytext=(
-                            peak.peakPosition, peak.peakIntensity),
-                        arrowprops={"arrowstyle": "-", "alpha": 0.5})
-            cnt += 1
-            if cnt == 5:
-                break
-        self.spectrum3Canvas.draw()
+            def show(peak: OribitoolBase.Peak):
+                i = peak.peakIntensity
+                return i > yi and i < ya
+            peaks = [peak for peak in peaks if show(peak)]
+            peakIntensities = np.array([peak.peakIntensity for peak in peaks])
+
+            indexes = np.flip(peakIntensities.argsort())
+
+            annotations = [child for child in ax.get_children(
+            ) if isinstance(child, matplotlib.text.Annotation)]
+            for i in range(len(annotations)):
+                ann = annotations.pop()
+                ann.remove()
+                del ann
+
+            cnt = 0
+            for index in indexes:
+                peak = peaks[index]
+                if len(peak.formulaList) == 0:
+                    continue
+                opeak = peak.originalPeak
+                i = OribitoolFunc.indexNearest_njit(
+                    opeak.mz, peak.peakPosition)
+                position = opeak.mz[i]
+                intensity = opeak.intensity[i]
+                ax.annotate(','.join([str(f) for f in peak.formulaList]),
+                            xy=(position, intensity), xytext=(
+                                peak.peakPosition, peak.peakIntensity),
+                            arrowprops={"arrowstyle": "-", "alpha": 0.5})
+                cnt += 1
+                if cnt == 5:
+                    break
+            self.spectrum3Canvas.draw()
 
     @busy
     def qSpectra3PeakListDoubleClicked(self, item: QtWidgets.QTableWidgetItem):
@@ -1660,20 +1769,20 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         length = len(peaks)
         while end < length and opeak == peaks[end].originalPeak:
             end += 1
-        workspace.showedSpectra3PeakRange = range(start, end)
-        workspace.showedSpectra3Peak = peaks[start:end]
+        workspace.shownSpectra3PeakRange = range(start, end)
+        workspace.shownSpectra3Peak = peaks[start:end]
 
-        self.showSpectra3Peak(workspace.showedSpectra3Peak)
+        self.showSpectra3Peak(workspace.shownSpectra3Peak)
 
     @restore
-    def showSpectra3Peak(self, showedSpectra3Peak: List[OribitoolBase.Peak]):
+    def showSpectra3Peak(self, shownSpectra3Peak: List[OribitoolBase.Peak]):
         showOrigin = self.spectrum3PeakOriginCheckBox.isChecked()
         showSum = self.spectrum3PeakSumCheckBox.isChecked()
         showResidual = self.spectrum3PeakResidualCheckBox.isChecked()
         showLegend = self.spectrum3PeakLegendCheckBox.isChecked()
 
         workspace = self.workspace
-        opeak = showedSpectra3Peak[0].originalPeak
+        opeak = shownSpectra3Peak[0].originalPeak
         ax = self.spectrum3PeakAx
         ax.clear()
         ax.axhline(color='black', linewidth=0.5)
@@ -1686,11 +1795,13 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
         table = self.spectrum3PeakPropertyTableWidget
 
-        table.setRowCount(len(showedSpectra3Peak))
+        table.clearContents()
+        table.setRowCount(0)
+        table.setRowCount(len(shownSpectra3Peak))
 
         peakFitFunc = workspace.peakFitFunc
 
-        for index, peak in enumerate(showedSpectra3Peak):
+        for index, peak in enumerate(shownSpectra3Peak):
             ax.plot(peak.mz, peak.intensity, label='fitted peak %d' %
                     index, linewidth=1.5)
 
@@ -1699,8 +1810,27 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                     index, column, QtWidgets.QTableWidgetItem(str(s)))
 
             setValue(0, ', '.join([str(f) for f in peak.formulaList]))
-            setValue(1, peak.peakPosition)
-            setValue(2, peak.peakIntensity)
+            setValue(1, format(peak.peakPosition, '.5f'))
+            setValue(2, format(peak.peakIntensity, '.2f'))
+            if len(peak.formulaList) == 1:
+                setValue(3, format((peak.peakPosition /
+                                    peak.formulaList[0].mass() - 1) * 1e6, '.5f'))
+                formula = peak.formulaList[0]
+                if formula.isIsotope:
+                    origin = formula.findOrigin()
+                    peaks = workspace.spectrum3fittedPeaks
+                    m = origin.mass()
+                    d = m * self.ionCalculator.errppm
+                    r = OribitoolFunc.indexBetween(
+                        peaks, (m - d, m + d), method=(lambda peaks, index: peaks[index].peakPosition))
+                    for i in r:
+                        for f in peaks[i].formulaList:
+                            if f == origin:
+                                setValue(4, format(peak.peakIntensity /
+                                                   peaks[i].peakIntensity, '.5f'))
+                                setValue(
+                                    5, format(formula.relativeAbundance(), '.5f'))
+                                break
 
             if showSum or showResidual:
                 tmpItensity = peakFitFunc.func.getIntensity(opeak.mz, peak)
@@ -1709,7 +1839,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 if showResidual:
                     diffIntensity -= tmpItensity
 
-        if len(showedSpectra3Peak) > 1:
+        if len(shownSpectra3Peak) > 1:
             if showSum:
                 ax.plot(opeak.mz, sumIntensity,
                         label='fitted peak sum', linewidth=1.5)
@@ -1735,23 +1865,23 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             setValue(1, opeak.intensity[index])
 
         self.spectrum3PeakFitGroupBox.setHidden(False)
-        self.spectrum3Widget.setHidden(True)
+        self.spectrum3MainWidget.setHidden(True)
 
     @busy
     @withoutArgs
     def qSpectra3PeakReshow(self):
-        self.showSpectra3Peak(self.workspace.showedSpectra3Peak)
+        self.showSpectra3Peak(self.workspace.shownSpectra3Peak)
 
     @busy
     @withoutArgs
     def qSpectra3PeakRefit(self):
         num = self.spectrum3PeakNumSpinBox.value()
         workspace = self.workspace
-        peaks = workspace.showedSpectra3Peak
+        peaks = workspace.shownSpectra3Peak
         opeak = peaks[0].originalPeak
         fittedpeaks = workspace.peakFitFunc.fitPeak(opeak, num, force=True)
         calc = self.ionCalculator
-        workspace.showedSpectra3Peak = fittedpeaks
+        workspace.shownSpectra3Peak = fittedpeaks
         for i, peak in enumerate(fittedpeaks):
             peak.addFormula(calc.calc(peak.peakPosition))
 
@@ -1761,20 +1891,20 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @withoutArgs
     def qSpectra3PeakClose(self):
         self.spectrum3PeakFitGroupBox.setHidden(True)
-        self.spectrum3Widget.setHidden(False)
-        self.workspace.showedSpectrum3Peak = None
+        self.spectrum3MainWidget.setHidden(False)
+        self.workspace.shownSpectrum3Peak = None
 
     @threadBegin
     @withoutArgs
     def qSpectra3PeakSave(self):
         workspace = self.workspace
         calc = self.ionCalculator
-        showedSpectrum3Peaks = workspace.spectrum3fittedPeaks
-        r = workspace.showedSpectra3PeakRange
-        showedSpectra3Peak = workspace.showedSpectra3Peak
+        shownSpectrum3Peaks = workspace.spectrum3fittedPeaks
+        r = workspace.shownSpectra3PeakRange
+        shownSpectra3Peak = workspace.shownSpectra3Peak
 
         table = self.spectrum3PeakPropertyTableWidget
-        for index, peak in enumerate(showedSpectra3Peak):
+        for index, peak in enumerate(shownSpectra3Peak):
             strformula = table.item(index, 0).text()
             if strformula != ', '.join([str(f) for f in peak.formulaList]):
                 l = []
@@ -1786,11 +1916,11 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 peak.formulaList = l
 
         for i in r:
-            showedSpectrum3Peaks.pop(r.start)
-        for peak in reversed(showedSpectra3Peak):
-            showedSpectrum3Peaks.insert(r.start, peak)
+            shownSpectrum3Peaks.pop(r.start)
+        for peak in reversed(shownSpectra3Peak):
+            shownSpectrum3Peaks.insert(r.start, peak)
             peak.handled = True
-        spectrum = workspace.calibratedSpectra3[workspace.showedSpectrum3Index]
+        spectrum = workspace.calibratedSpectra3[workspace.shownSpectrum3Index]
         residual = workspace.spectrum3Residual
         peakFitFunc = workspace.peakFitFunc
 
@@ -1798,17 +1928,17 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             fileTime = spectrum.fileTime
             msg = "calc formula"
             sendStatus(fileTime, msg, -1, 0)
-            OribitoolFunc.recalcFormula(showedSpectrum3Peaks, calc, sendStatus)
+            OribitoolFunc.recalcFormula(shownSpectrum3Peaks, calc, sendStatus)
             msg = "calc residual"
             sendStatus(fileTime, msg, -1, 0)
-            opeak: OribitoolBase.Peak = showedSpectra3Peak[0].originalPeak
+            opeak: OribitoolBase.Peak = shownSpectra3Peak[0].originalPeak
             mz = residual[0]
             intensity = residual[1]
             index = OribitoolFunc.indexNearest_njit(mz, opeak.mz[0])
             s = slice(index, index + len(opeak.mz))
             intensity[s] = opeak.intensity
             intensity = intensity[s]
-            for peak in showedSpectra3Peak:
+            for peak in shownSpectra3Peak:
                 intensity -= peakFitFunc.func._funcFit(
                     opeak.mz, *peak.fittedParam)
             return residual
@@ -1820,10 +1950,9 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     def qSpectra3PeakSaveFinished(self, result, args):
         workspace = self.workspace
         workspace.spectrum3Residual = result
-        self.showSpectra3Peaks(workspace.calibratedSpectra3[workspace.showedSpectrum3Index], workspace.spectrum3fittedPeaks, result)
-        self.spectrum3PeakFitGroupBox.setHidden(True)
-        self.spectrum3Widget.setHidden(False)
-        self.workspace.showedSpectrum3Peak = None
+        self.showSpectra3Peaks(
+            workspace.calibratedSpectra3[workspace.shownSpectrum3Index], workspace.spectrum3fittedPeaks, result)
+        self.workspace.shownSpectrum3Peak = None
 
     @threadBegin
     @withoutArgs
@@ -1834,7 +1963,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         ppm = self.massListPpmDoubleSpinBox.value()*1e-6
         workspace = self.workspace
         index = index[0].row()
-        workspace.showedSpectrum3Index = index
+        workspace.shownSpectrum3Index = index
         spectrum: OribitoolClass.CalibratedSpectrum = workspace.calibratedSpectra3[index]
         massList: OribitoolClass.MassList = workspace.massList
         massList.ppm = ppm
@@ -1871,10 +2000,10 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @savefile("save as", "csv file(*.csv)")
     def qSpectrum3PeaksExport(self, path):
         workspace = self.workspace
-        if workspace.showedSpectrum3Index is None:
-            raise ValueError('There is no spectrum showed')
+        if workspace.shownSpectrum3Index is None:
+            raise ValueError('There is no spectrum shown')
         thread = QThread(OribitoolExport.exportPeakList, (path,
-                                                          workspace.calibratedSpectra3[workspace.showedSpectrum3Index].fileTime, workspace.spectrum3fittedPeaks))
+                                                          workspace.calibratedSpectra3[workspace.shownSpectrum3Index].fileTime, workspace.spectrum3fittedPeaks))
         thread.finished.connect(self.csvExportFinished)
         return thread
 
@@ -1883,12 +2012,28 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @savefile("save as", "csv file(*.csv)")
     def qSpectrum3IsotopeExport(self, path):
         workspace = self.workspace
-        if workspace.showedSpectrum3Index is None:
-            raise ValueError('There is no spectrum showed')
+        if workspace.shownSpectrum3Index is None:
+            raise ValueError('There is no spectrum shown')
         thread = QThread(OribitoolExport.exportIsotope, (path,
-                                                         workspace.calibratedSpectra3[workspace.showedSpectrum3Index].fileTime, workspace.spectrum3fittedPeaks))
+                                                         workspace.calibratedSpectra3[workspace.shownSpectrum3Index].fileTime, workspace.spectrum3fittedPeaks))
         thread.finished.connect(self.csvExportFinished)
         return thread
+
+    @threadBegin
+    @withoutArgs
+    def qSpectrum3LogScaleToggle(self):
+        log = self.spectrum3LogScaleCheckBox.isChecked()
+        ax = self.spectrum3Ax
+        ax.set_yscale('log' if log else 'linear')
+        if not log:
+            ax.yaxis.set_major_formatter(
+                matplotlib.ticker.FormatStrFormatter(r"%.1e"))
+        self.spectrum3RescaleFlag = True
+
+    @threadBegin
+    @withoutArgs
+    def qSpectra3Rescale(self):
+        self.spectrum3RescaleFlag = True
 
     @busy
     @withoutArgs
@@ -1907,10 +2052,10 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 formula = OribitoolFormula.Formula(mass)
                 formulaList.append(formula)
                 peakPosition = formula.mass()
-            peaks.append(OribitoolBase.MassListPeak(peakPosition, formulaList,1,True))
+            peaks.append(OribitoolBase.MassListPeak(
+                peakPosition, formulaList, 1, True))
         massList.addPeaks(peaks)
         self.showMassList(massList)
-
 
     @restore
     def showMassList(self, massList: OribitoolBase.MassList):
@@ -1966,7 +2111,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                         formula = OribitoolFormula.Formula(mass)
                         formulaList.append(formula)
                         peakPosition = formula.mass()
-                    peaks.append(OribitoolBase.MassListPeak(peakPosition, formulaList,1,True))
+                    peaks.append(OribitoolBase.MassListPeak(
+                        peakPosition, formulaList, 1, True))
                 massList = OribitoolBase.MassList()
                 massList.addPeaks(peaks)
         workspace.massList = massList
@@ -2078,11 +2224,11 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             setValue(1, timeSeries.mz)
             setValue(2, timeSeries.ppm * 1e6)
 
-
-        spectra=self.workspace.calibratedSpectra3
+        spectra = self.workspace.calibratedSpectra3
         length = 0 if spectra is None else len(spectra)
-        ax=self.timeSeriesAx
-        msg = ["please check mz or ppm of time series below, I may have no enough infomation about it"]
+        ax = self.timeSeriesAx
+        msg = [
+            "please check mz or ppm of time series below, I may have no enough infomation about it"]
         for timeSeries in timeSerieses:
             if len(timeSeries.time) < length / 3:
                 msg.append(timeSeries.tag)
@@ -2141,8 +2287,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.showTimeSeries(index)
 
     @restore
-    def showTimeSeries(self, showedTimeSeriesIndex: int):
-        timeSeries = self.workspace.timeSerieses[showedTimeSeriesIndex]
+    def showTimeSeries(self, shownTimeSeriesIndex: int):
+        timeSeries = self.workspace.timeSerieses[shownTimeSeriesIndex]
         retentionTime = self.timeSeriesUseRetentionTimeCheckBox.isChecked()
         startTime: np.datetime64 = timeSeries.time[0]
         time = None
@@ -2185,7 +2331,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @savefile("Save as", "csv file(*.csv)")
     def qTimeSeriesExport(self, path):
         if self.workspace.timeSeriesIndex is None:
-            raise ValueError('There is no time series showed')
+            raise ValueError('There is no time series shown')
         thread = QThread(OribitoolExport.exportTimeSerieses, (path, [
                          self.workspace.timeSerieses[self.workspace.timeSeriesIndex]]))
         thread.finished.connect(self.csvExportFinished)

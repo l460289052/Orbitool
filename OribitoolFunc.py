@@ -192,7 +192,7 @@ def processWithoutTime(func, args, signalQueue):
 def multiProcess(func, argsList: List[Tuple], fileTime, cpu=None, sendStatusFunc=nullSendStatus):
     '''
     multi process
-    the first line of func.__doc__ will be showed message
+    the first line of func.__doc__ will be shown message
     if fileTime is a list, func's first arguement must be fileTime
     '''
     if isinstance(fileTime, Iterable):

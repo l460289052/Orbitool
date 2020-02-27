@@ -69,7 +69,7 @@ You can change the formula's settings used in formula guessing.
 
 #### Calculator
 
-You can input formula or mass. If formula was inputted, mz will be showed. Others formula(s) will be showed.
+You can input formula or mass. If formula was inputted, mz will be shown. Others formula(s) will be shown.
 
 Just a hint: the result text box is editable just for copying. Oribitool won't read anything from it.
 
@@ -139,7 +139,7 @@ Hint: push those buttons won't do any calculation.
 
 + Spectra
 
-  all spectra will be showed here. Spectrum will be showed right if double click at a spectrum.
+  all spectra will be shown here. Spectrum will be shown right if double click at a spectrum.
 
 + Spectrum's property
 
@@ -163,7 +163,7 @@ use modified binPMF:
 
   4. delete peaks below LOD in original spectrum to get denoised spectrum
 
-Denoised spectrum will be showed as green while original spectrum will be showed as blue. You can choose to remove peaks below LOD, or all peaks minus LOD, or don't do denoise.
+Denoised spectrum will be shown as green while original spectrum will be shown as blue. You can choose to remove peaks below LOD, or all peaks minus LOD, or don't do denoise.
 
 ![spectrum1](\img\spectrum1.png)
 
@@ -183,11 +183,19 @@ as csv file with header = "mz intensity"
 
 If 'Scroll according to plot' check box is checked, the spectrum table will scroll to the left mz of the figure.
 
+##### y log scale
+
+I will autoscale y axis after toggling
+
+##### autoscale y axis
+
+rescale the figure to fit the highest peak and x axis within current x range
+
 ### Pre peak fitting
 
 ------
 
-all spectra are showed in left table. Select how much peak used in peak fitting and show.
+all spectra are shown in left table. Select how much peak used in peak fitting and show.
 
 #### Remove unique peak
 
@@ -211,7 +219,7 @@ canceled peak's color often is different with color before removing
 
 + Information
 
-  ions' formula and files' ppm will be showed
+  ions' formula and files' ppm will be shown
 
 #### Calibrate step
 
@@ -251,19 +259,33 @@ you can add time series by following methods:
 + selected peaks in 'Spectra&Peak fit' tab's peak list with ppm
 + (selected) peaks in mass list with ppm
 
-Time series will be showed right. If you want to check a specific time series, double it in the table, or export all time series.
+Time series will be shown right. If you want to check a specific time series, double it in the table, or export all time series.
 
 ### Bugs
 
 If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Oribitool.exe'.
 
 ## log
+**2020.02.27 version 1.0.2**
+
+Warning
+
++ I change the structure of .OribitWork file, so it may mismatch with former .OribitWork file.
+
+Appended
+
++ resize panels by mouse(test)
++ option for whether y axis use log scale
++ autoscale button for spectra
++ ppm column in 'Spectra&Peak fit' tab
++ isotope ratio column in 'Peak fit' group box
+
 **2020.02.15  version 1.0.1**
 
 Bug fix
 
 + ppm when show single file's calibration information
-+ wrong elements showed in formula. eg. Na when negative and S when positive
++ wrong elements shown in formula. eg. Na when negative and S when positive
   rewrite formula interface logic
 + "'NoneType' object has no attribute 'addPeaks'" when add peak to mass list without initialize in 'Spectra&Peak fit'
   

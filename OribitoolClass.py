@@ -143,7 +143,7 @@ class GetSpectrum(OribitoolBase.Operator):
         self.scanNum = scanNum
         self.time: datetime.timedelta = file.getSpectrumRetentionTime(scanNum)
         tmp = format(self.time.total_seconds(), '.2f')
-        self.showedTime = (tmp, tmp)
+        self.shownTime = (tmp, tmp)
 
     def __call__(self, fileList: FileList, sendStatus=OribitoolBase.nullSendStatus):
         fileTime = self.fileTime
@@ -170,7 +170,7 @@ class AverageSpectrum(OribitoolBase.Operator):
             t1, t2 = timeRange
             t1 += file.creationDate
             t2 += file.creationDate
-        self.showedTime = (t1.strftime(OribitoolBase.timeFormat),
+        self.shownTime = (t1.strftime(OribitoolBase.timeFormat),
                            t2.strftime(OribitoolBase.timeFormat))
 
     def __call__(self, fileList: FileList, sendStatus=OribitoolBase.nullSendStatus):
@@ -515,14 +515,14 @@ class Workspace(object):
 
         # @showSpectra3
         self.calibratedSpectra3: List[OribitoolBase.Spectrum] = None
-        self.showedSpectrum3Index: int = None
+        self.shownSpectrum3Index: int = None
         # @showSpectra3Peaks
         self.spectrum3fittedPeaks = None
         self.spectrum3Residual:(np.ndarray, np.ndarray) = None
 
         # @showSpectra3Peak
-        self.showedSpectrum3PeakRange: range = None
-        self.showedSpectrum3Peak: List[OribitoolBase.Peak] = None
+        self.shownSpectrum3PeakRange: range = None
+        self.shownSpectrum3Peak: List[OribitoolBase.Peak] = None
 
         # @showMassList
         self.massList: MassList = OribitoolBase.MassList()
