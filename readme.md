@@ -266,6 +266,20 @@ Time series will be shown right. If you want to check a specific time series, do
 If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Oribitool.exe'.
 
 ## log
+**2020.02.29 version 1.0.3**
+
+Warning
+
++ I add a polarity filter, so it mismatch with former OribitWork file
+
+Appended
+
++ polarity filter when averaging spectrum
+
+Change
+
++ UI
+
 **2020.02.27 version 1.0.2**
 
 Warning

@@ -66,6 +66,10 @@ def showInfo(content: str, cap=None):
         None, cap if cap is not None else 'info', str(content))
 
 
+if DEBUG:
+    showInfo('DEBUG')
+
+
 def busy(func):
     @wraps(func)
     def decorator(self, *args, **kargs):
@@ -159,6 +163,17 @@ def timer(func):
     return decorator
 
 
+def spectraIndex(func):
+    @wraps(func)
+    def decorator(self, *args):
+        indexes = self.spectraTableWidget.selectedIndexes()
+        if len(indexes) == 0:
+            raise ValueError("No spectrum was selected")
+        index = indexes[0].row()
+        return func(self, index)
+    return decorator
+
+
 def openfile(caption, filter=None, multi=False, folder=False):
     if isinstance(caption, types.FunctionType):
         raise TypeError()
@@ -223,12 +238,21 @@ def savefile(caption, filter):
     return f
 
 
-def setSpliterFactor(splitter: QtWidgets.QSplitter, factors: List[int]):
+def splitterSetSize(splitter: QtWidgets.QSplitter, minSizes: List[bool]):
     '''
-    factors: List[strechfactor]
+    sizes: List[size]
     '''
-    for index, factor in enumerate(factors):
-        splitter.setStretchFactor(index, factor)
+    ss = splitter.width()
+    index = None
+    sizes = []
+    for i, mi in enumerate(minSizes):
+        widget = splitter.widget(i)
+        if minSizes[i]:
+            sizes.append(widget.minimumSizeHint().width())
+        else:
+            index = i
+    sizes.insert(index, ss - sum(sizes))
+    splitter.setSizes(sizes)
 
 
 class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
@@ -248,8 +272,10 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.optionActionExport.triggered.connect(self.qOptionExport)
 
         # formula
-        self.formulaPlusRadioButton.clicked.connect(self.qFormulaChargeToggle)
-        self.formulaMinusRadioButton.clicked.connect(self.qFormulaChargeToggle)
+        self.formulaPositiveRadioButton.clicked.connect(
+            self.qFormulaPolarityToggle)
+        self.formulaNegativeRadioButton.clicked.connect(
+            self.qFormulaPolarityToggle)
         self.formulaApplyPushButton.clicked.connect(self.qFormulaApply)
         self.formulaCalcPushButton.clicked.connect(self.qFormulaCalc)
 
@@ -269,6 +295,13 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.massListTableWidget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeToContents)
 
+        # spectra
+        self.spectraTableWidget.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.ResizeToContents)
+        self.spectrumPropertyTableWidget.horizontalHeader(
+        ).setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        self.spectraTableWidget.itemClicked.connect(self.qSpectraClicked)
+
         # files
         self.addFolderPushButton.clicked.connect(self.qAddFolder)
         self.addFilePushButton.clicked.connect(self.qAddFile)
@@ -282,8 +315,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             QtWidgets.QHeaderView.ResizeToContents)
 
         # spectra1 & denoise
-        self.spectra1TableWidget.itemDoubleClicked.connect(
-            self.qSpectra1DoubleClicked)
+        self.spectra1ShowPushButton.clicked.connect(self.qSpectra1Show)
         self.denoiseRecalcPushButton.clicked.connect(self.qDenoiseRecalc)
         self.denoiseFinishPushButton.clicked.connect(
             lambda: self.qDenoise(True))
@@ -299,12 +331,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.spectrum1RescalePushButton.clicked.connect(self.qSpectra1Rescale)
         self.spectrum1RescaleFlag = False
 
-        setSpliterFactor(self.spectra1Splitter, [1, 1, 3])
-
-        self.spectra1TableWidget.horizontalHeader().setSectionResizeMode(
-            QtWidgets.QHeaderView.ResizeToContents)
-        self.spectrum1PropertyTableWidget.horizontalHeader(
-        ).setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.spectrum1TableWidget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeToContents)
 
@@ -332,9 +358,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             self.qPeakFit2ShowSelectedSpectrum)
         self.peak2CancelPushButton.clicked.connect(self.qPeak2RmCancel)
         self.peak2FinishPushButton.clicked.connect(self.qPeak2Finish)
-
-        self.peakFitSpectra2TableWidget.horizontalHeader().setSectionResizeMode(
-            QtWidgets.QHeaderView.ResizeToContents)
 
         self.peak2Widget.setLayout(QtWidgets.QVBoxLayout())
         self.peak2Canvas: matplotlib.backend_bases.FigureCanvasBase = FigureCanvas(
@@ -369,8 +392,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.calibrationInfoExportPushButton.clicked.connect(
             self.qCalibrationInfoExport)
 
-        setSpliterFactor(self.calibrationSplitter, [1, 1, 2])
-
         self.calibrationIonsTableWidget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeToContents)
         self.calibrationResultTableWidget.horizontalHeader().setSectionResizeMode(
@@ -401,11 +422,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             self.qSpectrum3LogScaleToggle)
         self.spectrum3RescalePushButton.clicked.connect(self.qSpectra3Rescale)
         self.spectrum3RescaleFlag = False
-
-        setSpliterFactor(self.spectra3Splitter, [1, 1, 3])
-
-        self.spectra3TableWidget.horizontalHeader().setSectionResizeMode(
-            QtWidgets.QHeaderView.ResizeToContents)
 
         self.spectrum3PeakListTableWidget.itemDoubleClicked.connect(
             self.qSpectra3PeakListDoubleClicked)
@@ -492,6 +508,17 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.timeSeriesAx.autoscale(True)
         self.timeSeriesTag2Line: Dict[str, matplotlib.lines.Line2D] = {}
 
+        # initialize splitter
+        # if init too early, won't get true size
+        self.show()
+        splitterSetSize(self.splitter, [True, False, True])
+        self.tabWidget.setCurrentWidget(self.spectra1Tab)
+        splitterSetSize(self.spectra1Splitter, [True, False])
+        self.tabWidget.setCurrentWidget(self.calibrationTab)
+        splitterSetSize(self.calibrationSplitter, [True, True, False])
+        self.tabWidget.setCurrentWidget(self.spectra3Tab)
+        splitterSetSize(self.spectra3Splitter, [True, False])
+
         # variables initial
 
         self.fileList = OribitoolClass.FileList()
@@ -526,7 +553,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             showInfo("wait for processing", 'busy')
             return False
         self.busy = busy
-        self.widget.setDisabled(busy)
+        self.splitter.setDisabled(busy)
         self.progressBar.setHidden(not busy)
         return True
 
@@ -571,15 +598,13 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             workspace.denoisedSpectra2 = None
             workspace.fileTimeSpectraMaps = None
 
-            clearAndSetRow(self.spectra1TableWidget)
-            clearAndSetRow(self.spectrum1TableWidget)
-            clearAndSetRow(self.spectrum1PropertyTableWidget)
+            clearAndSetRow(self.spectraTableWidget)
+            clearAndSetRow(self.spectrumPropertyTableWidget)
             self.spectrum1Ax.clear()
             self.spectrum1Canvas.draw()
         if beginFrom <= 2:
             workspace.peakFitFunc = None
 
-            clearAndSetRow(self.peakFitSpectra2TableWidget)
             self.peak2Ax.clear()
             self.peak2Canvas.draw()
         if beginFrom <= 3:
@@ -594,7 +619,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             workspace.spectrum3fittedPeaks = None
             workspace.spectrum3Residual = None
 
-            clearAndSetRow(self.spectra3TableWidget)
             clearAndSetRow(self.spectrum3PeakListTableWidget)
             self.spectrum3Ax.clear()
             self.spectrum3Canvas.draw()
@@ -656,6 +680,12 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.qSetOption(option)
 
         workspace: OribitoolClass.Workspace = result['workspace']
+        if not hasattr(workspace, 'version') or workspace.version < OribitoolClass.supportedVersion:
+            msg = "Not supported OribitWork file version"
+            if hasattr(workspace, 'version'):
+                msg += f": {OribitoolClass.version2Str(workspace.version)}"
+            showInfo(msg)
+
         fileTimePaths: List[Tuple[datetime.datetime, str]
                             ] = result['fileTimePaths']
         self.workspace = workspace
@@ -676,13 +706,11 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
         self.showMassList(workspace.massList)
 
-        self.showSpectra1(workspace.spectra1Operators)
+        self.showSpectra(workspace.spectra1Operators)
         self.showSpectrum1(workspace.spectrum1,
                            workspace.LOD, workspace.denoisedSpectrum1)
-        self.showPeakFit2Spectra(workspace.denoisedSpectra2)
         self.showPeakFitFunc(workspace.peakFitFunc)
         self.showCalibrationInfoAll(workspace.fileTimeCalibrations)
-        self.showSpectra3(workspace.calibratedSpectra3)
         if workspace.calibratedSpectra3 is not None:
             self.showSpectra3Peaks(
                 workspace.calibratedSpectra3[workspace.shownSpectrum3Index], workspace.spectrum3fittedPeaks, workspace.spectrum3Residual)
@@ -721,7 +749,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    def qFormulaChargeToggle(self):
+    def qFormulaPolarityToggle(self):
         ionCalculator = self.ionCalculator
         self.showFormulaOption(ionCalculator)
 
@@ -730,11 +758,11 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         charge = None
         elements = None
         isotopes = None
-        if self.formulaPlusRadioButton.isChecked():
+        if self.formulaPositiveRadioButton.isChecked():
             charge = 1
             elements = OribitoolGuessIons.p_elements
             isotopes = OribitoolGuessIons.p_isotopes
-        elif self.formulaMinusRadioButton.isChecked():
+        elif self.formulaNegativeRadioButton.isChecked():
             charge = -1
             elements = OribitoolGuessIons.n_elements
             isotopes = OribitoolGuessIons.n_isotopes
@@ -767,9 +795,9 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @withoutArgs
     def qFormulaApply(self):
         calculator = self.ionCalculator
-        if self.formulaPlusRadioButton.isChecked():
+        if self.formulaPositiveRadioButton.isChecked():
             calculator['charge'] = 1
-        elif self.formulaMinusRadioButton.isChecked():
+        elif self.formulaNegativeRadioButton.isChecked():
             calculator['charge'] = -1
 
         calculator.errppm = self.formulaPpmDoubleSpinBox.value()/1e6
@@ -836,14 +864,23 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @openfile("Select one folder", folder=True)
     def qAddFolder(self, folder):
         table = self.fileTableWidget
-        fileTimes = self.fileList.addFileFromFolder(
-            folder, self.recurrenceCheckBox.isChecked(), '.raw')
-        count = table.rowCount()
-        table.setRowCount(count+len(fileTimes))
-        for index, time in enumerate(fileTimes):
-            self.showFile(time, count+index)
+        try:
+            fileTimes = self.fileList.addFileFromFolder(
+                folder, self.recurrenceCheckBox.isChecked(), '.raw')
+            count = table.rowCount()
+            table.setRowCount(count+len(fileTimes))
+            for index, time in enumerate(fileTimes):
+                self.showFile(time, count+index)
+            self.showFileTimeRange()
+        except ValueError as e:
+            table.clearContents()
+            table.setRowCount(0)
+            table.setRowCount(len(self.fileList.timedict))
+            for index, fileTime in enumerate(self.fileList.timedict.keys()):
+                self.showFile(fileTime, index)
+            self.showFileTimeRange()
+            raise e
 
-        self.showFileTimeRange()
 
     @busy
     @withoutArgs
@@ -877,25 +914,33 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @withoutArgs
     def qShowFilesSpectra(self):
         self.clear(1)
-        fileIndexes = self.fileTableWidget.selectedIndexes()
+        workspace = self.workspace
+
+        startTime = self.averageStartDateTimeEdit.dateTime().toPyDateTime()
+        endTime = self.averageEndDateTimeEdit.dateTime().toPyDateTime()
+        polarity = 0
+        if self.averagePositiveRadioButton.isChecked():
+            polarity = 1
+        elif self.averageNegativeRadioButton.isChecked():
+            polarity = -1
+
+        table = self.fileTableWidget
+        fileIndexes = table.selectedIndexes()
         if not fileIndexes:
             raise ValueError('No file was selected')
-        table = self.fileTableWidget
         fileList = self.fileList.subList(
             [table.item(index.row(), 3).text() for index in fileIndexes])
 
-        operators = []
-        for f in fileList.timedict.values():
-            operators.extend([OribitoolClass.GetSpectrum(f, index) for index in range(
-                f.firstScanNumber, f.lastScanNumber + 1)])
+        operators = OribitoolClass.AverageFileList(
+            fileList, None, None, 1, polarity, (startTime, endTime))
         self.workspace.spectra1Operators = operators
-        self.showSpectra1(operators)
+        self.showSpectra(operators)
 
         self.tabWidget.setCurrentWidget(self.spectra1Tab)
 
     @restore
-    def showSpectra1(self, spectra1Operators: Union[OribitoolClass.GetSpectrum, OribitoolClass.AverageSpectrum]):
-        table = self.spectra1TableWidget
+    def showSpectra(self, spectra1Operators: Union[OribitoolClass.GetSpectrum, OribitoolClass.GetSpectrum]):
+        table = self.spectraTableWidget
         table.setRowCount(len(spectra1Operators))
         for index, operator in enumerate(spectra1Operators):
             def setValue(column: int, s):
@@ -904,6 +949,23 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
             setValue(0, operator.shownTime[0])
             setValue(1, operator.shownTime[1])
+
+    @threadBegin
+    def qSpectraClicked(self, item: QtWidgets.QTableWidgetItem):
+        row = item.row()
+        workspace = self.workspace
+        operator = workspace.spectra1Operators[row]
+        file = self.fileList[operator.fileTime]
+        value = [('file', file.name)]
+        table = self.spectrumPropertyTableWidget
+        table.setRowCount(0)
+        table.setRowCount(len(value))
+        for index, (k, v) in enumerate(value):
+            def setValue(column, s):
+                table.setItem(
+                    index, column, QtWidgets.QTableWidgetItem(str(s)))
+            setValue(0, k)
+            setValue(1, v)
 
     @busy
     @withoutArgs
@@ -920,6 +982,11 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         startTime = self.averageStartDateTimeEdit.dateTime().toPyDateTime()
         endTime = self.averageEndDateTimeEdit.dateTime().toPyDateTime()
         ppm = self.averagePpmDoubleSpinBox.value() / 1e6
+        polarity = 0
+        if self.averagePositiveRadioButton.isChecked():
+            polarity = 1
+        elif self.averageNegativeRadioButton.isChecked():
+            polarity = -1
 
         table = self.fileTableWidget
         fileIndexes = table.selectedIndexes()
@@ -930,8 +997,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             [table.item(index.row(), 3).text() for index in fileIndexes])
 
         workspace.spectra1Operators = OribitoolClass.AverageFileList(
-            fileList, ppm, time, N, (startTime, endTime))
-        self.showSpectra1(workspace.spectra1Operators)
+            fileList, ppm, time, N, polarity, (startTime, endTime))
+        self.showSpectra(workspace.spectra1Operators)
         self.tabWidget.setCurrentWidget(self.spectra1Tab)
 
     @busy
@@ -949,21 +1016,26 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         startTime = self.averageStartDateTimeEdit.dateTime().toPyDateTime()
         endTime = self.averageEndDateTimeEdit.dateTime().toPyDateTime()
         ppm = self.averagePpmDoubleSpinBox.value() / 1e6
+        polarity = 0
+        if self.averagePositiveRadioButton.isChecked():
+            polarity = 1
+        elif self.averageNegativeRadioButton.isChecked():
+            polarity = -1
 
         workspace.spectra1Operators = OribitoolClass.AverageFileList(
-            self.fileList, ppm, time, N, (startTime, endTime))
+            self.fileList, ppm, time, N, polarity, (startTime, endTime))
 
-        self.showSpectra1(workspace.spectra1Operators)
+        self.showSpectra(workspace.spectra1Operators)
         self.tabWidget.setCurrentWidget(self.spectra1Tab)
 
     @threadBegin
-    def qSpectra1DoubleClicked(self, item: QtWidgets.QTableWidgetItem):
+    @spectraIndex
+    def qSpectra1Show(self, index):
         minus = self.denoiseRemoveMinusRadioButton.isChecked()
         workspace = self.workspace
         fileList = self.fileList
-        index = item.row()
         spectrum = None
-        self.spectrum1PropertyTableWidget.clearContents()
+        self.spectrumPropertyTableWidget.clearContents()
 
         operator = workspace.spectra1Operators[index]
 
@@ -977,11 +1049,11 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 spectrum, LOD, peakAt, minus, sendStatus)
             return (spectrum, LOD, denoisedSpectrum)
         thread = QThread(process, tuple())
-        thread.finished.connect(self.qSpectra1DoubleClickedFinished)
+        thread.finished.connect(self.qSpectra1ShowFinished)
         return thread
 
     @threadEnd
-    def qSpectra1DoubleClickedFinished(self, result, args):
+    def qSpectra1ShowFinished(self, result, args):
         spectrum, LOD, denoisedSpectrum1 = result
         workspace = self.workspace
         workspace.spectrum1 = spectrum
@@ -992,16 +1064,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @restore
     def showSpectrum1(self, spectrum: OribitoolBase.Spectrum, LOD: (float, float), denoisedSpectrum1: OribitoolBase.Spectrum):
-        table = self.spectrum1PropertyTableWidget
-        value = [('file', self.fileList[spectrum.fileTime].name)]
-        table.setRowCount(len(value))
-        for index, (k, v) in enumerate(value):
-            def setValue(column, s):
-                table.setItem(
-                    index, column, QtWidgets.QTableWidgetItem(str(s)))
-            setValue(0, k)
-            setValue(1, v)
-
         table = self.spectrum1TableWidget
 
         table.clearContents()
@@ -1210,33 +1272,14 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         workspace.spectra2LODs = LODs
         workspace.denoisedSpectra2 = spectra
         workspace.fileTimeSpectraMaps = maps
-        self.showPeakFit2Spectra(spectra)
         self.tabWidget.setCurrentWidget(self.peakFit2Tab)
 
-    @restore
-    def showPeakFit2Spectra(self, denoisedSpectra2: List[OribitoolBase.Spectrum]):
-        table = self.peakFitSpectra2TableWidget
-        table.clearContents()
-        table.setRowCount(0)
-        table.setRowCount(len(denoisedSpectra2))
-        for index, spectrum in enumerate(denoisedSpectra2):
-            def setValue(column, s):
-                table.setItem(
-                    index, column, QtWidgets.QTableWidgetItem(str(s)))
-            setValue(0, spectrum.timeRange[0].strftime(
-                OribitoolBase.timeFormat))
-            setValue(1, spectrum.timeRange[1].strftime(
-                OribitoolBase.timeFormat))
-
     @busy
-    @withoutArgs
-    def qPeakFit2ShowSelectedSpectrum(self):
-        indexes = self.peakFitSpectra2TableWidget.selectedIndexes()
-        if len(indexes) == 0:
-            raise ValueError("No spectrum was selected")
-        index = indexes[0].row()
+    @spectraIndex
+    def qPeakFit2ShowSelectedSpectrum(self, index):
         workspace = self.workspace
-
+        if workspace.denoisedSpectra2 is None:
+            raise ValueError('please denoise first')
         spectrum = workspace.denoisedSpectra2[index]
         peakFitFunc = OribitoolClass.PeakFitFunc(
             spectrum, self.peakFitNumSpinBox.value())
@@ -1272,6 +1315,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.peak2MouseLineAni = None
         ax.xaxis.set_major_formatter(
             matplotlib.ticker.FormatStrFormatter(r"%.1e"))
+        ax.yaxis.set_tick_params(rotation=15)
         for normPeak in peakFitFunc.normPeaks:
             ax.plot(normPeak.mz, normPeak.intensity)
         self.fitPeak2PlotNormPeakWithoutDraw()
@@ -1526,7 +1570,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @savefile("Save as", "csv file(*.csv)")
     def qCalibrationInfoExport(self, path):
         workspace = self.workspace
-        if workspace.fileTimeCalibrations is None:
+        if workspace.fileTimeCalibrations is None or len(workspace.fileTimeCalibrations) == 0:
             raise ValueError('There is no calibration infomation calculated')
         thread = QThread(OribitoolExport.exportCalibrationInfo,
                          (path, self.fileList, self.calibrationIonList, workspace.fileTimeCalibrations))
@@ -1543,7 +1587,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     def qCalibrationFinish(self):
         self.clear(4)
         workspace = self.workspace
-        if len(workspace.fileTimeCalibrations) == 0:
+        if workspace.fileTimeCalibrations is None or len(workspace.fileTimeCalibrations) == 0:
             raise ValueError('please calculate calibration infomation first')
 
         argsList = [i for i in zip(workspace.fileTimeCalibrations.values(
@@ -1566,30 +1610,14 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         workspace = self.workspace
         workspace.calibratedSpectra3 = calibratedSpectra3
 
-        self.showSpectra3(calibratedSpectra3)
         self.tabWidget.setCurrentWidget(self.spectra3Tab)
 
-    @restore
-    def showSpectra3(self, spectra: List[OribitoolBase.Spectrum]):
-        table = self.spectra3TableWidget
-        table.clearContents()
-        table.setRowCount(0)
-        table.setRowCount(len(spectra))
-        for index, spectrum in enumerate(spectra):
-            def setValue(column, s):
-                table.setItem(
-                    index, column, QtWidgets.QTableWidgetItem(str(s)))
-            setValue(0, spectrum.timeRange[0])
-            setValue(1, spectrum.timeRange[1])
-
     @threadBegin
-    @withoutArgs
-    def qSpectra3FitSpectrum(self):
-        index = self.spectra3TableWidget.selectedIndexes()
-        if not index:
-            raise ValueError('No spectrum was selected')
+    @spectraIndex
+    def qSpectra3FitSpectrum(self, index):
         workspace = self.workspace
-        index = index[0].row()
+        if workspace.calibratedSpectra3 is None:
+            raise ValueError('Please calibrate first')
         workspace.shownSpectrum3Index = index
         spectrum: OribitoolBase.Spectrum = workspace.calibratedSpectra3[index]
         peakFitFunc = workspace.peakFitFunc
@@ -1955,13 +1983,12 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.workspace.shownSpectrum3Peak = None
 
     @threadBegin
-    @withoutArgs
-    def qSpectra3FitUseMassList(self):
-        index = self.spectra3TableWidget.selectedIndexes()
-        if not index:
-            raise ValueError('No spectrum was selected')
-        ppm = self.massListPpmDoubleSpinBox.value()*1e-6
+    @spectraIndex
+    def qSpectra3FitUseMassList(self, index):
         workspace = self.workspace
+        if workspace.calibratedSpectra3 is None:
+            raise ValueError('Please calibrate first')
+        ppm = self.massListPpmDoubleSpinBox.value()*1e-6
         index = index[0].row()
         workspace.shownSpectrum3Index = index
         spectrum: OribitoolClass.CalibratedSpectrum = workspace.calibratedSpectra3[index]

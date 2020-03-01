@@ -25,12 +25,15 @@ clr.AddReference('System.Collections')
 from ThermoFisher.CommonCore.Data import ToleranceUnits, Extensions
 from ThermoFisher.CommonCore.Data.Business import ChromatogramSignal, ChromatogramTraceSettings, \
      DataUnits, Device, GenericDataTypes, SampleType, Scan, TraceType, MassOptions
-from ThermoFisher.CommonCore.Data.FilterEnums import IonizationModeType, MSOrderType
+from ThermoFisher.CommonCore.Data.FilterEnums import IonizationModeType, MSOrderType, PolarityType
 from ThermoFisher.CommonCore.Data.Interfaces import IChromatogramSettings, IScanEventBase, \
      IScanFilter, RawFileClassification
 from ThermoFisher.CommonCore.MassPrecisionEstimator import PrecisionEstimate
 from ThermoFisher.CommonCore.RawFileReader import RawFileReaderAdapter
 
+convertPolarity = {PolarityType.Any: 0,
+                   PolarityType.Positive: 1,
+                   PolarityType.Negative: -1}
 
 class File:
     def __init__(self, fullname):
@@ -53,6 +56,18 @@ class File:
     def getSpectrumRetentionTimes(self):
         return [self.getSpectrumRetentionTime(scanNum) for scanNum in range(self.firstScanNumber, self.lastScanNumber + 1)]
         
+    def getFilter(self, polarity):
+        scanfilter = None
+        filters = self.rawfile.GetFilters()
+        for f in filters:
+            if convertPolarity[f.Polarity] == polarity:
+                scanfilter = f
+        return scanfilter
+
+    def getSpectrumPolarity(self, scanNum):
+        scanfilter = self.rawfile.GetFilterForScanNumber(scanNum)
+        return convertPolarity[scanfilter.Polarity]
+
     def getSpectrum(self, scanNum):
         rawfile = self.rawfile
         retentimeTime = datetime.timedelta(minutes=rawfile.RetentionTimeFromScanNumber(scanNum))
@@ -64,7 +79,7 @@ class File:
         time = retentimeTime+self.creationDate
         return OribitoolBase.Spectrum(self.creationDate, mz, intensity, (time, time), (scanNum, scanNum))
         
-    def getAveragedSpectrum(self, ppm, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None):
+    def getAveragedSpectrum(self, ppm, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None, polarity = -1):
         averaged = None
 
         rawfile = self.rawfile
@@ -85,7 +100,7 @@ class File:
         else:
             raise ValueError(
                 "`timeRange` or `numRange` must be provided and only one can be provided")
-        scanfilter = IScanFilter(rawfile.GetFilterForScanNumber(start))
+        scanfilter = self.getFilter(polarity)
         last = end - 1
         massOption = MassOptions(ppm, ToleranceUnits.ppm)
         averaged = Extensions.AverageScansInScanRange(

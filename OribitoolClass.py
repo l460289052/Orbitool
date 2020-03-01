@@ -138,24 +138,7 @@ class FileList(object):
 
 
 class GetSpectrum(OribitoolBase.Operator):
-    def __init__(self, file: File, scanNum):
-        self.fileTime = file.creationDate
-        self.scanNum = scanNum
-        self.time: datetime.timedelta = file.getSpectrumRetentionTime(scanNum)
-        tmp = format(self.time.total_seconds(), '.2f')
-        self.shownTime = (tmp, tmp)
-
-    def __call__(self, fileList: FileList, sendStatus=OribitoolBase.nullSendStatus):
-        fileTime = self.fileTime
-        file: File = fileList.timedict[fileTime]
-        msg = "get spectrum"
-        sendStatus(fileTime, msg, -1, 0)
-        ret = file.getSpectrum(self.scanNum)
-        return ret
-
-
-class AverageSpectrum(OribitoolBase.Operator):
-    def __init__(self, file: File, ppm: float, numRange: (int, int) = None, timeRange: (datetime.timedelta, datetime.timedelta) = None):
+    def __init__(self, file: File, ppm: float, numRange: (int, int) = None, timeRange: (datetime.timedelta, datetime.timedelta) = None, polarity = -1):
         self.fileTime = file.creationDate
         self.ppm = ppm
         self.numRange = numRange
@@ -171,19 +154,28 @@ class AverageSpectrum(OribitoolBase.Operator):
             t1 += file.creationDate
             t2 += file.creationDate
         self.shownTime = (t1.strftime(OribitoolBase.timeFormat),
-                           t2.strftime(OribitoolBase.timeFormat))
+                          t2.strftime(OribitoolBase.timeFormat))
+        self.polarity = polarity
 
     def __call__(self, fileList: FileList, sendStatus=OribitoolBase.nullSendStatus):
         fileTime = self.fileTime
         file: File = fileList.timedict[fileTime]
         msg = "averaging"
         sendStatus(fileTime, msg, -1, 0)
-        ret = file.getAveragedSpectrum(self.ppm, self.timeRange, self.numRange)
+        numRange = self.numRange
+        if numRange is None or numRange[1] - numRange[0] > 1:
+            ret = file.getAveragedSpectrum(self.ppm, self.timeRange, numRange, self.polarity)
+        else:
+            ret = file.getSpectrum(numRange[0])
         return ret
 
 
-def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N: int = None, timeLimit: Tuple[datetime.datetime, datetime.datetime] = None) -> List[AverageSpectrum]:
+def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N: int = None, polarity:int = -1, timeLimit: Tuple[datetime.datetime, datetime.datetime] = None) -> List[GetSpectrum]:
     timedict = fileList.timedict
+    for file in timedict.values():
+        if file.getFilter(polarity) is None:
+            raise ValueError(f"Please check file {file.name}. It doesn't have spectrum with polarity = {polarity}")
+
     averageSpectra = []
 
     if timeLimit is None:
@@ -227,7 +219,7 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
             right = left + N
             if right > end:
                 right = end
-            return AverageSpectrum(f, ppm, numRange=(left, right))
+            return GetSpectrum(f, ppm, numRange=(left, right), polarity = polarity)
         delta = N
 
     elif time is not None:
@@ -251,7 +243,7 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
             right = left + time
             if right > end:
                 right = end
-            return AverageSpectrum(f, ppm, timeRange=(left, right))
+            return GetSpectrum(f, ppm, timeRange=(left, right), polarity = polarity)
         delta = time
 
     for f in timedict.values():
@@ -259,13 +251,16 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
         while index < end:
             averageSpectra.append(average(f, index, end))
             index += delta
-
+    if N == 1:
+        averageSpectra = [spectrum for spectrum in averageSpectra if timedict[spectrum.fileTime].getSpectrumPolarity(
+            spectrum.numRange[0]) == polarity]
     return averageSpectra
 
 
 class PeakFitFunc:
     def __init__(self, spectrum: OribitoolBase.Spectrum, num: int):
-        peaks = spectrum.peaks if spectrum.peaks is not None else OribitoolFunc.getPeaks(spectrum)
+        peaks = spectrum.peaks if spectrum.peaks is not None else OribitoolFunc.getPeaks(
+            spectrum)
         peaks = [peak for peak in peaks if peak.splitNum == 1]
         num = max(0, min(num, len(peaks)))
 
@@ -313,7 +308,7 @@ class PeakFitFunc:
     def fitPeak(self, peak: OribitoolBase.Peak, num: int = None, force: bool = False) -> List[OribitoolBase.Peak]:
         return self.func.splitPeak(peak, num, force)
 
-    def fitPeaks(self, peaks: List[OribitoolBase.Peak], fileTime:datetime.datetime = datetime.datetime.now(), sendStatus=OribitoolFunc.nullSendStatus) -> List[OribitoolBase.Peak]:
+    def fitPeaks(self, peaks: List[OribitoolBase.Peak], fileTime: datetime.datetime = datetime.datetime.now(), sendStatus=OribitoolFunc.nullSendStatus) -> List[OribitoolBase.Peak]:
         '''
         if peaks are sorted, ret will be sorted be peakPosition
         '''
@@ -397,10 +392,11 @@ class CalibrateMass:
             start = stop
         newSpectrum.peaks = newPeaks
         return newSpectrum
-    
+
     @staticmethod
-    def fitSpectra(fileTime:datetime.datetime, massCalibrate, spectra: List[OribitoolBase.Spectrum]) -> List[OribitoolBase.Spectrum]:
+    def fitSpectra(fileTime: datetime.datetime, massCalibrate, spectra: List[OribitoolBase.Spectrum]) -> List[OribitoolBase.Spectrum]:
         return [massCalibrate.fitSpectrum(spectrum) for spectrum in spectra]
+
 
 def fitUseMassList(massList: OribitoolBase.MassList, spectrum: OribitoolBase.Spectrum, peakFitFunc: PeakFitFunc, sendStatus=OribitoolBase.nullSendStatus):
     '''
@@ -413,17 +409,17 @@ def fitUseMassList(massList: OribitoolBase.MassList, spectrum: OribitoolBase.Spe
     minRatio = 1 - ppm
     maxRatio = 1 + ppm
 
-    select = np.zeros(len(peaks), dtype = np.bool)
+    select = np.zeros(len(peaks), dtype=np.bool)
     length = len(massList)
     msg = 'parting using mass list'
     for index, peak in enumerate(massList):
         sendStatus(fileTime, msg, index, length)
         l = OribitoolFunc.indexFirstNotSmallerThan(
-            peaks, peak.peakPosition * minRatio, method= (lambda peaks, index: peaks[index].mz[-1]))
+            peaks, peak.peakPosition * minRatio, method=(lambda peaks, index: peaks[index].mz[-1]))
         r = OribitoolFunc.indexFirstBiggerThan(
             peaks, peak.peakPosition*maxRatio, method=(lambda peaks, index: peaks[index].mz[0]))
         select[l:r] = True
-    
+
     peaks = [peak for peak, slt in zip(peaks, select) if slt]
 
     fittedPeaks = peakFitFunc.fitPeaks(peaks, fileTime, sendStatus)
@@ -434,7 +430,8 @@ def fitUseMassList(massList: OribitoolBase.MassList, spectrum: OribitoolBase.Spe
     fLength = len(fittedPeaks)
     for index, peak in enumerate(massList):
         sendStatus(fileTime, msg, index, length)
-        frIndex = OribitoolFunc.indexNearest(fittedPeaks, peak.peakPosition, (flIndex, fLength), method=(lambda peaks, index: peaks[index].peakPosition))
+        frIndex = OribitoolFunc.indexNearest(fittedPeaks, peak.peakPosition, (
+            flIndex, fLength), method=(lambda peaks, index: peaks[index].peakPosition))
         if frIndex < 0 or frIndex >= fLength:
             break
         fpeak = fittedPeaks[frIndex]
@@ -489,17 +486,31 @@ def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OribitoolBase.S
     return OribitoolBase.TimeSeries(time, intensity, mz, ppm, tag)
 
 
+supportedVersion = 1_00_03
+version = 1_00_03
+
+
+def version2Str(version):
+    v1 = int(version / 10000)
+    version -= v1*10000
+    v2 = int(version / 100)
+    version -= v2 * 100
+    v3 = version
+    return f"{v1}.{v2}.{v3}"
+
+
 class Workspace(object):
     def __init__(self):
-        # @showSpectra1
+        self.version = version
+        # @showSpectra
         self.spectra1Operators: List[Union[GetSpectrum,
-                                           AverageSpectrum]] = None
+                                           GetSpectrum]] = None
         # @showSpectrum1
         self.spectrum1: OribitoolBase.Spectrum = None
         self.noise: (np.ndarray, np.ndarray) = None
         self.LOD: (float, float) = None
         self.denoisedSpectrum1: OribitoolBase.Spectrum = None
-        
+
         # @showPeakFit2Spectra
         self.spectra2LODs: List[(float, float)] = None
         self.denoisedSpectra2: List[OribitoolBase.Spectrum] = None
@@ -513,12 +524,11 @@ class Workspace(object):
         # HNO3NO3-,C6H3O2NNO3-,C6H5O3NNO3-,C6H4O5N2NO3-,C8H12O10N2NO3-,C10H17O10N3NO3-
         self.fileTimeCalibrations: SortedDict = None
 
-        # @showSpectra3
         self.calibratedSpectra3: List[OribitoolBase.Spectrum] = None
         self.shownSpectrum3Index: int = None
         # @showSpectra3Peaks
         self.spectrum3fittedPeaks = None
-        self.spectrum3Residual:(np.ndarray, np.ndarray) = None
+        self.spectrum3Residual: (np.ndarray, np.ndarray) = None
 
         # @showSpectra3Peak
         self.shownSpectrum3PeakRange: range = None
