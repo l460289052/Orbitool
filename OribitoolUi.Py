@@ -701,6 +701,9 @@ class Ui_MainWindow(object):
         self.calibrationResultTableWidget.setRowCount(0)
         self.calibrationResultTableWidget.horizontalHeader().setStretchLastSection(True)
         self.verticalLayout_11.addWidget(self.calibrationResultTableWidget)
+        self.calibrationShowSpectrumPushButton = QtWidgets.QPushButton(self.layoutWidget2)
+        self.calibrationShowSpectrumPushButton.setObjectName("calibrationShowSpectrumPushButton")
+        self.verticalLayout_11.addWidget(self.calibrationShowSpectrumPushButton)
         self.calibrationShownSelectedPushButton = QtWidgets.QPushButton(self.layoutWidget2)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -1616,6 +1619,7 @@ class Ui_MainWindow(object):
         self.calibratePushButton.setText(_translate("MainWindow", "Calc calibrate info"))
         self.calibrationFinishPushButton.setText(_translate("MainWindow", "Calibrate ALL SPECTRA use info\n"
 "and continue"))
+        self.calibrationShowSpectrumPushButton.setText(_translate("MainWindow", "Show selected spectrum\'s info"))
         self.calibrationShownSelectedPushButton.setText(_translate("MainWindow", "Show selected file\'s info"))
         self.calibrationShowAllPushButton.setText(_translate("MainWindow", "Show all calibration info"))
         self.calibrationInfoExportPushButton.setText(_translate("MainWindow", "Export all info"))

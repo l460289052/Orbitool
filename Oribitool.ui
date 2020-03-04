@@ -1325,6 +1325,13 @@ and continue</string>
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="calibrationShowSpectrumPushButton">
+               <property name="text">
+                <string>Show selected spectrum's info</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="calibrationShownSelectedPushButton">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">

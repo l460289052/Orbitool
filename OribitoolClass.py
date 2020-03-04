@@ -329,6 +329,8 @@ class CalibrateMass:
     def __init__(self, fileTime, averagedSpectra: List[OribitoolBase.Spectrum], peakFitFunc: PeakFitFunc, ionList: List[OribitoolFormula.Formula], funcArgs, ppm=5e-6, useNIons=None):
         ionsMz = []
         ionsMzTho = np.zeros(len(ionList))
+        ionsPositions = []
+        ionsIntensities = []
         for index, ion in enumerate(ionList):
             mass = ion.mass()
             ionsMzTho[index] = mass
@@ -341,17 +343,25 @@ class CalibrateMass:
                 peaks = spectrum.peaks[r.start:r.stop]
                 peaks = peakFitFunc.fitPeaks(peaks)
                 if len(peaks) == 0:
-                    return mass-2*maxDelta
-                mz = OribitoolFunc.valueNearest(peaks, mass, method=(
+                    return 0, 0
+                index = OribitoolFunc.indexNearest(peaks, mass, method=(
                     lambda peaks, index: peaks[index].peakPosition))
-                return mz
-            mz = [process(spectrum) for spectrum in averagedSpectra]
-            mz = np.array(mz)
+                mz = peaks[index].peakPosition
+                intensity = peaks[index].peakIntensity
+                return mz, intensity
+            rets = [process(spectrum) for spectrum in averagedSpectra]
+            rets = np.array(rets)
+            mz = rets[:, 0]
+            ionsPositions.append(mz)
+            ionsIntensities.append(rets[:, 1])
             absDeltaPpm = abs(1 - mass / mz)
             sub = absDeltaPpm < ppm
             if np.count_nonzero(sub) > 0:
                 mz = mz[sub]
             ionsMz.append(np.average(mz))
+
+        ionsPositions = np.stack(ionsPositions, 1)
+        ionsIntensities = np.stack(ionsIntensities, 1)
 
         ionsMz = np.array(ionsMz)
         ionsMz = np.stack([ionsMz, ionsMzTho], 1)
@@ -368,6 +378,10 @@ class CalibrateMass:
         func = Func(ionsMz[minIndex, 0], ionsPpm[minIndex], *funcArgs)
 
         self.fileTime = fileTime
+        # ionsPositions[i,j] -> i-th spectrum, j-th ions
+        self.ionsPositions = ionsPositions
+        self.ionsIntensities = ionsIntensities
+
         self.ionsMz = ionsMz
         self.ionsPpm = ionsPpm
         self.minIndex = minIndex

@@ -255,6 +255,24 @@ def splitterSetSize(splitter: QtWidgets.QSplitter, minSizes: List[bool]):
     splitter.setSizes(sizes)
 
 
+class SpectraPlot:
+    def __init__(self, parentWidget):
+        self.parent = parentWidget
+        parentWidget.setLayout(QtWidgets.QVBoxLayout())
+        self.canvas = FigureCanvas(
+            matplotlib.figure.Figure(figsize=(20, 20)))
+        self.toolBar = NavigationToolbar2QT(
+            self.canvas, parentWidget)
+        parentWidget.layout().addWidget(self.toolBar)
+        parentWidget.layout().addWidget(self.canvas)
+        # right class is `matplotlib.axes._subplots.AxesSubplot`, just for type hint
+        self.ax: matplotlib.axes.Axes = self.canvas.figure.subplots()
+        self.ax.autoscale(True)
+        # self.canvas.figure.tight_layout()
+        self.canvas.figure.subplots_adjust(
+            left=0.1, right=0.999, top=0.999, bottom=0.05)
+
+
 class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     '''
     functions'name with q means accept user's input
@@ -334,19 +352,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.spectrum1TableWidget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeToContents)
 
-        self.spectrum1Widget.setLayout(QtWidgets.QVBoxLayout())
-        self.spectrum1Canvas = FigureCanvas(
-            matplotlib.figure.Figure(figsize=(20, 20)))
-        self.spectrum1ToolBar = NavigationToolbar2QT(
-            self.spectrum1Canvas, self.spectrum1Widget)
-        self.spectrum1Widget.layout().addWidget(self.spectrum1ToolBar)
-        self.spectrum1Widget.layout().addWidget(self.spectrum1Canvas)
-        # right class is `matplotlib.axes._subplots.AxesSubplot`, just for type hint
-        self.spectrum1Ax: matplotlib.axes.Axes = self.spectrum1Canvas.figure.subplots()
-        self.spectrum1Ax.autoscale(True)
-        # self.spectrum1Canvas.figure.tight_layout()
-        self.spectrum1Canvas.figure.subplots_adjust(
-            left=0.1, right=0.999, top=0.999, bottom=0.05)
+        self.spectrum1Plot = SpectraPlot(self.spectrum1Widget)
         self.spectrum1Timer = QtCore.QTimer(self)
         self.spectrum1Timer.setInterval(500)
         self.spectrum1Timer.timeout.connect(self.qSpectrum1ListFitXAxis)
@@ -383,6 +389,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.calibrationDelIonToolButton.clicked.connect(
             self.qCalibrationRmIon)
         self.calibratePushButton.clicked.connect(self.qInitCalibration)
+        self.calibrationShowSpectrumPushButton.clicked.connect(
+            self.qCalibrationShowSpectrum)
         self.calibrationShownSelectedPushButton.clicked.connect(
             self.qCalibrationShowSelected)
         self.calibrationShowAllPushButton.clicked.connect(
@@ -397,11 +405,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.calibrationResultTableWidget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeToContents)
 
-        self.calibrationWidget.setLayout(QtWidgets.QVBoxLayout())
-        self.calibrationCanvas: matplotlib.backend_bases.FigureCanvasBase = FigureCanvas(
-            matplotlib.figure.Figure(figsize=(20, 20)))
-        self.calibrationWidget.layout().addWidget(self.calibrationCanvas)
-        self.calibrationAx: matplotlib.axes.Axes = self.calibrationCanvas.figure.subplots()
+        self.calibrationPlot = SpectraPlot(self.calibrationWidget)
 
         # spectra 3 peak fit
         self.spectra3FitDefaultPushButton.clicked.connect(
@@ -428,17 +432,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.spectrum3PeakListTableWidget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeToContents)
 
-        self.spectrum3Widget.setLayout(QtWidgets.QVBoxLayout())
-        self.spectrum3Canvas = FigureCanvas(
-            matplotlib.figure.Figure(figsize=(20, 20)))
-        self.spectrum3ToolBar = NavigationToolbar2QT(
-            self.spectrum3Canvas, self.spectrum3Widget)
-        self.spectrum3Widget.layout().addWidget(self.spectrum3ToolBar)
-        self.spectrum3Widget.layout().addWidget(self.spectrum3Canvas)
-        self.spectrum3Ax: matplotlib.axes.Axes = self.spectrum3Canvas.figure.subplots()
-        self.spectrum3Ax.autoscale(True)
-        self.spectrum3Canvas.figure.subplots_adjust(
-            left=0.1, right=0.999, top=0.999, bottom=0.05)
+        self.spectrum3Plot = SpectraPlot(self.spectrum3Widget)
         self.spectrum3Timer = QtCore.QTimer(self)
         self.spectrum3Timer.setInterval(1000)
         self.spectrum3Timer.timeout.connect(self.qSpectrum3ListFitXAxis)
@@ -600,8 +594,9 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
             clearAndSetRow(self.spectraTableWidget)
             clearAndSetRow(self.spectrumPropertyTableWidget)
-            self.spectrum1Ax.clear()
-            self.spectrum1Canvas.draw()
+            plot = self.spectrum1Plot
+            plot.ax.clear()
+            plot.canvas.draw()
         if beginFrom <= 2:
             workspace.peakFitFunc = None
 
@@ -611,8 +606,9 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             workspace.fileTimeCalibrations = None
 
             clearAndSetRow(self.calibrationResultTableWidget)
-            self.calibrationAx.clear()
-            self.calibrationCanvas.draw()
+            plot = self.calibrationPlot
+            plot.ax.clear()
+            plot.canvas.draw()
         if beginFrom <= 4:
             workspace.calibratedSpectra3 = None
             workspace.shownSpectrum3Index = None
@@ -620,8 +616,9 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             workspace.spectrum3Residual = None
 
             clearAndSetRow(self.spectrum3PeakListTableWidget)
-            self.spectrum3Ax.clear()
-            self.spectrum3Canvas.draw()
+            plot = self.spectrum3Plot
+            plot.ax.clear()
+            plot.canvas.draw()
             self.spectrum3PeakFitGroupBox.setHidden(True)
         if beginFrom <= 5:
             self.timeSeriesTag2Line.clear()
@@ -881,7 +878,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             self.showFileTimeRange()
             raise e
 
-
     @busy
     @withoutArgs
     @openfile("Select one or more files", "RAW files(*.RAW)", True)
@@ -1079,7 +1075,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             setValue(1, "%.2f" % (spectrum.intensity[index]))
 
         log = self.spectrum1LogScaleCheckBox.isChecked()
-        ax = self.spectrum1Ax
+        plot = self.spectrum1Plot
+        ax = plot.ax
         ax.clear()
 
         ax.set_yscale('log' if log else 'linear')
@@ -1097,7 +1094,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
         ax.legend()
 
-        self.spectrum1Canvas.draw()
+        plot.canvas.draw()
 
     @timer
     def qSpectrum1ListFitXAxis(self):
@@ -1107,7 +1104,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         rescale = self.spectrum1RescaleFlag
         if not (scroll or rescale):
             return
-        l, r = self.spectrum1Ax.get_xlim()
+        plot = self.spectrum1Plot
+        l, r = plot.ax.get_xlim()
         scroll &= (l != self.spectrum1XAxisLeft)
         if scroll or rescale:
             workspace = self.workspace
@@ -1127,9 +1125,9 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                     delta = 0.05 * t
                     b = - delta
                     t += delta
-                self.spectrum1Ax.set_ylim(b, t)
+                plot.ax.set_ylim(b, t)
                 self.spectrum1RescaleFlag = False
-                self.spectrum1Canvas.draw()
+                plot.canvas.draw()
 
     @threadBegin
     @withoutArgs
@@ -1157,7 +1155,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @withoutArgs
     def qSpectrum1LogScaleToggle(self):
         log = self.spectrum1LogScaleCheckBox.isChecked()
-        ax = self.spectrum1Ax
+        ax = self.spectrum3Plot.ax
         ax.set_yscale('log' if log else 'linear')
         if not log:
             ax.yaxis.set_major_formatter(
@@ -1499,7 +1497,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 table.setItem(
                     i, j, QtWidgets.QTableWidgetItem(format(data[i, j], ".5f")))
 
-        ax = self.calibrationAx
+        plot = self.calibrationPlot
+        ax = plot.ax
         ax.clear()
         ax.axhline(color='black', linewidth=0.5)
         if data.shape[0] > 0:
@@ -1511,7 +1510,39 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         ax.legend()
         ax.relim()
         ax.autoscale_view(True, True, True)
-        self.calibrationCanvas.draw()
+        plot.canvas.draw()
+
+    @busy
+    @spectraIndex
+    def qCalibrationShowSpectrum(self, index):
+        workspace = self.workspace
+        if workspace.fileTimeCalibrations is None:
+            raise ValueError('Please calc calibration info first')
+        spectrum: OribitoolBase.Spectrum = workspace.denoisedSpectra2[index]
+        calibrator: OribitoolClass.CalibrateMass = workspace.fileTimeCalibrations[
+            spectrum.fileTime]
+        spectra = workspace.fileTimeSpectraMaps[spectrum.fileTime]
+        ii = OribitoolFunc.indexNearest(spectra, spectrum.timeRange[0], method=(
+            lambda spectra, index: spectra[index].timeRange[0]))
+        ionsPosition = calibrator.ionsPositions[ii]
+        ionsIntensity = calibrator.ionsIntensities[ii]
+
+        plot = self.calibrationPlot
+        ax = plot.ax
+        ax.clear()
+        ax.axhline(color='black', linewidth=0.5)
+        ax.plot(spectrum.mz, spectrum.intensity, color='black')
+
+        for x, y in zip(ionsPosition, ionsIntensity):
+            ax.plot([x, x], [0, y], color='red')
+        ax.xaxis.set_tick_params(rotation=15)
+        ax.yaxis.set_tick_params(rotation=60)
+        ax.yaxis.set_major_formatter(
+            matplotlib.ticker.FormatStrFormatter(r"%.1e"))
+
+        ax.relim()
+        ax.autoscale_view(True, True, True)
+        plot.canvas.draw()
 
     @busy
     @withoutArgs
@@ -1544,7 +1575,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         r = (50, 1000)
         X = np.linspace(*r, 1000)
         XX = massCali.func.predictPpm(X) * 1e6
-        ax = self.calibrationAx
+        plot = self.calibrationPlot
+        ax = plot.ax
         ax.clear()
 
         ax.axhline(color='black', linewidth=0.5)
@@ -1563,7 +1595,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
         ax.set_ylabel('ppm')
         ax.set_xlim(*r)
-        self.calibrationCanvas.draw()
+        plot.canvas.draw()
 
     @threadBegin
     @withoutArgs
@@ -1677,7 +1709,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
         mz = spectrum.mz
         log = self.spectrum3LogScaleCheckBox.isChecked()
-        ax = self.spectrum3Ax
+        plot = self.spectrum3Plot
+        ax = plot.ax
         ax.clear()
         ax.set_yscale('log' if log else 'linear')
         ax.axhline(color='black', linewidth=0.5)
@@ -1700,7 +1733,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             lr = ma
         ax.set_xlim(ll, lr)
 
-        self.spectrum3Canvas.draw()
+        plot.canvas.draw()
         self.spectrum3PeakFitGroupBox.setHidden(True)
         self.spectrum3MainWidget.setHidden(False)
 
@@ -1711,7 +1744,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         scroll = self.spectrum3AutoScrollCheckBox.isChecked()
         rescale = self.spectrum3RescaleFlag
 
-        ax = self.spectrum3Ax
+        plot = self.spectrum3Plot
+        ax = plot.ax
         l, r = ax.get_xlim()
 
         scroll &= (l != self.spectrum3XAxisLeft)
@@ -1777,7 +1811,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 cnt += 1
                 if cnt == 5:
                     break
-            self.spectrum3Canvas.draw()
+            plot.canvas.draw()
 
     @busy
     def qSpectra3PeakListDoubleClicked(self, item: QtWidgets.QTableWidgetItem):
@@ -1811,7 +1845,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
         workspace = self.workspace
         opeak = shownSpectra3Peak[0].originalPeak
-        ax = self.spectrum3PeakAx
+        ax = self.spectrum3Plot.ax
         ax.clear()
         ax.axhline(color='black', linewidth=0.5)
         if showOrigin:
@@ -2050,7 +2084,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     @withoutArgs
     def qSpectrum3LogScaleToggle(self):
         log = self.spectrum3LogScaleCheckBox.isChecked()
-        ax = self.spectrum3Ax
+        ax = self.spectrum3Plot.ax
         ax.set_yscale('log' if log else 'linear')
         if not log:
             ax.yaxis.set_major_formatter(

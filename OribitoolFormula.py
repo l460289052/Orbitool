@@ -3,14 +3,55 @@
 import math
 import re
 from pyteomics import mass
-from collections import UserDict
+import numpy as np
+from collections import UserDict, OrderedDict
 
+elementsOrder = ['C', 'H', 'O', 'N', 'S']
+#          0    1    2      3      4      5      6
+# element: min, max, 2*DBE, H min, H max, O min, O max
+elements = dict([
+    ('C', [0, 20, 2, '-', 2, 0, 3]),
+    ('H', [0, 40, -1, -1, -1, 0, 0]),
+    ('O', [0, 15, 0, 0, 0, -1, -1]),
+    ('N', [0, 4, 1, -1, 1, 0, 3]),
+    ('S', [0, 3, 0, 0, 0, 0, 4]),
+    ('Li', [0, 3, -1, 0, 0, 0, 0]),
+    ('Na', [0, 3, -1, 0, 0, 0, 0]),
+    ('K', [0, 3, -1, 0, 0, 0, 0]),
+    ('F', [0, 15, -1, -1, 0, 0, 0]),
+    ('Cl', [0, 3, -1, -1, 0, 0, 3]),
+    ('Br', [0, 3, -1, -1, 0, 0, 3]),
+    ('I', [0, 3, -1, -1, 0, 0, 3]),
+    ('P', [0, 4, 1, -1, 1, 0, 6]),
+    ('Si', [0, 5, 2, 0, 2, 0, 3])])
+    
+def CHfunc(C):
+	if C == 0:
+		return 0
+	elif C <= 2:
+		return 4 
+	elif C <= 6:
+		return 6 
+	elif C <= 10:
+		return 8 
+	elif C <= 16:
+		return 10 
+	elif C <= 24:
+		return 12 
+	elif C <= 32:
+		return 14 
+	elif C <= 42:
+		return 16 
+	elif C <= 54:
+		return 18 
+	else:
+		return int(math.ceil(0.3 * C))
 
-_print_order = ['C', 'H', 'O', 'N']
-_print_order_set = set(_print_order)
+def getCHmin(elements):
+    return np.array([CHfunc(c) for c in range(elements['C'][0],elements['C'][1]+1)], dtype = np.int)
+	
+CHmin = getCHmin(elements)
 
-
-# 抽时间用njit重写一下
 class Formula(UserDict):
     '''
     '''
@@ -60,7 +101,7 @@ class Formula(UserDict):
             raise ValueError('wrong formula:' + str(e))
 
     def mass(self) -> float:
-        return mass.calculate_mass(composition=self.data) - 0.0005486 * self.charge
+        return mass.calculate_mass(composition=self.data) - mass.nist_mass['e*'][0][0] * self.charge
 
     def addElement(self, element: str, m: str = None, num = None):
         '''
@@ -98,64 +139,59 @@ class Formula(UserDict):
                 return True
         return False
 
-    def Hmin(self) -> int:
-        if self.isIsotope:
-            return self.findOrigin().Hmin()
-        pHmin = None
-        if self['C'] == 0:
-            pHmin = 0
-        elif self['C'] <= 2:
-            pHmin = 4 - self['N'] 
-        elif self['C'] <= 6:
-            pHmin = 6 - self['N'] 
-        elif self['C'] <= 10:
-            pHmin = 8 - self['N'] 
-        elif self['C'] <= 16:
-            pHmin = 10 - self['N'] 
-        elif self['C'] <= 24:
-            pHmin = 12 - self['N'] 
-        elif self['C'] <= 32:
-            pHmin = 14 - self['N'] 
-        elif self['C'] <= 42:
-            pHmin = 16 - self['N'] 
-        elif self['C'] <= 54:
-            pHmin = 18 - self['N'] 
-        else:
-            pHmin = int(math.ceil(0.3 * self['C'] - self['N'] ))
-        if self.charge == -1:
-            return max(pHmin - 1, 0)
-        elif self.charge==1:
-            return max(pHmin,0)
-
-    def Hmax(self) -> int:
-        if self.isIsotope:
-            return self.findOrigin().Hmax()
-        if self.charge==-1:
-            return 2 * self['C'] + 2 + self['N']
-        else:
-            return 2 * self['C'] + 3 + self['N']
-
-
-    def Hpossible(self, NitrogenRule) -> bool:
-        '''
-        return Boolean indicating whether Hnum is possible
-        should be changed to add Cl or Na etc
-        '''
-        if self.isIsotope:
-            return self.findOrigin().Hpossible(NitrogenRule)
-
-        if self['H'] > self.Hmax():
-            return False
-
-        return self['H'] >= self.Hmin() and (not NitrogenRule or (self['H'] + self['N'] + self['Na']) % 2 == 1)
-
     def DBE(self) -> float:
         """
         only count C N H
         """
         if self.isIsotope:
             return self.findOrigin().DBE()
-        return 1.0 + self['C'] + 0.5 * (self['N']+ self.charge - self['H'] -self['Na'])
+        DBE_2 = 2.0
+        for k, v in self.items():
+            DBE_2 += v * elements[k][2]
+        return DBE_2 / 2
+
+    def Omin(self):
+        if self.isIsotope:
+            return self.findOrigin().Omin()
+        ret = 0
+        for k, v in self.items():
+            ret += v * elements[k][5]
+        # return ret
+        return max(ret, elements['O'][0])
+
+    def Omax(self):
+        if self.isIsotope:
+            return self.findOrigin().Omax()
+        ret = 0
+        for k, v in self.items():
+            ret += v * elements[k][6]
+        # return ret
+        return min(ret, elements['O'][1])
+
+    def Hmin(self):
+        if self.isIsotope:
+            return self.findOrigin().Hmin()
+        ret = 0
+        for k, v in self.items():
+            if k == 'C':
+                ret += int(CHmin[v])
+            else:
+                ret += v * elements[k][3]
+        if self.charge == -1:
+            ret -= 1
+        # return ret
+        return max(ret, elements['H'][0])
+    
+    def Hmax(self):
+        if self.isIsotope:
+            return self.findOrigin().Hmax()
+        ret = 0
+        for k, v in self.items():
+            ret += v * elements[k][4]
+        if self.charge == -1:
+            ret -= 1
+        # return ret
+        return min(ret, elements['H'][1])
 
     def findOrigin(self):
         '''
@@ -186,7 +222,7 @@ class Formula(UserDict):
     def toStr(self, showProton: bool = False, withCharge: bool = True) -> str:
         s = []
         elements = list(self.keys())
-        for e in _print_order:
+        for e in elementsOrder:
             v = self[e]
             if v > 0:
                 tmp = f"{e}[{int(round(mass.nist_mass[e][0][0]))}]" if showProton else e
