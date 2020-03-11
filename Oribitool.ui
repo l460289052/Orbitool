@@ -184,7 +184,7 @@
         <enum>QTabWidget::Rounded</enum>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>4</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -2255,41 +2255,33 @@ and continue</string>
         </layout>
        </widget>
       </widget>
-      <widget class="QToolBox" name="toolBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QTabWidget" name="tabWidget_2">
        <property name="minimumSize">
         <size>
-         <width>240</width>
+         <width>200</width>
          <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>240</width>
-         <height>16777215</height>
         </size>
        </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="page_3">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>240</width>
-          <height>473</height>
-         </rect>
-        </property>
-        <attribute name="label">
+       <widget class="QWidget" name="tab_3">
+        <attribute name="title">
          <string>Formula</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_20">
+        <layout class="QVBoxLayout" name="verticalLayout_9">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
          <item>
           <widget class="QScrollArea" name="scrollArea_2">
            <property name="sizePolicy">
@@ -2299,7 +2291,7 @@ and continue</string>
             </sizepolicy>
            </property>
            <property name="horizontalScrollBarPolicy">
-            <enum>Qt::ScrollBarAlwaysOff</enum>
+            <enum>Qt::ScrollBarAsNeeded</enum>
            </property>
            <property name="widgetResizable">
             <bool>true</bool>
@@ -2309,11 +2301,11 @@ and continue</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>220</width>
-              <height>453</height>
+              <width>178</width>
+              <height>554</height>
              </rect>
             </property>
-            <layout class="QFormLayout" name="formLayout_3">
+            <layout class="QFormLayout" name="formLayout">
              <item row="0" column="0" colspan="2">
               <widget class="QGroupBox" name="groupBox_7">
                <property name="title">
@@ -2355,14 +2347,65 @@ and continue</string>
                </layout>
               </widget>
              </item>
+             <item row="1" column="0" colspan="2">
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>mz range</string>
+               </property>
+              </widget>
+             </item>
              <item row="2" column="0">
+              <widget class="QDoubleSpinBox" name="formulaMzMinDoubleSpinBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>9999.989999999999782</double>
+               </property>
+               <property name="value">
+                <double>50.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QDoubleSpinBox" name="formulaMzMaxDoubleSpinBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>9999.998999999999796</double>
+               </property>
+               <property name="value">
+                <double>750.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
               <widget class="QLabel" name="label_5">
                <property name="text">
                 <string>ppm</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
+             <item row="5" column="1">
               <widget class="QDoubleSpinBox" name="formulaPpmDoubleSpinBox">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2378,55 +2421,14 @@ and continue</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="0" colspan="2">
-              <widget class="QTableWidget" name="formulaTableWidget">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>100</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>200</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="verticalScrollMode">
-                <enum>QAbstractItemView::ScrollPerPixel</enum>
-               </property>
-               <attribute name="horizontalHeaderDefaultSectionSize">
-                <number>50</number>
-               </attribute>
-               <attribute name="horizontalHeaderStretchLastSection">
-                <bool>true</bool>
-               </attribute>
-               <column>
-                <property name="text">
-                 <string>Min</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>Max</string>
-                </property>
-               </column>
-              </widget>
-             </item>
-             <item row="5" column="0">
+             <item row="6" column="0">
               <widget class="QLabel" name="label_6">
                <property name="text">
                 <string>Nitrogen rule</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
+             <item row="6" column="1">
               <widget class="QCheckBox" name="formulaNitrogenRuleCheckBox">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2439,204 +2441,478 @@ and continue</string>
                </property>
               </widget>
              </item>
-             <item row="6" column="0" colspan="2">
+             <item row="7" column="0">
               <widget class="QLabel" name="label_2">
                <property name="text">
-                <string>O ≤ cC + nN + sS</string>
+                <string>elements</string>
                </property>
               </widget>
              </item>
-             <item row="7" column="0" colspan="2">
-              <layout class="QGridLayout" name="gridLayout">
-               <item row="0" column="1">
-                <widget class="QLabel" name="label_16">
-                 <property name="text">
-                  <string>n</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="2">
-                <widget class="QLabel" name="label_15">
-                 <property name="text">
-                  <string>s</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_17">
-                 <property name="text">
-                  <string>c</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QSpinBox" name="formulaOCRatioSpinBox">
+             <item row="8" column="0" colspan="2">
+              <widget class="QTableWidget" name="formulaElementTableWidget">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>200</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="verticalScrollMode">
+                <enum>QAbstractItemView::ScrollPerPixel</enum>
+               </property>
+               <property name="horizontalScrollMode">
+                <enum>QAbstractItemView::ScrollPerPixel</enum>
+               </property>
+               <attribute name="horizontalHeaderDefaultSectionSize">
+                <number>50</number>
+               </attribute>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>use</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>mass</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Min</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Max</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>2DBE</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Hmin</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Hmax</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Omin</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Omax</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+             <item row="9" column="0" colspan="2">
+              <layout class="QHBoxLayout" name="horizontalLayout_30">
+               <item>
+                <widget class="QLineEdit" name="formulaElementLineEdit">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="value">
-                  <number>3</number>
-                 </property>
                 </widget>
                </item>
-               <item row="1" column="1">
-                <widget class="QSpinBox" name="formulaONRatioSpinBox">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+               <item>
+                <widget class="QToolButton" name="formulaElementAddToolButton">
+                 <property name="maximumSize">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
                  </property>
-                 <property name="value">
-                  <number>3</number>
+                 <property name="palette">
+                  <palette>
+                   <active>
+                    <colorrole role="ButtonText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>0</red>
+                       <green>85</green>
+                       <blue>0</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </active>
+                   <inactive>
+                    <colorrole role="ButtonText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>0</red>
+                       <green>85</green>
+                       <blue>0</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </inactive>
+                   <disabled>
+                    <colorrole role="ButtonText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>120</red>
+                       <green>120</green>
+                       <blue>120</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </disabled>
+                  </palette>
                  </property>
-                </widget>
-               </item>
-               <item row="1" column="2">
-                <widget class="QSpinBox" name="formulaOSRatioSpinBox">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+                 <property name="font">
+                  <font>
+                   <family>Consolas</family>
+                   <pointsize>12</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
                  </property>
-                 <property name="value">
-                  <number>4</number>
+                 <property name="text">
+                  <string>+</string>
                  </property>
                 </widget>
                </item>
               </layout>
              </item>
-             <item row="8" column="0" colspan="2">
-              <widget class="QPushButton" name="formulaApplyPushButton">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
+             <item row="10" column="0" colspan="2">
+              <widget class="QLabel" name="label_3">
                <property name="text">
-                <string>Apply</string>
+                <string>isotopes</string>
                </property>
               </widget>
              </item>
-             <item row="9" column="0" colspan="2">
-              <widget class="QGroupBox" name="groupBox_3">
+             <item row="11" column="0" colspan="2">
+              <widget class="QTableWidget" name="formulaIsotopeTableWidget">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="title">
-                <string>Calculator</string>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>isotope</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>mass</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+             <item row="12" column="0">
+              <widget class="QLineEdit" name="formulaIsotopeLineEdit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
-               <layout class="QFormLayout" name="formLayout_5">
-                <item row="0" column="0" colspan="2">
-                 <widget class="QLabel" name="label_19">
-                  <property name="font">
-                   <font>
-                    <pointsize>7</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>input formula or mass</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QPushButton" name="formulaCalcPushButton">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>40</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>Calc</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="0">
-                 <widget class="QLabel" name="label_12">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="text">
-                   <string>Result:</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="1">
-                 <widget class="QLineEdit" name="formulaResultLineEdit">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QLineEdit" name="formulaInputLineEdit">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+              </widget>
+             </item>
+             <item row="12" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_25">
+               <item>
+                <widget class="QToolButton" name="formulaIsotopeAddToolButton">
+                 <property name="minimumSize">
+                  <size>
+                   <width>20</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="palette">
+                  <palette>
+                   <active>
+                    <colorrole role="ButtonText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>0</red>
+                       <green>85</green>
+                       <blue>0</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </active>
+                   <inactive>
+                    <colorrole role="ButtonText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>0</red>
+                       <green>85</green>
+                       <blue>0</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </inactive>
+                   <disabled>
+                    <colorrole role="ButtonText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>120</red>
+                       <green>120</green>
+                       <blue>120</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </disabled>
+                  </palette>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Consolas</family>
+                   <pointsize>12</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>+</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="formulaIsotopeDelToolButton">
+                 <property name="minimumSize">
+                  <size>
+                   <width>20</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="palette">
+                  <palette>
+                   <active>
+                    <colorrole role="ButtonText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>170</red>
+                       <green>0</green>
+                       <blue>0</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </active>
+                   <inactive>
+                    <colorrole role="ButtonText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>170</red>
+                       <green>0</green>
+                       <blue>0</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </inactive>
+                   <disabled>
+                    <colorrole role="ButtonText">
+                     <brush brushstyle="SolidPattern">
+                      <color alpha="255">
+                       <red>120</red>
+                       <green>120</green>
+                       <blue>120</blue>
+                      </color>
+                     </brush>
+                    </colorrole>
+                   </disabled>
+                  </palette>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Consolas</family>
+                   <pointsize>12</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>-</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_10">
+               <property name="text">
+                <string>DBE</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QDoubleSpinBox" name="formulaDBEminDoubleSpinBox">
+               <property name="decimals">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QDoubleSpinBox" name="formulaDBEmaxDoubleSpinBox">
+               <property name="decimals">
+                <number>1</number>
+               </property>
               </widget>
              </item>
             </layout>
            </widget>
           </widget>
          </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="page_4">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>240</width>
-          <height>473</height>
-         </rect>
-        </property>
-        <attribute name="label">
-         <string>Mass list</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_18">
          <item>
-          <widget class="QLineEdit" name="massListLineEdit">
+          <widget class="QPushButton" name="formulaApplyPushButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="text">
+            <string>Apply</string>
+           </property>
           </widget>
          </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_3">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="title">
+            <string>Calculator</string>
+           </property>
+           <layout class="QFormLayout" name="formLayout_5">
+            <item row="0" column="0" colspan="2">
+             <widget class="QLabel" name="label_19">
+              <property name="font">
+               <font>
+                <pointsize>7</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>input formula or mass</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QPushButton" name="formulaCalcPushButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>40</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Calc</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="formulaInputLineEdit">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_12">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Result:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLineEdit" name="formulaResultLineEdit">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_4">
+        <attribute name="title">
+         <string>Mass list</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_16">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
          <item>
           <widget class="QPushButton" name="massListAddPushButton">
            <property name="sizePolicy">
@@ -2647,6 +2923,16 @@ and continue</string>
            </property>
            <property name="text">
             <string>Add</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="massListLineEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
           </widget>
          </item>
@@ -2792,10 +3078,10 @@ and continue</string>
      <x>0</x>
      <y>0</y>
      <width>1146</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="workspaceMenu">
+   <widget class="QMenu" name="menuWorkspace">
     <property name="title">
      <string>Workspace</string>
     </property>
@@ -2809,7 +3095,7 @@ and continue</string>
     <addaction name="optionActionImport"/>
     <addaction name="optionActionExport"/>
    </widget>
-   <addaction name="workspaceMenu"/>
+   <addaction name="menuWorkspace"/>
    <addaction name="menuOption"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

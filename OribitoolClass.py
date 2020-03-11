@@ -15,7 +15,6 @@ from sortedcontainers import SortedDict
 
 import OribitoolBase
 import OribitoolFormula
-import OribitoolGuessIons
 import OribitoolFunc
 from OribitoolDll import File
 
@@ -326,7 +325,7 @@ class CalibrateMass:
     calibrate for file
     '''
 
-    def __init__(self, fileTime, averagedSpectra: List[OribitoolBase.Spectrum], peakFitFunc: PeakFitFunc, ionList: List[OribitoolFormula.Formula], funcArgs, ppm=5e-6, useNIons=None):
+    def __init__(self, fileTime, averagedSpectra: List[OribitoolBase.Spectrum], peakFitFunc: PeakFitFunc, ionList: List[OribitoolFormula.FormulaHint], funcArgs, ppm=5e-6, useNIons=None):
         ionsMz = []
         ionsMzTho = np.zeros(len(ionList))
         ionsPositions = []
@@ -500,8 +499,8 @@ def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OribitoolBase.S
     return OribitoolBase.TimeSeries(time, intensity, mz, ppm, tag)
 
 
-supportedVersion = 1_00_03
-version = 1_00_03
+supportedVersion = 1_01_00
+version = 1_01_00
 
 
 def version2Str(version):

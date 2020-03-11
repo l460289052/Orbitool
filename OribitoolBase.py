@@ -3,28 +3,12 @@
 import abc
 from datetime import datetime, timedelta
 from typing import List, Tuple, Union, Iterable
+from OribitoolFormula import FormulaHint
+from OribitoolFormulaCalc import IonCalculatorHint
 
 import numpy as np
 
 timeFormat = r"%Y%m%d %H:%M:%S"
-
-class Formula(abc.ABC):
-    @abc.abstractmethod
-    def __init__(self, formula: str = None):
-        pass
-
-    @abc.abstractmethod
-    def mass(self) -> float:
-        pass
-
-    @abc.abstractmethod
-    def __eq__(self, formula):
-        pass
-
-    @abc.abstractmethod
-    def __hash__(self):
-        pass
-
 
 def nullSendStatus(fileTime: datetime, msg: str, index: int, length: int):
     pass
@@ -66,7 +50,7 @@ class Peak:
         self.peakIntensity = peakIntensity
         self.area = area
 
-    def addFormula(self, formulaList: List[Formula]):
+    def addFormula(self, formulaList: List[FormulaHint]):
         self.formulaList = formulaList
 
     def copy(self, spectrum=None, indexRange: range = None, mz=None, intensity=None):

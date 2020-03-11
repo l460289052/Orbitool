@@ -21,7 +21,6 @@ import sklearn.preprocessing
 import statsmodels.nonparametric.smoothers_lowess as lowess
 
 import OribitoolBase
-import OribitoolGuessIons
 
 
 def nullSendStatus(fileTime: datetime.datetime, msg: str, index: int, length: int):
@@ -579,8 +578,8 @@ def file2Obj(path: str):
         return pickle.load(reader)
 
 
-def recalcFormula(peaks: List[OribitoolBase.Peak], ionCalc: OribitoolGuessIons.IonCalculator, sendStatus=nullSendStatus):
-    ppm = ionCalc.errppm
+def recalcFormula(peaks: List[OribitoolBase.Peak], ionCalc: OribitoolBase.IonCalculatorHint, sendStatus=nullSendStatus):
+    ppm = ionCalc.ppm
     minratio = 1 - ppm
     maxratio = 1 + ppm
     time = peaks[0].spectrum.fileTime if len(peaks) > 0 else None
@@ -592,9 +591,9 @@ def recalcFormula(peaks: List[OribitoolBase.Peak], ionCalc: OribitoolGuessIons.I
         if peak.handled:
             continue
         intensity = peak.peakIntensity
-        formulaList = ionCalc.calc(peak.peakPosition)
+        formulaList = ionCalc.get(peak.peakPosition)
 
-        def correct(formula: OribitoolGuessIons.Formula):
+        def correct(formula: OribitoolBase.FormulaHint):
             if not formula.isIsotope:
                 return True
             ratio = formula.relativeAbundance() * 1.5

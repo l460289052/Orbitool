@@ -20,13 +20,15 @@ from matplotlib.backends.backend_qt5agg import (FigureCanvas,
                                                 NavigationToolbar2QT)
 from PyQt5 import QtCore, QtGui, QtWidgets
 from sortedcontainers import SortedDict
+import pyteomics.mass
 
 import OribitoolBase
 import OribitoolDll
 import OribitoolClass
+import OribitoolElement
 import OribitoolFormula
 import OribitoolFunc
-import OribitoolGuessIons
+import OribitoolFormulaCalc
 import OribitoolOption
 import OribitoolExport
 import OribitoolUi
@@ -290,14 +292,13 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.optionActionExport.triggered.connect(self.qOptionExport)
 
         # formula
-        self.formulaPositiveRadioButton.clicked.connect(
-            self.qFormulaPolarityToggle)
-        self.formulaNegativeRadioButton.clicked.connect(
-            self.qFormulaPolarityToggle)
+        self.formulaElementAddToolButton.clicked.connect(self.qFormulaElementAdd)
+        self.formulaIsotopeAddToolButton.clicked.connect(self.qFormulaIsotopeAdd)
+        self.formulaIsotopeDelToolButton.clicked.connect(self.qFormulaIsotopeDel)
         self.formulaApplyPushButton.clicked.connect(self.qFormulaApply)
         self.formulaCalcPushButton.clicked.connect(self.qFormulaCalc)
 
-        self.formulaTableWidget.horizontalHeader().setSectionResizeMode(
+        self.formulaElementTableWidget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeToContents)
 
         # mass list
@@ -517,9 +518,13 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
         self.fileList = OribitoolClass.FileList()
         # @showFormulaOption
-        self.ionCalculator = OribitoolGuessIons.IonCalculator()
+        self.ionCalculator: OribitoolFormulaCalc.IonCalculatorHint = OribitoolFormulaCalc.IonCalculator()
+        self.ionCalculator.setEI('N')
+        self.ionCalculator.setEI('C[13]')
+        self.ionCalculator.setEI('O[18]')
+        self.ionCalculator.setEI('S[34]')
         # @showCalibrationIon
-        self.calibrationIonList: List[(str, OribitoolFormula.Formula)] = []
+        self.calibrationIonList: List[(str, OribitoolFormula.FormulaHint)] = []
 
         self.workspace = OribitoolClass.Workspace()
         self.threads = []
@@ -634,6 +639,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         option = OribitoolOption.Option()
         option.addAllWidgets(self)
         option.addObjects(self, ['calibrationIonList', 'ionCalculator'])
+        option.objects['elementParas']=OribitoolElement.getParas()
         return option
 
     def qSetOption(self, option: OribitoolOption.Option):
@@ -641,9 +647,11 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         option.applyWidgets(self)
         self.busyLimit = True
         option.applyObjects(self)
+        for key, para in option.objects['elementParas'].items():
+            OribitoolElement.setPara(key, para)
         self.showFormulaOption(self.ionCalculator)
         self.showCalibrationIon(self.calibrationIonList)
-
+        
     @busy
     @withoutArgs
     @openfile(caption="Select Option file", filter="Option file(*.OribitOption)")
@@ -746,73 +754,176 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    def qFormulaPolarityToggle(self):
-        ionCalculator = self.ionCalculator
-        self.showFormulaOption(ionCalculator)
+    def qFormulaElementAdd(self):
+        key = self.formulaElementLineEdit.text().strip()
+        self.formulaElementLineEdit.setText('')
+        if key not in pyteomics.mass.nist_mass:
+            raise ValueError(f'Unknown element {key}')
+        OribitoolElement.setPara(key, [0] * 7)
+        self.showFormulaOption(self.ionCalculator)
+
+    @busy
+    @withoutArgs
+    def qFormulaIsotopeAdd(self):
+        key = self.formulaIsotopeLineEdit.text().strip()
+        self.formulaIsotopeLineEdit.setText('')
+        table = self.formulaIsotopeTableWidget
+        row = table.rowCount()
+        table.setRowCount(row + 1)
+        table.setItem(row, 0, key)
+        table.showRow(row)
+    
+    @busy
+    @withoutArgs
+    def qFormulaIsotopeDel(self):
+        table=self.formulaIsotopeTableWidget
+        indexes = table.selectedIndexes()
+        indexes = [index.row() for index in indexes]
+        for index in reversed(indexes):
+            table.removeRow(index)
+        table.show()
+            
 
     @restore
-    def showFormulaOption(self, calculator: OribitoolGuessIons.IonCalculator = None):
-        charge = None
-        elements = None
-        isotopes = None
-        if self.formulaPositiveRadioButton.isChecked():
-            charge = 1
-            elements = OribitoolGuessIons.p_elements
-            isotopes = OribitoolGuessIons.p_isotopes
-        elif self.formulaNegativeRadioButton.isChecked():
-            charge = -1
-            elements = OribitoolGuessIons.n_elements
-            isotopes = OribitoolGuessIons.n_isotopes
+    def showFormulaOption(self, calculator: OribitoolFormulaCalc.IonCalculatorHint = None):
+        if calculator.charge == 1:
+            self.formulaPositiveRadioButton.setChecked(True)
+        elif calculator.charge == -1:
+            self.formulaNegativeRadioButton.setChecked(False)
 
-        self.formulaPpmDoubleSpinBox.setValue(calculator.errppm*1e6)
-        self.formulaNitrogenRuleCheckBox.setChecked(calculator['NitrogenRule'])
-        self.formulaOCRatioSpinBox.setValue(calculator['OCRatioMax'])
-        self.formulaONRatioSpinBox.setValue(calculator['ONRatioMax'])
-        self.formulaOSRatioSpinBox.setValue(calculator['OSRatioMax'])
-        values = []
+        self.formulaMzMinDoubleSpinBox.setValue(calculator.Mmin)
+        self.formulaMzMaxDoubleSpinBox.setValue(calculator.Mmax)
+        self.formulaDBEminDoubleSpinBox.setValue(calculator.DBEmin)
+        self.formulaDBEmaxDoubleSpinBox.setValue(calculator.DBEmax)
+        self.formulaPpmDoubleSpinBox.setValue(calculator.ppm*1e6)
+        self.formulaNitrogenRuleCheckBox.setChecked(calculator.nitrogenRule)
 
-        for e in elements:
-            values.append((e, calculator[e]))
-        for e in isotopes:
-            values.append((e, calculator[e]))
-        values.append(('DBE', calculator['DBE']))
+        elements = set(calculator.getElements())
+        elements.add('e')
 
-        table = self.formulaTableWidget
-        table.setRowCount(len(values))
-        for index, (_, (mi, ma)) in enumerate(values):
-            def setValue(column, s):
+        constElement=['e', 'C', 'H', 'O']
+        paras = list()
+        getparas=OribitoolElement.getParas()
+        for ce in constElement:
+            paras.append((ce,getparas[ce]))
+            getparas.pop(ce)
+        constElement=list(constElement)
+        paras.extend(list(getparas.items()))
+        table = self.formulaElementTableWidget
+        table.clearContents()
+        table.setRowCount(0)
+        table.setRowCount(len(paras))
+        table.setVerticalHeaderLabels([key for key, _ in paras])
+        for index, (key, para) in enumerate(paras):
+            def setValue(column, s, editable = True):
+                item=QtWidgets.QTableWidgetItem(str(s))
+                if not editable:
+                    item.setFlags(QtCore.Qt.NoItemFlags)
                 table.setItem(
-                    index, column, QtWidgets.QTableWidgetItem(str(s)))
-            setValue(0, mi)
-            setValue(1, ma)
-        values = [value for value, _ in values]
-        table.setVerticalHeaderLabels(values)
+                    index, column, item)
+            item = QtWidgets.QTableWidgetItem()
+            if key in constElement:
+                item.setFlags(QtCore.Qt.ItemIsUserCheckable)
+            else:
+                item.setFlags(QtCore.Qt.ItemIsUserCheckable |
+                            QtCore.Qt.ItemIsEnabled)
+            item.setCheckState(QtCore.Qt.Checked if key in elements else QtCore.Qt.Unchecked)
+            table.setItem(index, 0, item)
+            if key == 'e':
+                setValue(1, pyteomics.mass.nist_mass['e*'][0][0], False)
+                setValue(2, para[0], False)
+                setValue(3, para[1], False)
+            else:
+                setValue(1, pyteomics.mass.nist_mass[key][0][0], False)
+                setValue(2, para[0])
+                setValue(3, para[1])
+            setValue(4, para[2])
+            if key=='C':
+                setValue(5, '-', False)
+            else:
+                setValue(5, para[3])
+            setValue(6, para[4])
+            setValue(7, para[5])
+            setValue(8, para[6])
+
+        isotopes = calculator.getIsotopes()
+        table = self.formulaIsotopeTableWidget
+        table.clearContents()
+        table.setRowCount(0)
+        table.setRowCount(len(isotopes))
+        for index, key in enumerate(isotopes):
+            def setValue(column, s):
+                table.setItem(index, column, QtWidgets.QTableWidgetItem(str(s)))
+            setValue(0, key)
+            setValue(1, pyteomics.mass.calculate_mass(composition={key: 1}))       
+
 
     @busy
     @withoutArgs
     def qFormulaApply(self):
+        eps = 1e-9
+
         calculator = self.ionCalculator
+        def setAndReturn(attr: str, value):
+            if isinstance(value, float):
+                if abs(getattr(calculator, attr) - value) < eps:
+                    return False
+            elif getattr(calculator, attr) == value:
+                return False
+            setattr(calculator, attr, value)
+            return True
+
+        changed = False
         if self.formulaPositiveRadioButton.isChecked():
-            calculator['charge'] = 1
+            changed|=setAndReturn('charge',1)
         elif self.formulaNegativeRadioButton.isChecked():
-            calculator['charge'] = -1
+            changed|=setAndReturn('charge',-1)
 
-        calculator.errppm = self.formulaPpmDoubleSpinBox.value()/1e6
-        calculator['NitrogenRule'] = self.formulaNitrogenRuleCheckBox.isChecked()
-        calculator['OCRatioMax'] = self.formulaOCRatioSpinBox.value()
-        calculator['ONRatioMax'] = self.formulaONRatioSpinBox.value()
-        calculator['OSRatioMax'] = self.formulaOSRatioSpinBox.value()
+        setAndReturn('ppm', self.formulaPpmDoubleSpinBox.value() / 1e6)
+        changed |= setAndReturn('DBEmin', self.formulaDBEminDoubleSpinBox.value())
+        changed |= setAndReturn('DBEmax', self.formulaDBEmaxDoubleSpinBox.value())
+        setAndReturn('Mmin', self.formulaMzMinDoubleSpinBox.value())
+        setAndReturn('Mmax', self.formulaMzMaxDoubleSpinBox.value())
+        changed |= setAndReturn('nitrogenRule', self.formulaNitrogenRuleCheckBox.isChecked())
 
-        table = self.formulaTableWidget
+        table=self.formulaElementTableWidget
+        elements=set(calculator.getElements())
         for index in range(table.rowCount()):
             label = table.verticalHeaderItem(index).text()
+            if table.item(index, 0).checkState() == QtCore.Qt.Checked:
+                if label != 'e' and label not in elements:
+                    calculator.setEI(label)
+            else:
+                if label in elements:
+                    calculator.setEI(label, False)
+                    
 
             def getValue(column):
                 return table.item(index, column).text()
-            mi = int(getValue(0))
-            ma = int(getValue(1))
-            calculator[label] = (mi, ma)
-
+            para=[getValue(column+2) for column in range(0, 7)]
+            if label == 'C':
+                para[3] = 0
+            para=[float(p) for p in para]
+            getpara = np.array(OribitoolElement.getPara(label))
+            if np.abs(np.array(para) - getpara).max() > eps:
+                changed = True
+                OribitoolElement.setPara(label, para)
+        
+        table = self.formulaIsotopeTableWidget
+        isotopes = set(calculator.getIsotopes())
+        for index in range(table.rowCount()):
+            isotope = table.item(index, 0).text()
+            if isotope in isotopes:
+                isotopes.remove(isotope)
+            else:
+                calculator.setEI(isotope)
+                changed = True
+        if len(isotopes) > 0:
+            changed = True
+        for isotope in isotopes:
+            calculator.setEI(isotope, False)
+        if changed:
+            calculator.clear()
         self.showFormulaOption(calculator)
 
     @busy
@@ -821,7 +932,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         text = self.formulaInputLineEdit.text()
         try:
             mass = float(text)
-            formulaList = self.ionCalculator.calc(mass)
+            formulaList = self.ionCalculator.get(mass)
             if len(formulaList) > 0:
                 self.formulaResultLineEdit.setText(
                     ', '.join([str(f) for f in formulaList]))
@@ -1411,12 +1522,12 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         self.calibrationLineEdit.setText('')
 
     @restore
-    def showCalibrationIon(self, ionList: List[Tuple[str, OribitoolFormula.Formula]]):
+    def showCalibrationIon(self, ionList: List[Tuple[str, OribitoolBase.FormulaHint]]):
         self.calibrationIonsTableWidget.setRowCount(len(ionList))
         for index, pair in enumerate(ionList):
             self.showCalibrationIonAt(index, pair)
 
-    def showCalibrationIonAt(self, index, strFormulaPair: (str, OribitoolFormula.Formula)):
+    def showCalibrationIonAt(self, index, strFormulaPair: (str, OribitoolBase.FormulaHint)):
         ion, formula = strFormulaPair
         table = self.calibrationIonsTableWidget
 
@@ -1572,7 +1683,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             setValue(3, massCali.ionsPpm[i] * 1e6)
             setValue(4, 'True' if i in massCali.minIndex else 'False')
 
-        r = (50, 1000)
+        r = (calc.Mmin, calc.Mmax)
         X = np.linspace(*r, 1000)
         XX = massCali.func.predictPpm(X) * 1e6
         plot = self.calibrationPlot
@@ -1664,7 +1775,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             length = len(fittedPeaks)
             for index, peak in enumerate(fittedPeaks):
                 sendStatus(fileTime, msg, index, length)
-                peak.addFormula(calc.calc(peak.peakPosition))
+                peak.addFormula(calc.get(peak.peakPosition))
             sendStatus(fileTime, msg, length, length)
             OribitoolFunc.recalcFormula(fittedPeaks, calc, sendStatus)
 
@@ -1845,7 +1956,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
 
         workspace = self.workspace
         opeak = shownSpectra3Peak[0].originalPeak
-        ax = self.spectrum3Plot.ax
+        ax = self.spectrum3PeakAx
         ax.clear()
         ax.axhline(color='black', linewidth=0.5)
         if showOrigin:
@@ -1882,7 +1993,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                     origin = formula.findOrigin()
                     peaks = workspace.spectrum3fittedPeaks
                     m = origin.mass()
-                    d = m * self.ionCalculator.errppm
+                    d = m * self.ionCalculator.ppm
                     r = OribitoolFunc.indexBetween(
                         peaks, (m - d, m + d), method=(lambda peaks, index: peaks[index].peakPosition))
                     for i in r:
@@ -1945,7 +2056,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         calc = self.ionCalculator
         workspace.shownSpectra3Peak = fittedpeaks
         for i, peak in enumerate(fittedpeaks):
-            peak.addFormula(calc.calc(peak.peakPosition))
+            peak.addFormula(calc.get(peak.peakPosition))
 
         self.showSpectra3Peak(fittedpeaks)
 

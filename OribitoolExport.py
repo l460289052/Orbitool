@@ -144,7 +144,7 @@ def exportTimeSerieses(writer:csv.writer, timeSerieses: List[TimeSeries], sendSt
 def exportIsotope(writer:csv.writer, fileTime: datetime, peaks: List[Peak], sendStatus=nullSendStatus):
 	
 	msg = "mapping isotope"
-	formulaMap: Dict[Formula, Tuple[int, Formula]] = {}
+	formulaMap: Dict[FormulaHint, Tuple[int, FormulaHint]] = {}
 	length = len(peaks)
 	for index, peak in enumerate(peaks):
 		if index % 20 == 0:
@@ -175,7 +175,7 @@ def exportIsotope(writer:csv.writer, fileTime: datetime, peaks: List[Peak], send
 	sendStatus(fileTime, msg, length, length)
 
 @checkOpenCsv
-def exportCalibrationInfo(writer:csv.writer, fileList:FileList, ionList:List[Tuple[str, Formula]], calibrators: SortedDict, sendStatus=nullSendStatus):
+def exportCalibrationInfo(writer:csv.writer, fileList:FileList, ionList:List[Tuple[str, FormulaHint]], calibrators: SortedDict, sendStatus=nullSendStatus):
 	msg = "exporting calibration infomation"
 	header = ['','ppm']
 	header.extend([s for s, _ in ionList])

@@ -20,6 +20,16 @@ If you have no idea about this. Just open 'Oribitool.exe' and follow those steps
 10. 'default' button->
 11. have fun
 
+## UI
+
+you can change some panels' width with mouse:
+
++ Spectra List
++ tab 'Formula' and tab 'Mass list'
++ panels in tab 'Spectra'
++ panels in tab 'Calibration'
++ panels in tab 'Spectra&Peak fit'
+
 ## Toolbar
 
 you can export workspace and option used in this tool.
@@ -62,16 +72,83 @@ this part is for formula guessing when fitting peaks in 'Spectra&Peak fit' tab u
 You can change the formula's settings used in formula guessing.
 
 + Charge
++ mz range
++ DBE
 + ppm
-+ Number of elements
-+ Nitrogen rule
-+ OC ratio etc
++ whether use Nitrogen rule
++ elements and isotopes to be used
++ elements' parameters
 
 #### Calculator
 
-You can input formula or mass. If formula was inputted, mz will be shown. Others formula(s) will be shown.
+You can input **formula** or **mass**. 
+
++ If formula was inputted, the result will be its mass (with electron). 
++ if mass was inputted, the Calculator will calculate and show formula(s).
 
 Just a hint: the result text box is editable just for copying. Oribitool won't read anything from it.
+
+#### Calculation method
+
+each element (take electron as a special element) has 7 parameters can be changed (some elements' some parameters won't be changed):
+
++ MIN: minimum of the element's number
++ MAX: maximum of the element's number
++ 2*DBE: 2 times element's effect to DBE
++ H min, H max: ability to replace H
++ O min, O max: ability to replace O
+
+ I will show you with this tool's built-in elements' parameters:
+
+|      | min  | max  | 2*DBE | H min | H max | O min | O max |
+| ---- | ---- | ---- | ----- | ----- | ----- | ----- | ----- |
+| e    | -1   | 1    | -1    | -0.5  | -0.5  | 0     | 0     |
+| C    | 0    | 20   | 2     | -     | 2     | 0     | 3     |
+| H    | 0    | 40   | -1    | -1    | -1    | 0     | 0     |
+| O    | 0    | 15   | 0     | 0     | 0     | -1    | -1    |
+| N    | 0    | 4    | 1     | -1    | 1     | 0     | 3     |
+| S    | 0    | 3    | 0     | 0     | 0     | 0     | 4     |
+| Li   | 0    | 3    | -1    | 0     | 0     | 0     | 0     |
+| Na   | 0    | 3    | -1    | 0     | 0     | 0     | 0     |
+| K    | 0    | 3    | -1    | 0     | 0     | 0     | 0     |
+| F    | 0    | 15   | -1    | -1    | 0     | 0     | 0     |
+| Cl   | 0    | 3    | -1    | -1    | 0     | 0     | 3     |
+| Br   | 0    | 3    | -1    | -1    | 0     | 0     | 3     |
+| I    | 0    | 3    | -1    | -1    | 0     | 0     | 3     |
+| P    | 0    | 4    | 1     | -1    | 1     | 0     | 6     |
+| Si   | 0    | 5    | 2     | 0     | 2     | 0     | 3     |
+
+for element C, H min change with number
+
+| C num | 0    | 1    | 2    | 3    | 4    | 5    | 6    | 7    | 8    | 9    | 10   | 11   | 12   |
+| ----- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| H min | 0    | 4    | 4    | 6    | 6    | 6    | 6    | 8    | 8    | 8    | 8    | 10   | ...  |
+
+some parameters have some initial value:
+
+| 2*DBE | H min | H max | O min | O max |
+| ----- | ----- | ----- | ----- | ----- |
+| 2     | -0.5  | 2.5   | 0     | 0     |
+
+##### example
+
+If I have a part of formula 'C10N-', for this part: 
+
++ minimum of O will be $max(0_{O:min},0_{initial:Omin}+1*0_{e:Omin}+10*0_{C:Omin}+1*0_{N:Omin})=0$
++ maximum of O will be $min(15_{O:max},0_{initial:Omax}+1*0_{e:Omin}+10*3_{C:Omax}+1*3_{N:Omax})=15$
+
+Then program will iterate O number from 0 to 15.
+
+If O number is 11 at some time while iterating, the part becomes 'C10O11N-':
+
++ minimum of H will be $max(0_{H:min},-0.5_{initial:Hmin}+1*(-0.5)_{e:Hmin}+8_{\text{Hmin for C=10}}+1*(-1)_{N:Hmin})=6$
++ maximum of H will be $min(40_{H:min},2.5_{initial:Hmax}+1*(-0.5)_{e:Hmax}+10*2_{C:Hmax}+1*1_{N:Hmax})=23$
+
+So the program will iterate H number from 6 to 23 for a specific mass guessing.
+
+I will add some mass constrains within iteration.
+
+for a ion 'C10H15O11N-', $DBE=\frac{2_{initial:2DBE}+1*(-1)_{e:2DBE}+10*2_{C:2DBE}+1*1_{N:2DBE}+15*(-1)_{H:2DBE}}{2}=3.5$
 
 ### Mass list
 
@@ -229,7 +306,7 @@ canceled peak's color often is different with color before removing
 
 #### Show single file's information
 
-by pushing "Show selected file's info", you will get a figure show a file's calibration curve.
+by pushing "Show selected file's info", you will get a figure show a file's calibration curve. The x axis will be mz range you set in tab 'Formula'.
 
 ![filecalibrationinfo](\img\filecalibrationinfo.png)
 
@@ -247,7 +324,7 @@ If you want to refit a peak, could double click a peak in peak list. You can cha
 
 ![peakfit2](img\peakfit2.png)
 
-ps: you can change 2 things in this groupbox: peak num and formulas
+> you can change 2 things in this groupbox: peak num, formulas
 
 ### Time series
 
@@ -266,6 +343,18 @@ Time series will be shown right. If you want to check a specific time series, do
 If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Oribitool.exe'.
 
 ## log
+
+**2002.03.11 version 1.1.0**
+
+Warning
+
++ I rewrite formula calculation part by cython, so it mismatch with former OribitWork/OribitOption file
+
+Appended
+
++ Rewrite formula calculation part by cython which is extremely fast than python (50 times faster without accuracy loss, the only cost is nearly 2 weeks coding). I also changed the structure, now you can add any element you want
++ Formula panel size changeable
+
 **2020.02.29 version 1.0.3**
 
 Warning
