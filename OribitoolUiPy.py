@@ -681,8 +681,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     def workspaceImportFinished(self, result, args):
         self.clear(0)
 
-        option: OribitoolOption.Option = result['option']
-        self.qSetOption(option)
 
         workspace: OribitoolClass.Workspace = result['workspace']
         if not hasattr(workspace, 'version') or workspace.version < OribitoolClass.supportedVersion:
@@ -690,6 +688,9 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             if hasattr(workspace, 'version'):
                 msg += f": {OribitoolClass.version2Str(workspace.version)}"
             showInfo(msg)
+
+        option: OribitoolOption.Option = result['option']
+        self.qSetOption(option)
 
         fileTimePaths: List[Tuple[datetime.datetime, str]
                             ] = result['fileTimePaths']
@@ -1683,6 +1684,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             setValue(3, massCali.ionsPpm[i] * 1e6)
             setValue(4, 'True' if i in massCali.minIndex else 'False')
 
+        calc=self.ionCalculator
         r = (calc.Mmin, calc.Mmax)
         X = np.linspace(*r, 1000)
         XX = massCali.func.predictPpm(X) * 1e6
@@ -2134,7 +2136,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         if workspace.calibratedSpectra3 is None:
             raise ValueError('Please calibrate first')
         ppm = self.massListPpmDoubleSpinBox.value()*1e-6
-        index = index[0].row()
         workspace.shownSpectrum3Index = index
         spectrum: OribitoolClass.CalibratedSpectrum = workspace.calibratedSpectra3[index]
         massList: OribitoolClass.MassList = workspace.massList

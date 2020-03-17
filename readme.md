@@ -343,8 +343,16 @@ Time series will be shown right. If you want to check a specific time series, do
 If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Oribitool.exe'.
 
 ## log
+**2020.03.17 version 1.1.2**
+Bug fix
++ error when use mass list fit spectrum
 
-**2002.03.11 version 1.1.0**
+**2020.03.12 version 1.1.1**
+
+Bug fix
++ cannot show file's calibration information
+
+**2020.03.11 version 1.1.0**
 
 Warning
 
