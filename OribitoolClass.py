@@ -137,7 +137,7 @@ class FileList(object):
 
 
 class GetSpectrum(OribitoolBase.Operator):
-    def __init__(self, file: File, ppm: float, numRange: (int, int) = None, timeRange: (datetime.timedelta, datetime.timedelta) = None, polarity = -1):
+    def __init__(self, file: File, ppm: float, numRange: (int, int) = None, timeRange: (datetime.timedelta, datetime.timedelta) = None, polarity=-1):
         self.fileTime = file.creationDate
         self.ppm = ppm
         self.numRange = numRange
@@ -163,17 +163,62 @@ class GetSpectrum(OribitoolBase.Operator):
         sendStatus(fileTime, msg, -1, 0)
         numRange = self.numRange
         if numRange is None or numRange[1] - numRange[0] > 1:
-            ret = file.getAveragedSpectrum(self.ppm, self.timeRange, numRange, self.polarity)
+            ret = file.getAveragedSpectrum(
+                self.ppm, self.timeRange, numRange, self.polarity)
         else:
             ret = file.getSpectrum(numRange[0])
         return ret
 
 
-def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N: int = None, polarity:int = -1, timeLimit: Tuple[datetime.datetime, datetime.datetime] = None) -> List[GetSpectrum]:
+class GetAveragedSpectrumAcrossFiles(OribitoolBase.Operator):
+    def __init__(self, fileList: FileList, spectra: List[GetSpectrum], time, N, now=None):
+        self.spectra = spectra
+
+        if N is not None:
+            maximum = spectra[0].numRange[1] - spectra[0].numRange[0]
+            self.opIndex = 0
+            for index, op in enumerate(spectra):
+                if op.numRange[1] - op.numRange[0] > maximum:
+                    maximum = op.numRange[1] - op.numRange[0]
+                    self.opIndex = index
+
+            op = spectra[0]
+            file: File = fileList.timedict[op.fileTime]
+            s = file.creationDate + \
+                file.getSpectrumRetentionTime(op.numRange[0])
+            op = spectra[-1]
+            file: File = fileList.timedict[op.fileTime]
+            t = file.creationDate + \
+                file.getSpectrumRetentionTime(op.numRange[1])
+        else:
+            maximum = spectra[0].timeRange[1] - spectra[0].timeRange[0]
+            self.opIndex = 0
+            for index, op in enumerate(spectra):
+                if op.timeRange[1] - op.timeRange[0] > maximum:
+                    maximum = op.timeRange[1] - op.timeRange[0]
+                    self.opIndex = index
+
+            s = now
+            t = now + time
+        op = spectra[self.opIndex]
+        self.fileTime = op.fileTime
+        self.ppm = op.ppm
+        self.numRange = op.numRange
+        self.timeRange = op.timeRange
+        self.shownTime = (s.strftime(OribitoolBase.timeFormat),
+                          t.strftime(OribitoolBase.timeFormat))
+        self.polarity = spectra[0].polarity
+
+    def __call__(self, fileList: FileList, sendStatus=OribitoolBase.nullSendStatus):
+        return self.spectra[self.opIndex](fileList, sendStatus)
+
+
+def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N: int = None, polarity: int = -1, timeLimit: Tuple[datetime.datetime, datetime.datetime] = None) -> List[GetSpectrum]:
     timedict = fileList.timedict
     for file in timedict.values():
         if file.getFilter(polarity) is None:
-            raise ValueError(f"Please check file {file.name}. It doesn't have spectrum with polarity = {polarity}")
+            raise ValueError(
+                f"Please check file {file.name}. It doesn't have spectrum with polarity = {polarity}")
 
     averageSpectra = []
 
@@ -182,11 +227,11 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
     tmpDelta = datetime.timedelta(seconds=1)
     startTime = timeLimit[0] - tmpDelta
     endTime = timeLimit[1] + tmpDelta
-    indexRange = None
-    numCount = None
-    average = None
-    delta = None
+
     if N is not None:
+        zero = 0
+        delta = N
+
         def indexRange(f: File):
             retentionStartTime = startTime - f.creationDate
             retentionEndTime = endTime - f.creationDate
@@ -196,7 +241,7 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
                 return (f.lastScanNumber+1, f.lastScanNumber+1)
             else:
                 start = None
-                end = None
+                stop = None
                 infoList = f.getSpectrumInfoList()
                 if f.startTime > retentionStartTime:
                     start = f.firstScanNumber
@@ -204,55 +249,105 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
                     start = f.firstScanNumber + OribitoolFunc.indexFirstNotSmallerThan(
                         infoList, retentionStartTime, method=(lambda array, index: array[index].retentionTime))
                 if f.endTime < retentionEndTime:
-                    end = f.lastScanNumber + 1
+                    stop = f.lastScanNumber + 1
                 else:
-                    end = f.firstScanNumber+OribitoolFunc.indexFirstBiggerThan(
+                    stop = f.firstScanNumber+OribitoolFunc.indexFirstBiggerThan(
                         infoList, retentionEndTime, method=(lambda array, index: array[index].retentionTime))
-                return (start, end)
+                return (start, stop)
 
-        def numCount(f: File):
-            start, end = indexRange(f)
-            return math.ceil((end-start+1)/N)
+        def average(f: File, left, length):
+            right = left + length - 1
+            return GetSpectrum(f, ppm, numRange=(left, right), polarity=polarity)
 
-        def average(f: File, left, end):
-            right = left + N
-            if right > end:
-                right = end
-            return GetSpectrum(f, ppm, numRange=(left, right), polarity = polarity)
-        delta = N
+        it = OribitoolBase.iterator(fileList.timedict.values())
+        if it.end:
+            return averageSpectra
+        nowfile = it.value
+        index, stop = indexRange(nowfile)
+        while not it.end:
+            while index + delta <= stop:
+                averageSpectra.append(average(nowfile, index, delta))
+                index += delta
+
+            if index == stop:
+                it.next()
+                if it.end:
+                    break
+                nowfile = it.value
+                index, stop = indexRange(nowfile)
+                continue
+
+            spectra = []
+            left = delta
+            while left > zero:
+                if left <= stop - index:
+                    spectra.append(average(nowfile, index, left))
+                    index += left
+                    left = zero
+                else:
+                    count = stop - index
+                    spectra.append(average(nowfile, index, count))
+                    left -= count
+                    it.next()
+                    if it.end:
+                        break
+                    nowfile = it.value
+                    index, stop = indexRange(nowfile)
+            averageSpectra.append(
+                GetAveragedSpectrumAcrossFiles(fileList, spectra, time, N))
+        if N == 1:
+            averageSpectra = [spectrum for spectrum in averageSpectra if timedict[spectrum.fileTime].getSpectrumPolarity(
+                spectrum.numRange[0]) == polarity]
 
     elif time is not None:
-        def indexRange(f: File):
-            retentionStartTime = startTime - f.creationDate
-            retentionEndTime = endTime - f.creationDate
-            if f.startTime > retentionStartTime and f.endTime < retentionEndTime:
-                return (datetime.timedelta(), f.endTime)
-            elif f.creationDate + f.endTime < startTime or f.creationDate + f.startTime > endTime:
-                return (f.endTime + tmpDelta, f.endTime + tmpDelta)
-            else:
-                start = datetime.timedelta() if f.startTime > retentionStartTime else retentionStartTime
-                end = f.endTime if f.endTime < retentionEndTime else retentionEndTime
-                return (start, end)
+        zero = datetime.timedelta()
 
-        def numCount(f: File):
-            start, end = indexRange(f)
-            return math.ceil((end-start)/time)
+        def average(f: File, now, length):
+            left = now - f.creationDate
+            right = left + length
+            return GetSpectrum(f, ppm, timeRange=(left, right), polarity=polarity)
 
-        def average(f: File, left, end):
-            right = left + time
-            if right > end:
-                right = end
-            return GetSpectrum(f, ppm, timeRange=(left, right), polarity = polarity)
-        delta = time
+        it = OribitoolBase.iterator(fileList.timedict.values())
+        if it.end:
+            return averageSpectra
+        nowfile = it.value
+        now = startTime
+        times = int((nowfile.creationDate - now)/time)
+        if times > 0:
+            now += times * time
+        while not it.end:
+            if nowfile.creationDate + nowfile.endTime < now:
+                it.next()
+                if it.end:
+                    break
+                nowfile = it.value
+                continue
 
-    for f in timedict.values():
-        index, end = indexRange(f)
-        while index < end:
-            averageSpectra.append(average(f, index, end))
-            index += delta
-    if N == 1:
-        averageSpectra = [spectrum for spectrum in averageSpectra if timedict[spectrum.fileTime].getSpectrumPolarity(
-            spectrum.numRange[0]) == polarity]
+            fendTime = nowfile.creationDate+nowfile.endTime
+            while now + time <= fendTime:
+                averageSpectra.append(average(nowfile, now, time))
+                now += time
+
+            tmp = now
+            tmpnow = now
+            spectra = []
+            while True:
+                if nowfile.creationDate + nowfile.endTime < now + time:
+                    spectra.append(
+                        average(nowfile, tmpnow, nowfile.creationDate + nowfile.endTime - tmpnow))
+                    tmpnow = nowfile.creationDate + nowfile.endTime
+                    it.next()
+                    if it.end:
+                        break
+                    nowfile = it.value
+                else:
+                    spectra.append(
+                        average(nowfile, tmpnow, now + time - tmpnow))
+                    now += time
+                    break
+            averageSpectra.append(
+                GetAveragedSpectrumAcrossFiles(fileList, spectra, time, N, tmp))
+
     return averageSpectra
 
 
@@ -349,7 +444,7 @@ class CalibrateMass:
                 intensity = peaks[index].peakIntensity
                 return mz, intensity
             rets = [process(spectrum) for spectrum in averagedSpectra]
-            rets = np.array(rets)
+            rets = np.array(rets, dtype=np.float)
             mz = rets[:, 0]
             ionsPositions.append(mz)
             ionsIntensities.append(rets[:, 1])
@@ -362,7 +457,7 @@ class CalibrateMass:
         ionsPositions = np.stack(ionsPositions, 1)
         ionsIntensities = np.stack(ionsIntensities, 1)
 
-        ionsMz = np.array(ionsMz)
+        ionsMz = np.array(ionsMz, dtype=np.float)
         ionsMz = np.stack([ionsMz, ionsMzTho], 1)
 
         ionsPpm = 1-ionsMz[:, 1]/ionsMz[:, 0]
@@ -491,16 +586,16 @@ def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OribitoolBase.S
                 fmz.append(peak.peakPosition)
                 intensity.append(peak.peakIntensity)
     time = np.array(time, dtype=np.datetime64)
-    fmz = np.array(fmz)
-    intensity = np.array(intensity)
+    fmz = np.array(fmz, dtype=np.float)
+    intensity = np.array(intensity, dtype=np.float)
 
     sendStatus(calibratedSpectrum.fileTime, msg, index, length)
 
     return OribitoolBase.TimeSeries(time, intensity, mz, ppm, tag)
 
 
-supportedVersion = 1_01_00
-version = 1_01_00
+supportedVersion = 1_02_00
+version = 1_02_00
 
 
 def version2Str(version):
@@ -539,11 +634,11 @@ class Workspace(object):
 
         self.calibratedSpectra3: List[OribitoolBase.Spectrum] = None
         self.shownSpectrum3Index: int = None
-        # @showSpectra3Peaks
+        # @showSpectrum3Peaks
         self.spectrum3fittedPeaks = None
         self.spectrum3Residual: (np.ndarray, np.ndarray) = None
 
-        # @showSpectra3Peak
+        # @showSpectrum3Peak
         self.shownSpectrum3PeakRange: range = None
         self.shownSpectrum3Peak: List[OribitoolBase.Peak] = None
 

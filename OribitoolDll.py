@@ -39,6 +39,7 @@ class File:
     def __init__(self, fullname):
         rawfile = RawFileReaderAdapter.FileFactory(fullname)
         rawfile.SelectInstrument(Device.MS, 1)
+        rawfile.IncludeReferenceAndExceptionData = True
         self.path = fullname
         self.name = os.path.split(fullname)[1]
         self.rawfile = rawfile
@@ -49,6 +50,7 @@ class File:
         self.endTime = datetime.timedelta(minutes=self.rawfile.RunHeader.EndTime)
         self.firstScanNumber = self.rawfile.RunHeader.FirstSpectrum
         self.lastScanNumber = self.rawfile.RunHeader.LastSpectrum
+        self.massResolution = int(self.rawfile.GetTrailerExtraInformation(1).Values[11])
         
     def getSpectrumRetentionTime(self, scanNum):
         return datetime.timedelta(minutes=self.rawfile.RetentionTimeFromScanNumber(scanNum))
@@ -74,8 +76,8 @@ class File:
         scanStatistics = rawfile.GetScanStatsForScanNumber(scanNum)
         segmentedScan = rawfile.GetSegmentedScanFromScanNumber(
             scanNum, scanStatistics)
-        mz = np.array(list(segmentedScan.Positions))
-        intensity = np.array(list(segmentedScan.Intensities))
+        mz = np.array(list(segmentedScan.Positions), dtype=np.float)
+        intensity = np.array(list(segmentedScan.Intensities), dtype=np.float)
         time = retentimeTime+self.creationDate
         return OribitoolBase.Spectrum(self.creationDate, mz, intensity, (time, time), (scanNum, scanNum))
         
@@ -103,8 +105,14 @@ class File:
         scanfilter = self.getFilter(polarity)
         last = end - 1
         massOption = MassOptions(ppm, ToleranceUnits.ppm)
-        averaged = Extensions.AverageScansInScanRange(
-            rawfile, start, last, scanfilter, massOption).SegmentedScan
+        if start<=last:
+            averaged = Extensions.AverageScansInScanRange(
+                rawfile, start, last, scanfilter, massOption).SegmentedScan
+            mz = np.array(list(averaged.Positions), dtype=np.float)
+            intensity = np.array(list(averaged.Intensities), dtype=np.float)
+        else:
+            mz = np.zeros(0, dtype=np.float)
+            intensity = np.zeros(0, dtype=np.float)
 
         sTime = self.creationDate +  self.getSpectrumRetentionTime(start)
         eTime = self.creationDate + self.getSpectrumRetentionTime(last)
@@ -112,8 +120,6 @@ class File:
         timeRange = (sTime, eTime)
 
         numRange = (start,end)
-        mz = np.array(list(averaged.Positions))
-        intensity = np.array(list(averaged.Intensities))
         return OribitoolBase.Spectrum(self.creationDate, mz, intensity, timeRange, numRange)
 
     def __del__(self):

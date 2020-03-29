@@ -391,7 +391,7 @@ class NormalDistributionFunc:
         return int(np.arctan((num-5)/20)*20000+4050)
 
     def __init__(self, params: List[tuple]):
-        params = np.array(params)
+        params = np.array(params, dtype=np.float)
         self.paramList = params
         peakPosition = params[:, 1]
         peakSigma = params[:, 2]

@@ -326,6 +326,12 @@ If you want to refit a peak, could double click a peak in peak list. You can cha
 
 > you can change 2 things in this groupbox: peak num, formulas
 
+#### Mass defect
+
+you can choose what rainbow stand for, DBE or certain element's num. And you can choose whether use size( aka area) stand for log intensity or intensity.
+
+![mass defect](img\massdefect.png)
+
 ### Time series
 
 you can add time series by following methods:
@@ -343,14 +349,28 @@ Time series will be shown right. If you want to check a specific time series, do
 If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Oribitool.exe'.
 
 ## log
-**2020.03.17 version 1.1.2**
+**2020.03.27 version 1.2.0**
+
 Bug fix
-+ error when use mass list fit spectrum
++ Out of range when remove peak from mass list
+
+Appended
++ Log scale and autoscale in timeseries
++ Merge mass list
++ Mass defect
+
+Changed
++ When averaging across file, keep time interval 
+
+**2020.03.17 version 1.1.2**
+
+Bug fix
++ Error when use mass list fit spectrum
 
 **2020.03.12 version 1.1.1**
 
 Bug fix
-+ cannot show file's calibration information
++ Cannot show file's calibration information
 
 **2020.03.11 version 1.1.0**
 
