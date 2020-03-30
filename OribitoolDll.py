@@ -105,17 +105,17 @@ class File:
         scanfilter = self.getFilter(polarity)
         last = end - 1
         massOption = MassOptions(ppm, ToleranceUnits.ppm)
+        sTime = self.creationDate +  self.getSpectrumRetentionTime(start)
         if start<=last:
             averaged = Extensions.AverageScansInScanRange(
                 rawfile, start, last, scanfilter, massOption).SegmentedScan
             mz = np.array(list(averaged.Positions), dtype=np.float)
             intensity = np.array(list(averaged.Intensities), dtype=np.float)
+            eTime = self.creationDate + self.getSpectrumRetentionTime(last)
         else:
             mz = np.zeros(0, dtype=np.float)
             intensity = np.zeros(0, dtype=np.float)
-
-        sTime = self.creationDate +  self.getSpectrumRetentionTime(start)
-        eTime = self.creationDate + self.getSpectrumRetentionTime(last)
+            eTime = sTime
 
         timeRange = (sTime, eTime)
 

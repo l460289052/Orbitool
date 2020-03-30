@@ -180,7 +180,7 @@ class MassList:
                     iter2.next()
                 else:
                     if peak1.formulaList == peak2.formulaList:
-                        peak = peak(None, max(peak1.subpeaks, peak2.subpeaks))
+                        peak = peak(None, max(peak1.splitNum, peak2.splitNum))
                         peak.addFittedParam(
                             None, (peak1.peakPosition + peak2.peakPosition) / 2)
                         peak.handled = peak1.handled
@@ -196,7 +196,7 @@ class MassList:
                         formulaList = list(
                             set(peak1.formulaList) & set(peak2.formulaList))
                         formulaList.sort(key=lambda formula: formula.mass())
-                        peak = Peak(None, max(peak1.subpeaks, peak2.subpeaks))
+                        peak = Peak(None, max(peak1.splitNum, peak2.splitNum))
                         peak.addFittedParam(None, formulaList[0].mass() if len(
                             formulaList) == 1 else(peak1.peakPosition + peak2.peakPosition) / 2)
                         peak.addFormula(formulaList)

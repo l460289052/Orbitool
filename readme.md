@@ -154,6 +154,12 @@ for a ion 'C10H15O11N-', $DBE=\frac{2_{initial:2DBE}+1*(-1)_{e:2DBE}+10*2_{C:2DB
 
 this part is for fitting peaks in 'Spectra&Peak fit' tab using 'mass list' button, or for calculating time series in 'Time series' tab.
 
+#### ppm
+
+2 peaks within setted ppm added to mass list will be merged into 1 single peak.
+
+eg. 100.00 and 100.0001 added to mass list with 1ppm will be a peak 100.00005
+
 #### Add
 
 you can add an item to mass list like those:
@@ -189,6 +195,12 @@ example:
 | 199.09763  |
 | C6H5O8N2-  |
 | C4H8O12N3- |
+
+#### Merge
+
+similar to 'Import', but don't delete original mass list.
+
+eg. your mass list has 3 peaks a, b, c. And a OribitMassList file or csv file contains a mass list including peaks a, b, d, e. You can use merge to make your mass list become peaks a, b, c, d, e
 
 ## Tabs
 
@@ -242,7 +254,7 @@ use modified binPMF:
 
 Denoised spectrum will be shown as green while original spectrum will be shown as blue. You can choose to remove peaks below LOD, or all peaks minus LOD, or don't do denoise.
 
-![spectrum1](\img\spectrum1.png)
+![spectrum1](img\spectrum1.png)
 
 ##### Export noise
 
@@ -278,7 +290,7 @@ all spectra are shown in left table. Select how much peak used in peak fitting a
 
 Push your left mouse button and scroll, a red line will appear like below figure. When you release button, all peak crossed will be removed. If you delete caches, may take seconds initializing.
 
-![peakfit1](\img\peakfit1.png)
+![peakfit1](img\peakfit1.png)
 
 #### Cancel remove
 
@@ -338,7 +350,7 @@ you can add time series by following methods:
 
 + mz with ppm
 + formula with ppm
-+ mz range
++ mz range (eg. 100.001-100.002)
 + selected peaks in 'Spectra&Peak fit' tab's peak list with ppm
 + (selected) peaks in mass list with ppm
 
@@ -349,7 +361,17 @@ Time series will be shown right. If you want to check a specific time series, do
 If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Oribitool.exe'.
 
 ## log
-**2020.03.27 version 1.2.0**
+**2003.03.30 version 1.2.1**
+
+Bug fix
++ Error when merge peaks in mass list
++ Erroe when fit use mass list
++ Error when add isotope
+
+Maybe fixed
++ Error scan number
+
+**2020.03.29 version 1.2.0**
 
 Bug fix
 + Out of range when remove peak from mass list

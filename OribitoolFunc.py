@@ -636,7 +636,7 @@ def calculateResidual(fittedPeaks: OribitoolBase.Peak, fitFunc: NormalDistributi
         ointensity -= fitFunc._funcFit(
             omz, *peak.fittedParam)
         
-    sendStatus(fileTime, msg, index, length)
+    sendStatus(fileTime, msg, length, length)
     msg = "concatenate residual"
     sendStatus(fileTime, msg, 0,1)
    

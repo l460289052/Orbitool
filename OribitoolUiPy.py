@@ -787,7 +787,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         table = self.formulaIsotopeTableWidget
         row = table.rowCount()
         table.setRowCount(row + 1)
-        table.setItem(row, 0, key)
+        table.setItem(row, 0, QtWidgets.QTableWidgetItem(key))
         table.showRow(row)
 
     @busy
@@ -1035,6 +1035,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         for index in indexes:
             self.fileList.rmFile(table.item(index, 3).text())
             table.removeRow(index)
+        table.show()
         self.showFileTimeRange()
 
     @busy
