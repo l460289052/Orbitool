@@ -180,6 +180,8 @@ you can add an item to mass list like those:
 
 ##### csv file
 
+Only a column
+
 format:
 
 | formula/mz      |
@@ -361,6 +363,11 @@ Time series will be shown right. If you want to check a specific time series, do
 If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Oribitool.exe'.
 
 ## log
+
+**2020.3.31 version 1.2.4**
+
+Bug fix
++ Error when merge mass list
 
 **2020.3.31 version 1.2.3**
 

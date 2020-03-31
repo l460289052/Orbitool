@@ -2367,11 +2367,11 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 reader = csv.reader(csvfile)
                 next(reader)
                 peaks = []
-                for row in reader:
+                for index, row in enumerate(reader):
                     peakPosition = None
                     formulaList = []
-                    if len(row) != 1:
-                        raise ValueError(f'row "{", ".join(row)}"')
+                    if len(row) == 0:
+                        continue
                     mass = row[0]
                     try:
                         peakPosition = float(mass)
@@ -2402,11 +2402,11 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 reader = csv.reader(csvfile)
                 next(reader)
                 peaks = []
-                for row in reader:
+                for index, row in enumerate(reader):
                     peakPosition = None
                     formulaList = []
-                    if len(row) != 1:
-                        raise ValueError(f'row "{", ".join(row)}"')
+                    if len(row) == 0:
+                        continue
                     mass = row[0]
                     try:
                         peakPosition = float(mass)

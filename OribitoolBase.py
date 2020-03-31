@@ -169,21 +169,16 @@ class MassList:
             if iter2.end:
                 peaks.extend(peaks1[iter1.index:])
                 break
-            peak1: Peak = iter1.value
-            peak2: Peak = iter2.value
+            peak1: MassListPeak = iter1.value
+            peak2: MassListPeak = iter2.value
             if abs(peak2.peakPosition / peak1.peakPosition - 1) < ppm:
                 if peak1.handled and not peak2.handled:
                     peaks.append(peak1)
-                    iter1.next()
                 elif not peak1.handled and peak2.handled:
                     peaks.append(peak2)
-                    iter2.next()
                 else:
                     if peak1.formulaList == peak2.formulaList:
-                        peak = peak(None, max(peak1.splitNum, peak2.splitNum))
-                        peak.addFittedParam(
-                            None, (peak1.peakPosition + peak2.peakPosition) / 2)
-                        peak.handled = peak1.handled
+                        peak = MassListPeak((peak1.peakPosition + peak2.peakPosition) / 2, peak1.formulaList, max(peak1.splitNum, peak2.splitNum), peak1.handled)
                         peaks.append(peak)
                     elif peak1.handled and peak2.handled:
                         raise ValueError("can't merge peak in mass list at %.5f with peak at %.5f using ppm = %.2f" % (
@@ -196,13 +191,13 @@ class MassList:
                         formulaList = list(
                             set(peak1.formulaList) & set(peak2.formulaList))
                         formulaList.sort(key=lambda formula: formula.mass())
-                        peak = Peak(None, max(peak1.splitNum, peak2.splitNum))
-                        peak.addFittedParam(None, formulaList[0].mass() if len(
-                            formulaList) == 1 else(peak1.peakPosition + peak2.peakPosition) / 2)
-                        peak.addFormula(formulaList)
+                        if len(formulaList) == 1:
+                            peak = MassListPeak(formulaList[0].mass(), formulaList, max(peak1.splitNum, peak2.splitNum))
+                        else:
+                            peak = MassListPeak((peak1.peakPosition + peak2.peakPosition) / 2, formulaList, max(peak1.splitNum, peak2.splitNum))
                         peaks.append(peak)
-                    iter1.next()
-                    iter2.next()
+                iter1.next()
+                iter2.next()
             elif peak1.peakPosition < peak2.peakPosition:
                 peaks.append(peak1)
                 iter1.next()
