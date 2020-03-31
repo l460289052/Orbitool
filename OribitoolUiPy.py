@@ -2633,7 +2633,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         t = 1
         for timeSeries in workspace.timeSerieses:
             rng = OribitoolFunc.indexBetween(timeSeries.time, (l, r))
-            t = max(t, timeSeries.intensity[rng].max())
+            if len(rng) > 0:
+                t = max(t, timeSeries.intensity[rng].max())
 
         if self.timeSeriesLogScaleCheckBox.isChecked():
             t *= 10

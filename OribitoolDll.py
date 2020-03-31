@@ -80,23 +80,37 @@ class File:
         intensity = np.array(list(segmentedScan.Intensities), dtype=np.float)
         time = retentimeTime+self.creationDate
         return OribitoolBase.Spectrum(self.creationDate, mz, intensity, (time, time), (scanNum, scanNum))
+
+    def timeRange2NumRange(self, timeRange: Tuple[datetime.timedelta, datetime.timedelta]):
+        rawfile = self.rawfile
+        r: range = OribitoolFunc.indexBetween(self, timeRange,
+                                                (self.firstScanNumber,
+                                                self.lastScanNumber + 1),
+                                                method=(lambda f, i: f.getSpectrumRetentionTime(i)))
+        return (r.start, r.stop)
+
+    def checkAverageEmpty(self, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
+        rawfile = self.rawfile
+        if timeRange is not None and numRange is None:
+            start, end = self.timeRange2NumRange(timeRange)
+        elif numRange is not None and timeRange is None:
+            start, end = numRange
+        else:
+            raise ValueError(
+                "`timeRange` or `numRange` must be provided and only one can be provided")
+        
+        for i in range(start, end):
+            if self.getSpectrumPolarity(i) == polarity:
+                return False
+        return True
+
         
     def getAveragedSpectrum(self, ppm, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None, polarity = -1):
         averaged = None
 
         rawfile = self.rawfile
-        def method(f, index: int) -> datetime.timedelta:
-            return f.getSpectrumRetentionTime(index)
-
-        start = None
-        end = None
         if timeRange is not None and numRange is None:
-            r: range = OribitoolFunc.indexBetween(self, timeRange,
-                                                    (self.firstScanNumber,
-                                                    self.lastScanNumber + 1),
-                                                    method=method)
-            start = r.start
-            end = r.stop
+            start, end = self.timeRange2NumRange(timeRange)
         elif numRange is not None and timeRange is None:
             start, end = numRange
         else:
@@ -106,7 +120,7 @@ class File:
         last = end - 1
         massOption = MassOptions(ppm, ToleranceUnits.ppm)
         sTime = self.creationDate +  self.getSpectrumRetentionTime(start)
-        if start<=last:
+        if start <= last:
             averaged = Extensions.AverageScansInScanRange(
                 rawfile, start, last, scanfilter, massOption).SegmentedScan
             mz = np.array(list(averaged.Positions), dtype=np.float)

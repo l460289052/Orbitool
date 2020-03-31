@@ -156,6 +156,11 @@ class GetSpectrum(OribitoolBase.Operator):
                           t2.strftime(OribitoolBase.timeFormat))
         self.polarity = polarity
 
+        if numRange is None or numRange[1] - numRange[0] > 1:
+            self.empty = file.checkAverageEmpty(self.timeRange, numRange, self.polarity)
+        else:
+            self.empty = False
+
     def __call__(self, fileList: FileList, sendStatus=OribitoolBase.nullSendStatus):
         fileTime = self.fileTime
         file: File = fileList.timedict[fileTime]
@@ -208,6 +213,7 @@ class GetAveragedSpectrumAcrossFiles(OribitoolBase.Operator):
         self.shownTime = (s.strftime(OribitoolBase.timeFormat),
                           t.strftime(OribitoolBase.timeFormat))
         self.polarity = spectra[0].polarity
+        self.empty = op.empty
 
     def __call__(self, fileList: FileList, sendStatus=OribitoolBase.nullSendStatus):
         return self.spectra[self.opIndex](fileList, sendStatus)
@@ -231,29 +237,12 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
     if N is not None:
         zero = 0
         delta = N
-
+        def method(f, index: int) -> datetime.timedelta:
+            return f.getSpectrumRetentionTime(index)
         def indexRange(f: File):
             retentionStartTime = startTime - f.creationDate
             retentionEndTime = endTime - f.creationDate
-            if f.startTime > retentionStartTime and f.endTime < retentionEndTime:
-                return (f.firstScanNumber, f.lastScanNumber + 1)
-            if f.creationDate + f.endTime < startTime or f.creationDate+f.startTime > endTime:
-                return (f.lastScanNumber+1, f.lastScanNumber+1)
-            else:
-                start = None
-                stop = None
-                infoList = f.getSpectrumInfoList()
-                if f.startTime > retentionStartTime:
-                    start = f.firstScanNumber
-                else:
-                    start = f.firstScanNumber + OribitoolFunc.indexFirstNotSmallerThan(
-                        infoList, retentionStartTime, method=(lambda array, index: array[index].retentionTime))
-                if f.endTime < retentionEndTime:
-                    stop = f.lastScanNumber + 1
-                else:
-                    stop = f.firstScanNumber+OribitoolFunc.indexFirstBiggerThan(
-                        infoList, retentionEndTime, method=(lambda array, index: array[index].retentionTime))
-                return (start, stop)
+            return f.timeRange2NumRange((retentionStartTime, retentionEndTime))
 
         def average(f: File, left, length):
             right = left + length - 1
@@ -302,52 +291,67 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
     elif time is not None:
         zero = datetime.timedelta()
 
-        def average(f: File, now, length):
+        def average(f: File, now, nowend):
             left = now - f.creationDate
-            right = left + length
+            right = nowend - f.creationDate
             return GetSpectrum(f, ppm, timeRange=(left, right), polarity=polarity)
 
         it = OribitoolBase.iterator(fileList.timedict.values())
+        now = startTime
+        nowfile = it.value
+        while not it.end and nowfile.creationDate + nowfile.endTime < now:
+            it.next()
+            nowfile = it.value
         if it.end:
             return averageSpectra
-        nowfile = it.value
-        now = startTime
-        times = int((nowfile.creationDate - now)/time)
-        if times > 0:
-            now += times * time
-        while not it.end:
-            if nowfile.creationDate + nowfile.endTime < now:
-                it.next()
-                if it.end:
-                    break
-                nowfile = it.value
-                continue
 
-            fendTime = nowfile.creationDate+nowfile.endTime
-            while now + time <= fendTime:
-                averageSpectra.append(average(nowfile, now, time))
-                now += time
+        nowend = now + time
+        if nowend > endTime:
+            nowend = endTime
+        nowfstart = nowfile.creationDate + nowfile.startTime
+        nowfend = nowfile.creationDate + nowfile.endTime
 
-            tmp = now
-            tmpnow = now
-            spectra = []
-            while True:
-                if nowfile.creationDate + nowfile.endTime < now + time:
-                    spectra.append(
-                        average(nowfile, tmpnow, nowfile.creationDate + nowfile.endTime - tmpnow))
-                    tmpnow = nowfile.creationDate + nowfile.endTime
-                    it.next()
-                    if it.end:
+        while now <= endTime and not it.end:
+            if nowfend >= nowend:
+                if nowfstart > nowend:
+                    times = int((nowfile.creationDate - now)/time)
+                    now += times * time
+                    nowend = now + time
+                    if now > endTime:
                         break
+                    if nowend > endTime:
+                        nowend = endTime
+                averageSpectra.append(average(nowfile, now, nowend))
+                if nowfend == nowend:
+                    it.next()
                     nowfile = it.value
-                else:
-                    spectra.append(
-                        average(nowfile, tmpnow, now + time - tmpnow))
-                    now += time
-                    break
-            averageSpectra.append(
-                GetAveragedSpectrumAcrossFiles(fileList, spectra, time, N, tmp))
+                    nowfstart = nowfile.creationDate + nowfile.startTime
+                    nowfend = nowfile.creationDate + nowfile.endTime
+            else:
+                tmpnow = now
+                spectra = []
+                while True:
+                    if nowfend < nowend:
+                        spectra.append(average(nowfile, tmpnow, nowfend))
+                        tmpnow = nowfend
+                        it.next()
+                        if it.end:
+                            break
+                        nowfile = it.value
+                        nowfstart = nowfile.creationDate + nowfile.startTime
+                        nowfend = nowfile.creationDate + nowfile.endTime
+                    else:
+                        if nowfstart < nowend:
+                            spectra.append(average(nowfile, tmpnow, nowend))
+                        break
+                averageSpectra.append(GetAveragedSpectrumAcrossFiles(fileList, spectra, time, N, now))
 
+            now += time
+            nowend = now + time
+            if nowend > endTime:
+                nowend = endTime
+
+    averageSpectra = [spectra for spectra in averageSpectra if not spectra.empty]
     return averageSpectra
 
 
@@ -595,7 +599,7 @@ def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OribitoolBase.S
 
 
 supportedVersion = 1_02_00
-version = 1_02_01
+version = 1_02_02
 
 
 def version2Str(version):

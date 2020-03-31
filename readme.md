@@ -361,7 +361,17 @@ Time series will be shown right. If you want to check a specific time series, do
 If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Oribitool.exe'.
 
 ## log
-**2003.03.30 version 1.2.1**
+
+**2020.03.31 version 1.2.2**
+
+Bug fix
++ Division Zero Error when autoscale timeseries
++ Error when average by number
+
+Changed
++ Rewrite average by time part
+
+**2020.03.30 version 1.2.1**
 
 Bug fix
 + Error when merge peaks in mass list
