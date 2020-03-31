@@ -362,6 +362,13 @@ If you meet any bugs, please let me know. You can send me the 'error.txt' file w
 
 ## log
 
+**2020.3.31 version 1.2.3**
+
+Bug fix
++ scan number error while averaging (maybe fix or not, I have no file to test)
++ math domain error when fit peak, and this is a reason for 'NoneType' object has no attribute 'fileTime' error. But this peak must be wrong, because this error only occurs when mz less than 0.
++ convert inputted formula with isotopes wrong.
+
 **2020.03.31 version 1.2.2**
 
 Bug fix

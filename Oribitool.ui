@@ -2498,7 +2498,7 @@ and continue</string>
         </size>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab_3">
         <attribute name="title">
@@ -2536,8 +2536,8 @@ and continue</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>186</width>
-              <height>574</height>
+              <width>178</width>
+              <height>554</height>
              </rect>
             </property>
             <layout class="QFormLayout" name="formLayout">
@@ -3320,7 +3320,7 @@ and continue</string>
      <x>0</x>
      <y>0</y>
      <width>1146</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuWorkspace">

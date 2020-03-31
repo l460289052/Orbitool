@@ -186,7 +186,6 @@ cdef class Formula:
                 raise ValueError(f'unknown element:{element}[{m}]')
             if elementMassNum[index] != m:  # isotope
                 self.setI(index, m, self.getI(index, m) + num)
-                return
         self.setE(index, self.getE(index) + num)
 
     @staticmethod

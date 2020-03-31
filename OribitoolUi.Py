@@ -1356,7 +1356,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName("scrollArea_2")
         self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 186, 574))
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 178, 554))
         self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
         self.formLayout = QtWidgets.QFormLayout(self.scrollAreaWidgetContents_2)
         self.formLayout.setObjectName("formLayout")
@@ -1751,7 +1751,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addWidget(self.progressBar)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1146, 23))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1146, 22))
         self.menubar.setObjectName("menubar")
         self.menuWorkspace = QtWidgets.QMenu(self.menubar)
         self.menuWorkspace.setObjectName("menuWorkspace")
@@ -1777,9 +1777,9 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuOption.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(4)
+        self.tabWidget.setCurrentIndex(2)
         self.spectrum3TabWidget.setCurrentIndex(1)
-        self.tabWidget_2.setCurrentIndex(1)
+        self.tabWidget_2.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

@@ -433,7 +433,7 @@ class NormalDistributionFunc:
         return y
 
     def _funcFit(self, mz: np.ndarray, a, mu):
-        sigma = self.peakSigmaFit*math.sqrt(mu/200)*mu
+        sigma = self.peakSigmaFit*np.sqrt(np.abs(mu)/200)*mu
         return NormalDistributionFunc._func(mz, a, mu, sigma)
 
     def getFittedParam(self, peak: OribitoolBase.Peak):
