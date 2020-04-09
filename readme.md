@@ -364,6 +364,11 @@ If you meet any bugs, please let me know. You can send me the 'error.txt' file w
 
 ## log
 
+**2020.4.9 version 1.2.5**
+
+Bug fix
++ Crash when type wrong element
+
 **2020.3.31 version 1.2.4**
 
 Bug fix

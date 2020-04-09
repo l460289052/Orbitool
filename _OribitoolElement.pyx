@@ -15,7 +15,7 @@ import re
 cdef int _factor = 10
 cdef int _andfactor = (1 << _factor) - 1
 
-cdef void str2element(str key, int*index, int*m):
+cdef void str2element(str key, int*index, int*m) except *:
     match = re.fullmatch(r"(e-?|[A-Z][a-z]{0,2})(\[\d+\])?", key)
     if match is None:
         raise KeyError(f'have no element {key}')

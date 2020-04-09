@@ -9,7 +9,7 @@ from libcpp.pair cimport pair
 cdef:
     int _factor
     int _andfactor
-    void str2element(str key, int*index, int*m)
+    void str2element(str key, int*index, int*m) except *
 
     list elements
     dict elementsMap

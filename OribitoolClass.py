@@ -600,7 +600,7 @@ def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OribitoolBase.S
 
 
 supportedVersion = 1_02_00
-version = 1_02_04
+version = 1_02_05
 
 
 def version2Str(version):

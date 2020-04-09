@@ -90,6 +90,23 @@ def busy(func):
         self.setBusy(False)
     return decorator
 
+def busyExcept(run):
+    def busy(func):
+        @wraps(func)
+        def decorator(self, *args, **kargs):
+            if not self.setBusy(True):
+                return
+            try:
+                func(self, *args, **kargs)
+            except Exception as e:
+                showInfo(str(e))
+                with open('error.txt', 'a') as file:
+                    print('', datetime.datetime.now(), str(e), sep='\n', file=file)
+                    traceback.print_exc(file=file)
+                run(self)
+            self.setBusy(False)
+        return decorator
+    return busy
 
 def withoutArgs(func):
     @wraps(func)
@@ -774,8 +791,6 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
     def qFormulaElementAdd(self):
         key = self.formulaElementLineEdit.text().strip()
         self.formulaElementLineEdit.setText('')
-        if key not in pyteomics.mass.nist_mass:
-            raise ValueError(f'Unknown element {key}')
         OribitoolElement.setPara(key, [0] * 7)
         self.showFormulaOption(self.ionCalculator)
 
@@ -875,11 +890,10 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             setValue(0, key)
             setValue(1, pyteomics.mass.calculate_mass(composition={key: 1}))
 
-    @busy
+    @busyExcept(lambda self: self.showFormulaOption(self.ionCalculator))
     @withoutArgs
     def qFormulaApply(self):
         eps = 1e-9
-
         calculator = self.ionCalculator
 
         def setAndReturn(attr: str, value):
@@ -987,27 +1001,27 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             self.averageStartDateTimeEdit.setDateTime(now)
             self.averageEndDateTimeEdit.setDateTime(now)
 
-    @busy
+    @busyExcept(lambda self: self.qAddFolderExcept())
     @withoutArgs
     @openfile("Select one folder", folder=True)
     def qAddFolder(self, folder):
         table = self.fileTableWidget
-        try:
-            fileTimes = self.fileList.addFileFromFolder(
-                folder, self.recurrenceCheckBox.isChecked(), '.raw')
-            count = table.rowCount()
-            table.setRowCount(count+len(fileTimes))
-            for index, time in enumerate(fileTimes):
-                self.showFile(time, count+index)
-            self.showFileTimeRange()
-        except ValueError as e:
-            table.clearContents()
-            table.setRowCount(0)
-            table.setRowCount(len(self.fileList.timedict))
-            for index, fileTime in enumerate(self.fileList.timedict.keys()):
-                self.showFile(fileTime, index)
-            self.showFileTimeRange()
-            raise e
+        fileTimes = self.fileList.addFileFromFolder(
+            folder, self.recurrenceCheckBox.isChecked(), '.raw')
+        count = table.rowCount()
+        table.setRowCount(count+len(fileTimes))
+        for index, time in enumerate(fileTimes):
+            self.showFile(time, count+index)
+        self.showFileTimeRange()
+    
+    def qAddFolderExcept(self):
+        table = self.fileTableWidget
+        table.clearContents()
+        table.setRowCount(0)
+        table.setRowCount(len(self.fileList.timedict))
+        for index, fileTime in enumerate(self.fileList.timedict.keys()):
+            self.showFile(fileTime, index)
+        self.showFileTimeRange()
 
     @busy
     @withoutArgs

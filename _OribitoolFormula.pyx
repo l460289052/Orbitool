@@ -176,7 +176,7 @@ cdef class Formula:
     cdef double Hmax(self):
         return _elements_Hmax(self.elements)
 
-    cpdef void addElement(self, str element, int m = 0, int num=1):
+    cpdef void addElement(self, str element, int m = 0, int num=1) except *:
         cdef int index = elementsMap.get(element, -1)
         if index == -1:
             raise ValueError(f'unknown element:{element}')
