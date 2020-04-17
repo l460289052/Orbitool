@@ -364,6 +364,14 @@ If you meet any bugs, please let me know. You can send me the 'error.txt' file w
 
 ## log
 
+**2020.4.17 version 1.2.6**
+
+Appended
++ Merge close peaks
+
+Bug fix
++ area calculation
+
 **2020.4.9 version 1.2.5**
 
 Bug fix

@@ -426,6 +426,28 @@ class NormalDistributionFunc:
             peakPosition / 200), intensity=intensity / peakHeight, originalPeak=peak)
         peak.addFittedParam(param)
         return peak
+    
+    @staticmethod
+    @numba.njit(cache=True)
+    def mergePeaksParam(param1: tuple, param2: tuple):
+        a1, mu1 = param1
+        a2, mu2 = param2
+        aSum = a1 + a2
+        return (a1 + a2, mu1 * a1 / aSum + mu2 * a2 / aSum)
+
+    def mergePeaks(self, peak1: OribitoolBase.Peak, peak2: OribitoolBase.Peak):
+        newparam = NormalDistributionFunc.mergePeaksParam(peak1.fittedParam, peak2.fittedParam)
+        if peak1.originalPeak is not None and peak1.originalPeak == peak2.originalPeak:
+            newmz = peak1.originalPeak.mz
+        else:
+            newmz = np.unique(np.concatenate((peak1.mz, peak2.mz)))
+            select = np.concatenate(((newmz[1:] - newmz[:-1]) > 1e-9,np.ones(1,dtype=np.bool)))
+            newmz=newmz[select]
+        newIntensity = self._funcFit(newmz, *newparam)
+        newPeak=OribitoolBase.Peak(peak1.spectrum, mz=newmz, intensity=newIntensity, originalPeak=peak1.originalPeak, splitNum=(peak1.splitNum - 1) if isinstance(peak1.splitNum, int) else 1)
+        peakIntensity=self._funcFit(newparam[1], *newparam)
+        newPeak.addFittedParam(newparam, newparam[1], peakIntensity, newparam[0])
+        return newPeak
 
     def normFunc(self, x):
         y = self._func(x, 1, 0, self.peakSigmaFit) / \
@@ -494,7 +516,7 @@ class NormalDistributionFunc:
                     newPeak = OribitoolBase.Peak(
                         peak.spectrum, mz=mz[select], intensity=newIntensity, originalPeak=peak, splitNum=num)
                     newPeak.addFittedParam(
-                        p, p[1], peakIntensity, fittedParam[0])
+                        p, p[1], peakIntensity, p[0])
                     peaks.append(newPeak)
                     if len(peaks) > 1:
                         peaks.sort(key=lambda peak: peak.peakPosition)
@@ -644,4 +666,53 @@ def calculateResidual(fittedPeaks: OribitoolBase.Peak, fitFunc: NormalDistributi
     residualInt = np.concatenate(residualInt)
 
     return (residualMz, residualInt)
+
+
+def mergePeaks(peaks: List[OribitoolBase.Peak], ppm: float, func:NormalDistributionFunc, ionCalc:OribitoolBase.IonCalculatorHint, sameFormula=True):
+    '''
+    if `sameFormula` == True:
+        will merge peaks which have same formula or both have no formula
+    else:
+        will average ignore formula
+    '''
+    newpeaks = []
+    if len(peaks) > 0:
+        newpeaks.append(peaks[0])
+    for i in range(1, len(peaks)):
+        peak1 = newpeaks[-1]
+        peak2 = peaks[i]
+        if np.abs(peak1.peakPosition / peak2.peakPosition - 1) < ppm:
+            merge = False
+            formulaList = None
+            if sameFormula:
+                if peak1.formulaList is None and peak2.formulaList is None:
+                    merge = True
+                    formulaList = []
+                elif peak1.formulaList is not None and peak2.formulaList is not None:
+                    if set(peak1.formulaList) == set(peak2.formulaList):
+                        merge = True
+                        formulaList = peak1.formulaList
+            else:
+                merge = True
+                if peak1.handled and peak2.handled:
+                    formulaList = list(set(peak1.formulaList) &
+                                       set(peak2.formulaList))
+                    formulaList.sort(key=lambda formula: formula.mass())
+                elif peak1.handled:
+                    formulaList = peak1.formulaList
+                elif peak2.handled:
+                    formulaList = peak2.formulaList
+            if merge:
+                newpeak = func.mergePeaks(peak1, peak2)
+                if formulaList is None:
+                    formulaList = ionCalc.get(newpeak.peakPosition)
+                newpeak.addFormula(formulaList)
+                newpeaks.pop()
+                newpeaks.append(newpeak)
+                continue
+        newpeaks.append(peak2)
+    return newpeaks
+        
+
+
 

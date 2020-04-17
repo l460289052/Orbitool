@@ -90,6 +90,7 @@ def busy(func):
         self.setBusy(False)
     return decorator
 
+
 def busyExcept(run):
     def busy(func):
         @wraps(func)
@@ -101,12 +102,14 @@ def busyExcept(run):
             except Exception as e:
                 showInfo(str(e))
                 with open('error.txt', 'a') as file:
-                    print('', datetime.datetime.now(), str(e), sep='\n', file=file)
+                    print('', datetime.datetime.now(),
+                          str(e), sep='\n', file=file)
                     traceback.print_exc(file=file)
                 run(self)
             self.setBusy(False)
         return decorator
     return busy
+
 
 def withoutArgs(func):
     @wraps(func)
@@ -438,6 +441,10 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             self.qSpectra3FitSpectrum)
         self.spectra3FitUseMassListPushButton.clicked.connect(
             self.qSpectrum3FitUseMassList)
+
+        self.spectrum3PeaksMergePushButton.clicked.connect(
+            self.qSpectrum3PeaksMerge)
+
         self.spectrum3PeaksAddPushButton.clicked.connect(
             self.qSpectrum3PeaksAdd)
         self.spectrum3PeaksAddAllPushButton.clicked.connect(
@@ -1013,7 +1020,7 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         for index, time in enumerate(fileTimes):
             self.showFile(time, count+index)
         self.showFileTimeRange()
-    
+
     def qAddFolderExcept(self):
         table = self.fileTableWidget
         table.clearContents()
@@ -1931,7 +1938,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
                 i = peak.peakIntensity
                 return i > yi and i < ya
             peaks = [peak for peak in peaks if show(peak)]
-            peakIntensities = np.array([peak.peakIntensity for peak in peaks], dtype=np.float)
+            peakIntensities = np.array(
+                [peak.peakIntensity for peak in peaks], dtype=np.float)
 
             indexes = np.flip(peakIntensities.argsort())
 
@@ -2184,6 +2192,24 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         thread.finished.connect(self.qSpectra3FitFinished)
         return thread
 
+    @threadBegin
+    @withoutArgs
+    def qSpectrum3PeaksMerge(self):
+        workspace = self.workspace
+        if workspace.spectrum3fittedPeaks is None:
+            raise ValueError('Please fit first')
+
+        def process(ionCalc, sendStatus):
+            fileTime = workspace.calibratedSpectra3[workspace.shownSpectrum3Index].fileTime
+            sendStatus(fileTime, 'merge peaks', -1, 0)
+            newpeaks = OribitoolFunc.mergePeaks(workspace.spectrum3fittedPeaks, self.spectrum3PeaksMergePpmDoubleSpinBox.value(
+            ) * 1e-6, workspace.peakFitFunc.func, self.ionCalculator)
+            sendStatus(fileTime, 'calc residual', -1, 0)
+            return newpeaks, OribitoolFunc.calculateResidual(newpeaks, workspace.peakFitFunc.func, fileTime, sendStatus)
+        thread = QThread(process, (self.ionCalculator,))
+        thread.finished.connect(self.qSpectra3FitFinished)
+        return thread
+
     @busy
     @withoutArgs
     def qSpectrum3PeaksAdd(self):
@@ -2253,8 +2279,10 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         fig.clf()
         plot.ax = fig.subplots()
         ax = plot.ax
-        miFactor = math.exp(self.spectrum3MassDefectMiSizeHorizontalSlider.value() / 20.0)
-        maFactor = math.exp(self.spectrum3MassDefectMaSizeHorizontalSlider.value() / 20.0)
+        miFactor = math.exp(
+            self.spectrum3MassDefectMiSizeHorizontalSlider.value() / 20.0)
+        maFactor = math.exp(
+            self.spectrum3MassDefectMaSizeHorizontalSlider.value() / 20.0)
 
         DBE = self.spectrum3MassDefectDBERadioButton.isChecked()
         log = self.spectrum3MassDefectIntensityLogCheckBox.isChecked()
@@ -2275,7 +2303,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         clr_x = [peak.peakPosition for peak in clr_peaks]
         clr_x = np.array(clr_x, dtype=np.float)
         clr_y = clr_x - np.round(clr_x)
-        clr_size = np.array([peak.peakIntensity for peak in clr_peaks], dtype=np.float)
+        clr_size = np.array(
+            [peak.peakIntensity for peak in clr_peaks], dtype=np.float)
         if log:
             clr_size = np.log(clr_size + 1) - 1
 
@@ -2284,7 +2313,8 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             gry_x = [peak.peakPosition for peak in gry_peaks]
             gry_x = np.array(gry_x, dtype=np.float)
             gry_y = gry_x - np.round(gry_x)
-            gry_size = np.array([peak.peakIntensity for peak in gry_peaks], dtype=np.float)
+            gry_size = np.array(
+                [peak.peakIntensity for peak in gry_peaks], dtype=np.float)
             if log:
                 gry_size = np.log(gry_size + 1) - 1
             maximum = np.max((clr_size.max(), gry_size.max()))
@@ -2295,23 +2325,25 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
             maximum /= 70
         else:
             maximum /= 200
-        maximum/=maFactor
+        maximum /= maFactor
         minimum = 5 * miFactor
-        
+
         ax.clear()
         if gry:
             gry_size /= maximum
             gry_size[gry_size < minimum] = minimum
-            ax.scatter(gry_x, gry_y, s=gry_size, c='grey', linewidths=0.5, edgecolors='k')
+            ax.scatter(gry_x, gry_y, s=gry_size, c='grey',
+                       linewidths=0.5, edgecolors='k')
         clr_size /= maximum
         clr_size[clr_size < minimum] = minimum
-        sc = ax.scatter(clr_x, clr_y, s=clr_size, c=clr_color, cmap=cmap, linewidths=0.5, edgecolors='k')
+        sc = ax.scatter(clr_x, clr_y, s=clr_size, c=clr_color,
+                        cmap=cmap, linewidths=0.5, edgecolors='k')
         clrb = fig.colorbar(sc)
-        clrb.set_label('DBE' if DBE else f'Element {element}' , rotation=270)
+        clrb.set_label('DBE' if DBE else f'Element {element}', rotation=270)
 
         ax.autoscale(True)
         fig.tight_layout()
-        
+
         plot.canvas.draw()
 
     @busy
@@ -2641,8 +2673,10 @@ class Window(QtWidgets.QMainWindow, OribitoolUi.Ui_MainWindow):
         if len(plot.ax.get_lines()) == 0:
             return
         l, r = plot.ax.get_xlim()
-        l = np.array(matplotlib.dates.num2date(l).replace(tzinfo=None), dtype=np.datetime64)
-        r = np.array(matplotlib.dates.num2date(r).replace(tzinfo=None), dtype=np.datetime64)
+        l = np.array(matplotlib.dates.num2date(
+            l).replace(tzinfo=None), dtype=np.datetime64)
+        r = np.array(matplotlib.dates.num2date(
+            r).replace(tzinfo=None), dtype=np.datetime64)
         b = 0
         t = 1
         for timeSeries in workspace.timeSerieses:
