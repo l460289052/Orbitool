@@ -1,4 +1,4 @@
-# Oribitool Readme
+# Orbitool Readme
 
 [TOC]
 
@@ -6,7 +6,7 @@ This tool can help you process with spectrum averaging, denoising, calibrating, 
 
 There are 3 parts: Toolbar, Tabs, Formula/Masslist.
 
-If you have no idea about this. Just open 'Oribitool.exe' and follow those steps
+If you have no idea about this. Just open 'Orbitool.exe' and follow those steps
 
 1. add a single file -> 
 2. 'Average selected file' button ->
@@ -47,7 +47,7 @@ Workspace includes
 
 #### Input&Output
 
-It could be exported as *.OribitWork file, when you import it, all the widgets related will be set.
+It could be exported as *.OrbitWork file, when you import it, all the widgets related will be set.
 
 ### Option
 
@@ -59,7 +59,7 @@ Option includes
 
 #### Input&Output
 
-It could be exported as *.OribitOption file.
+It could be exported as *.OrbitOption file.
 
 ## Formula/Mass list
 
@@ -86,7 +86,7 @@ You can input **formula** or **mass**.
 + If formula was inputted, the result will be its mass (with electron). 
 + if mass was inputted, the Calculator will calculate and show formula(s).
 
-Just a hint: the result text box is editable just for copying. Oribitool won't read anything from it.
+Just a hint: the result text box is editable just for copying. Orbitool won't read anything from it.
 
 #### Calculation method
 
@@ -174,9 +174,9 @@ you can add an item to mass list like those:
 
 #### Input&Output
 
-##### OribitMassList file
+##### OrbitMassList file
 
-*.OribitMassList
+*.OrbitMassList
 
 ##### csv file
 
@@ -202,7 +202,7 @@ example:
 
 similar to 'Import', but don't delete original mass list.
 
-eg. your mass list has 3 peaks a, b, c. And a OribitMassList file or csv file contains a mass list including peaks a, b, d, e. You can use merge to make your mass list become peaks a, b, c, d, e
+eg. your mass list has 3 peaks a, b, c. And a OrbitMassList file or csv file contains a mass list including peaks a, b, d, e. You can use merge to make your mass list become peaks a, b, c, d, e
 
 ## Tabs
 
@@ -360,7 +360,7 @@ Time series will be shown right. If you want to check a specific time series, do
 
 ### Bugs
 
-If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Oribitool.exe'.
+If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Orbitool.exe'.
 
 ## log
 
@@ -435,7 +435,7 @@ Bug fix
 
 Warning
 
-+ I rewrite formula calculation part by cython, so it mismatch with former OribitWork/OribitOption file
++ I rewrite formula calculation part by cython, so it mismatch with former OrbitWork/OrbitOption file
 
 Appended
 
@@ -446,7 +446,7 @@ Appended
 
 Warning
 
-+ I add a polarity filter, so it mismatch with former OribitWork file
++ I add a polarity filter, so it mismatch with former OrbitWork file
 
 Appended
 
@@ -460,7 +460,7 @@ Change
 
 Warning
 
-+ I change the structure of .OribitWork file, so it may mismatch with former .OribitWork file.
++ I change the structure of .OrbitWork file, so it may mismatch with former .OrbitWork file.
 
 Appended
 

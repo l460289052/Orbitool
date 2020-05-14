@@ -3,9 +3,9 @@ from Cython.Build import cythonize
 import numpy as np
 
 cythonizes = [
-cythonize("_OribitoolElement.pyx", annotate=True),
-cythonize("_OribitoolFormula.pyx", annotate=True),
-cythonize("_OribitoolFormulaCalc.pyx", annotate=True)
+cythonize("_OrbitoolElement.pyx", annotate=True),
+cythonize("_OrbitoolFormula.pyx", annotate=True),
+cythonize("_OrbitoolFormulaCalc.pyx", annotate=True)
 ]
 for cy in cythonizes:
     setup(ext_modules=cy, script_args=['build_ext'], include_dirs=[np.get_include()], options={'build_ext':{'inplace':True}})

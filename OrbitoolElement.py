@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import Dict, List
 
-from _OribitoolElement import setPara as _setPara, getPara as _getPara, getParas as _getParas
+from _OrbitoolElement import setPara as _setPara, getPara as _getPara, getParas as _getParas
 
 
 def setPara(e: str, v: list):

@@ -3,8 +3,8 @@
 import abc
 from datetime import datetime, timedelta
 from typing import List, Tuple, Union, Iterable
-from OribitoolFormula import FormulaHint
-from OribitoolFormulaCalc import IonCalculatorHint
+from OrbitoolFormula import FormulaHint
+from OrbitoolFormulaCalc import IonCalculatorHint
 
 import numpy as np
 

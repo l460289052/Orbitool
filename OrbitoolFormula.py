@@ -2,8 +2,8 @@
 
 from typing import Union
 
-from _OribitoolElement import setPara, getPara, getParas
-from _OribitoolFormula import Formula
+from _OrbitoolElement import setPara, getPara, getParas
+from _OrbitoolFormula import Formula
 
 class FormulaHint:
     def __init__(self, formula: Union[str, dict] = None, **kwargs):

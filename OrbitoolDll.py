@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import OribitoolBase
-import OribitoolFunc
+import OrbitoolBase
+import OrbitoolFunc
 
 import os
 import copy
@@ -79,11 +79,11 @@ class File:
         mz = np.array(list(segmentedScan.Positions), dtype=np.float)
         intensity = np.array(list(segmentedScan.Intensities), dtype=np.float)
         time = retentimeTime+self.creationDate
-        return OribitoolBase.Spectrum(self.creationDate, mz, intensity, (time, time), (scanNum, scanNum))
+        return OrbitoolBase.Spectrum(self.creationDate, mz, intensity, (time, time), (scanNum, scanNum))
 
     def timeRange2NumRange(self, timeRange: Tuple[datetime.timedelta, datetime.timedelta]):
         rawfile = self.rawfile
-        r: range = OribitoolFunc.indexBetween(self, timeRange,
+        r: range = OrbitoolFunc.indexBetween(self, timeRange,
                                                 (self.firstScanNumber,
                                                 self.lastScanNumber + 1),
                                                 method=(lambda f, i: f.getSpectrumRetentionTime(i)))
@@ -134,7 +134,7 @@ class File:
         timeRange = (sTime, eTime)
 
         numRange = (start,end)
-        return OribitoolBase.Spectrum(self.creationDate, mz, intensity, timeRange, numRange)
+        return OrbitoolBase.Spectrum(self.creationDate, mz, intensity, timeRange, numRange)
 
     def __del__(self):
         self.rawfile.Dispose()

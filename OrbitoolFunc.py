@@ -20,7 +20,7 @@ import sklearn.linear_model
 import sklearn.preprocessing
 import statsmodels.nonparametric.smoothers_lowess as lowess
 
-import OribitoolBase
+import OrbitoolBase
 
 
 def nullSendStatus(fileTime: datetime.datetime, msg: str, index: int, length: int):
@@ -269,13 +269,13 @@ def _getPeaks_njit(mz: np.ndarray, intensity: np.ndarray, indexRange, mzRange) -
     return np.stack((l, r), 1)
 
 
-def getPeaks(spectrum: OribitoolBase.Spectrum, indexRange: (int, int) = None, mzRange: (float, float) = None) -> List[OribitoolBase.Peak]:
+def getPeaks(spectrum: OrbitoolBase.Spectrum, indexRange: (int, int) = None, mzRange: (float, float) = None) -> List[OrbitoolBase.Peak]:
     '''
     get peak divided by 0, result peak may have many peakPoint
     '''
     peaksRange = _getPeaks_njit(
         spectrum.mz, spectrum.intensity, indexRange, mzRange)
-    return [OribitoolBase.Peak(spectrum, range(rstart, rstop)) for rstart, rstop in peaksRange]
+    return [OrbitoolBase.Peak(spectrum, range(rstart, rstop)) for rstart, rstop in peaksRange]
 
 
 @numba.njit(cache=True)
@@ -309,7 +309,7 @@ def _getNoise_njit(mz, intensity,  quantile) -> np.ndarray:
     return peakAt, (noiseMz, noiseInt), (noiseQuantile, noiseStd)
 
 
-def getNoise(spectrum: OribitoolBase.Spectrum,  quantile=0.7, sendStatus=nullSendStatus) -> Tuple[np.ndarray, np.ndarray]:
+def getNoise(spectrum: OrbitoolBase.Spectrum,  quantile=0.7, sendStatus=nullSendStatus) -> Tuple[np.ndarray, np.ndarray]:
     """
     @quantile: sort peaks by intensity, select num*quantile-th biggest peak
     """
@@ -363,7 +363,7 @@ def _denoiseWithLOD_njit(mz: np.ndarray, intensity: np.ndarray, LOD: (float, flo
     return mz, newIntensity
 
 
-def denoiseWithLOD(spectrum: OribitoolBase.Spectrum, LOD: (float, float), peakAt: np.ndarray = None, minus=False, sendStatus=OribitoolBase.nullSendStatus) -> OribitoolBase.Spectrum:
+def denoiseWithLOD(spectrum: OrbitoolBase.Spectrum, LOD: (float, float), peakAt: np.ndarray = None, minus=False, sendStatus=OrbitoolBase.nullSendStatus) -> OrbitoolBase.Spectrum:
     fileTime = spectrum.fileTime
     msg = "denoising"
     sendStatus(fileTime, msg, -1, 0)
@@ -379,7 +379,7 @@ def denoiseWithLOD(spectrum: OribitoolBase.Spectrum, LOD: (float, float), peakAt
     return newSpectrum
 
 
-def denoise(spectrum: OribitoolBase.Spectrum,  quantile=0.7, minus=False, sendStatus=OribitoolBase.nullSendStatus):
+def denoise(spectrum: OrbitoolBase.Spectrum,  quantile=0.7, minus=False, sendStatus=OrbitoolBase.nullSendStatus):
     peakAt, noise, LOD = getNoise(spectrum,  quantile, sendStatus)
     return noise, LOD, denoiseWithLOD(spectrum, LOD, peakAt, minus, sendStatus)
 
@@ -406,7 +406,7 @@ class NormalDistributionFunc:
         return a / (np.sqrt(2 * np.pi) * sigma) * np.exp(-0.5 * ((mz - mu) / sigma) ** 2)
 
     @staticmethod
-    def getParam(peak: OribitoolBase.Peak):
+    def getParam(peak: OrbitoolBase.Peak):
         mz: np.ndarray = peak.mz
         intensity: np.ndarray = peak.intensity
         mzmean = mz.mean()
@@ -414,7 +414,7 @@ class NormalDistributionFunc:
         return scipy.optimize.curve_fit(NormalDistributionFunc._func, mz, intensity, param0, maxfev=100)[0]
 
     @staticmethod
-    def getNormalizedPeak(peak: OribitoolBase.Peak, param) -> OribitoolBase.Peak:
+    def getNormalizedPeak(peak: OrbitoolBase.Peak, param) -> OrbitoolBase.Peak:
         '''
         return (mz, intensity)`
         '''
@@ -422,7 +422,7 @@ class NormalDistributionFunc:
         intensity: np.ndarray = peak.intensity
         peakArea, peakPosition, peakSigma = param
         peakHeight = NormalDistributionFunc._func(peakPosition, *param)
-        peak = OribitoolBase.Peak(peak.spectrum, mz=(mz / peakPosition - 1) / math.sqrt(
+        peak = OrbitoolBase.Peak(peak.spectrum, mz=(mz / peakPosition - 1) / math.sqrt(
             peakPosition / 200), intensity=intensity / peakHeight, originalPeak=peak)
         peak.addFittedParam(param)
         return peak
@@ -435,7 +435,7 @@ class NormalDistributionFunc:
         aSum = a1 + a2
         return (a1 + a2, mu1 * a1 / aSum + mu2 * a2 / aSum)
 
-    def mergePeaks(self, peak1: OribitoolBase.Peak, peak2: OribitoolBase.Peak):
+    def mergePeaks(self, peak1: OrbitoolBase.Peak, peak2: OrbitoolBase.Peak):
         newparam = NormalDistributionFunc.mergePeaksParam(peak1.fittedParam, peak2.fittedParam)
         if peak1.originalPeak is not None and peak1.originalPeak == peak2.originalPeak:
             newmz = peak1.originalPeak.mz
@@ -444,7 +444,7 @@ class NormalDistributionFunc:
             select = np.concatenate(((newmz[1:] - newmz[:-1]) > 1e-9,np.ones(1,dtype=np.bool)))
             newmz=newmz[select]
         newIntensity = self._funcFit(newmz, *newparam)
-        newPeak=OribitoolBase.Peak(peak1.spectrum, mz=newmz, intensity=newIntensity, originalPeak=peak1.originalPeak, splitNum=(peak1.splitNum - 1) if isinstance(peak1.splitNum, int) else 1)
+        newPeak=OrbitoolBase.Peak(peak1.spectrum, mz=newmz, intensity=newIntensity, originalPeak=peak1.originalPeak, splitNum=(peak1.splitNum - 1) if isinstance(peak1.splitNum, int) else 1)
         peakIntensity=self._funcFit(newparam[1], *newparam)
         newPeak.addFittedParam(newparam, newparam[1], peakIntensity, newparam[0])
         return newPeak
@@ -458,17 +458,17 @@ class NormalDistributionFunc:
         sigma = self.peakSigmaFit*np.sqrt(np.abs(mu)/200)*mu
         return NormalDistributionFunc._func(mz, a, mu, sigma)
 
-    def getFittedParam(self, peak: OribitoolBase.Peak):
+    def getFittedParam(self, peak: OrbitoolBase.Peak):
         mz: np.ndarray = peak.mz
         intensity: np.ndarray = peak.intensity
         mzmean = mz.mean()
         param = (intensity.max() * mzmean * self.peakSigmaFit * 2, mzmean)
         return scipy.optimize.curve_fit(self._funcFit, mz, intensity, param, maxfev=100)[0]
 
-    def getIntensity(self, mz: np.ndarray, peak: OribitoolBase.Peak):
+    def getIntensity(self, mz: np.ndarray, peak: OrbitoolBase.Peak):
         return self._funcFit(mz, *peak.fittedParam)
 
-    def splitPeak(self, peak: OribitoolBase.Peak, splitNum=None, force=False) -> List[OribitoolBase.Peak]:
+    def splitPeak(self, peak: OrbitoolBase.Peak, splitNum=None, force=False) -> List[OrbitoolBase.Peak]:
         peakAt = peak.peakAt()
 
         if splitNum is None:
@@ -513,7 +513,7 @@ class NormalDistributionFunc:
                     newIntensity = newIntensity[select]
                     newIntensity[-1] = 0
                     newIntensity[0] = 0
-                    newPeak = OribitoolBase.Peak(
+                    newPeak = OrbitoolBase.Peak(
                         peak.spectrum, mz=mz[select], intensity=newIntensity, originalPeak=peak, splitNum=num)
                     newPeak.addFittedParam(
                         p, p[1], peakIntensity, p[0])
@@ -533,7 +533,7 @@ class NormalDistributionFunc:
             for row in np.stack((mz, intensity), 1):
                 writer.writerow(row)
         raise ValueError("can't fit peak in (%.5f,%.5f) at spectrum %s" % (
-            mz[0], mz[-1], peak.spectrum.timeRange[0].strftime(OribitoolBase.timeFormat)))
+            mz[0], mz[-1], peak.spectrum.timeRange[0].strftime(OrbitoolBase.timeFormat)))
 
 
 @numba.njit(cache=True)
@@ -600,7 +600,7 @@ def file2Obj(path: str):
         return pickle.load(reader)
 
 
-def recalcFormula(peaks: List[OribitoolBase.Peak], ionCalc: OribitoolBase.IonCalculatorHint, sendStatus=nullSendStatus):
+def recalcFormula(peaks: List[OrbitoolBase.Peak], ionCalc: OrbitoolBase.IonCalculatorHint, sendStatus=nullSendStatus):
     ppm = ionCalc.ppm
     minratio = 1 - ppm
     maxratio = 1 + ppm
@@ -615,7 +615,7 @@ def recalcFormula(peaks: List[OribitoolBase.Peak], ionCalc: OribitoolBase.IonCal
         intensity = peak.peakIntensity
         formulaList = ionCalc.get(peak.peakPosition)
 
-        def correct(formula: OribitoolBase.FormulaHint):
+        def correct(formula: OrbitoolBase.FormulaHint):
             if not formula.isIsotope:
                 return True
             ratio = formula.relativeAbundance() * 1.5
@@ -634,7 +634,7 @@ def recalcFormula(peaks: List[OribitoolBase.Peak], ionCalc: OribitoolBase.IonCal
     sendStatus(time, msg, length, length)
 
 
-def calculateResidual(fittedPeaks: OribitoolBase.Peak, fitFunc: NormalDistributionFunc, fileTime:datetime.datetime = datetime.datetime.now(), sendStatus=nullSendStatus):
+def calculateResidual(fittedPeaks: OrbitoolBase.Peak, fitFunc: NormalDistributionFunc, fileTime:datetime.datetime = datetime.datetime.now(), sendStatus=nullSendStatus):
     '''
     fittedPeaks will be changed
     '''
@@ -668,7 +668,7 @@ def calculateResidual(fittedPeaks: OribitoolBase.Peak, fitFunc: NormalDistributi
     return (residualMz, residualInt)
 
 
-def mergePeaks(peaks: List[OribitoolBase.Peak], ppm: float, func:NormalDistributionFunc, ionCalc:OribitoolBase.IonCalculatorHint, sameFormula=True):
+def mergePeaks(peaks: List[OrbitoolBase.Peak], ppm: float, func:NormalDistributionFunc, ionCalc:OrbitoolBase.IonCalculatorHint, sameFormula=True):
     '''
     if `sameFormula` == True:
         will merge peaks which have same formula or both have no formula

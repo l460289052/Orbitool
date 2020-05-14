@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Oribitool.ui'
+# Form implementation generated from reading ui file 'Orbitool.ui'
 #
 # Created by: PyQt5 UI code generator 5.9.2
 #
@@ -1806,7 +1806,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Oribitool"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Orbitool"))
         self.groupBox_9.setTitle(_translate("MainWindow", "Speatra List"))
         item = self.spectraTableWidget.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "Start time"))

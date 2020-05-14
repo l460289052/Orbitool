@@ -14,8 +14,8 @@ if __name__ == "__main__":
     from PyQt5 import QtWidgets
     app = QtWidgets.QApplication(sys.argv)
 
-    import OribitoolUiPy
+    import OrbitoolUiPy
 
-    MainWin = OribitoolUiPy.Window()
+    MainWin = OrbitoolUiPy.Window()
     MainWin.show()
     sys.exit(app.exec_())

@@ -15,7 +15,7 @@ import pyteomics.mass
 import re
 from typing import Union
 
-from _OribitoolElement cimport str2element, _factor, _andfactor, elements, elementsMap, elementMass,\
+from _OrbitoolElement cimport str2element, _factor, _andfactor, elements, elementsMap, elementMass,\
      elementMassNum , elementMassDist, elementNumMap, elementParasMap, CHmin
 
 _elementsOrder = ['C', 'H', 'O', 'N', 'S']
