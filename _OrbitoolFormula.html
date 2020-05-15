@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Cython: _OribitoolFormula.pyx</title>
+    <title>Cython: _OrbitoolFormula.pyx</title>
     <style type="text/css">
     
 body.cython { font-family: courier; font-size: 12; }
@@ -363,10 +363,10 @@ body.cython { font-family: courier; font-size: 12; }
     <span style="background-color: #FFFF00">Yellow lines</span> hint at Python interaction.<br />
     Click on a line that starts with a "<code>+</code>" to see the C code that Cython generated for it.
 </p>
-<p>Raw output: <a href="_OribitoolFormula.cpp">_OribitoolFormula.cpp</a></p>
+<p>Raw output: <a href="_OrbitoolFormula.cpp">_OrbitoolFormula.cpp</a></p>
 <div class="cython"><pre class="cython line score-8" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">001</span>: <span class="c"># distutils: language = c++</span></pre>
 <pre class='cython code score-8 '>
-  /* "code/_OribitoolFormula.pyx":1
+  /* "code/_OrbitoolFormula.pyx":1
  * # distutils: language = c++             # &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
  * # cython: language_level = 3
  * from cpython cimport *
@@ -412,7 +412,7 @@ body.cython { font-family: courier; font-size: 12; }
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">017</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">018</span>: <span class="k">from</span> <span class="nn">_OribitoolElement</span> <span class="k">cimport</span> <span class="n">str2element</span><span class="p">,</span> <span class="n">_factor</span><span class="p">,</span> <span class="n">_andfactor</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">elementsMap</span><span class="p">,</span> <span class="n">elementMass</span><span class="p">,</span>\</pre>
+<pre class="cython line score-0">&#xA0;<span class="">018</span>: <span class="k">from</span> <span class="nn">_OrbitoolElement</span> <span class="k">cimport</span> <span class="n">str2element</span><span class="p">,</span> <span class="n">_factor</span><span class="p">,</span> <span class="n">_andfactor</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">elementsMap</span><span class="p">,</span> <span class="n">elementMass</span><span class="p">,</span>\</pre>
 <pre class="cython line score-0">&#xA0;<span class="">019</span>:      <span class="n">elementMassNum</span> <span class="p">,</span> <span class="n">elementMassDist</span><span class="p">,</span> <span class="n">elementNumMap</span><span class="p">,</span> <span class="n">elementParasMap</span><span class="p">,</span> <span class="n">CHmin</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">020</span>: </pre>
 <pre class="cython line score-21" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">021</span>: <span class="n">_elementsOrder</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="s">&#39;H&#39;</span><span class="p">,</span> <span class="s">&#39;O&#39;</span><span class="p">,</span> <span class="s">&#39;N&#39;</span><span class="p">,</span> <span class="s">&#39;S&#39;</span><span class="p">]</span></pre>
@@ -482,46 +482,46 @@ body.cython { font-family: courier; font-size: 12; }
         }
         <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
       }
-      <span class='refnanny'>__Pyx_XGOTREF</span>(__pyx_7genexpr__pyx_v_4code_17_OribitoolFormula_e);
-      <span class='pyx_macro_api'>__Pyx_DECREF_SET</span>(__pyx_7genexpr__pyx_v_4code_17_OribitoolFormula_e, __pyx_t_1);
+      <span class='refnanny'>__Pyx_XGOTREF</span>(__pyx_7genexpr__pyx_v_4code_16_OrbitoolFormula_e);
+      <span class='pyx_macro_api'>__Pyx_DECREF_SET</span>(__pyx_7genexpr__pyx_v_4code_16_OrbitoolFormula_e, __pyx_t_1);
       <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_1);
       __pyx_t_1 = 0;
-      if (unlikely(__pyx_v_17_OribitoolElement_elementsMap == Py_None)) {
+      if (unlikely(__pyx_v_16_OrbitoolElement_elementsMap == Py_None)) {
         <span class='py_c_api'>PyErr_SetString</span>(PyExc_TypeError, "'NoneType' object is not subscriptable");
         <span class='error_goto'>__PYX_ERR(0, 23, __pyx_L4_error)</span>
       }
-      __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyDict_GetItem</span>(__pyx_v_17_OribitoolElement_elementsMap, __pyx_7genexpr__pyx_v_4code_17_OribitoolFormula_e);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 23, __pyx_L4_error)</span>
+      __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyDict_GetItem</span>(__pyx_v_16_OrbitoolElement_elementsMap, __pyx_7genexpr__pyx_v_4code_16_OrbitoolFormula_e);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 23, __pyx_L4_error)</span>
       <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
       if (unlikely(<span class='pyx_c_api'>__Pyx_ListComp_Append</span>(__pyx_t_2, (PyObject*)__pyx_t_1))) <span class='error_goto'>__PYX_ERR(0, 23, __pyx_L4_error)</span>
       <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_3); __pyx_t_3 = 0;
-    <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_7genexpr__pyx_v_4code_17_OribitoolFormula_e);
-    <span class='pyx_macro_api'>__Pyx_DECREF_SET</span>(__pyx_7genexpr__pyx_v_4code_17_OribitoolFormula_e, Py_None);
+    <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_7genexpr__pyx_v_4code_16_OrbitoolFormula_e);
+    <span class='pyx_macro_api'>__Pyx_DECREF_SET</span>(__pyx_7genexpr__pyx_v_4code_16_OrbitoolFormula_e, Py_None);
     goto __pyx_L7_exit_scope;
     __pyx_L4_error:;
-    <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_7genexpr__pyx_v_4code_17_OribitoolFormula_e);
-    <span class='pyx_macro_api'>__Pyx_DECREF_SET</span>(__pyx_7genexpr__pyx_v_4code_17_OribitoolFormula_e, Py_None);
+    <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_7genexpr__pyx_v_4code_16_OrbitoolFormula_e);
+    <span class='pyx_macro_api'>__Pyx_DECREF_SET</span>(__pyx_7genexpr__pyx_v_4code_16_OrbitoolFormula_e, Py_None);
     goto __pyx_L1_error;
     __pyx_L7_exit_scope:;
   } /* exit inner scope */
   __pyx_t_6 = <span class='pyx_c_api'>__pyx_convert_vector_from_py_int</span>(__pyx_t_2);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_v_4code_17_OribitoolFormula_elementsOrder = __pyx_t_6;
+  __pyx_v_4code_16_OrbitoolFormula_elementsOrder = __pyx_t_6;
 </pre><pre class="cython line score-11" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">024</span>: <span class="k">cdef</span> <span class="kt">unordered_set</span>[<span class="kt">int</span>] <span class="nf">elementsOrderSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">elementsOrder</span><span class="p">)</span></pre>
-<pre class='cython code score-11 '>  __pyx_t_2 = <span class='pyx_c_api'>__pyx_convert_vector_to_py_int</span>(__pyx_v_4code_17_OribitoolFormula_elementsOrder);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 24, __pyx_L1_error)</span>
+<pre class='cython code score-11 '>  __pyx_t_2 = <span class='pyx_c_api'>__pyx_convert_vector_to_py_int</span>(__pyx_v_4code_16_OrbitoolFormula_elementsOrder);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 24, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
   __pyx_t_3 = <span class='py_c_api'>PySet_New</span>(__pyx_t_2);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 24, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_7 = <span class='pyx_c_api'>__pyx_convert_unordered_set_from_py_int</span>(__pyx_t_3);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 24, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_4code_17_OribitoolFormula_elementsOrderSet = __pyx_t_7;
+  __pyx_v_4code_16_OrbitoolFormula_elementsOrderSet = __pyx_t_7;
 </pre><pre class="cython line score-0">&#xA0;<span class="">025</span>: </pre>
 <pre class="cython line score-0">&#xA0;<span class="">026</span>: </pre>
 <pre class="cython line score-0">&#xA0;<span class="">027</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">028</span>: <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">_elements_mass</span><span class="p">(</span><span class="n">unordered_map</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">elements</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static double __pyx_f_4code_17_OribitoolFormula__elements_mass(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements) {
+<pre class='cython code score-0 '>static double __pyx_f_4code_16_OrbitoolFormula__elements_mass(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements) {
   double __pyx_v_mass;
   std::pair&lt;int,int&gt;  __pyx_v_i;
   double __pyx_r;
@@ -546,13 +546,13 @@ body.cython { font-family: courier; font-size: 12; }
 /* … */
   }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">032</span>:         <span class="n">mass</span><span class="o">+=</span><span class="n">elementMass</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">first</span><span class="p">]</span><span class="o">*</span><span class="n">i</span><span class="o">.</span><span class="n">second</span></pre>
-<pre class='cython code score-0 '>    __pyx_v_mass = (__pyx_v_mass + ((__pyx_v_17_OribitoolElement_elementMass[__pyx_v_i.first]) * __pyx_v_i.second));
+<pre class='cython code score-0 '>    __pyx_v_mass = (__pyx_v_mass + ((__pyx_v_16_OrbitoolElement_elementMass[__pyx_v_i.first]) * __pyx_v_i.second));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">033</span>:     <span class="k">return</span> <span class="n">mass</span></pre>
 <pre class='cython code score-0 '>  __pyx_r = __pyx_v_mass;
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">034</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">035</span>: <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">_elements_DBE</span><span class="p">(</span><span class="n">unordered_map</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">elements</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static double __pyx_f_4code_17_OribitoolFormula__elements_DBE(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements) {
+<pre class='cython code score-0 '>static double __pyx_f_4code_16_OrbitoolFormula__elements_DBE(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements) {
   double __pyx_v_dbe2;
   std::pair&lt;int,int&gt;  __pyx_v_i;
   double __pyx_r;
@@ -577,13 +577,13 @@ body.cython { font-family: courier; font-size: 12; }
 /* … */
   }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">039</span>:         <span class="n">dbe2</span> <span class="o">+=</span> <span class="n">i</span><span class="o">.</span><span class="n">second</span> <span class="o">*</span> <span class="n">elementParasMap</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">first</span><span class="p">][</span><span class="mf">0</span><span class="p">]</span></pre>
-<pre class='cython code score-0 '>    __pyx_v_dbe2 = (__pyx_v_dbe2 + (__pyx_v_i.second * ((__pyx_v_17_OribitoolElement_elementParasMap[__pyx_v_i.first])[0])));
+<pre class='cython code score-0 '>    __pyx_v_dbe2 = (__pyx_v_dbe2 + (__pyx_v_i.second * ((__pyx_v_16_OrbitoolElement_elementParasMap[__pyx_v_i.first])[0])));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">040</span>:     <span class="k">return</span> <span class="n">dbe2</span> <span class="o">/</span> <span class="mf">2</span></pre>
 <pre class='cython code score-0 '>  __pyx_r = (__pyx_v_dbe2 / 2.0);
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">041</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">042</span>: <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">_elements_Omin</span><span class="p">(</span><span class="n">unordered_map</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">elements</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static double __pyx_f_4code_17_OribitoolFormula__elements_Omin(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements) {
+<pre class='cython code score-0 '>static double __pyx_f_4code_16_OrbitoolFormula__elements_Omin(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements) {
   double __pyx_v_ret;
   std::pair&lt;int,int&gt;  __pyx_v_i;
   double __pyx_r;
@@ -608,13 +608,13 @@ body.cython { font-family: courier; font-size: 12; }
 /* … */
   }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">046</span>:         <span class="n">ret</span><span class="o">+=</span><span class="n">i</span><span class="o">.</span><span class="n">second</span><span class="o">*</span><span class="n">elementParasMap</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">first</span><span class="p">][</span><span class="mf">3</span><span class="p">]</span></pre>
-<pre class='cython code score-0 '>    __pyx_v_ret = (__pyx_v_ret + (__pyx_v_i.second * ((__pyx_v_17_OribitoolElement_elementParasMap[__pyx_v_i.first])[3])));
+<pre class='cython code score-0 '>    __pyx_v_ret = (__pyx_v_ret + (__pyx_v_i.second * ((__pyx_v_16_OrbitoolElement_elementParasMap[__pyx_v_i.first])[3])));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">047</span>:     <span class="k">return</span> <span class="n">ret</span></pre>
 <pre class='cython code score-0 '>  __pyx_r = __pyx_v_ret;
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">048</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">049</span>: <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">_elements_Omax</span><span class="p">(</span><span class="n">unordered_map</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">&amp;</span><span class="n">elements</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static double __pyx_f_4code_17_OribitoolFormula__elements_Omax(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements) {
+<pre class='cython code score-0 '>static double __pyx_f_4code_16_OrbitoolFormula__elements_Omax(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements) {
   double __pyx_v_ret;
   std::pair&lt;int,int&gt;  __pyx_v_i;
   double __pyx_r;
@@ -639,13 +639,13 @@ body.cython { font-family: courier; font-size: 12; }
 /* … */
   }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">053</span>:         <span class="n">ret</span><span class="o">+=</span><span class="n">i</span><span class="o">.</span><span class="n">second</span><span class="o">*</span><span class="n">elementParasMap</span><span class="p">[</span> <span class="n">i</span><span class="o">.</span><span class="n">first</span> <span class="p">][</span><span class="mf">4</span><span class="p">]</span></pre>
-<pre class='cython code score-0 '>    __pyx_v_ret = (__pyx_v_ret + (__pyx_v_i.second * ((__pyx_v_17_OribitoolElement_elementParasMap[__pyx_v_i.first])[4])));
+<pre class='cython code score-0 '>    __pyx_v_ret = (__pyx_v_ret + (__pyx_v_i.second * ((__pyx_v_16_OrbitoolElement_elementParasMap[__pyx_v_i.first])[4])));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">054</span>:     <span class="k">return</span> <span class="n">ret</span></pre>
 <pre class='cython code score-0 '>  __pyx_r = __pyx_v_ret;
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">055</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">056</span>: <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">_elements_Hmin</span><span class="p">(</span><span class="n">unordered_map</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">&amp;</span><span class="n">elements</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static double __pyx_f_4code_17_OribitoolFormula__elements_Hmin(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements) {
+<pre class='cython code score-0 '>static double __pyx_f_4code_16_OrbitoolFormula__elements_Hmin(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements) {
   double __pyx_v_ret;
   std::pair&lt;int,int&gt;  __pyx_v_i;
   double __pyx_r;
@@ -676,11 +676,11 @@ body.cython { font-family: courier; font-size: 12; }
       goto __pyx_L5;
     }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">061</span>:             <span class="n">ret</span><span class="o">+=</span><span class="n">CHmin</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">second</span><span class="p">]</span></pre>
-<pre class='cython code score-0 '>      __pyx_v_ret = (__pyx_v_ret + (__pyx_v_17_OribitoolElement_CHmin[__pyx_v_i.second]));
+<pre class='cython code score-0 '>      __pyx_v_ret = (__pyx_v_ret + (__pyx_v_16_OrbitoolElement_CHmin[__pyx_v_i.second]));
 </pre><pre class="cython line score-0">&#xA0;<span class="">062</span>:         <span class="k">else</span><span class="p">:</span></pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">063</span>:             <span class="n">ret</span><span class="o">+=</span><span class="n">i</span><span class="o">.</span><span class="n">second</span><span class="o">*</span><span class="n">elementParasMap</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">first</span><span class="p">][</span><span class="mf">1</span><span class="p">]</span></pre>
 <pre class='cython code score-0 '>    /*else*/ {
-      __pyx_v_ret = (__pyx_v_ret + (__pyx_v_i.second * ((__pyx_v_17_OribitoolElement_elementParasMap[__pyx_v_i.first])[1])));
+      __pyx_v_ret = (__pyx_v_ret + (__pyx_v_i.second * ((__pyx_v_16_OrbitoolElement_elementParasMap[__pyx_v_i.first])[1])));
     }
     __pyx_L5:;
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">064</span>:     <span class="k">return</span> <span class="n">ret</span></pre>
@@ -688,7 +688,7 @@ body.cython { font-family: courier; font-size: 12; }
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">065</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">066</span>: <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">_elements_Hmax</span><span class="p">(</span><span class="n">unordered_map</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">&amp;</span><span class="n">elements</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static double __pyx_f_4code_17_OribitoolFormula__elements_Hmax(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements) {
+<pre class='cython code score-0 '>static double __pyx_f_4code_16_OrbitoolFormula__elements_Hmax(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements) {
   double __pyx_v_ret;
   std::pair&lt;int,int&gt;  __pyx_v_i;
   double __pyx_r;
@@ -713,13 +713,13 @@ body.cython { font-family: courier; font-size: 12; }
 /* … */
   }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">070</span>:         <span class="n">ret</span><span class="o">+=</span><span class="n">i</span><span class="o">.</span><span class="n">second</span><span class="o">*</span><span class="n">elementParasMap</span><span class="p">[</span> <span class="n">i</span><span class="o">.</span><span class="n">first</span> <span class="p">][</span><span class="mf">2</span><span class="p">]</span></pre>
-<pre class='cython code score-0 '>    __pyx_v_ret = (__pyx_v_ret + (__pyx_v_i.second * ((__pyx_v_17_OribitoolElement_elementParasMap[__pyx_v_i.first])[2])));
+<pre class='cython code score-0 '>    __pyx_v_ret = (__pyx_v_ret + (__pyx_v_i.second * ((__pyx_v_16_OrbitoolElement_elementParasMap[__pyx_v_i.first])[2])));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">071</span>:     <span class="k">return</span> <span class="n">ret</span></pre>
 <pre class='cython code score-0 '>  __pyx_r = __pyx_v_ret;
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">072</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">073</span>: <span class="k">cdef</span> <span class="kt">bool</span> <span class="nf">_elements_eq</span><span class="p">(</span><span class="n">unordered_map</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">&amp;</span><span class="n">_f1</span><span class="p">,</span><span class="n">unordered_map</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">&amp;</span><span class="n">_f2</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static bool __pyx_f_4code_17_OribitoolFormula__elements_eq(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v__f1, std::unordered_map&lt;int,int&gt;  &amp;__pyx_v__f2) {
+<pre class='cython code score-0 '>static bool __pyx_f_4code_16_OrbitoolFormula__elements_eq(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v__f1, std::unordered_map&lt;int,int&gt;  &amp;__pyx_v__f2) {
   std::pair&lt;int,int&gt;  __pyx_v_i;
   std::unordered_map&lt;int,int&gt; ::iterator __pyx_v_it;
   bool __pyx_r;
@@ -773,7 +773,7 @@ body.cython { font-family: courier; font-size: 12; }
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">083</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">084</span>: <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">_mass_isotopes_mass</span><span class="p">(</span><span class="n">double</span> <span class="n">mass</span><span class="p">,</span> <span class="n">cpplist</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span><span class="o">&amp;</span><span class="n">isotopes</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static double __pyx_f_4code_17_OribitoolFormula__mass_isotopes_mass(double __pyx_v_mass, std::list&lt;std::pair&lt;int,int&gt; &gt;  &amp;__pyx_v_isotopes) {
+<pre class='cython code score-0 '>static double __pyx_f_4code_16_OrbitoolFormula__mass_isotopes_mass(double __pyx_v_mass, std::list&lt;std::pair&lt;int,int&gt; &gt;  &amp;__pyx_v_isotopes) {
   std::pair&lt;int,int&gt;  __pyx_v_i;
   double __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
@@ -795,13 +795,13 @@ body.cython { font-family: courier; font-size: 12; }
 /* … */
   }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">087</span>:         <span class="n">mass</span><span class="o">+=</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">second</span><span class="o">&amp;</span><span class="n">_andfactor</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">elementMassDist</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">first</span><span class="p">][</span><span class="n">i</span><span class="o">.</span><span class="n">second</span><span class="o">&gt;&gt;</span><span class="n">_factor</span><span class="p">]</span><span class="o">.</span><span class="n">first</span><span class="o">-</span><span class="n">elementMass</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">first</span><span class="p">])</span></pre>
-<pre class='cython code score-0 '>    __pyx_v_mass = (__pyx_v_mass + ((__pyx_v_i.second &amp; __pyx_v_17_OribitoolElement__andfactor) * (((__pyx_v_17_OribitoolElement_elementMassDist[__pyx_v_i.first])[(__pyx_v_i.second &gt;&gt; __pyx_v_17_OribitoolElement__factor)]).first - (__pyx_v_17_OribitoolElement_elementMass[__pyx_v_i.first]))));
+<pre class='cython code score-0 '>    __pyx_v_mass = (__pyx_v_mass + ((__pyx_v_i.second &amp; __pyx_v_16_OrbitoolElement__andfactor) * (((__pyx_v_16_OrbitoolElement_elementMassDist[__pyx_v_i.first])[(__pyx_v_i.second &gt;&gt; __pyx_v_16_OrbitoolElement__factor)]).first - (__pyx_v_16_OrbitoolElement_elementMass[__pyx_v_i.first]))));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">088</span>:     <span class="k">return</span> <span class="n">mass</span></pre>
 <pre class='cython code score-0 '>  __pyx_r = __pyx_v_mass;
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">089</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">090</span>: <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">_elements_isotopes_mass</span><span class="p">(</span><span class="n">unordered_map</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">&amp;</span><span class="n">elements</span><span class="p">,</span> <span class="n">cpplist</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span><span class="o">&amp;</span><span class="n">isotopes</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static double __pyx_f_4code_17_OribitoolFormula__elements_isotopes_mass(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements, std::list&lt;std::pair&lt;int,int&gt; &gt;  &amp;__pyx_v_isotopes) {
+<pre class='cython code score-0 '>static double __pyx_f_4code_16_OrbitoolFormula__elements_isotopes_mass(std::unordered_map&lt;int,int&gt;  &amp;__pyx_v_elements, std::list&lt;std::pair&lt;int,int&gt; &gt;  &amp;__pyx_v_isotopes) {
   double __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("_elements_isotopes_mass", 0);
@@ -812,38 +812,38 @@ body.cython { font-family: courier; font-size: 12; }
   return __pyx_r;
 }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">091</span>:     <span class="k">return</span> <span class="n">_mass_isotopes_mass</span><span class="p">(</span><span class="n">_elements_mass</span><span class="p">(</span><span class="n">elements</span><span class="p">),</span> <span class="n">isotopes</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_17_OribitoolFormula__mass_isotopes_mass(__pyx_f_4code_17_OribitoolFormula__elements_mass(__pyx_v_elements), __pyx_v_isotopes);
+<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_16_OrbitoolFormula__mass_isotopes_mass(__pyx_f_4code_16_OrbitoolFormula__elements_mass(__pyx_v_elements), __pyx_v_isotopes);
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">092</span>: </pre>
 <pre class="cython line score-0">&#xA0;<span class="">093</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">094</span>: <span class="k">cdef</span> <span class="k">class</span> <span class="nf">Formula</span><span class="p">:</span></pre>
-<pre class='cython code score-0 '>struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula {
-  double (*mass)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *, int __pyx_skip_dispatch);
-  struct __pyx_obj_4code_17_OribitoolFormula_Formula *(*findOrigin)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *, int __pyx_skip_dispatch);
-  double (*DBE)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *, int __pyx_skip_dispatch);
-  double (*Omin)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *);
-  double (*Omax)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *);
-  double (*Hmin)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *);
-  double (*Hmax)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *);
-  void (*addElement)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *, PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_4code_17_OribitoolFormula_7Formula_addElement *__pyx_optional_args);
+<pre class='cython code score-0 '>struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula {
+  double (*mass)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *, int __pyx_skip_dispatch);
+  struct __pyx_obj_4code_16_OrbitoolFormula_Formula *(*findOrigin)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *, int __pyx_skip_dispatch);
+  double (*DBE)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *, int __pyx_skip_dispatch);
+  double (*Omin)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *);
+  double (*Omax)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *);
+  double (*Hmin)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *);
+  double (*Hmax)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *);
+  void (*addElement)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *, PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_4code_16_OrbitoolFormula_7Formula_addElement *__pyx_optional_args);
   PyObject *(*eToStr)(int, int, bool);
   PyObject *(*iToStr)(int, int, int);
-  PyObject *(*toStr)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *, int __pyx_skip_dispatch, struct __pyx_opt_args_4code_17_OribitoolFormula_7Formula_toStr *__pyx_optional_args);
-  double (*relativeAbundance)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *, int __pyx_skip_dispatch);
-  void (*setE)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *, int, int);
-  int (*getE)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *, int);
-  void (*setI)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *, int, int, int);
-  int (*getI)(struct __pyx_obj_4code_17_OribitoolFormula_Formula *, int, int);
+  PyObject *(*toStr)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *, int __pyx_skip_dispatch, struct __pyx_opt_args_4code_16_OrbitoolFormula_7Formula_toStr *__pyx_optional_args);
+  double (*relativeAbundance)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *, int __pyx_skip_dispatch);
+  void (*setE)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *, int, int);
+  int (*getE)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *, int);
+  void (*setI)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *, int, int, int);
+  int (*getI)(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *, int, int);
 };
-static struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *__pyx_vtabptr_4code_17_OribitoolFormula_Formula;
+static struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *__pyx_vtabptr_4code_16_OrbitoolFormula_Formula;
 </pre><pre class="cython line score-40" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">095</span>:     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formula</span> <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span></pre>
 <pre class='cython code score-40 '>/* Python wrapper */
-static int __pyx_pw_4code_17_OribitoolFormula_7Formula_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_4code_17_OribitoolFormula_7Formula___init__[] = "\n        Formula('CC[13]H5O-')\n        Formula({'C':1,'C[13]':1,'H':5,'O':1},charge=-1)\n        Formula({'C':1,'C[13]':1,'H':5,'O':1,'charge'=-1})\n        Formula(C=1,H=2,O=1,charge=-1)\n        ";
+static int __pyx_pw_4code_16_OrbitoolFormula_7Formula_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_4code_16_OrbitoolFormula_7Formula___init__[] = "\n        Formula('CC[13]H5O-')\n        Formula({'C':1,'C[13]':1,'H':5,'O':1},charge=-1)\n        Formula({'C':1,'C[13]':1,'H':5,'O':1,'charge'=-1})\n        Formula(C=1,H=2,O=1,charge=-1)\n        ";
 #if CYTHON_COMPILING_IN_CPYTHON
-struct wrapperbase __pyx_wrapperbase_4code_17_OribitoolFormula_7Formula___init__;
+struct wrapperbase __pyx_wrapperbase_4code_16_OrbitoolFormula_7Formula___init__;
 #endif
-static int __pyx_pw_4code_17_OribitoolFormula_7Formula_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static int __pyx_pw_4code_16_OrbitoolFormula_7Formula_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_formula = 0;
   PyObject *__pyx_v_kwargs = 0;
   int __pyx_r;
@@ -890,11 +890,11 @@ static int __pyx_pw_4code_17_OribitoolFormula_7Formula_1__init__(PyObject *__pyx
   <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("__init__", 0, 0, 1, <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)); <span class='error_goto'>__PYX_ERR(0, 95, __pyx_L3_error)</span>
   __pyx_L3_error:;
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_v_kwargs); __pyx_v_kwargs = 0;
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula___init__(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self), __pyx_v_formula, __pyx_v_kwargs);
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula___init__(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self), __pyx_v_formula, __pyx_v_kwargs);
 
   /* function exit code */
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_v_kwargs);
@@ -902,7 +902,7 @@ static int __pyx_pw_4code_17_OribitoolFormula_7Formula_1__init__(PyObject *__pyx
   return __pyx_r;
 }
 
-static int __pyx_pf_4code_17_OribitoolFormula_7Formula___init__(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, PyObject *__pyx_v_formula, PyObject *__pyx_v_kwargs) {
+static int __pyx_pf_4code_16_OrbitoolFormula_7Formula___init__(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, PyObject *__pyx_v_formula, PyObject *__pyx_v_kwargs) {
   PyObject *__pyx_v_charge = NULL;
   PyObject *__pyx_v_match = NULL;
   PyObject *__pyx_v_e = NULL;
@@ -924,7 +924,7 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula___init__(struct __pyx_obj
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_8);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_10);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_16);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_v_charge);
@@ -1052,7 +1052,7 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula___init__(struct __pyx_obj
           goto __pyx_L11;
         }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">108</span>:                     <span class="bp">self</span><span class="o">.</span><span class="n">setE</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="o">-</span><span class="mf">1</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>          ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, 0, -1);
+<pre class='cython code score-0 '>          ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, 0, -1);
 </pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">109</span>:                 <span class="k">elif</span> <span class="n">charge</span> <span class="o">==</span> <span class="s">&#39;-&#39;</span><span class="p">:</span></pre>
 <pre class='cython code score-2 '>        __pyx_t_4 = (<span class='pyx_c_api'>__Pyx_PyUnicode_Equals</span>(__pyx_v_charge, __pyx_kp_u__2, Py_EQ)); if (unlikely(__pyx_t_4 &lt; 0)) <span class='error_goto'>__PYX_ERR(0, 109, __pyx_L3_error)</span>
         if (__pyx_t_4) {
@@ -1060,7 +1060,7 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula___init__(struct __pyx_obj
         }
         __pyx_L11:;
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">110</span>:                     <span class="bp">self</span><span class="o">.</span><span class="n">setE</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="mf">1</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>          ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, 0, 1);
+<pre class='cython code score-0 '>          ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, 0, 1);
 </pre><pre class="cython line score-86" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">111</span>:                 <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="s">r&quot;([A-Z][a-z]{0,2})(\[\d+\])?(\d*)&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="p">):</span></pre>
 <pre class='cython code score-86 '>        <span class='pyx_c_api'>__Pyx_GetModuleGlobalName</span>(__pyx_t_6, __pyx_n_s_re);<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 111, __pyx_L3_error)</span>
         <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
@@ -1255,7 +1255,7 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula___init__(struct __pyx_obj
             __pyx_t_9 = <span class='pyx_c_api'>__Pyx_PyInt_As_int</span>(__pyx_v_m); if (unlikely((__pyx_t_9 == (int)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 120, __pyx_L3_error)</span>
             __pyx_t_14.__pyx_n = 1;
             __pyx_t_14.m = __pyx_t_9;
-            ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;addElement(__pyx_v_self, ((PyObject*)__pyx_v_e), 0, &amp;__pyx_t_14); 
+            ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;addElement(__pyx_v_self, ((PyObject*)__pyx_v_e), 0, &amp;__pyx_t_14);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 120, __pyx_L3_error)</span>
 </pre><pre class="cython line score-0">&#xA0;<span class="">121</span>:                     <span class="k">else</span><span class="p">:</span></pre>
 <pre class="cython line score-27" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">122</span>:                         <span class="bp">self</span><span class="o">.</span><span class="n">addElement</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">num</span><span class="p">))</span></pre>
 <pre class='cython code score-27 '>          /*else*/ {
@@ -1268,7 +1268,7 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula___init__(struct __pyx_obj
             __pyx_t_14.__pyx_n = 2;
             __pyx_t_14.m = __pyx_t_9;
             __pyx_t_14.num = __pyx_t_15;
-            ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;addElement(__pyx_v_self, ((PyObject*)__pyx_v_e), 0, &amp;__pyx_t_14); 
+            ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;addElement(__pyx_v_self, ((PyObject*)__pyx_v_e), 0, &amp;__pyx_t_14);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 122, __pyx_L3_error)</span>
           }
           __pyx_L15:;
 </pre><pre class="cython line score-0">&#xA0;<span class="">123</span>:             <span class="k">else</span><span class="p">:</span></pre>
@@ -1463,7 +1463,7 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula___init__(struct __pyx_obj
             __pyx_t_14.__pyx_n = 2;
             __pyx_t_14.m = __pyx_t_9;
             __pyx_t_14.num = __pyx_t_17;
-            ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;addElement(__pyx_v_self, ((PyObject*)__pyx_v_e), 0, &amp;__pyx_t_14); 
+            ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;addElement(__pyx_v_self, ((PyObject*)__pyx_v_e), 0, &amp;__pyx_t_14);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 137, __pyx_L3_error)</span>
 </pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">138</span>:                     <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s">&#39;charge&#39;</span><span class="p">:</span></pre>
 <pre class='cython code score-2 '>          __pyx_t_4 = (<span class='pyx_c_api'>__Pyx_PyUnicode_Equals</span>(__pyx_v_k, __pyx_n_u_charge, Py_EQ)); if (unlikely(__pyx_t_4 &lt; 0)) <span class='error_goto'>__PYX_ERR(0, 138, __pyx_L3_error)</span>
           if (likely(__pyx_t_4)) {
@@ -1475,7 +1475,7 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula___init__(struct __pyx_obj
             <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
             __pyx_t_17 = <span class='pyx_c_api'>__Pyx_PyInt_As_int</span>(__pyx_t_6); if (unlikely((__pyx_t_17 == (int)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 139, __pyx_L3_error)</span>
             <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_6); __pyx_t_6 = 0;
-            ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, 0, __pyx_t_17);
+            ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, 0, __pyx_t_17);
 </pre><pre class="cython line score-0">&#xA0;<span class="">140</span>:                     <span class="k">else</span><span class="p">:</span></pre>
 <pre class="cython line score-12" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">141</span>:                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;wrong kwargs&#39;</span><span class="o">+</span><span class="n">k</span><span class="p">)</span></pre>
 <pre class='cython code score-12 '>          /*else*/ {
@@ -1496,7 +1496,7 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula___init__(struct __pyx_obj
 </pre><pre class="cython line score-21" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">142</span>:         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span></pre>
 <pre class='cython code score-21 '>    __pyx_t_15 = <span class='pyx_c_api'>__Pyx_PyErr_ExceptionMatches</span>(__pyx_builtin_ValueError);
     if (__pyx_t_15) {
-      <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
       if (<span class='pyx_c_api'>__Pyx_GetException</span>(&amp;__pyx_t_10, &amp;__pyx_t_7, &amp;__pyx_t_6) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 142, __pyx_L5_except_error)</span>
       <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_10);
       <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_7);
@@ -1561,19 +1561,19 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula___init__(struct __pyx_obj
 <pre class="cython line score-0">&#xA0;<span class="">145</span>:     <span class="k">property</span> <span class="nf">charge</span><span class="p">:</span></pre>
 <pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">146</span>:         <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
 <pre class='cython code score-3 '>/* Python wrapper */
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_6charge_1__get__(PyObject *__pyx_v_self); /*proto*/
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_6charge_1__get__(PyObject *__pyx_v_self) {
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_6charge_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_6charge_1__get__(PyObject *__pyx_v_self) {
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__get__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_6charge___get__(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_6charge___get__(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self));
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_6charge___get__(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_6charge___get__(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__get__", 0);
@@ -1581,7 +1581,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_6charge___get__(str
   /* function exit code */
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_1);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.charge.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.charge.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
@@ -1590,7 +1590,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_6charge___get__(str
 }
 </pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">147</span>:             <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">getE</span><span class="p">(</span><span class="mf">0</span><span class="p">)</span></pre>
 <pre class='cython code score-3 '>  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
-  __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>((-((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getE(__pyx_v_self, 0)));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 147, __pyx_L1_error)</span>
+  __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>((-((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getE(__pyx_v_self, 0)));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 147, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1598,8 +1598,8 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_6charge___get__(str
 </pre><pre class="cython line score-0">&#xA0;<span class="">148</span>: </pre>
 <pre class="cython line score-9" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">149</span>:         <span class="k">def</span> <span class="nf">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">int</span> <span class="n">value</span><span class="p">):</span></pre>
 <pre class='cython code score-9 '>/* Python wrapper */
-static int __pyx_pw_4code_17_OribitoolFormula_7Formula_6charge_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_arg_value); /*proto*/
-static int __pyx_pw_4code_17_OribitoolFormula_7Formula_6charge_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_arg_value) {
+static int __pyx_pw_4code_16_OrbitoolFormula_7Formula_6charge_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_arg_value); /*proto*/
+static int __pyx_pw_4code_16_OrbitoolFormula_7Formula_6charge_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_arg_value) {
   int __pyx_v_value;
   int __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
@@ -1609,18 +1609,18 @@ static int __pyx_pw_4code_17_OribitoolFormula_7Formula_6charge_3__set__(PyObject
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.charge.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.charge.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_6charge_2__set__(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self), ((int)__pyx_v_value));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_6charge_2__set__(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self), ((int)__pyx_v_value));
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static int __pyx_pf_4code_17_OribitoolFormula_7Formula_6charge_2__set__(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, int __pyx_v_value) {
+static int __pyx_pf_4code_16_OrbitoolFormula_7Formula_6charge_2__set__(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, int __pyx_v_value) {
   int __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__set__", 0);
@@ -1631,24 +1631,24 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula_6charge_2__set__(struct _
   return __pyx_r;
 }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">150</span>:             <span class="bp">self</span><span class="o">.</span><span class="n">setE</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span> <span class="o">-</span><span class="n">value</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>  ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, 0, (-__pyx_v_value));
+<pre class='cython code score-0 '>  ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, 0, (-__pyx_v_value));
 </pre><pre class="cython line score-0">&#xA0;<span class="">151</span>: </pre>
 <pre class="cython line score-0">&#xA0;<span class="">152</span>:     <span class="nd">@property</span></pre>
 <pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">153</span>:     <span class="k">def</span> <span class="nf">isIsotope</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
 <pre class='cython code score-3 '>/* Python wrapper */
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_9isIsotope_1__get__(PyObject *__pyx_v_self); /*proto*/
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_9isIsotope_1__get__(PyObject *__pyx_v_self) {
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_9isIsotope_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_9isIsotope_1__get__(PyObject *__pyx_v_self) {
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__get__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_9isIsotope___get__(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_9isIsotope___get__(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self));
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_9isIsotope___get__(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_9isIsotope___get__(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__get__", 0);
@@ -1656,7 +1656,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_9isIsotope___get__(
   /* function exit code */
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_1);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.isIsotope.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.isIsotope.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
@@ -1672,8 +1672,8 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_9isIsotope___get__(
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">155</span>: </pre>
 <pre class="cython line score-47" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">156</span>:     <span class="k">cpdef</span> <span class="kt">double</span> <span class="nf">mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
-<pre class='cython code score-47 '>static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_3mass(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static double __pyx_f_4code_17_OribitoolFormula_7Formula_mass(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, int __pyx_skip_dispatch) {
+<pre class='cython code score-47 '>static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_3mass(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static double __pyx_f_4code_16_OrbitoolFormula_7Formula_mass(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, int __pyx_skip_dispatch) {
   double __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("mass", 0);
@@ -1688,7 +1688,7 @@ static double __pyx_f_4code_17_OribitoolFormula_7Formula_mass(struct __pyx_obj_4
       #endif
       __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(((PyObject *)__pyx_v_self), __pyx_n_s_mass);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)</span>
       <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_4code_17_OribitoolFormula_7Formula_3mass)) {
+      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_4code_16_OrbitoolFormula_7Formula_3mass)) {
         <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_t_1);
         __pyx_t_3 = __pyx_t_1; __pyx_t_4 = NULL;
         if (CYTHON_UNPACK_METHODS &amp;&amp; unlikely(<span class='py_c_api'>PyMethod_Check</span>(__pyx_t_3))) {
@@ -1730,7 +1730,7 @@ static double __pyx_f_4code_17_OribitoolFormula_7Formula_mass(struct __pyx_obj_4
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_2);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_3);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_4);
-  <span class='pyx_c_api'>__Pyx_WriteUnraisable</span>("code._OribitoolFormula.Formula.mass", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  <span class='pyx_c_api'>__Pyx_WriteUnraisable</span>("code._OrbitoolFormula.Formula.mass", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_r = 0;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
@@ -1738,24 +1738,24 @@ static double __pyx_f_4code_17_OribitoolFormula_7Formula_mass(struct __pyx_obj_4
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_3mass(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_3mass(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_3mass(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_3mass(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("mass (wrapper)", 0);
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_2mass(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_2mass(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self));
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_2mass(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_2mass(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("mass", 0);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
-  __pyx_t_1 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_f_4code_17_OribitoolFormula_7Formula_mass(__pyx_v_self, 1));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)</span>
+  __pyx_t_1 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_f_4code_16_OrbitoolFormula_7Formula_mass(__pyx_v_self, 1));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1764,7 +1764,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_2mass(struct __pyx_
   /* function exit code */
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_1);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.mass", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.mass", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
@@ -1772,14 +1772,14 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_2mass(struct __pyx_
   return __pyx_r;
 }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">157</span>:         <span class="k">return</span> <span class="n">_elements_isotopes_mass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_17_OribitoolFormula__elements_isotopes_mass(__pyx_v_self-&gt;elements, __pyx_v_self-&gt;isotopes);
+<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_16_OrbitoolFormula__elements_isotopes_mass(__pyx_v_self-&gt;elements, __pyx_v_self-&gt;isotopes);
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">158</span>: </pre>
 <pre class="cython line score-35" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">159</span>:     <span class="k">cpdef</span> <span class="kt">Formula</span> <span class="nf">findOrigin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
-<pre class='cython code score-35 '>static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_5findOrigin(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_f_4code_17_OribitoolFormula_7Formula_findOrigin(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, int __pyx_skip_dispatch) {
-  struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_formula = 0;
-  struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_r = NULL;
+<pre class='cython code score-35 '>static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_5findOrigin(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_f_4code_16_OrbitoolFormula_7Formula_findOrigin(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, int __pyx_skip_dispatch) {
+  struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_formula = 0;
+  struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("findOrigin", 0);
   /* Check if called by wrapper */
@@ -1793,7 +1793,7 @@ static struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_f_4code_17_Orib
       #endif
       __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(((PyObject *)__pyx_v_self), __pyx_n_s_findOrigin);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 159, __pyx_L1_error)</span>
       <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_4code_17_OribitoolFormula_7Formula_5findOrigin)) {
+      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_4code_16_OrbitoolFormula_7Formula_5findOrigin)) {
         <span class='pyx_macro_api'>__Pyx_XDECREF</span>(((PyObject *)__pyx_r));
         <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_t_1);
         __pyx_t_3 = __pyx_t_1; __pyx_t_4 = NULL;
@@ -1811,8 +1811,8 @@ static struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_f_4code_17_Orib
         if (unlikely(!__pyx_t_2)) <span class='error_goto'>__PYX_ERR(0, 159, __pyx_L1_error)</span>
         <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
         <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_3); __pyx_t_3 = 0;
-        if (!(likely(((__pyx_t_2) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_t_2, __pyx_ptype_4code_17_OribitoolFormula_Formula))))) <span class='error_goto'>__PYX_ERR(0, 159, __pyx_L1_error)</span>
-        __pyx_r = ((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_t_2);
+        if (!(likely(((__pyx_t_2) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_t_2, __pyx_ptype_4code_16_OrbitoolFormula_Formula))))) <span class='error_goto'>__PYX_ERR(0, 159, __pyx_L1_error)</span>
+        __pyx_r = ((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_t_2);
         __pyx_t_2 = 0;
         <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
         goto __pyx_L0;
@@ -1836,7 +1836,7 @@ static struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_f_4code_17_Orib
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_2);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_3);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_4);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.findOrigin", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.findOrigin", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>((PyObject *)__pyx_v_formula);
@@ -1846,24 +1846,24 @@ static struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_f_4code_17_Orib
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_5findOrigin(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_5findOrigin(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_5findOrigin(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_5findOrigin(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("findOrigin (wrapper)", 0);
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_4findOrigin(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_4findOrigin(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self));
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_4findOrigin(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_4findOrigin(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("findOrigin", 0);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
-  __pyx_t_1 = ((PyObject *)__pyx_f_4code_17_OribitoolFormula_7Formula_findOrigin(__pyx_v_self, 1));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 159, __pyx_L1_error)</span>
+  __pyx_t_1 = ((PyObject *)__pyx_f_4code_16_OrbitoolFormula_7Formula_findOrigin(__pyx_v_self, 1));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 159, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1872,7 +1872,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_4findOrigin(struct 
   /* function exit code */
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_1);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.findOrigin", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.findOrigin", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
@@ -1880,9 +1880,9 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_4findOrigin(struct 
   return __pyx_r;
 }
 </pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">160</span>:         <span class="k">cdef</span> <span class="kt">Formula</span> <span class="nf">formula</span> <span class="o">=</span> <span class="n">Formula</span><span class="p">()</span></pre>
-<pre class='cython code score-2 '>  __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_CallNoArg</span>(((PyObject *)__pyx_ptype_4code_17_OribitoolFormula_Formula));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 160, __pyx_L1_error)</span>
+<pre class='cython code score-2 '>  __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_CallNoArg</span>(((PyObject *)__pyx_ptype_4code_16_OrbitoolFormula_Formula));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 160, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-  __pyx_v_formula = ((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_t_1);
+  __pyx_v_formula = ((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_t_1);
   __pyx_t_1 = 0;
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">161</span>:         <span class="n">formula</span><span class="o">.</span><span class="n">elements</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span></pre>
 <pre class='cython code score-0 '>  __pyx_t_5 = __pyx_v_self-&gt;elements;
@@ -1894,8 +1894,8 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_4findOrigin(struct 
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">163</span>: </pre>
 <pre class="cython line score-47" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">164</span>:     <span class="k">cpdef</span> <span class="kt">double</span> <span class="nf">DBE</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
-<pre class='cython code score-47 '>static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_7DBE(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static double __pyx_f_4code_17_OribitoolFormula_7Formula_DBE(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, int __pyx_skip_dispatch) {
+<pre class='cython code score-47 '>static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_7DBE(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static double __pyx_f_4code_16_OrbitoolFormula_7Formula_DBE(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, int __pyx_skip_dispatch) {
   double __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("DBE", 0);
@@ -1910,7 +1910,7 @@ static double __pyx_f_4code_17_OribitoolFormula_7Formula_DBE(struct __pyx_obj_4c
       #endif
       __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(((PyObject *)__pyx_v_self), __pyx_n_s_DBE);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 164, __pyx_L1_error)</span>
       <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_4code_17_OribitoolFormula_7Formula_7DBE)) {
+      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_4code_16_OrbitoolFormula_7Formula_7DBE)) {
         <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_t_1);
         __pyx_t_3 = __pyx_t_1; __pyx_t_4 = NULL;
         if (CYTHON_UNPACK_METHODS &amp;&amp; unlikely(<span class='py_c_api'>PyMethod_Check</span>(__pyx_t_3))) {
@@ -1952,7 +1952,7 @@ static double __pyx_f_4code_17_OribitoolFormula_7Formula_DBE(struct __pyx_obj_4c
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_2);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_3);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_4);
-  <span class='pyx_c_api'>__Pyx_WriteUnraisable</span>("code._OribitoolFormula.Formula.DBE", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  <span class='pyx_c_api'>__Pyx_WriteUnraisable</span>("code._OrbitoolFormula.Formula.DBE", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_r = 0;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
@@ -1960,24 +1960,24 @@ static double __pyx_f_4code_17_OribitoolFormula_7Formula_DBE(struct __pyx_obj_4c
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_7DBE(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_7DBE(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_7DBE(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_7DBE(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("DBE (wrapper)", 0);
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_6DBE(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_6DBE(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self));
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_6DBE(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_6DBE(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("DBE", 0);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
-  __pyx_t_1 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_f_4code_17_OribitoolFormula_7Formula_DBE(__pyx_v_self, 1));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 164, __pyx_L1_error)</span>
+  __pyx_t_1 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_f_4code_16_OrbitoolFormula_7Formula_DBE(__pyx_v_self, 1));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 164, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1986,7 +1986,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_6DBE(struct __pyx_o
   /* function exit code */
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_1);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.DBE", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.DBE", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
@@ -1994,11 +1994,11 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_6DBE(struct __pyx_o
   return __pyx_r;
 }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">165</span>:         <span class="k">return</span> <span class="n">_elements_DBE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_17_OribitoolFormula__elements_DBE(__pyx_v_self-&gt;elements);
+<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_16_OrbitoolFormula__elements_DBE(__pyx_v_self-&gt;elements);
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">166</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">167</span>:     <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">Omin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static double __pyx_f_4code_17_OribitoolFormula_7Formula_Omin(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+<pre class='cython code score-0 '>static double __pyx_f_4code_16_OrbitoolFormula_7Formula_Omin(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   double __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("Omin", 0);
@@ -2009,11 +2009,11 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_6DBE(struct __pyx_o
   return __pyx_r;
 }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">168</span>:         <span class="k">return</span> <span class="n">_elements_Omin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_17_OribitoolFormula__elements_Omin(__pyx_v_self-&gt;elements);
+<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_16_OrbitoolFormula__elements_Omin(__pyx_v_self-&gt;elements);
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">169</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">170</span>:     <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">Omax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static double __pyx_f_4code_17_OribitoolFormula_7Formula_Omax(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+<pre class='cython code score-0 '>static double __pyx_f_4code_16_OrbitoolFormula_7Formula_Omax(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   double __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("Omax", 0);
@@ -2024,11 +2024,11 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_6DBE(struct __pyx_o
   return __pyx_r;
 }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">171</span>:         <span class="k">return</span> <span class="n">_elements_Omax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_17_OribitoolFormula__elements_Omax(__pyx_v_self-&gt;elements);
+<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_16_OrbitoolFormula__elements_Omax(__pyx_v_self-&gt;elements);
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">172</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">173</span>:     <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">Hmin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static double __pyx_f_4code_17_OribitoolFormula_7Formula_Hmin(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+<pre class='cython code score-0 '>static double __pyx_f_4code_16_OrbitoolFormula_7Formula_Hmin(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   double __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("Hmin", 0);
@@ -2039,11 +2039,11 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_6DBE(struct __pyx_o
   return __pyx_r;
 }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">174</span>:         <span class="k">return</span> <span class="n">_elements_Hmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_17_OribitoolFormula__elements_Hmin(__pyx_v_self-&gt;elements);
+<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_16_OrbitoolFormula__elements_Hmin(__pyx_v_self-&gt;elements);
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">175</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">176</span>:     <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">Hmax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static double __pyx_f_4code_17_OribitoolFormula_7Formula_Hmax(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+<pre class='cython code score-0 '>static double __pyx_f_4code_16_OrbitoolFormula_7Formula_Hmax(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   double __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("Hmax", 0);
@@ -2054,12 +2054,12 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_6DBE(struct __pyx_o
   return __pyx_r;
 }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">177</span>:         <span class="k">return</span> <span class="n">_elements_Hmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_17_OribitoolFormula__elements_Hmax(__pyx_v_self-&gt;elements);
+<pre class='cython code score-0 '>  __pyx_r = __pyx_f_4code_16_OrbitoolFormula__elements_Hmax(__pyx_v_self-&gt;elements);
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">178</span>: </pre>
-<pre class="cython line score-106" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">179</span>:     <span class="k">cpdef</span> <span class="kt">void</span> <span class="nf">addElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span> <span class="n">element</span><span class="p">,</span> <span class="nb">int</span> <span class="n">m</span> <span class="o">=</span> <span class="mf">0</span><span class="p">,</span> <span class="nb">int</span> <span class="n">num</span><span class="o">=</span><span class="mf">1</span><span class="p">):</span></pre>
-<pre class='cython code score-106 '>static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_9addElement(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static void __pyx_f_4code_17_OribitoolFormula_7Formula_addElement(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, PyObject *__pyx_v_element, int __pyx_skip_dispatch, struct __pyx_opt_args_4code_17_OribitoolFormula_7Formula_addElement *__pyx_optional_args) {
+<pre class="cython line score-106" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">179</span>:     <span class="k">cpdef</span> <span class="kt">void</span> <span class="nf">addElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span> <span class="n">element</span><span class="p">,</span> <span class="nb">int</span> <span class="n">m</span> <span class="o">=</span> <span class="mf">0</span><span class="p">,</span> <span class="nb">int</span> <span class="n">num</span><span class="o">=</span><span class="mf">1</span><span class="p">)</span> <span class="k">except</span> <span class="o">*</span><span class="p">:</span></pre>
+<pre class='cython code score-106 '>static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_9addElement(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static void __pyx_f_4code_16_OrbitoolFormula_7Formula_addElement(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, PyObject *__pyx_v_element, int __pyx_skip_dispatch, struct __pyx_opt_args_4code_16_OrbitoolFormula_7Formula_addElement *__pyx_optional_args) {
   int __pyx_v_m = ((int)0);
   int __pyx_v_num = ((int)1);
   int __pyx_v_index;
@@ -2084,7 +2084,7 @@ static void __pyx_f_4code_17_OribitoolFormula_7Formula_addElement(struct __pyx_o
       #endif
       __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(((PyObject *)__pyx_v_self), __pyx_n_s_addElement);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 179, __pyx_L1_error)</span>
       <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_4code_17_OribitoolFormula_7Formula_9addElement)) {
+      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_4code_16_OrbitoolFormula_7Formula_9addElement)) {
         __pyx_t_3 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(__pyx_v_m);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 179, __pyx_L1_error)</span>
         <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
         __pyx_t_4 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(__pyx_v_num);<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 179, __pyx_L1_error)</span>
@@ -2169,14 +2169,14 @@ static void __pyx_f_4code_17_OribitoolFormula_7Formula_addElement(struct __pyx_o
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_5);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_6);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_8);
-  <span class='pyx_c_api'>__Pyx_WriteUnraisable</span>("code._OribitoolFormula.Formula.addElement", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.addElement", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_L0:;
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_9addElement(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_9addElement(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_9addElement(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_9addElement(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_element = 0;
   int __pyx_v_m;
   int __pyx_v_num;
@@ -2247,12 +2247,12 @@ static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_9addElement(PyObjec
   __pyx_L5_argtuple_error:;
   <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("addElement", 0, 1, 3, <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)); <span class='error_goto'>__PYX_ERR(0, 179, __pyx_L3_error)</span>
   __pyx_L3_error:;
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.addElement", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.addElement", __pyx_clineno, __pyx_lineno, __pyx_filename);
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_element), (&amp;PyUnicode_Type), 1, "element", 1))) <span class='error_goto'>__PYX_ERR(0, 179, __pyx_L1_error)</span>
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self), __pyx_v_element, __pyx_v_m, __pyx_v_num);
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_8addElement(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self), __pyx_v_element, __pyx_v_m, __pyx_v_num);
 
   /* function exit code */
   goto __pyx_L0;
@@ -2263,7 +2263,7 @@ static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_9addElement(PyObjec
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, PyObject *__pyx_v_element, int __pyx_v_m, int __pyx_v_num) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_8addElement(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, PyObject *__pyx_v_element, int __pyx_v_m, int __pyx_v_num) {
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("addElement", 0);
@@ -2271,7 +2271,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
   __pyx_t_1.__pyx_n = 2;
   __pyx_t_1.m = __pyx_v_m;
   __pyx_t_1.num = __pyx_v_num;
-  __pyx_vtabptr_4code_17_OribitoolFormula_Formula-&gt;addElement(__pyx_v_self, __pyx_v_element, 1, &amp;__pyx_t_1); 
+  __pyx_vtabptr_4code_16_OrbitoolFormula_Formula-&gt;addElement(__pyx_v_self, __pyx_v_element, 1, &amp;__pyx_t_1);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 179, __pyx_L1_error)</span>
   __pyx_t_2 = __Pyx_void_to_None(NULL);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
   __pyx_r = __pyx_t_2;
@@ -2281,7 +2281,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
   /* function exit code */
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_2);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.addElement", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.addElement", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
@@ -2289,11 +2289,11 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
   return __pyx_r;
 }
 </pre><pre class="cython line score-15" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">180</span>:         <span class="k">cdef</span> <span class="kt">int</span> <span class="nf">index</span> <span class="o">=</span> <span class="n">elementsMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="o">-</span><span class="mf">1</span><span class="p">)</span></pre>
-<pre class='cython code score-15 '>  if (unlikely(__pyx_v_17_OribitoolElement_elementsMap == Py_None)) {
+<pre class='cython code score-15 '>  if (unlikely(__pyx_v_16_OrbitoolElement_elementsMap == Py_None)) {
     <span class='py_c_api'>PyErr_Format</span>(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "get");
     <span class='error_goto'>__PYX_ERR(0, 180, __pyx_L1_error)</span>
   }
-  __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyDict_GetItemDefault</span>(__pyx_v_17_OribitoolElement_elementsMap, __pyx_v_element, __pyx_int_neg_1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 180, __pyx_L1_error)</span>
+  __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyDict_GetItemDefault</span>(__pyx_v_16_OrbitoolElement_elementsMap, __pyx_v_element, __pyx_int_neg_1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 180, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   __pyx_t_7 = <span class='pyx_c_api'>__Pyx_PyInt_As_int</span>(__pyx_t_1); if (unlikely((__pyx_t_7 == (int)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 180, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
@@ -2322,7 +2322,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
 /* … */
   }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">185</span>:             <span class="k">if</span> <span class="n">elementMassDist</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="n">elementMassDist</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">end</span><span class="p">():</span></pre>
-<pre class='cython code score-0 '>    __pyx_t_9 = (((__pyx_v_17_OribitoolElement_elementMassDist[__pyx_v_index]).find(__pyx_v_m) == (__pyx_v_17_OribitoolElement_elementMassDist[__pyx_v_index]).end()) != 0);
+<pre class='cython code score-0 '>    __pyx_t_9 = (((__pyx_v_16_OrbitoolElement_elementMassDist[__pyx_v_index]).find(__pyx_v_m) == (__pyx_v_16_OrbitoolElement_elementMassDist[__pyx_v_index]).end()) != 0);
     if (unlikely(__pyx_t_9)) {
 /* … */
     }
@@ -2366,18 +2366,18 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
       <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
       <span class='error_goto'>__PYX_ERR(0, 186, __pyx_L1_error)</span>
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">187</span>:             <span class="k">if</span> <span class="n">elementMassNum</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">!=</span> <span class="n">m</span><span class="p">:</span>  <span class="c"># isotope</span></pre>
-<pre class='cython code score-0 '>    __pyx_t_9 = (((__pyx_v_17_OribitoolElement_elementMassNum[__pyx_v_index]) != __pyx_v_m) != 0);
+<pre class='cython code score-0 '>    __pyx_t_9 = (((__pyx_v_16_OrbitoolElement_elementMassNum[__pyx_v_index]) != __pyx_v_m) != 0);
     if (__pyx_t_9) {
 /* … */
     }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">188</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">setI</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getI</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="o">+</span> <span class="n">num</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>      ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setI(__pyx_v_self, __pyx_v_index, __pyx_v_m, (((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, __pyx_v_m) + __pyx_v_num));
+<pre class='cython code score-0 '>      ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setI(__pyx_v_self, __pyx_v_index, __pyx_v_m, (((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, __pyx_v_m) + __pyx_v_num));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">189</span>:         <span class="bp">self</span><span class="o">.</span><span class="n">setE</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getE</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">+</span> <span class="n">num</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>  ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, __pyx_v_index, (((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getE(__pyx_v_self, __pyx_v_index) + __pyx_v_num));
+<pre class='cython code score-0 '>  ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, __pyx_v_index, (((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getE(__pyx_v_self, __pyx_v_index) + __pyx_v_num));
 </pre><pre class="cython line score-0">&#xA0;<span class="">190</span>: </pre>
 <pre class="cython line score-0">&#xA0;<span class="">191</span>:     <span class="nd">@staticmethod</span></pre>
 <pre class="cython line score-7" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">192</span>:     <span class="k">cdef</span> <span class="kt">str</span> <span class="nf">eToStr</span><span class="p">(</span><span class="nb">int</span> <span class="n">index</span><span class="p">,</span> <span class="nb">int</span> <span class="n">num</span><span class="p">,</span> <span class="nb">bool</span> <span class="n">showProton</span><span class="p">):</span></pre>
-<pre class='cython code score-7 '>static PyObject *__pyx_f_4code_17_OribitoolFormula_7Formula_eToStr(int __pyx_v_index, int __pyx_v_num, bool __pyx_v_showProton) {
+<pre class='cython code score-7 '>static PyObject *__pyx_f_4code_16_OrbitoolFormula_7Formula_eToStr(int __pyx_v_index, int __pyx_v_num, bool __pyx_v_showProton) {
   PyObject *__pyx_v_e = 0;
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
@@ -2389,7 +2389,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_2);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_5);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_6);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.eToStr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.eToStr", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_v_e);
@@ -2403,11 +2403,11 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     __pyx_t_3 = 0;
     __pyx_t_4 = 127;
-    if (unlikely(__pyx_v_17_OribitoolElement_elements == Py_None)) {
+    if (unlikely(__pyx_v_16_OrbitoolElement_elements == Py_None)) {
       <span class='py_c_api'>PyErr_SetString</span>(PyExc_TypeError, "'NoneType' object is not subscriptable");
       <span class='error_goto'>__PYX_ERR(0, 193, __pyx_L1_error)</span>
     }
-    __pyx_t_5 = <span class='pyx_c_api'>__Pyx_GetItemInt_List</span>(__pyx_v_17_OribitoolElement_elements, __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 1, 1, 1);<span class='error_goto'> if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 193, __pyx_L1_error)</span>
+    __pyx_t_5 = <span class='pyx_c_api'>__Pyx_GetItemInt_List</span>(__pyx_v_16_OrbitoolElement_elements, __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 1, 1, 1);<span class='error_goto'> if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 193, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_5);
     __pyx_t_6 = <span class='pyx_c_api'>__Pyx_PyObject_FormatSimple</span>(__pyx_t_5, __pyx_empty_unicode);<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 193, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
@@ -2421,7 +2421,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
     __pyx_t_3 += 1;
     <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_kp_u__4);
     <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_2, 1, __pyx_kp_u__4);
-    __pyx_t_6 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>((__pyx_v_17_OribitoolElement_elementMassNum[__pyx_v_index]));<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 193, __pyx_L1_error)</span>
+    __pyx_t_6 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>((__pyx_v_16_OrbitoolElement_elementMassNum[__pyx_v_index]));<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 193, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
     __pyx_t_5 = <span class='pyx_c_api'>__Pyx_PyObject_FormatSimple</span>(__pyx_t_6, __pyx_empty_unicode);<span class='error_goto'> if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 193, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_5);
@@ -2441,11 +2441,11 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
     __pyx_t_1 = __pyx_t_5;
     __pyx_t_5 = 0;
   } else {
-    if (unlikely(__pyx_v_17_OribitoolElement_elements == Py_None)) {
+    if (unlikely(__pyx_v_16_OrbitoolElement_elements == Py_None)) {
       <span class='py_c_api'>PyErr_SetString</span>(PyExc_TypeError, "'NoneType' object is not subscriptable");
       <span class='error_goto'>__PYX_ERR(0, 193, __pyx_L1_error)</span>
     }
-    __pyx_t_5 = <span class='pyx_c_api'>__Pyx_GetItemInt_List</span>(__pyx_v_17_OribitoolElement_elements, __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 1, 1, 1);<span class='error_goto'> if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 193, __pyx_L1_error)</span>
+    __pyx_t_5 = <span class='pyx_c_api'>__Pyx_GetItemInt_List</span>(__pyx_v_16_OrbitoolElement_elements, __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 1, 1, 1);<span class='error_goto'> if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 193, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_5);
     if (!(likely(<span class='py_c_api'>PyUnicode_CheckExact</span>(__pyx_t_5))||((__pyx_t_5) == Py_None)||(<span class='py_c_api'>PyErr_Format</span>(PyExc_TypeError, "Expected %.16s, got %.200s", "unicode", Py_TYPE(__pyx_t_5)-&gt;tp_name), 0))) <span class='error_goto'>__PYX_ERR(0, 193, __pyx_L1_error)</span>
     __pyx_t_1 = __pyx_t_5;
@@ -2491,7 +2491,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
   }
 </pre><pre class="cython line score-0">&#xA0;<span class="">200</span>:     <span class="nd">@staticmethod</span></pre>
 <pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">201</span>:     <span class="k">cdef</span> <span class="kt">str</span> <span class="nf">iToStr</span><span class="p">(</span><span class="nb">int</span> <span class="n">index</span><span class="p">,</span> <span class="nb">int</span> <span class="n">m</span><span class="p">,</span> <span class="nb">int</span> <span class="n">num</span><span class="p">):</span></pre>
-<pre class='cython code score-5 '>static PyObject *__pyx_f_4code_17_OribitoolFormula_7Formula_iToStr(int __pyx_v_index, int __pyx_v_m, int __pyx_v_num) {
+<pre class='cython code score-5 '>static PyObject *__pyx_f_4code_16_OrbitoolFormula_7Formula_iToStr(int __pyx_v_index, int __pyx_v_m, int __pyx_v_num) {
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("iToStr", 0);
@@ -2501,7 +2501,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_2);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_5);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_6);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.iToStr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.iToStr", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
@@ -2519,11 +2519,11 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     __pyx_t_3 = 0;
     __pyx_t_4 = 127;
-    if (unlikely(__pyx_v_17_OribitoolElement_elements == Py_None)) {
+    if (unlikely(__pyx_v_16_OrbitoolElement_elements == Py_None)) {
       <span class='py_c_api'>PyErr_SetString</span>(PyExc_TypeError, "'NoneType' object is not subscriptable");
       <span class='error_goto'>__PYX_ERR(0, 203, __pyx_L1_error)</span>
     }
-    __pyx_t_5 = <span class='pyx_c_api'>__Pyx_GetItemInt_List</span>(__pyx_v_17_OribitoolElement_elements, __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 1, 1, 1);<span class='error_goto'> if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 203, __pyx_L1_error)</span>
+    __pyx_t_5 = <span class='pyx_c_api'>__Pyx_GetItemInt_List</span>(__pyx_v_16_OrbitoolElement_elements, __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 1, 1, 1);<span class='error_goto'> if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 203, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_5);
     __pyx_t_6 = <span class='pyx_c_api'>__Pyx_PyObject_FormatSimple</span>(__pyx_t_5, __pyx_empty_unicode);<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 203, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
@@ -2564,11 +2564,11 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
     __pyx_t_3 = 0;
     __pyx_t_4 = 127;
-    if (unlikely(__pyx_v_17_OribitoolElement_elements == Py_None)) {
+    if (unlikely(__pyx_v_16_OrbitoolElement_elements == Py_None)) {
       <span class='py_c_api'>PyErr_SetString</span>(PyExc_TypeError, "'NoneType' object is not subscriptable");
       <span class='error_goto'>__PYX_ERR(0, 205, __pyx_L1_error)</span>
     }
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_GetItemInt_List</span>(__pyx_v_17_OribitoolElement_elements, __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 1, 1, 1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 205, __pyx_L1_error)</span>
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_GetItemInt_List</span>(__pyx_v_16_OrbitoolElement_elements, __pyx_v_index, int, 1, __Pyx_PyInt_From_int, 1, 1, 1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 205, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     __pyx_t_5 = <span class='pyx_c_api'>__Pyx_PyObject_FormatSimple</span>(__pyx_t_2, __pyx_empty_unicode);<span class='error_goto'> if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 205, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_5);
@@ -2614,8 +2614,8 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_8addElement(struct 
   }
 </pre><pre class="cython line score-0">&#xA0;<span class="">208</span>: </pre>
 <pre class="cython line score-99" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">209</span>:     <span class="k">cpdef</span> <span class="nf">toStr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">bool</span> <span class="n">showProton</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="nb">bool</span> <span class="n">withCharge</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span></pre>
-<pre class='cython code score-99 '>static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_11toStr(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_f_4code_17_OribitoolFormula_7Formula_toStr(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, int __pyx_skip_dispatch, struct __pyx_opt_args_4code_17_OribitoolFormula_7Formula_toStr *__pyx_optional_args) {
+<pre class='cython code score-99 '>static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_11toStr(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_f_4code_16_OrbitoolFormula_7Formula_toStr(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, int __pyx_skip_dispatch, struct __pyx_opt_args_4code_16_OrbitoolFormula_7Formula_toStr *__pyx_optional_args) {
   bool __pyx_v_showProton = ((bool)0);
   bool __pyx_v_withCharge = ((bool)1);
   PyObject *__pyx_v_rets = 0;
@@ -2650,7 +2650,7 @@ static PyObject *__pyx_f_4code_17_OribitoolFormula_7Formula_toStr(struct __pyx_o
       #endif
       __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(((PyObject *)__pyx_v_self), __pyx_n_s_toStr);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)</span>
       <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_4code_17_OribitoolFormula_7Formula_11toStr)) {
+      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_4code_16_OrbitoolFormula_7Formula_11toStr)) {
         <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
         __pyx_t_3 = <span class='pyx_c_api'>__Pyx_PyBool_FromLong</span>(__pyx_v_showProton);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 209, __pyx_L1_error)</span>
         <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
@@ -2733,7 +2733,7 @@ static PyObject *__pyx_f_4code_17_OribitoolFormula_7Formula_toStr(struct __pyx_o
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_5);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_6);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_8);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.toStr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.toStr", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_v_rets);
@@ -2743,8 +2743,8 @@ static PyObject *__pyx_f_4code_17_OribitoolFormula_7Formula_toStr(struct __pyx_o
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_11toStr(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_11toStr(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_11toStr(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_11toStr(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   bool __pyx_v_showProton;
   bool __pyx_v_withCharge;
   PyObject *__pyx_r = 0;
@@ -2806,18 +2806,18 @@ static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_11toStr(PyObject *_
   __pyx_L5_argtuple_error:;
   <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("toStr", 0, 0, 2, <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)); <span class='error_goto'>__PYX_ERR(0, 209, __pyx_L3_error)</span>
   __pyx_L3_error:;
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.toStr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.toStr", __pyx_clineno, __pyx_lineno, __pyx_filename);
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_10toStr(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self), __pyx_v_showProton, __pyx_v_withCharge);
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_10toStr(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self), __pyx_v_showProton, __pyx_v_withCharge);
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_10toStr(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, bool __pyx_v_showProton, bool __pyx_v_withCharge) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_10toStr(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, bool __pyx_v_showProton, bool __pyx_v_withCharge) {
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("toStr", 0);
@@ -2825,7 +2825,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_10toStr(struct __py
   __pyx_t_2.__pyx_n = 2;
   __pyx_t_2.showProton = __pyx_v_showProton;
   __pyx_t_2.withCharge = __pyx_v_withCharge;
-  __pyx_t_1 = __pyx_vtabptr_4code_17_OribitoolFormula_Formula-&gt;toStr(__pyx_v_self, 1, &amp;__pyx_t_2);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)</span>
+  __pyx_t_1 = __pyx_vtabptr_4code_16_OrbitoolFormula_Formula-&gt;toStr(__pyx_v_self, 1, &amp;__pyx_t_2);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -2834,7 +2834,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_10toStr(struct __py
   /* function exit code */
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_1);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.toStr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.toStr", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
@@ -2865,9 +2865,9 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_10toStr(struct __py
 <pre class="cython line score-0">&#xA0;<span class="">216</span>:         <span class="k">cdef</span> <span class="kt">unordered_map</span>[<span class="nf">int</span><span class="p">,</span> <span class="kt">int</span>].<span class="kt">iterator</span> <span class="nf">it</span><span class="p">,</span> <span class="nf">isoit</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">217</span>:         <span class="k">cdef</span> <span class="kt">int</span> <span class="nf">i</span><span class="p">,</span> <span class="nf">index</span><span class="p">,</span> <span class="nf">num</span></pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">218</span>:         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">elementsOrder</span><span class="p">:</span></pre>
-<pre class='cython code score-0 '>  __pyx_t_12 = __pyx_v_4code_17_OribitoolFormula_elementsOrder.begin();
+<pre class='cython code score-0 '>  __pyx_t_12 = __pyx_v_4code_16_OrbitoolFormula_elementsOrder.begin();
   for (;;) {
-    if (!(__pyx_t_12 != __pyx_v_4code_17_OribitoolFormula_elementsOrder.end())) break;
+    if (!(__pyx_t_12 != __pyx_v_4code_16_OrbitoolFormula_elementsOrder.end())) break;
     __pyx_t_7 = *__pyx_t_12;
     ++__pyx_t_12;
     __pyx_v_i = __pyx_t_7;
@@ -2895,14 +2895,14 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_10toStr(struct __py
         goto __pyx_L8;
       }
 </pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">225</span>:                     <span class="n">rets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Formula</span><span class="o">.</span><span class="n">eToStr</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">showProton</span><span class="p">))</span></pre>
-<pre class='cython code score-3 '>        __pyx_t_1 = __pyx_f_4code_17_OribitoolFormula_7Formula_eToStr(__pyx_v_index, __pyx_v_num, __pyx_v_showProton);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 225, __pyx_L1_error)</span>
+<pre class='cython code score-3 '>        __pyx_t_1 = __pyx_f_4code_16_OrbitoolFormula_7Formula_eToStr(__pyx_v_index, __pyx_v_num, __pyx_v_showProton);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 225, __pyx_L1_error)</span>
         <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
         __pyx_t_14 = <span class='pyx_c_api'>__Pyx_PyList_Append</span>(__pyx_v_rets, __pyx_t_1);<span class='error_goto'> if (unlikely(__pyx_t_14 == ((int)-1))) __PYX_ERR(0, 225, __pyx_L1_error)</span>
         <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">226</span>:                 <span class="k">else</span><span class="p">:</span></pre>
 <pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">227</span>:                     <span class="n">rets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Formula</span><span class="o">.</span><span class="n">eToStr</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">num</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">getI</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="mf">0</span><span class="p">),</span> <span class="n">showProton</span><span class="p">))</span></pre>
 <pre class='cython code score-3 '>      /*else*/ {
-        __pyx_t_1 = __pyx_f_4code_17_OribitoolFormula_7Formula_eToStr(__pyx_v_index, (__pyx_v_num - ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, 0)), __pyx_v_showProton);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 227, __pyx_L1_error)</span>
+        __pyx_t_1 = __pyx_f_4code_16_OrbitoolFormula_7Formula_eToStr(__pyx_v_index, (__pyx_v_num - ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, 0)), __pyx_v_showProton);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 227, __pyx_L1_error)</span>
         <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
         __pyx_t_14 = <span class='pyx_c_api'>__Pyx_PyList_Append</span>(__pyx_v_rets, __pyx_t_1);<span class='error_goto'> if (unlikely(__pyx_t_14 == ((int)-1))) __PYX_ERR(0, 227, __pyx_L1_error)</span>
         <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
@@ -2926,7 +2926,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_10toStr(struct __py
 /* … */
           }
 </pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">231</span>:                             <span class="n">rets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Formula</span><span class="o">.</span><span class="n">iToStr</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">li</span><span class="o">.</span><span class="n">second</span><span class="o">&gt;&gt;</span><span class="n">_factor</span><span class="p">,</span><span class="n">li</span><span class="o">.</span><span class="n">second</span><span class="o">&amp;</span><span class="n">_andfactor</span><span class="p">))</span></pre>
-<pre class='cython code score-3 '>            __pyx_t_1 = __pyx_f_4code_17_OribitoolFormula_7Formula_iToStr(__pyx_v_index, (__pyx_v_li.second &gt;&gt; __pyx_v_17_OribitoolElement__factor), (__pyx_v_li.second &amp; __pyx_v_17_OribitoolElement__andfactor));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 231, __pyx_L1_error)</span>
+<pre class='cython code score-3 '>            __pyx_t_1 = __pyx_f_4code_16_OrbitoolFormula_7Formula_iToStr(__pyx_v_index, (__pyx_v_li.second &gt;&gt; __pyx_v_16_OrbitoolElement__factor), (__pyx_v_li.second &amp; __pyx_v_16_OrbitoolElement__andfactor));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 231, __pyx_L1_error)</span>
             <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
             __pyx_t_14 = <span class='pyx_c_api'>__Pyx_PyList_Append</span>(__pyx_v_rets, __pyx_t_1);<span class='error_goto'> if (unlikely(__pyx_t_14 == ((int)-1))) __PYX_ERR(0, 231, __pyx_L1_error)</span>
             <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
@@ -2955,9 +2955,9 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_10toStr(struct __py
 <pre class='cython code score-0 '>      __pyx_t_7 = __pyx_v_ei.second;
       __pyx_v_num = __pyx_t_7;
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">239</span>:                 <span class="n">sit</span> <span class="o">=</span> <span class="n">elementsOrderSet</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>      __pyx_v_sit = __pyx_v_4code_17_OribitoolFormula_elementsOrderSet.find(__pyx_v_index);
+<pre class='cython code score-0 '>      __pyx_v_sit = __pyx_v_4code_16_OrbitoolFormula_elementsOrderSet.find(__pyx_v_index);
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">240</span>:                 <span class="k">if</span> <span class="n">sit</span> <span class="o">==</span> <span class="n">elementsOrderSet</span><span class="o">.</span><span class="n">end</span><span class="p">():</span></pre>
-<pre class='cython code score-0 '>      __pyx_t_13 = ((__pyx_v_sit == __pyx_v_4code_17_OribitoolFormula_elementsOrderSet.end()) != 0);
+<pre class='cython code score-0 '>      __pyx_t_13 = ((__pyx_v_sit == __pyx_v_4code_16_OrbitoolFormula_elementsOrderSet.end()) != 0);
       if (__pyx_t_13) {
 /* … */
       }
@@ -2970,14 +2970,14 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_10toStr(struct __py
           goto __pyx_L16;
         }
 </pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">243</span>:                         <span class="n">rets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Formula</span><span class="o">.</span><span class="n">eToStr</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">showProton</span><span class="p">))</span></pre>
-<pre class='cython code score-3 '>          __pyx_t_1 = __pyx_f_4code_17_OribitoolFormula_7Formula_eToStr(__pyx_v_index, __pyx_v_num, __pyx_v_showProton);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 243, __pyx_L1_error)</span>
+<pre class='cython code score-3 '>          __pyx_t_1 = __pyx_f_4code_16_OrbitoolFormula_7Formula_eToStr(__pyx_v_index, __pyx_v_num, __pyx_v_showProton);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 243, __pyx_L1_error)</span>
           <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
           __pyx_t_14 = <span class='pyx_c_api'>__Pyx_PyList_Append</span>(__pyx_v_rets, __pyx_t_1);<span class='error_goto'> if (unlikely(__pyx_t_14 == ((int)-1))) __PYX_ERR(0, 243, __pyx_L1_error)</span>
           <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">244</span>:                     <span class="k">else</span><span class="p">:</span></pre>
 <pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">245</span>:                         <span class="n">rets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Formula</span><span class="o">.</span><span class="n">eToStr</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">num</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">getI</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="mf">0</span><span class="p">),</span> <span class="n">showProton</span><span class="p">))</span></pre>
 <pre class='cython code score-3 '>        /*else*/ {
-          __pyx_t_1 = __pyx_f_4code_17_OribitoolFormula_7Formula_eToStr(__pyx_v_index, (__pyx_v_num - ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, 0)), __pyx_v_showProton);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 245, __pyx_L1_error)</span>
+          __pyx_t_1 = __pyx_f_4code_16_OrbitoolFormula_7Formula_eToStr(__pyx_v_index, (__pyx_v_num - ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, 0)), __pyx_v_showProton);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 245, __pyx_L1_error)</span>
           <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
           __pyx_t_14 = <span class='pyx_c_api'>__Pyx_PyList_Append</span>(__pyx_v_rets, __pyx_t_1);<span class='error_goto'> if (unlikely(__pyx_t_14 == ((int)-1))) __PYX_ERR(0, 245, __pyx_L1_error)</span>
           <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
@@ -3001,7 +3001,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_10toStr(struct __py
 /* … */
             }
 </pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">249</span>:                                 <span class="n">rets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Formula</span><span class="o">.</span><span class="n">iToStr</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">li</span><span class="o">.</span><span class="n">second</span><span class="o">&gt;&gt;</span><span class="n">_factor</span><span class="p">,</span><span class="n">li</span><span class="o">.</span><span class="n">second</span><span class="o">&amp;</span><span class="n">_andfactor</span><span class="p">))</span></pre>
-<pre class='cython code score-3 '>              __pyx_t_1 = __pyx_f_4code_17_OribitoolFormula_7Formula_iToStr(__pyx_v_index, (__pyx_v_li.second &gt;&gt; __pyx_v_17_OribitoolElement__factor), (__pyx_v_li.second &amp; __pyx_v_17_OribitoolElement__andfactor));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 249, __pyx_L1_error)</span>
+<pre class='cython code score-3 '>              __pyx_t_1 = __pyx_f_4code_16_OrbitoolFormula_7Formula_iToStr(__pyx_v_index, (__pyx_v_li.second &gt;&gt; __pyx_v_16_OrbitoolElement__factor), (__pyx_v_li.second &amp; __pyx_v_16_OrbitoolElement__andfactor));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 249, __pyx_L1_error)</span>
               <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
               __pyx_t_14 = <span class='pyx_c_api'>__Pyx_PyList_Append</span>(__pyx_v_rets, __pyx_t_1);<span class='error_goto'> if (unlikely(__pyx_t_14 == ((int)-1))) __PYX_ERR(0, 249, __pyx_L1_error)</span>
               <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
@@ -3012,7 +3012,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_10toStr(struct __py
 /* … */
   }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">252</span>:             <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getE</span><span class="p">(</span><span class="mf">0</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>    __pyx_v_index = ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getE(__pyx_v_self, 0);
+<pre class='cython code score-0 '>    __pyx_v_index = ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getE(__pyx_v_self, 0);
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">253</span>:             <span class="k">if</span> <span class="n">index</span><span class="o">==</span><span class="mf">1</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>    __pyx_t_13 = ((__pyx_v_index == 1) != 0);
     if (__pyx_t_13) {
@@ -3094,8 +3094,8 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_10toStr(struct __py
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">262</span>: </pre>
 <pre class="cython line score-48" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">263</span>:     <span class="k">cpdef</span> <span class="kt">double</span> <span class="nf">relativeAbundance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
-<pre class='cython code score-48 '>static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_13relativeAbundance(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static double __pyx_f_4code_17_OribitoolFormula_7Formula_relativeAbundance(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, int __pyx_skip_dispatch) {
+<pre class='cython code score-48 '>static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_13relativeAbundance(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static double __pyx_f_4code_16_OrbitoolFormula_7Formula_relativeAbundance(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, int __pyx_skip_dispatch) {
   double __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("relativeAbundance", 0);
@@ -3110,7 +3110,7 @@ static double __pyx_f_4code_17_OribitoolFormula_7Formula_relativeAbundance(struc
       #endif
       __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(((PyObject *)__pyx_v_self), __pyx_n_s_relativeAbundance);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 263, __pyx_L1_error)</span>
       <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_4code_17_OribitoolFormula_7Formula_13relativeAbundance)) {
+      if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_4code_16_OrbitoolFormula_7Formula_13relativeAbundance)) {
         <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_t_1);
         __pyx_t_3 = __pyx_t_1; __pyx_t_4 = NULL;
         if (CYTHON_UNPACK_METHODS &amp;&amp; unlikely(<span class='py_c_api'>PyMethod_Check</span>(__pyx_t_3))) {
@@ -3153,7 +3153,7 @@ static double __pyx_f_4code_17_OribitoolFormula_7Formula_relativeAbundance(struc
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_3);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_4);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_9);
-  <span class='pyx_c_api'>__Pyx_WriteUnraisable</span>("code._OribitoolFormula.Formula.relativeAbundance", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  <span class='pyx_c_api'>__Pyx_WriteUnraisable</span>("code._OrbitoolFormula.Formula.relativeAbundance", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_r = 0;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
@@ -3161,24 +3161,24 @@ static double __pyx_f_4code_17_OribitoolFormula_7Formula_relativeAbundance(struc
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_13relativeAbundance(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_13relativeAbundance(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_13relativeAbundance(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_13relativeAbundance(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("relativeAbundance (wrapper)", 0);
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_12relativeAbundance(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self));
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_12relativeAbundance(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("relativeAbundance", 0);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
-  __pyx_t_1 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_f_4code_17_OribitoolFormula_7Formula_relativeAbundance(__pyx_v_self, 1));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 263, __pyx_L1_error)</span>
+  __pyx_t_1 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_f_4code_16_OrbitoolFormula_7Formula_relativeAbundance(__pyx_v_self, 1));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 263, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3187,7 +3187,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance
   /* function exit code */
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_1);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.relativeAbundance", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.relativeAbundance", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
@@ -3220,7 +3220,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance
   __pyx_t_8.__pyx_n = 2;
   __pyx_t_8.showProton = 1;
   __pyx_t_8.withCharge = 0;
-  __pyx_t_3 = ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;toStr(__pyx_v_self, 0, &amp;__pyx_t_8);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 266, __pyx_L1_error)</span>
+  __pyx_t_3 = ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;toStr(__pyx_v_self, 0, &amp;__pyx_t_8);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 266, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
   if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_t_2, __pyx_n_s_formula, __pyx_t_3) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 266, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_3); __pyx_t_3 = 0;
@@ -3254,19 +3254,19 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance
 </pre><pre class="cython line score-9" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">268</span>:                 <span class="n">formula</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">findOrigin</span><span class="p">()</span><span class="o">.</span><span class="n">toStr</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span></pre>
 <pre class='cython code score-9 '>  __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyDict_NewPresized</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 268, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-  __pyx_t_4 = ((PyObject *)((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;findOrigin(__pyx_v_self, 0));<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 268, __pyx_L1_error)</span>
+  __pyx_t_4 = ((PyObject *)((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;findOrigin(__pyx_v_self, 0));<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 268, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_4);
   __pyx_t_8.__pyx_n = 2;
   __pyx_t_8.showProton = 1;
   __pyx_t_8.withCharge = 0;
-  __pyx_t_9 = ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_t_4)-&gt;__pyx_vtab)-&gt;toStr(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_t_4), 0, &amp;__pyx_t_8);<span class='error_goto'> if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 268, __pyx_L1_error)</span>
+  __pyx_t_9 = ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_t_4)-&gt;__pyx_vtab)-&gt;toStr(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_t_4), 0, &amp;__pyx_t_8);<span class='error_goto'> if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 268, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_9);
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_4); __pyx_t_4 = 0;
   if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_t_1, __pyx_n_s_formula, __pyx_t_9) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 268, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_9); __pyx_t_9 = 0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">269</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">270</span>:     <span class="k">cdef</span> <span class="kt">void</span> <span class="nf">setE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">int</span> <span class="n">index</span><span class="p">,</span> <span class="nb">int</span> <span class="n">num</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static void __pyx_f_4code_17_OribitoolFormula_7Formula_setE(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, int __pyx_v_index, int __pyx_v_num) {
+<pre class='cython code score-0 '>static void __pyx_f_4code_16_OrbitoolFormula_7Formula_setE(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, int __pyx_v_index, int __pyx_v_num) {
   std::unordered_map&lt;int,int&gt; ::iterator __pyx_v_it;
   std::list&lt;std::pair&lt;int,int&gt; &gt; ::iterator __pyx_v_lit;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
@@ -3285,7 +3285,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance
     __pyx_t_1 = __pyx_t_2;
     goto __pyx_L4_bool_binop_done;
   }
-  __pyx_t_2 = ((__pyx_v_num &lt; ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, 0)) != 0);
+  __pyx_t_2 = ((__pyx_v_num &lt; ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, 0)) != 0);
   __pyx_t_1 = __pyx_t_2;
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
@@ -3332,7 +3332,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance
 <pre class='cython code score-0 '>  (__pyx_v_self-&gt;elements[__pyx_v_index]) = __pyx_v_num;
 </pre><pre class="cython line score-0">&#xA0;<span class="">286</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">287</span>:     <span class="k">cdef</span> <span class="kt">int</span> <span class="nf">getE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">int</span> <span class="n">index</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static int __pyx_f_4code_17_OribitoolFormula_7Formula_getE(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, int __pyx_v_index) {
+<pre class='cython code score-0 '>static int __pyx_f_4code_16_OrbitoolFormula_7Formula_getE(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, int __pyx_v_index) {
   std::unordered_map&lt;int,int&gt; ::iterator __pyx_v_it;
   int __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
@@ -3361,7 +3361,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">295</span>: </pre>
 <pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">296</span>:     <span class="k">cdef</span> <span class="kt">void</span> <span class="nf">setI</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">int</span> <span class="n">index</span><span class="p">,</span> <span class="nb">int</span> <span class="n">m</span><span class="p">,</span> <span class="nb">int</span> <span class="n">num</span><span class="p">):</span></pre>
-<pre class='cython code score-2 '>static void __pyx_f_4code_17_OribitoolFormula_7Formula_setI(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, int __pyx_v_index, int __pyx_v_m, int __pyx_v_num) {
+<pre class='cython code score-2 '>static void __pyx_f_4code_16_OrbitoolFormula_7Formula_setI(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, int __pyx_v_index, int __pyx_v_m, int __pyx_v_num) {
   std::list&lt;std::pair&lt;int,int&gt; &gt; ::iterator __pyx_v_it;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("setI", 0);
@@ -3369,7 +3369,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance
   /* function exit code */
   goto __pyx_L0;
   __pyx_L1_error:;
-  <span class='pyx_c_api'>__Pyx_WriteUnraisable</span>("code._OribitoolFormula.Formula.setI", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  <span class='pyx_c_api'>__Pyx_WriteUnraisable</span>("code._OrbitoolFormula.Formula.setI", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
 }
@@ -3390,7 +3390,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance
       __pyx_t_1 = __pyx_t_2;
       goto __pyx_L6_bool_binop_done;
     }
-    __pyx_t_2 = ((((*__pyx_v_it).second &gt;&gt; __pyx_v_17_OribitoolElement__factor) == __pyx_v_m) != 0);
+    __pyx_t_2 = ((((*__pyx_v_it).second &gt;&gt; __pyx_v_16_OrbitoolElement__factor) == __pyx_v_m) != 0);
     __pyx_t_1 = __pyx_t_2;
     __pyx_L6_bool_binop_done:;
     if (__pyx_t_1) {
@@ -3407,7 +3407,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance
 </pre><pre class="cython line score-0">&#xA0;<span class="">306</span>:                 <span class="k">else</span><span class="p">:</span></pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">307</span>:                     <span class="n">deref</span><span class="p">(</span><span class="n">it</span><span class="p">)</span><span class="o">.</span><span class="n">second</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span> <span class="o">&lt;&lt;</span> <span class="n">_factor</span><span class="p">)</span> <span class="o">+</span> <span class="n">num</span></pre>
 <pre class='cython code score-0 '>      /*else*/ {
-        (*__pyx_v_it).second = ((__pyx_v_m &lt;&lt; __pyx_v_17_OribitoolElement__factor) + __pyx_v_num);
+        (*__pyx_v_it).second = ((__pyx_v_m &lt;&lt; __pyx_v_16_OrbitoolElement__factor) + __pyx_v_num);
       }
       __pyx_L8:;
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">308</span>:                 <span class="k">return</span></pre>
@@ -3422,22 +3422,22 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance
   }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">311</span>:             <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">int</span><span class="p">](</span><span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">m</span><span class="o">&lt;&lt;</span><span class="n">_factor</span><span class="p">)</span><span class="o">+</span><span class="n">num</span><span class="p">))</span></pre>
 <pre class='cython code score-0 '>    try {
-      __pyx_t_3 = std::pair&lt;int,int&gt; (__pyx_v_index, ((__pyx_v_m &lt;&lt; __pyx_v_17_OribitoolElement__factor) + __pyx_v_num));
+      __pyx_t_3 = std::pair&lt;int,int&gt; (__pyx_v_index, ((__pyx_v_m &lt;&lt; __pyx_v_16_OrbitoolElement__factor) + __pyx_v_num));
     } catch(...) {
       __Pyx_CppExn2PyErr();
       <span class='error_goto'>__PYX_ERR(0, 311, __pyx_L1_error)</span>
     }
     __pyx_v_self-&gt;isotopes.push_back(__pyx_t_3);
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">312</span>:             <span class="k">if</span> <span class="n">num</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">getE</span><span class="p">(</span><span class="n">index</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>    __pyx_t_1 = ((__pyx_v_num &gt; ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getE(__pyx_v_self, __pyx_v_index)) != 0);
+<pre class='cython code score-0 '>    __pyx_t_1 = ((__pyx_v_num &gt; ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getE(__pyx_v_self, __pyx_v_index)) != 0);
     if (__pyx_t_1) {
 /* … */
     }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">313</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">setE</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>      ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, __pyx_v_index, __pyx_v_num);
+<pre class='cython code score-0 '>      ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, __pyx_v_index, __pyx_v_num);
 </pre><pre class="cython line score-0">&#xA0;<span class="">314</span>: </pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">315</span>:     <span class="k">cdef</span> <span class="kt">int</span> <span class="nf">getI</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">int</span> <span class="n">index</span><span class="p">,</span> <span class="nb">int</span> <span class="n">m</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>static int __pyx_f_4code_17_OribitoolFormula_7Formula_getI(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, int __pyx_v_index, int __pyx_v_m) {
+<pre class='cython code score-0 '>static int __pyx_f_4code_16_OrbitoolFormula_7Formula_getI(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, int __pyx_v_index, int __pyx_v_m) {
   std::pair&lt;int,int&gt;  __pyx_v_i;
   int __pyx_v_ret;
   int __pyx_r;
@@ -3479,14 +3479,14 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance
         __pyx_t_1 = __pyx_t_5;
         goto __pyx_L7_bool_binop_done;
       }
-      __pyx_t_5 = (((__pyx_v_i.second &gt;&gt; __pyx_v_17_OribitoolElement__factor) == __pyx_v_m) != 0);
+      __pyx_t_5 = (((__pyx_v_i.second &gt;&gt; __pyx_v_16_OrbitoolElement__factor) == __pyx_v_m) != 0);
       __pyx_t_1 = __pyx_t_5;
       __pyx_L7_bool_binop_done:;
       if (__pyx_t_1) {
 /* … */
       }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">324</span>:                     <span class="n">ret</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">second</span> <span class="o">&amp;</span> <span class="n">_andfactor</span></pre>
-<pre class='cython code score-0 '>        __pyx_v_ret = (__pyx_v_i.second &amp; __pyx_v_17_OribitoolElement__andfactor);
+<pre class='cython code score-0 '>        __pyx_v_ret = (__pyx_v_i.second &amp; __pyx_v_16_OrbitoolElement__andfactor);
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">325</span>:                     <span class="k">break</span></pre>
 <pre class='cython code score-0 '>        goto __pyx_L5_break;
 </pre><pre class="cython line score-0">&#xA0;<span class="">326</span>:         <span class="k">else</span><span class="p">:</span></pre>
@@ -3509,15 +3509,15 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_12relativeAbundance
 /* … */
       }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">329</span>:                     <span class="n">ret</span> <span class="o">+=</span> <span class="n">i</span><span class="o">.</span><span class="n">second</span> <span class="o">&amp;</span> <span class="n">_andfactor</span></pre>
-<pre class='cython code score-0 '>        __pyx_v_ret = (__pyx_v_ret + (__pyx_v_i.second &amp; __pyx_v_17_OribitoolElement__andfactor));
+<pre class='cython code score-0 '>        __pyx_v_ret = (__pyx_v_ret + (__pyx_v_i.second &amp; __pyx_v_16_OrbitoolElement__andfactor));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">330</span>:         <span class="k">return</span> <span class="n">ret</span></pre>
 <pre class='cython code score-0 '>  __pyx_r = __pyx_v_ret;
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">331</span>: </pre>
 <pre class="cython line score-15" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">332</span>:     <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span> <span class="n">key</span><span class="p">,</span> <span class="nb">int</span> <span class="n">num</span><span class="p">):</span></pre>
 <pre class='cython code score-15 '>/* Python wrapper */
-static int __pyx_pw_4code_17_OribitoolFormula_7Formula_15__setitem__(PyObject *__pyx_v_self, PyObject *__pyx_v_key, PyObject *__pyx_arg_num); /*proto*/
-static int __pyx_pw_4code_17_OribitoolFormula_7Formula_15__setitem__(PyObject *__pyx_v_self, PyObject *__pyx_v_key, PyObject *__pyx_arg_num) {
+static int __pyx_pw_4code_16_OrbitoolFormula_7Formula_15__setitem__(PyObject *__pyx_v_self, PyObject *__pyx_v_key, PyObject *__pyx_arg_num); /*proto*/
+static int __pyx_pw_4code_16_OrbitoolFormula_7Formula_15__setitem__(PyObject *__pyx_v_self, PyObject *__pyx_v_key, PyObject *__pyx_arg_num) {
   int __pyx_v_num;
   int __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
@@ -3527,12 +3527,12 @@ static int __pyx_pw_4code_17_OribitoolFormula_7Formula_15__setitem__(PyObject *_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.__setitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.__setitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return -1;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_key), (&amp;PyUnicode_Type), 1, "key", 1))) <span class='error_goto'>__PYX_ERR(0, 332, __pyx_L1_error)</span>
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_14__setitem__(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self), ((PyObject*)__pyx_v_key), ((int)__pyx_v_num));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_14__setitem__(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self), ((PyObject*)__pyx_v_key), ((int)__pyx_v_num));
 
   /* function exit code */
   goto __pyx_L0;
@@ -3543,7 +3543,7 @@ static int __pyx_pw_4code_17_OribitoolFormula_7Formula_15__setitem__(PyObject *_
   return __pyx_r;
 }
 
-static int __pyx_pf_4code_17_OribitoolFormula_7Formula_14__setitem__(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, PyObject *__pyx_v_key, int __pyx_v_num) {
+static int __pyx_pf_4code_16_OrbitoolFormula_7Formula_14__setitem__(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, PyObject *__pyx_v_key, int __pyx_v_num) {
   int __pyx_v_index;
   int __pyx_v_m;
   int __pyx_r;
@@ -3556,7 +3556,7 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula_14__setitem__(struct __py
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_2);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_3);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.__setitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.__setitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
@@ -3564,15 +3564,15 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula_14__setitem__(struct __py
 }
 </pre><pre class="cython line score-0">&#xA0;<span class="">333</span>:         <span class="k">cdef</span> <span class="kt">int</span> <span class="nf">index</span><span class="p">,</span> <span class="nf">m</span></pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">334</span>:         <span class="n">str2element</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">index</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">m</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>  __pyx_f_17_OribitoolElement_str2element(__pyx_v_key, (&amp;__pyx_v_index), (&amp;__pyx_v_m));<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 334, __pyx_L1_error)</span>
+<pre class='cython code score-0 '>  __pyx_f_16_OrbitoolElement_str2element(__pyx_v_key, (&amp;__pyx_v_index), (&amp;__pyx_v_m));<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 334, __pyx_L1_error)</span>
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">335</span>:         <span class="k">if</span> <span class="n">elementMassNum</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">==</span><span class="n">m</span><span class="p">:</span></pre>
-<pre class='cython code score-0 '>  __pyx_t_1 = (((__pyx_v_17_OribitoolElement_elementMassNum[__pyx_v_index]) == __pyx_v_m) != 0);
+<pre class='cython code score-0 '>  __pyx_t_1 = (((__pyx_v_16_OrbitoolElement_elementMassNum[__pyx_v_index]) == __pyx_v_m) != 0);
   if (__pyx_t_1) {
 /* … */
     goto __pyx_L3;
   }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">336</span>:             <span class="bp">self</span><span class="o">.</span><span class="n">setE</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">num</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">getI</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="mf">0</span><span class="p">))</span></pre>
-<pre class='cython code score-0 '>    ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, __pyx_v_index, (__pyx_v_num + ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, 0)));
+<pre class='cython code score-0 '>    ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, __pyx_v_index, (__pyx_v_num + ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, 0)));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">337</span>:         <span class="k">elif</span> <span class="n">m</span> <span class="o">&gt;</span> <span class="mf">0</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((__pyx_v_m &gt; 0) != 0);
   if (__pyx_t_1) {
@@ -3580,13 +3580,13 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula_14__setitem__(struct __py
     goto __pyx_L3;
   }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">338</span>:             <span class="k">if</span> <span class="n">elementMassDist</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">!=</span> <span class="n">elementMassDist</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">end</span><span class="p">():</span></pre>
-<pre class='cython code score-0 '>    __pyx_t_1 = (((__pyx_v_17_OribitoolElement_elementMassDist[__pyx_v_index]).find(__pyx_v_m) != (__pyx_v_17_OribitoolElement_elementMassDist[__pyx_v_index]).end()) != 0);
+<pre class='cython code score-0 '>    __pyx_t_1 = (((__pyx_v_16_OrbitoolElement_elementMassDist[__pyx_v_index]).find(__pyx_v_m) != (__pyx_v_16_OrbitoolElement_elementMassDist[__pyx_v_index]).end()) != 0);
     if (likely(__pyx_t_1)) {
 /* … */
       goto __pyx_L4;
     }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">339</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">setI</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>      ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setI(__pyx_v_self, __pyx_v_index, __pyx_v_m, __pyx_v_num);
+<pre class='cython code score-0 '>      ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setI(__pyx_v_self, __pyx_v_index, __pyx_v_m, __pyx_v_num);
 </pre><pre class="cython line score-0">&#xA0;<span class="">340</span>:             <span class="k">else</span><span class="p">:</span></pre>
 <pre class="cython line score-11" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">341</span>:                 <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">f</span><span class="s">&#39;have no element {key}&#39;</span><span class="p">)</span></pre>
 <pre class='cython code score-11 '>    /*else*/ {
@@ -3606,19 +3606,19 @@ static int __pyx_pf_4code_17_OribitoolFormula_7Formula_14__setitem__(struct __py
 </pre><pre class="cython line score-0">&#xA0;<span class="">342</span>:         <span class="k">else</span><span class="p">:</span></pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">343</span>:             <span class="bp">self</span><span class="o">.</span><span class="n">setE</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span></pre>
 <pre class='cython code score-0 '>  /*else*/ {
-    ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, __pyx_v_index, __pyx_v_num);
+    ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setE(__pyx_v_self, __pyx_v_index, __pyx_v_num);
   }
   __pyx_L3:;
 </pre><pre class="cython line score-0">&#xA0;<span class="">344</span>: </pre>
 <pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">345</span>:     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span> <span class="n">key</span><span class="p">):</span></pre>
 <pre class='cython code score-5 '>/* Python wrapper */
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_17__getitem__(PyObject *__pyx_v_self, PyObject *__pyx_v_key); /*proto*/
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_17__getitem__(PyObject *__pyx_v_self, PyObject *__pyx_v_key) {
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_17__getitem__(PyObject *__pyx_v_self, PyObject *__pyx_v_key); /*proto*/
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_17__getitem__(PyObject *__pyx_v_self, PyObject *__pyx_v_key) {
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__getitem__ (wrapper)", 0);
   if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_key), (&amp;PyUnicode_Type), 1, "key", 1))) <span class='error_goto'>__PYX_ERR(0, 345, __pyx_L1_error)</span>
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_16__getitem__(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self), ((PyObject*)__pyx_v_key));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_16__getitem__(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self), ((PyObject*)__pyx_v_key));
 
   /* function exit code */
   goto __pyx_L0;
@@ -3629,7 +3629,7 @@ static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_17__getitem__(PyObj
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_16__getitem__(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, PyObject *__pyx_v_key) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_16__getitem__(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, PyObject *__pyx_v_key) {
   int __pyx_v_index;
   int __pyx_v_m;
   PyObject *__pyx_r = NULL;
@@ -3639,7 +3639,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_16__getitem__(struc
   /* function exit code */
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_2);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.__getitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.__getitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
@@ -3648,7 +3648,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_16__getitem__(struc
 }
 </pre><pre class="cython line score-0">&#xA0;<span class="">346</span>:         <span class="k">cdef</span> <span class="kt">int</span> <span class="nf">index</span> <span class="p">,</span><span class="nf">m</span></pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">347</span>:         <span class="n">str2element</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">index</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">m</span><span class="p">)</span></pre>
-<pre class='cython code score-0 '>  __pyx_f_17_OribitoolElement_str2element(__pyx_v_key, (&amp;__pyx_v_index), (&amp;__pyx_v_m));<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 347, __pyx_L1_error)</span>
+<pre class='cython code score-0 '>  __pyx_f_16_OrbitoolElement_str2element(__pyx_v_key, (&amp;__pyx_v_index), (&amp;__pyx_v_m));<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 347, __pyx_L1_error)</span>
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">348</span>:         <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mf">0</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((__pyx_v_m == 0) != 0);
   if (__pyx_t_1) {
@@ -3656,19 +3656,19 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_16__getitem__(struc
   }
 </pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">349</span>:             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getE</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></pre>
 <pre class='cython code score-3 '>    <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getE(__pyx_v_self, __pyx_v_index));<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 349, __pyx_L1_error)</span>
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getE(__pyx_v_self, __pyx_v_index));<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 349, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">350</span>:         <span class="k">elif</span> <span class="n">elementMassNum</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">==</span><span class="n">m</span><span class="p">:</span></pre>
-<pre class='cython code score-0 '>  __pyx_t_1 = (((__pyx_v_17_OribitoolElement_elementMassNum[__pyx_v_index]) == __pyx_v_m) != 0);
+<pre class='cython code score-0 '>  __pyx_t_1 = (((__pyx_v_16_OrbitoolElement_elementMassNum[__pyx_v_index]) == __pyx_v_m) != 0);
   if (__pyx_t_1) {
 /* … */
   }
 </pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">351</span>:             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getE</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">getI</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="mf">0</span><span class="p">)</span></pre>
 <pre class='cython code score-3 '>    <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>((((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getE(__pyx_v_self, __pyx_v_index) - ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, 0)));<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 351, __pyx_L1_error)</span>
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>((((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getE(__pyx_v_self, __pyx_v_index) - ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, 0)));<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 351, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
@@ -3677,7 +3677,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_16__getitem__(struc
 <pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">353</span>:             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getI</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span></pre>
 <pre class='cython code score-3 '>  /*else*/ {
     <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, __pyx_v_m));<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 353, __pyx_L1_error)</span>
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getI(__pyx_v_self, __pyx_v_index, __pyx_v_m));<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 353, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
@@ -3687,19 +3687,19 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_16__getitem__(struc
 <pre class="cython line score-0">&#xA0;<span class="">355</span>: </pre>
 <pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">356</span>:     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
 <pre class='cython code score-3 '>/* Python wrapper */
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_19__str__(PyObject *__pyx_v_self); /*proto*/
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_19__str__(PyObject *__pyx_v_self) {
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_19__str__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_19__str__(PyObject *__pyx_v_self) {
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__str__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_18__str__(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_18__str__(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self));
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_18__str__(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_18__str__(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__str__", 0);
@@ -3707,7 +3707,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_18__str__(struct __
   /* function exit code */
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_1);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.__str__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.__str__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
@@ -3719,7 +3719,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_18__str__(struct __
   __pyx_t_2.__pyx_n = 2;
   __pyx_t_2.showProton = 0;
   __pyx_t_2.withCharge = 1;
-  __pyx_t_1 = ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;toStr(__pyx_v_self, 0, &amp;__pyx_t_2);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 357, __pyx_L1_error)</span>
+  __pyx_t_1 = ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;toStr(__pyx_v_self, 0, &amp;__pyx_t_2);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 357, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3727,19 +3727,19 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_18__str__(struct __
 </pre><pre class="cython line score-0">&#xA0;<span class="">358</span>: </pre>
 <pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">359</span>:     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
 <pre class='cython code score-3 '>/* Python wrapper */
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_21__repr__(PyObject *__pyx_v_self); /*proto*/
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_21__repr__(PyObject *__pyx_v_self) {
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_21__repr__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_21__repr__(PyObject *__pyx_v_self) {
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__repr__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_20__repr__(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_20__repr__(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self));
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_20__repr__(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_20__repr__(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__repr__", 0);
@@ -3747,7 +3747,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_20__repr__(struct _
   /* function exit code */
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_1);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.__repr__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.__repr__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   <span class='refnanny'>__Pyx_XGIVEREF</span>(__pyx_r);
@@ -3759,7 +3759,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_20__repr__(struct _
   __pyx_t_2.__pyx_n = 2;
   __pyx_t_2.showProton = 0;
   __pyx_t_2.withCharge = 1;
-  __pyx_t_1 = ((struct __pyx_vtabstruct_4code_17_OribitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;toStr(__pyx_v_self, 0, &amp;__pyx_t_2);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 360, __pyx_L1_error)</span>
+  __pyx_t_1 = ((struct __pyx_vtabstruct_4code_16_OrbitoolFormula_Formula *)__pyx_v_self-&gt;__pyx_vtab)-&gt;toStr(__pyx_v_self, 0, &amp;__pyx_t_2);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 360, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3767,13 +3767,13 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_20__repr__(struct _
 </pre><pre class="cython line score-0">&#xA0;<span class="">361</span>: </pre>
 <pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">362</span>:     <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Formula</span> <span class="n">formula</span><span class="p">):</span></pre>
 <pre class='cython code score-2 '>/* Python wrapper */
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_23__eq__(PyObject *__pyx_v_self, PyObject *__pyx_v_formula); /*proto*/
-static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_23__eq__(PyObject *__pyx_v_self, PyObject *__pyx_v_formula) {
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_23__eq__(PyObject *__pyx_v_self, PyObject *__pyx_v_formula); /*proto*/
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_23__eq__(PyObject *__pyx_v_self, PyObject *__pyx_v_formula) {
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__eq__ (wrapper)", 0);
-  if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_formula), __pyx_ptype_4code_17_OribitoolFormula_Formula, 1, "formula", 0))) <span class='error_goto'>__PYX_ERR(0, 362, __pyx_L1_error)</span>
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_22__eq__(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self), ((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_formula));
+  if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_formula), __pyx_ptype_4code_16_OrbitoolFormula_Formula, 1, "formula", 0))) <span class='error_goto'>__PYX_ERR(0, 362, __pyx_L1_error)</span>
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_22__eq__(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self), ((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_formula));
 
   /* function exit code */
   goto __pyx_L0;
@@ -3784,7 +3784,7 @@ static PyObject *__pyx_pw_4code_17_OribitoolFormula_7Formula_23__eq__(PyObject *
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_22__eq__(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self, struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_formula) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_22__eq__(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self, struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_formula) {
   std::pair&lt;int,int&gt;  __pyx_v_i;
   std::pair&lt;int,int&gt;  __pyx_v_j;
   bool __pyx_v_flag;
@@ -3800,7 +3800,7 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_22__eq__(struct __p
   return __pyx_r;
 }
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">363</span>:         <span class="k">if</span> <span class="ow">not</span> <span class="n">_elements_eq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span> <span class="n">formula</span><span class="o">.</span><span class="n">elements</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>  __pyx_t_1 = ((!(__pyx_f_4code_17_OribitoolFormula__elements_eq(__pyx_v_self-&gt;elements, __pyx_v_formula-&gt;elements) != 0)) != 0);
+<pre class='cython code score-0 '>  __pyx_t_1 = ((!(__pyx_f_4code_16_OrbitoolFormula__elements_eq(__pyx_v_self-&gt;elements, __pyx_v_formula-&gt;elements) != 0)) != 0);
   if (__pyx_t_1) {
 /* … */
   }
@@ -3878,19 +3878,19 @@ static PyObject *__pyx_pf_4code_17_OribitoolFormula_7Formula_22__eq__(struct __p
 </pre><pre class="cython line score-0">&#xA0;<span class="">378</span>: </pre>
 <pre class="cython line score-8" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">379</span>:     <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre>
 <pre class='cython code score-8 '>/* Python wrapper */
-static Py_hash_t __pyx_pw_4code_17_OribitoolFormula_7Formula_25__hash__(PyObject *__pyx_v_self); /*proto*/
-static Py_hash_t __pyx_pw_4code_17_OribitoolFormula_7Formula_25__hash__(PyObject *__pyx_v_self) {
+static Py_hash_t __pyx_pw_4code_16_OrbitoolFormula_7Formula_25__hash__(PyObject *__pyx_v_self); /*proto*/
+static Py_hash_t __pyx_pw_4code_16_OrbitoolFormula_7Formula_25__hash__(PyObject *__pyx_v_self) {
   Py_hash_t __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__hash__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_4code_17_OribitoolFormula_7Formula_24__hash__(((struct __pyx_obj_4code_17_OribitoolFormula_Formula *)__pyx_v_self));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_24__hash__(((struct __pyx_obj_4code_16_OrbitoolFormula_Formula *)__pyx_v_self));
 
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
 
-static Py_hash_t __pyx_pf_4code_17_OribitoolFormula_7Formula_24__hash__(struct __pyx_obj_4code_17_OribitoolFormula_Formula *__pyx_v_self) {
+static Py_hash_t __pyx_pf_4code_16_OrbitoolFormula_7Formula_24__hash__(struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_self) {
   int __pyx_v_ret;
   std::pair&lt;int,int&gt;  __pyx_v_i;
   Py_hash_t __pyx_r;
@@ -3900,7 +3900,7 @@ static Py_hash_t __pyx_pf_4code_17_OribitoolFormula_7Formula_24__hash__(struct _
   /* function exit code */
   __pyx_L1_error:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_4);
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OribitoolFormula.Formula.__hash__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.__hash__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
   if (unlikely(__pyx_r == -1) &amp;&amp; !<span class='py_c_api'>PyErr_Occurred</span>()) __pyx_r = -2;
@@ -3921,7 +3921,7 @@ static Py_hash_t __pyx_pf_4code_17_OribitoolFormula_7Formula_24__hash__(struct _
 /* … */
   }
 </pre><pre class="cython line score-8" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">383</span>:             <span class="n">ret</span><span class="o">^=</span><span class="nb">hash</span><span class="p">((</span><span class="n">i</span><span class="o">.</span><span class="n">first</span><span class="o">&lt;&lt;</span><span class="n">_factor</span><span class="p">)</span><span class="o">+</span><span class="n">i</span><span class="o">.</span><span class="n">second</span><span class="p">)</span></pre>
-<pre class='cython code score-8 '>    __pyx_t_4 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(((__pyx_v_i.first &lt;&lt; __pyx_v_17_OribitoolElement__factor) + __pyx_v_i.second));<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 383, __pyx_L1_error)</span>
+<pre class='cython code score-8 '>    __pyx_t_4 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(((__pyx_v_i.first &lt;&lt; __pyx_v_16_OrbitoolElement__factor) + __pyx_v_i.second));<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 383, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_4);
     __pyx_t_5 = <span class='py_c_api'>PyObject_Hash</span>(__pyx_t_4);<span class='error_goto'> if (unlikely(__pyx_t_5 == ((Py_hash_t)-1))) __PYX_ERR(0, 383, __pyx_L1_error)</span>
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_4); __pyx_t_4 = 0;
@@ -3937,7 +3937,7 @@ static Py_hash_t __pyx_pf_4code_17_OribitoolFormula_7Formula_24__hash__(struct _
 /* … */
   }
 </pre><pre class="cython line score-8" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">385</span>:             <span class="n">ret</span><span class="o">^=</span><span class="nb">hash</span><span class="p">((</span><span class="n">i</span><span class="o">.</span><span class="n">first</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">_factor</span><span class="o">&lt;&lt;</span><span class="mf">1</span><span class="p">))</span><span class="o">+</span><span class="n">i</span><span class="o">.</span><span class="n">second</span><span class="p">)</span></pre>
-<pre class='cython code score-8 '>    __pyx_t_4 = <span class='pyx_c_api'>__Pyx_PyInt_From_long</span>(((__pyx_v_i.first &lt;&lt; (__pyx_v_17_OribitoolElement__factor &lt;&lt; 1)) + __pyx_v_i.second));<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 385, __pyx_L1_error)</span>
+<pre class='cython code score-8 '>    __pyx_t_4 = <span class='pyx_c_api'>__Pyx_PyInt_From_long</span>(((__pyx_v_i.first &lt;&lt; (__pyx_v_16_OrbitoolElement__factor &lt;&lt; 1)) + __pyx_v_i.second));<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 385, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_4);
     __pyx_t_5 = <span class='py_c_api'>PyObject_Hash</span>(__pyx_t_4);<span class='error_goto'> if (unlikely(__pyx_t_5 == ((Py_hash_t)-1))) __PYX_ERR(0, 385, __pyx_L1_error)</span>
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_4); __pyx_t_4 = 0;

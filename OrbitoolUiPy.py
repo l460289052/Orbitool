@@ -393,6 +393,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             self.qPeakFit2ShowSelectedSpectrum)
         self.peak2CancelPushButton.clicked.connect(self.qPeak2RmCancel)
         self.peak2FinishPushButton.clicked.connect(self.qPeak2Finish)
+        self.peak2ExportPushButton.clicked.connect(self.qPeak2Export)
 
         self.peak2Widget.setLayout(QtWidgets.QVBoxLayout())
         self.peak2Canvas: matplotlib.backend_bases.FigureCanvasBase = FigureCanvas(
@@ -508,6 +509,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         # spectrum 3 mass defect
         self.spectrum3MassDefectPlotPushButton.clicked.connect(
             self.qSpectrum3MassDefectPlot)
+        self.spectrum3MassDefectExportPushButton.clicked.connect(
+            self.qSpectrum3MassDefectExport)
 
         self.spectrum3MassDefectPlot = SpectraPlot(
             self.spectrum3MassDefectWidget)
@@ -990,7 +993,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             table.setItem(index, column, QtWidgets.QTableWidgetItem(s))
 
         def date2str(time: datetime.datetime):
-            return time.strftime(OrbitoolBase.timeFormat)
+            return time.replace(microsecond=0).isoformat()
 
         f: OrbitoolClass.File = self.fileList[time]
         setValue(0, f.name)
@@ -1539,6 +1542,14 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             self.tabWidget.setCurrentWidget(self.calibrationTab)
         else:
             showInfo('Please fit peak first')
+
+    @busy
+    @withoutArgs
+    @openfile("Select one folder to save information", folder=True)
+    def qPeak2Export(self, folder):
+        OrbitoolExport.exportFitInfo(folder,self.workspace.peakFitFunc,self.showStatus)
+
+
 
     @busy
     @withoutArgs
@@ -2270,22 +2281,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     def qSpectrum3Rescale(self):
         self.spectrum3RescaleFlag = True
 
-    @busy
-    @withoutArgs
-    def qSpectrum3MassDefectPlot(self):
-        cmap = matplotlib.cm.rainbow
-        plot = self.spectrum3MassDefectPlot
-        fig: matplotlib.figure.Figure = plot.canvas.figure
-        fig.clf()
-        plot.ax = fig.subplots()
-        ax = plot.ax
-        miFactor = math.exp(
-            self.spectrum3MassDefectMiSizeHorizontalSlider.value() / 20.0)
-        maFactor = math.exp(
-            self.spectrum3MassDefectMaSizeHorizontalSlider.value() / 20.0)
-
+    def spectrum3MassDefect(self) -> (tuple, tuple):
         DBE = self.spectrum3MassDefectDBERadioButton.isChecked()
-        log = self.spectrum3MassDefectIntensityLogCheckBox.isChecked()
         gry = self.spectrum3MassDefectShowGreyCheckBox.isChecked()
 
         peaks = self.workspace.spectrum3fittedPeaks
@@ -2305,8 +2302,6 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         clr_y = clr_x - np.round(clr_x)
         clr_size = np.array(
             [peak.peakIntensity for peak in clr_peaks], dtype=np.float)
-        if log:
-            clr_size = np.log(clr_size + 1) - 1
 
         if gry:
             gry_peaks = [peak for peak in peaks if len(peak.formulaList) != 1]
@@ -2315,25 +2310,56 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             gry_y = gry_x - np.round(gry_x)
             gry_size = np.array(
                 [peak.peakIntensity for peak in gry_peaks], dtype=np.float)
-            if log:
-                gry_size = np.log(gry_size + 1) - 1
+        else:
+            gry_x = np.zeros(0, dtype=np.float)
+            gry_y = gry_x
+            gry_size = gry_x
+            
+        return ((clr_x, clr_y, clr_size, clr_color), (gry_x, gry_y, gry_size))
+
+
+    @busy
+    @withoutArgs
+    def qSpectrum3MassDefectPlot(self):
+        cmap = matplotlib.cm.rainbow
+        plot = self.spectrum3MassDefectPlot
+        fig: matplotlib.figure.Figure = plot.canvas.figure
+        fig.clf()
+        plot.ax = fig.subplots()
+        ax = plot.ax
+        miFactor = math.exp(
+            self.spectrum3MassDefectMiSizeHorizontalSlider.value() / 20.0)
+        maFactor = math.exp(
+            self.spectrum3MassDefectMaSizeHorizontalSlider.value() / 20.0)
+
+        DBE = self.spectrum3MassDefectDBERadioButton.isChecked()
+        log = self.spectrum3MassDefectIntensityLogCheckBox.isChecked()
+
+        ((clr_x, clr_y, clr_size, clr_color),
+         (gry_x, gry_y, gry_size)) = self.spectrum3MassDefect()
+
+        if log:
+            clr_size = np.log(clr_size + 1) - 1
+            gry_size = np.log(gry_size + 1) - 1
+
+        if len(gry_x) > 0:
             maximum = np.max((clr_size.max(), gry_size.max()))
         else:
             maximum = clr_size.max()
-
+        
         if log:
             maximum /= 70
         else:
             maximum /= 200
         maximum /= maFactor
-        minimum = 5 * miFactor
+        minimum = 5*miFactor
 
         ax.clear()
-        if gry:
-            gry_size /= maximum
-            gry_size[gry_size < minimum] = minimum
-            ax.scatter(gry_x, gry_y, s=gry_size, c='grey',
-                       linewidths=0.5, edgecolors='k')
+        gry_size /= maximum
+        gry_size[gry_size < minimum] = minimum
+        ax.scatter(gry_x, gry_y, s=gry_size, c='grey',
+                    linewidths=0.5, edgecolors='k')
+
         clr_size /= maximum
         clr_size[clr_size < minimum] = minimum
         sc = ax.scatter(clr_x, clr_y, s=clr_size, c=clr_color,
@@ -2345,6 +2371,12 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         fig.tight_layout()
 
         plot.canvas.draw()
+
+    @busy
+    @withoutArgs
+    @savefile(caption="Save as", filter="csv file(*.csv)")
+    def qSpectrum3MassDefectExport(self, path):
+        OrbitoolExport.exportMassDefect(path,*self.spectrum3MassDefect(), self.showStatus)
 
     @busy
     @withoutArgs
@@ -2654,7 +2686,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
 
             def strTime(time: np.timedelta64):
                 time: datetime.datetime = time.astype(datetime.datetime)
-                return time.strftime(OrbitoolBase.timeFormat)
+                return time.replace(microsecond=0).isoformat()
         intensity = timeSeries.intensity
         table = self.timeSeriesTableWidget
         table.clearContents()
@@ -2714,8 +2746,9 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @withoutArgs
     @savefile("Save as", "csv file(*.csv)")
     def qTimeSeriesesExport(self, path):
+        withppm=self.timeSeriesesExportWithPpmCheckBox.isChecked()
         thread = QThread(OrbitoolExport.exportTimeSerieses,
-                         (path, self.workspace.timeSerieses))
+                         (path, self.workspace.timeSerieses, withppm))
         thread.finished.connect(self.csvExportFinished)
         return thread
 
@@ -2725,7 +2758,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     def qTimeSeriesExport(self, path):
         if self.workspace.timeSeriesIndex is None:
             raise ValueError('There is no time series shown')
+        withppm=self.timeSeriesesExportWithPpmCheckBox.isChecked()
         thread = QThread(OrbitoolExport.exportTimeSerieses, (path, [
-                         self.workspace.timeSerieses[self.workspace.timeSeriesIndex]]))
+                         self.workspace.timeSerieses[self.workspace.timeSeriesIndex]], withppm))
         thread.finished.connect(self.csvExportFinished)
         return thread

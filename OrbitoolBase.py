@@ -8,8 +8,6 @@ from OrbitoolFormulaCalc import IonCalculatorHint
 
 import numpy as np
 
-timeFormat = r"%Y%m%d %H:%M:%S"
-
 def nullSendStatus(fileTime: datetime, msg: str, index: int, length: int):
     pass
 

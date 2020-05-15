@@ -152,8 +152,8 @@ class GetSpectrum(OrbitoolBase.Operator):
             t1, t2 = timeRange
             t1 += file.creationDate
             t2 += file.creationDate
-        self.shownTime = (t1.strftime(OrbitoolBase.timeFormat),
-                          t2.strftime(OrbitoolBase.timeFormat))
+        self.shownTime = (t1.replace(microsecond=0).isoformat(),
+                          t2.replace(microsecond=0).isoformat())
         self.polarity = polarity
 
         if numRange is None or numRange[1] - numRange[0] > 1:
@@ -211,8 +211,8 @@ class GetAveragedSpectrumAcrossFiles(OrbitoolBase.Operator):
         self.ppm = op.ppm
         self.numRange = op.numRange
         self.timeRange = op.timeRange
-        self.shownTime = (s.strftime(OrbitoolBase.timeFormat),
-                          t.strftime(OrbitoolBase.timeFormat))
+        self.shownTime = (s.replace(microsecond=0).isoformat(),
+                          t.replace(microsecond=0).isoformat())
         self.polarity = spectra[0].polarity
         self.empty = op.empty
 
@@ -600,7 +600,7 @@ def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OrbitoolBase.Sp
 
 
 supportedVersion = 1_02_00
-version = 1_02_06
+version = 1_02_07
 
 
 def version2Str(version):

@@ -364,6 +364,21 @@ If you meet any bugs, please let me know. You can send me the 'error.txt' file w
 
 ## log
 
+**2020.5.15 version 1.2.7**
+
+Appended
++ Export
+  + fit infomation
+  + mass defect
++ when export time serieses
+  + export time as isotime, igor time, matlab datenum, excel datenum
+  + choose with or without text "with ppm"
+
+Bug fix
++ numba.numpy_extensions not found. numba changed its interface in new version, and new version have some errors when generate executable files, so use numba's version 0.48
++ wrong spelling
+  from "Oribit" to "Orbit"
+
 **2020.4.17 version 1.2.6**
 
 Appended

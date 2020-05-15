@@ -184,7 +184,7 @@
         <enum>QTabWidget::Rounded</enum>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>5</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -937,6 +937,13 @@ without averaging</string>
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QPushButton" name="peak2ExportPushButton">
+               <property name="text">
+                <string>Export fit info</string>
+               </property>
+              </widget>
+             </item>
              <item>
               <widget class="QLabel" name="label_11">
                <property name="sizePolicy">
@@ -2153,6 +2160,13 @@ and continue</string>
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="spectrum3MassDefectExportPushButton">
+                <property name="text">
+                 <string>Export</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
            </widget>
@@ -2407,6 +2421,13 @@ and continue</string>
               </widget>
              </item>
             </layout>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="timeSeriesesExportWithPpmCheckBox">
+             <property name="text">
+              <string>Export with text &quot;with ppm&quot;</string>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="timeSeriesesExportPushButton">
@@ -3370,6 +3391,7 @@ and continue</string>
     <property name="title">
      <string>Option</string>
     </property>
+    <addaction name="optionActionSetting"/>
     <addaction name="optionActionImport"/>
     <addaction name="optionActionExport"/>
    </widget>
@@ -3395,6 +3417,11 @@ and continue</string>
   <action name="optionActionExport">
    <property name="text">
     <string>Export</string>
+   </property>
+  </action>
+  <action name="optionActionSetting">
+   <property name="text">
+    <string>Setting</string>
    </property>
   </action>
  </widget>

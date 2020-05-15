@@ -21,6 +21,7 @@ import sklearn.preprocessing
 import statsmodels.nonparametric.smoothers_lowess as lowess
 
 import OrbitoolBase
+from OrbitoolUnpickler import Unpickler
 
 
 def nullSendStatus(fileTime: datetime.datetime, msg: str, index: int, length: int):
@@ -533,7 +534,7 @@ class NormalDistributionFunc:
             for row in np.stack((mz, intensity), 1):
                 writer.writerow(row)
         raise ValueError("can't fit peak in (%.5f,%.5f) at spectrum %s" % (
-            mz[0], mz[-1], peak.spectrum.timeRange[0].strftime(OrbitoolBase.timeFormat)))
+            mz[0], mz[-1], peak.spectrum.timeRange[0].replace(microsecond=0).isoformat()))
 
 
 @numba.njit(cache=True)
@@ -593,11 +594,14 @@ def obj2File(path: str, obj):
     with gzip.open(path, 'wb', compresslevel=2) as writer:
         pickle.dump(obj, writer)
 
-
 def file2Obj(path: str):
-    # with open(path, 'rb') as reader:
-    with gzip.open(path, 'rb') as reader:
-        return pickle.load(reader)
+    try:
+        with gzip.open(path, 'rb') as reader:
+            return pickle.load(reader)
+    except ModuleNotFoundError:
+        with gzip.open(path, 'rb') as reader:
+            return Unpickler(reader).load()
+
 
 
 def recalcFormula(peaks: List[OrbitoolBase.Peak], ionCalc: OrbitoolBase.IonCalculatorHint, sendStatus=nullSendStatus):
@@ -713,6 +717,24 @@ def mergePeaks(peaks: List[OrbitoolBase.Peak], ppm: float, func:NormalDistributi
         newpeaks.append(peak2)
     return newpeaks
         
+def getIsoTimeWithZone(dt: datetime.datetime):
+    return dt.astimezone().isoformat()
+
+igorTimeStandard=datetime.datetime(1904,1,1)
+def getIgorTime(dt: datetime.datetime):
+    return int((dt - igorTimeStandard).total_seconds())
+    
+matlabTimeStandard=np.float64(-719529).astype('M8[D]')
+def getMatlabTime(dt: datetime.datetime):
+    return (np.datetime64(dt) - matlabTimeStandard).astype('m8[s]').astype(float) / 86400.
+    
+excelTimeStandard = datetime.datetime(1899, 12, 31)
+def getExcelTime(dt: datetime.datetime):
+    return (dt - excelTimeStandard).total_seconds() / 86400.
+
+def getTimesExactToS(dt: datetime.datetime):
+    dt = dt.replace(microsecond=0)
+    return [getIsoTimeWithZone(dt),getIgorTime(dt),getMatlabTime(dt),getExcelTime(dt)]
 
 
 
