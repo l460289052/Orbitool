@@ -171,20 +171,21 @@ class MassList:
             peak2: MassListPeak = iter2.value
             if abs(peak2.peakPosition / peak1.peakPosition - 1) < ppm:
                 if peak1.handled and not peak2.handled:
-                    peaks.append(peak1)
+                    iter2.next()
                 elif not peak1.handled and peak2.handled:
-                    peaks.append(peak2)
+                    iter1.next()
                 else:
                     if peak1.formulaList == peak2.formulaList:
                         peak = MassListPeak((peak1.peakPosition + peak2.peakPosition) / 2, peak1.formulaList, max(peak1.splitNum, peak2.splitNum), peak1.handled)
-                        peaks.append(peak)
+                        iter1._value = peak
+                        iter2.next()
                     elif peak1.handled and peak2.handled:
                         raise ValueError("can't merge peak in mass list at %.5f with peak at %.5f using ppm = %.2f" % (
                             peak1.peakPosition, peak2.peakPosition, ppm*1e6))
                     elif len(peak1.formulaList) < len(peak2.formulaList):
-                        peaks.append(peak1)
+                        iter2.next()
                     elif len(peak1.formulaList) > len(peak2.formulaList):
-                        peaks.append(peak2)
+                        iter1.next()
                     else:
                         formulaList = list(
                             set(peak1.formulaList) & set(peak2.formulaList))
@@ -193,9 +194,8 @@ class MassList:
                             peak = MassListPeak(formulaList[0].mass(), formulaList, max(peak1.splitNum, peak2.splitNum))
                         else:
                             peak = MassListPeak((peak1.peakPosition + peak2.peakPosition) / 2, formulaList, max(peak1.splitNum, peak2.splitNum))
-                        peaks.append(peak)
-                iter1.next()
-                iter2.next()
+                        iter1._value = peak
+                        iter2.next()
             elif peak1.peakPosition < peak2.peakPosition:
                 peaks.append(peak1)
                 iter1.next()

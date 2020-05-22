@@ -286,6 +286,7 @@ def peakAt_njit(intensity: np.ndarray) -> np.ndarray:
     peakAt = peakAt[:-1] > peakAt[1:]
     return peakAt
 
+
 @numba.njit(cache=True, parallel=True)
 def _getNoise_njit(mz, intensity,  quantile) -> np.ndarray:
     minMz = np.floor(mz[0])  # float
@@ -427,7 +428,7 @@ class NormalDistributionFunc:
             peakPosition / 200), intensity=intensity / peakHeight, originalPeak=peak)
         peak.addFittedParam(param)
         return peak
-    
+
     @staticmethod
     @numba.njit(cache=True)
     def mergePeaksParam(param1: tuple, param2: tuple):
@@ -437,17 +438,21 @@ class NormalDistributionFunc:
         return (a1 + a2, mu1 * a1 / aSum + mu2 * a2 / aSum)
 
     def mergePeaks(self, peak1: OrbitoolBase.Peak, peak2: OrbitoolBase.Peak):
-        newparam = NormalDistributionFunc.mergePeaksParam(peak1.fittedParam, peak2.fittedParam)
+        newparam = NormalDistributionFunc.mergePeaksParam(
+            peak1.fittedParam, peak2.fittedParam)
         if peak1.originalPeak is not None and peak1.originalPeak == peak2.originalPeak:
             newmz = peak1.originalPeak.mz
         else:
             newmz = np.unique(np.concatenate((peak1.mz, peak2.mz)))
-            select = np.concatenate(((newmz[1:] - newmz[:-1]) > 1e-9,np.ones(1,dtype=np.bool)))
-            newmz=newmz[select]
+            select = np.concatenate(
+                ((newmz[1:] - newmz[:-1]) > 1e-9, np.ones(1, dtype=np.bool)))
+            newmz = newmz[select]
         newIntensity = self._funcFit(newmz, *newparam)
-        newPeak=OrbitoolBase.Peak(peak1.spectrum, mz=newmz, intensity=newIntensity, originalPeak=peak1.originalPeak, splitNum=(peak1.splitNum - 1) if isinstance(peak1.splitNum, int) else 1)
-        peakIntensity=self._funcFit(newparam[1], *newparam)
-        newPeak.addFittedParam(newparam, newparam[1], peakIntensity, newparam[0])
+        newPeak = OrbitoolBase.Peak(peak1.spectrum, mz=newmz, intensity=newIntensity, originalPeak=peak1.originalPeak, splitNum=(
+            peak1.splitNum - 1) if isinstance(peak1.splitNum, int) else 1)
+        peakIntensity = self._funcFit(newparam[1], *newparam)
+        newPeak.addFittedParam(
+            newparam, newparam[1], peakIntensity, newparam[0])
         return newPeak
 
     def normFunc(self, x):
@@ -528,13 +533,13 @@ class NormalDistributionFunc:
                     raise ValueError(
                         "can't fit use peaks num as "+str(splitNum))
             param = param[:-2]
-        with open('errorpeak.csv', 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(['mz', 'intensity'])
-            for row in np.stack((mz, intensity), 1):
-                writer.writerow(row)
-        raise ValueError("can't fit peak in (%.5f,%.5f) at spectrum %s" % (
-            mz[0], mz[-1], peak.spectrum.timeRange[0].replace(microsecond=0).isoformat()))
+        peakstr = [f'sigma={self.peakSigmaFit}']
+        peakstr.append(','.join(['mz', 'intensity']))
+        for row in np.stack((mz, intensity), 1):
+            peakstr.append(','.join(row))
+        peakstr = '\n'.join(peakstr)
+        raise ValueError("can't fit peak in (%.5f,%.5f) at spectrum %s\n%s" % (
+            mz[0], mz[-1], peak.spectrum.timeRange[0].replace(microsecond=0).isoformat(), peakstr))
 
 
 @numba.njit(cache=True)
@@ -594,6 +599,7 @@ def obj2File(path: str, obj):
     with gzip.open(path, 'wb', compresslevel=2) as writer:
         pickle.dump(obj, writer)
 
+
 def file2Obj(path: str):
     try:
         with gzip.open(path, 'rb') as reader:
@@ -601,7 +607,6 @@ def file2Obj(path: str):
     except ModuleNotFoundError:
         with gzip.open(path, 'rb') as reader:
             return Unpickler(reader).load()
-
 
 
 def recalcFormula(peaks: List[OrbitoolBase.Peak], ionCalc: OrbitoolBase.IonCalculatorHint, sendStatus=nullSendStatus):
@@ -638,7 +643,7 @@ def recalcFormula(peaks: List[OrbitoolBase.Peak], ionCalc: OrbitoolBase.IonCalcu
     sendStatus(time, msg, length, length)
 
 
-def calculateResidual(fittedPeaks: OrbitoolBase.Peak, fitFunc: NormalDistributionFunc, fileTime:datetime.datetime = datetime.datetime.now(), sendStatus=nullSendStatus):
+def calculateResidual(fittedPeaks: OrbitoolBase.Peak, fitFunc: NormalDistributionFunc, fileTime: datetime.datetime = datetime.datetime.now(), sendStatus=nullSendStatus):
     '''
     fittedPeaks will be changed
     '''
@@ -661,18 +666,18 @@ def calculateResidual(fittedPeaks: OrbitoolBase.Peak, fitFunc: NormalDistributio
             residualInt.append(ointensity)
         ointensity -= fitFunc._funcFit(
             omz, *peak.fittedParam)
-        
+
     sendStatus(fileTime, msg, length, length)
     msg = "concatenate residual"
-    sendStatus(fileTime, msg, 0,1)
-   
+    sendStatus(fileTime, msg, 0, 1)
+
     residualMz = np.concatenate(residualMz)
     residualInt = np.concatenate(residualInt)
 
     return (residualMz, residualInt)
 
 
-def mergePeaks(peaks: List[OrbitoolBase.Peak], ppm: float, func:NormalDistributionFunc, ionCalc:OrbitoolBase.IonCalculatorHint, sameFormula=True):
+def mergePeaks(peaks: List[OrbitoolBase.Peak], ppm: float, func: NormalDistributionFunc, ionCalc: OrbitoolBase.IonCalculatorHint, sameFormula=True):
     '''
     if `sameFormula` == True:
         will merge peaks which have same formula or both have no formula
@@ -716,25 +721,34 @@ def mergePeaks(peaks: List[OrbitoolBase.Peak], ppm: float, func:NormalDistributi
                 continue
         newpeaks.append(peak2)
     return newpeaks
-        
+
+
 def getIsoTimeWithZone(dt: datetime.datetime):
     return dt.astimezone().isoformat()
 
-igorTimeStandard=datetime.datetime(1904,1,1)
+
+igorTimeStandard = datetime.datetime(1904, 1, 1)
+
+
 def getIgorTime(dt: datetime.datetime):
     return int((dt - igorTimeStandard).total_seconds())
-    
-matlabTimeStandard=np.float64(-719529).astype('M8[D]')
+
+
+matlabTimeStandard = np.float64(-719529).astype('M8[D]')
+
+
 def getMatlabTime(dt: datetime.datetime):
     return (np.datetime64(dt) - matlabTimeStandard).astype('m8[s]').astype(float) / 86400.
-    
+
+
 excelTimeStandard = datetime.datetime(1899, 12, 31)
+
+
 def getExcelTime(dt: datetime.datetime):
     return (dt - excelTimeStandard).total_seconds() / 86400.
 
+
 def getTimesExactToS(dt: datetime.datetime):
     dt = dt.replace(microsecond=0)
-    return [getIsoTimeWithZone(dt),getIgorTime(dt),getMatlabTime(dt),getExcelTime(dt)]
-
-
+    return [getIsoTimeWithZone(dt), getIgorTime(dt), getMatlabTime(dt), getExcelTime(dt)]
 

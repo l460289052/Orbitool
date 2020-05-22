@@ -600,7 +600,7 @@ def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OrbitoolBase.Sp
 
 
 supportedVersion = 1_02_00
-version = 1_02_07
+version = 1_02_08
 
 
 def version2Str(version):

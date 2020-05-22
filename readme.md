@@ -364,6 +364,14 @@ If you meet any bugs, please let me know. You can send me the 'error.txt' file w
 
 ## log
 
+**2020.5.22 version 1.2.8**
+Change
++ when calculate mass defect, use nearest formula instead of treat it as a grey point for a peak with multi-formula.
+
+Bug fix
++ when add peaks to mass list, there will be some peak not merged.
++ error when calculate mass defect using element.
+
 **2020.5.15 version 1.2.7**
 
 Appended

@@ -2288,13 +2288,24 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         peaks = self.workspace.spectrum3fittedPeaks
         if peaks is None:
             raise ValueError('please fit spectrum first')
-        clr_peaks = [peak for peak in peaks if len(peak.formulaList) == 1]
+        clr_peaks = [peak for peak in peaks if len(peak.formulaList) > 0]
+        clr_formula = [peak.formulaList[0] if len(peak.formulaList) == 1 else None for peak in clr_peaks]
+        for index in range(len(clr_formula)):
+            if clr_formula[index] is None:
+                peak=clr_peaks[index]
+                def ppm(formula: OrbitoolFormula.FormulaHint):
+                    return peak.peakPosition/formula.mass()-1
+                closestformula=peak.formulaList[0]
+                for formula in peak.formulaList[1:]:
+                    if abs(ppm(formula)) < abs(ppm(closestformula)):
+                        closestformula = formula
+                clr_formula[index]=closestformula
         if DBE:
-            clr_color = [peak.formulaList[0].DBE() for peak in clr_peaks]
+            clr_color = [formula.DBE() for formula in clr_formula]
             clr_color = np.array(clr_color, dtype=np.float)
         else:
             element = self.spectrum3MassDefectElementLineEdit.text()
-            clr_color = [peak.formulaList[0][element] for peak in clr_peaks]
+            clr_color = [formula[element] for formula in clr_formula]
             clr_color = np.array(clr_color, dtype=np.int)
 
         clr_x = [peak.peakPosition for peak in clr_peaks]
@@ -2365,6 +2376,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         sc = ax.scatter(clr_x, clr_y, s=clr_size, c=clr_color,
                         cmap=cmap, linewidths=0.5, edgecolors='k')
         clrb = fig.colorbar(sc)
+        element = self.spectrum3MassDefectElementLineEdit.text()
         clrb.set_label('DBE' if DBE else f'Element {element}', rotation=270)
 
         ax.autoscale(True)
