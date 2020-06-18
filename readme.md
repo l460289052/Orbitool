@@ -256,7 +256,7 @@ use modified binPMF:
 
 Denoised spectrum will be shown as green while original spectrum will be shown as blue. You can choose to remove peaks below LOD, or all peaks minus LOD, or don't do denoise.
 
-![spectrum1](img\spectrum1.png)
+![spectrum1](img/spectrum1.png)
 
 ##### Export noise
 
@@ -292,7 +292,7 @@ all spectra are shown in left table. Select how much peak used in peak fitting a
 
 Push your left mouse button and scroll, a red line will appear like below figure. When you release button, all peak crossed will be removed. If you delete caches, may take seconds initializing.
 
-![peakfit1](img\peakfit1.png)
+![peakfit1](img/peakfit1.png)
 
 #### Cancel remove
 
@@ -322,7 +322,7 @@ canceled peak's color often is different with color before removing
 
 by pushing "Show selected file's info", you will get a figure show a file's calibration curve. The x axis will be mz range you set in tab 'Formula'.
 
-![filecalibrationinfo](\img\filecalibrationinfo.png)
+![filecalibrationinfo](\img/filecalibrationinfo.png)
 
 ### Spectra&Peak fit
 
@@ -332,11 +332,11 @@ If you want to see a spectrum's peaks, select a spectrum and push 'default'. Thi
 
 This figure will automatically show 5 highest peaks' formula whose peak point is in window. If one of the 5 highest peak have no formula, formula will belong to the sixth one, etc.
 
-![spectrum2](img\spectrum2.png)
+![spectrum2](img/spectrum2.png)
 
 If you want to refit a peak, could double click a peak in peak list. You can change 'peak num' and push 'Re-fit' button. If you click 'Save' button, the change will be added to peak list, and the peaks' formulas won't be changed unless you refit the spectrum again. You can change formula in 'Peak fit' box by double clicking that cell.
 
-![peakfit2](img\peakfit2.png)
+![peakfit2](img/peakfit2.png)
 
 > you can change 2 things in this groupbox: peak num, formulas
 
@@ -344,7 +344,7 @@ If you want to refit a peak, could double click a peak in peak list. You can cha
 
 you can choose what rainbow stand for, DBE or certain element's num. And you can choose whether use size( aka area) stand for log intensity or intensity.
 
-![mass defect](img\massdefect.png)
+![mass defect](img/massdefect.png)
 
 ### Time series
 
