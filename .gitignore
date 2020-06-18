@@ -13,7 +13,6 @@ error.txt
 *.Orbit*
 *.csv
 *.pdf
-img
 build
 *.c
 *.cpp
