@@ -715,7 +715,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @openfile(caption="Save as", filter="Work file(*.OrbitWork)")
     def qWorkspaceImport(self, file):
         def process(filepath, sendStatus):
-            return OrbitoolFunc.file2Obj(filepath)
+            return OrbitoolFunc.file2Obj(filepath, sendStatus)
 
         thread = QThread(process, (file,))
         thread.finished.connect(self.workspaceImportFinished)
