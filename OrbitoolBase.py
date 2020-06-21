@@ -209,10 +209,10 @@ class MassList:
             indexes = [indexes]
         else:
             indexes = indexes.copy()
-            indexes.sort(reverse=True)
+        indexes = np.unique(indexes)
         poped = []
         peaks = self._peaks
-        for index in indexes:
+        for index in indexes[::-1]:
             poped.append(peaks.pop(index))
         poped.reverse()
         return poped
