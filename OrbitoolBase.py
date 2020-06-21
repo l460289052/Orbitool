@@ -209,19 +209,19 @@ class MassList:
             indexes = [indexes]
         else:
             indexes = indexes.copy()
-            indexes.sort(reverse=True)
+        indexes = np.unique(indexes)
         poped = []
         peaks = self._peaks
-        for index in indexes:
+        for index in indexes[::-1]:
             poped.append(peaks.pop(index))
         poped.reverse()
         return poped
 
     def __getitem__(self, index: Union[int, slice, range]) -> Union[Peak, List[Peak]]:
-        if isinstance(index, (int, slice)):
-            return self._peaks[index]
-        elif isinstance(index, range):
+        if isinstance(index, range):
             return self._peaks[index.start:index.stop:index.step]
+        else:
+            return self._peaks[index]
 
     def __iter__(self):
         return iter(self._peaks)

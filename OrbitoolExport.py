@@ -203,13 +203,14 @@ def exportCalibrationInfo(writer:csv.writer, fileList:FileList, ionList:List[Tup
 @checkOpenCsv
 def exportMassList(writer: csv.writer, massList: MassList, sendStatus=nullSendStatus):
     msg = "exporting mass list"
-    header = ['formula/mz']
+    header = ['formula','mz']
     now = datetime.now()
     writer.writerow(header)
     length = len(massList)
     for index, peak in enumerate(massList):
         sendStatus(now, msg, index, length)
-        writer.writerow([str(peak.formulaList[0] if len(peak.formulaList) == 1 else peak.peakPosition)])
+        writer.writerow([str(peak.formulaList[0]) if len(
+            peak.formulaList) == 1 else '', peak.peakPosition])
         
 def exportFitInfo(folderpath, peakFitFunc:PeakFitFunc, sendStatus=nullSendStatus):
     msg="exporting fit information"

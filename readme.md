@@ -364,6 +364,13 @@ If you meet any bugs, please let me know. You can send me the 'error.txt' file w
 
 ## log
 
+**2020.6.21 version 1.2.9**
+Change
++ when export mass list, use 2 columns (formula,mz) instead of 1 mixed column
+
+Bug fix
++ some "index out of range"
+
 **2020.5.22 version 1.2.8**
 Change
 + when calculate mass defect, use nearest formula instead of treat it as a grey point for a peak with multi-formula.

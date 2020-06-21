@@ -744,9 +744,9 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             if os.path.exists(path):
                 fileList.addFile(path)
             while time not in fileList:
-                showInfo("cannot find file '%s'" % path)
+                showInfo(f"cannot find file '{path}'")
                 files = QtWidgets.QFileDialog.getOpenFileNames(
-                    caption="Select one or more files",
+                    caption=f"Select '{path}'' or more files",
                     directory='.',
                     filter="RAW files(*.RAW)")
                 for path in files[0]:
@@ -821,7 +821,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         table = self.formulaIsotopeTableWidget
         indexes = table.selectedIndexes()
         indexes = [index.row() for index in indexes]
-        for index in reversed(indexes):
+        indexes = np.unique(indexes)
+        for index in indexes[::-1]:
             table.removeRow(index)
         table.show()
 
@@ -1055,8 +1056,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         table = self.fileTableWidget
         indexes = table.selectedIndexes()
         indexes = [index.row() for index in indexes]
-        indexes.sort(reverse=True)
-        for index in indexes:
+        indexes = np.unique(indexes)
+        for index in indexes[::-1]:
             self.fileList.rmFile(table.item(index, 3).text())
             table.removeRow(index)
         table.show()
@@ -1593,10 +1594,10 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @withoutArgs
     def qCalibrationRmIon(self):
         indexes = self.calibrationIonsTableWidget.selectedIndexes()
-        indexes = sorted([index.row() for index in indexes], reverse=True)
+        indexes = np.unique(indexes)
         table = self.calibrationIonsTableWidget
         ionList = self.calibrationIonList
-        for index in indexes:
+        for index in indexes[::-1]:
             table.removeRow(index)
             ionList.pop(index)
 
@@ -2225,11 +2226,12 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @withoutArgs
     def qSpectrum3PeaksAdd(self):
         indexes = self.spectrum3PeakListTableWidget.selectedIndexes()
+        indexes=np.unique([index.row() for index in indexes])
         workspace = self.workspace
         massList = workspace.massList
         peaks = workspace.spectrum3fittedPeaks
         toBeAdded: List[OrbitoolBase.Peak] = [
-            peaks[index.row()] for index in indexes]
+            peaks[index] for index in indexes]
         massList.addPeaks(toBeAdded)
         self.showMassList(massList)
 
@@ -2432,7 +2434,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     def qMassListRemoveSelected(self):
         table = self.massListTableWidget
         indexes = table.selectedIndexes()
-        indexes = [index.row() for index in indexes]
+        indexes = np.unique([index.row() for index in indexes])
         massList = self.workspace.massList
         massList.popPeaks(indexes)
         # indexes.sort(reverse=True)
@@ -2462,7 +2464,9 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                     formulaList = []
                     if len(row) == 0:
                         continue
-                    mass = row[0]
+                    mass = row[0].strip()
+                    if len(mass) == 0 and len(row) > 1:
+                        mass = row[1].strip()
                     try:
                         peakPosition = float(mass)
                     except ValueError:
@@ -2497,7 +2501,9 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                     formulaList = []
                     if len(row) == 0:
                         continue
-                    mass = row[0]
+                    mass = row[0].strip()
+                    if len(mass) == 0 and len(row) > 1:
+                        mass = row[1].strip()
                     try:
                         peakPosition = float(mass)
                     except ValueError:
@@ -2550,12 +2556,14 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             speaks = None
             if self.timeSeriesSelectedPeaksRadioButton.isChecked():
                 indexes = self.spectrum3PeakListTableWidget.selectedIndexes()
+                indexes=np.unique([index.row() for index in indexes])
                 peaks = workspace.spectrum3fittedPeaks
-                speaks = [peaks[index.row()] for index in indexes]
+                speaks = [peaks[index] for index in indexes]
             elif self.timeSeriesSelectedMassListRadioButton.isChecked():
                 indexes = self.massListTableWidget.selectedIndexes()
+                indexes=np.unique([index.row() for index in indexes])
                 massList = workspace.massList
-                speaks = [massList[index.row()] for index in indexes]
+                speaks = [massList[index] for index in indexes]
             elif self.timeSeriesMassListRadioButton.isChecked():
                 speaks = workspace.massList
             else:
@@ -2656,7 +2664,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @withoutArgs
     def qTimeSeriesRemoveSelected(self):
         indexes = self.timeSeriesesTableWidget.selectedIndexes()
-        indexes = [index.row() for index in indexes]
+        indexes = np.unique([index.row() for index in indexes])
         workspace = self.workspace
         timeSeries = workspace.timeSerieses
         tag2Line = self.timeSeriesTag2Line

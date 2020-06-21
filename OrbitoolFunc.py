@@ -604,8 +604,8 @@ def file2Obj(path: str, sendStatus=None):
     try:
         with gzip.open(path, 'rb') as reader:
             return pickle.load(reader)
-    if sendStatus is not None:
-        sendStatus(datetime.datetime.now(),'old files',-1,0)
+        if sendStatus is not None:
+            sendStatus(datetime.datetime.now(),'old files',-1,0)
     except ModuleNotFoundError:
         with gzip.open(path, 'rb') as reader:
             return Unpickler(reader).load()
