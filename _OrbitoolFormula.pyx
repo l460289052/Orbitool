@@ -15,6 +15,10 @@ import pyteomics.mass
 import re
 from typing import Union
 
+import cython
+import numpy as np
+cimport numpy as np
+
 from _OrbitoolElement cimport str2element, _factor, _andfactor, elements, elementsMap, elementMass,\
      elementMassNum , elementMassDist, elementNumMap, elementParasMap, CHmin
 
@@ -101,7 +105,7 @@ cdef class Formula:
         '''
         try:
             if isinstance(formula, str):
-                if not re.fullmatch(r"([A-Z][a-z]{0,2}(\[\d+\])?\d*)+[-+]?", formula):
+                if not re.fullmatch(r"([A-Z][a-z]{0,2}(\[\d+\])?\d*)*[-+]?", formula):
                     raise ValueError(str(formula))
                 charge = formula[-1]
                 if charge == '+':
@@ -157,7 +161,7 @@ cdef class Formula:
         return _elements_isotopes_mass(self.elements, self.isotopes)
 
     cpdef Formula findOrigin(self):
-        cdef Formula formula = Formula()
+        cdef Formula formula = Formula.__new__(Formula)
         formula.elements=self.elements
         return formula
 
@@ -257,7 +261,7 @@ cdef class Formula:
             elif index > 0:
                 return ''.join(rets)+ f'e-{index}'
             elif index < 0:
-                return ''.join(rets)+ f'e+{index}'
+                return ''.join(rets)+ f'e+{-index}'
         return ''.join(rets)
 
     cpdef double relativeAbundance(self):
@@ -267,21 +271,20 @@ cdef class Formula:
             pyteomics.mass.isotopic_composition_abundance(
                 formula=self.findOrigin().toStr(True, False))
 
-    cdef void setE(self, int index, int num):
+    cpdef void clear(self):
+        self.elements.clear()
+        self.isotopes.clear()
+
+    cdef void setE(self, int index, int num) except *:
+        if index != 0 and num<self.getI(index,0):
+            raise ValueError(f"the number of {index} '{elements[index]}' shouldn't be lesser than {self.getI(index,0)}")
+        
         cdef unordered_map[int, int].iterator it
-        cdef cpplist[pair[int, int]].iterator lit
-        if num==0 or num < self.getI(index, 0):
-            lit = self.isotopes.begin()
-            while lit!=self.isotopes.end():
-                if deref(lit).first == index:
-                    lit = self.isotopes.erase(lit)
-                else:
-                    inc(lit)
-            if num==0:
-                it = self.elements.find(index)
-                if it != self.elements.end():
-                    self.elements.erase(it)
-                return
+        if num==0:
+            it = self.elements.find(index)
+            if it != self.elements.end():
+                self.elements.erase(it)
+            return
         self.elements[index] = num
 
     cdef int getE(self, int index):
@@ -293,24 +296,36 @@ cdef class Formula:
             return 0
         return deref(it).second
 
-    cdef void setI(self, int index, int m, int num):
+    cdef void setI(self, int index, int m, int num) except *:
         '''
         wouldn't change elements' nums
         eg. C2 -> setI(6,13,1) -> CC[13]
+            spectial: setI(6,0,0) # clear
         '''
+        if num<0:
+            raise ValueError(f"the number of {index} '{elements[index]}[{m}]' shouldn't be lesser than 0")
         cdef cpplist[pair[int, int]].iterator it = self.isotopes.begin()
-        while it!=self.isotopes.end():
-            if deref(it).first == index and (deref(it).second >> _factor) == m:
-                if num == 0:
-                    self.isotopes.erase(it)
-                else:
+        if num==0:
+            if m==0:
+                while it!=self.isotopes.end():
+                    if deref(it).first == index:
+                        self.isotopes.erase(it)
+            else:
+                while it!=self.isotopes.end():
+                    if deref(it).first == index and (deref(it).second >> _factor) == m:
+                        self.isotopes.erase(it)
+                        return
+        else:
+            if m==0:
+                raise ValueError("if m==0, index must equal to 0")
+            if self.getE(index)<self.getI(index,0)-self.getI(index,m)+num:
+                raise ValueError(f"the number of {index} '{elements[index]}[{m}]' shouldn't be greater than {self.getE(index)-self.getI(index,0)+self.getI(index,m)}")
+            while it!=self.isotopes.end():
+                if deref(it).first == index and (deref(it).second >> _factor) == m:
                     deref(it).second = (m << _factor) + num
-                return
-            inc(it)
-        if num != 0:
+                    return
+                inc(it)
             self.isotopes.push_back(pair[int,int](index, (m<<_factor)+num))
-            if num > self.getE(index):
-                self.setE(index, num)
 
     cdef int getI(self, int index, int m):
         '''
@@ -329,18 +344,118 @@ cdef class Formula:
                     ret += i.second & _andfactor
         return ret
 
+    cdef Formula copy(self):
+        cdef Formula ret = Formula.__new__(Formula)
+        ret.elements=self.elements
+        ret.isotopes=self.isotopes
+        return ret
+
+    cdef void add_(self, Formula f)except *:
+        cdef pair[int, int] i
+        for i in f.elements:
+            self.setE(i.first,self.getE(i.first)+i.second)
+        for i in f.isotopes:
+            self.setI(i.first,i.second>>_factor,self.getI(i.first,i.second>>_factor)+(i.second&_andfactor))
+
+    cdef void sub_(self, Formula f)except *:
+        cdef pair[int, int] i
+        # isotopes first
+        for i in f.isotopes:
+            self.setI(i.first,i.second>>_factor,self.getI(i.first,i.second>>_factor)-(i.second&_andfactor))
+        for i in f.elements:
+            self.setE(i.first,self.getE(i.first)-i.second)
+
+    cdef void mul_(self, int times)except *:
+        if times<=0:
+            if times==0:
+                self.clear()
+                return
+            raise ValueError("times should be in 0,1,...")
+
+        cdef unordered_map[int,int].iterator i = self.elements.begin()
+        cdef cpplist[pair[int,int]].iterator it = self.isotopes.begin()
+        while i!=self.elements.end():
+            # cython bug
+            # deref(it).second*=times
+            self.elements[deref(i).first]=times*deref(i).second
+            inc(i)
+        while it!=self.isotopes.end():
+            deref(it).second=(deref(it).second>>_factor<<_factor)+(deref(it).second&_andfactor)*times
+            inc(it)
+
+    cdef bool eq(self, Formula f):
+        if not _elements_eq(self.elements, f.elements):
+            return False
+        if self.isotopes.size()!=f.isotopes.size():
+            return False
+        cdef pair[int, int] i, j
+        cdef bool flag 
+        for i in self.isotopes:
+            flag = False
+            for j in f.isotopes:
+                if i.first==j.first and i.second==j.second:
+                    flag=True
+            if not flag:
+                return False
+        return True
+
+    cdef bool contains(self, Formula f):
+        if self.elements.size()< f.elements.size() or self.isotopes.size()<f.isotopes.size():
+            return False
+
+        cdef pair[int, int] i
+        for i in f.elements:
+            if self.getE(i.first)-self.getI(i.first,0)<i.second-f.getI(i.first,0):
+                return False
+        for i in f.isotopes:
+            if self.getI(i.first,i.second>>_factor)<i.second&_andfactor:
+                return False
+        return True
+
+    @cython.boundscheck(False)
+    def to_numpy(self):
+        '''
+        atomic number | mass number | number
+        '''
+        cdef np.ndarray[np.int_t, ndim=2] ret = np.empty((self.elements.size()+self.isotopes.size(),3),dtype=int)
+        cdef int i = 0
+        cdef pair[int, int] it
+        for it in self.elements:
+            ret[i,0]=it.first
+            ret[i,1]=0
+            ret[i,2]=it.second
+            inc(i)
+        for it in self.isotopes:
+            ret[i,0]=it.first
+            ret[i,1]=it.second>>_factor
+            ret[i,2]=it.second&_andfactor
+            inc(i)
+        return ret
+
+    @classmethod
+    @cython.boundscheck(False)
+    def from_numpy(cls, np.ndarray[np.int_t, ndim=2] data):
+        assert data.shape[1]==3
+        cdef Formula f = Formula.__new__(Formula)
+        cdef int i
+        for i in range(data.shape[0]):
+            if data[i,1]==0:
+                f.setE(data[i,0],data[i,2])
+            else:
+                f.setI(data[i,0],data[i,1],data[i,2])
+        return f
+
     def __setitem__(self, str key, int num):
         cdef int index, m
         str2element(key, &index, &m)
-        if elementMassNum[index]==m:
-            self.setE(index, num + self.getI(index, 0))
-        elif m > 0:
-            if elementMassDist[index].find(m) != elementMassDist[index].end():
-                self.setI(index, m, num)
-            else:
-                raise KeyError(f'have no element {key}')
-        else:
+        if m==0:
             self.setE(index, num)
+        elif elementMassNum[index]==m:
+            self.setE(index, num + self.getI(index, 0))
+        elif elementMassDist[index].find(m) != elementMassDist[index].end():
+            self.setI(index, m, num)
+        else:
+            raise KeyError(f'have no element {key}')
         
     def __getitem__(self, str key):
         cdef int index ,m
@@ -359,22 +474,46 @@ cdef class Formula:
     def __repr__(self):
         return self.toStr(False, True)
 
-    def __eq__(self, Formula formula):
-        if not _elements_eq(self.elements, formula.elements):
-            return False
-        if self.isotopes.size()!=formula.isotopes.size():
-            return False
-        cdef pair[int, int] i, j
-        cdef bool flag 
-        for i in self.isotopes:
-            it=formula.isotopes.begin()
-            flag = False
-            for j in formula.isotopes:
-                if i.first==j.first and i.second==j.second:
-                    flag=True
-            if not flag:
-                return False
-        return True
+    def __copy__(self):
+        return self.copy()
+
+    def __iadd__(self, Formula f):
+        self.add_(f)
+        return self
+
+    def __add__(self, Formula f):
+        cdef Formula ret = Formula.copy(self)
+        ret.add_(f)
+        return ret
+
+    def __isub__(self, Formula f):
+        self.sub_(f)
+        return self
+
+    def __sub__(self, Formula f):
+        cdef Formula ret = Formula.copy(self)
+        ret.sub_(f)
+        return ret
+
+    def __imul__(self, int t):
+        self.mul_(t)
+        return self
+
+    def __mul__(first, second):
+        cdef Formula ret
+        if isinstance(first, Formula):
+            ret = Formula.copy(first)
+            ret.mul_(second)
+        else:
+            ret = Formula.copy(second)
+            ret.mul_(first)
+        return ret
+
+    def __eq__(self, Formula f):
+        return self.eq(f)
+
+    def __contains__(self, Formula f):
+        return self.contains(f)
 
     def __hash__(self):
         cdef int ret = 0
@@ -384,8 +523,3 @@ cdef class Formula:
         for i in self.isotopes:
             ret^=hash((i.first<<(_factor<<1))+i.second)
         return ret
-
-
-
-
-

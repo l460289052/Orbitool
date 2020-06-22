@@ -180,23 +180,27 @@ you can add an item to mass list like those:
 
 ##### csv file
 
-Only a column
+Two columns
 
 format:
 
-| formula/mz      |
-| --------------- |
-| mz1 or formula1 |
-| mz2 or formula2 |
-| ...             |
+| formula           | mz           |
+| ----------------- | ------------ |
+| formula1 or empty | mz1 or empty |
+| formula2 or empty | mz2 or empty |
+| ...               | ...          |
 
 example:
 
-| formula/mz |
-| ---------- |
-| 199.09763  |
-| C6H5O8N2-  |
-| C4H8O12N3- |
+| formula    | mz        |
+| ---------- | --------- |
+|            | 199.09763 |
+| C6H5O8N2-  | 233.00514 |
+| C4H8O12N3- |           |
+
+When import mass list from csv file, you can choose formula or mz (If you provide both, Orbitool will insert formula instead of mz into mass list).
+
+When export mass list to csv file, Orbitool will fill mz column and formula for peak who has formula.
 
 #### Merge
 

@@ -154,7 +154,7 @@ cdef class IonCalculator:
         cdef double DBE2min = self.DBEmin*2
         cdef double DBE2max = self.DBEmax*2
 
-        cdef Formula f = Formula()
+        cdef Formula f = Formula.__new__(Formula)
         f.charge = self.charge
 
         cdef int Cnum, Onum, Hnum, num, index, Cmin, Cmax, Omax, Hmax, numMax, step
@@ -277,7 +277,7 @@ cdef class IonCalculator:
         self.getFormula(MR, &fit2)
         cdef Formula formula
         while fit1 != fit2:
-            formula = Formula()
+            formula = Formula.__new__(Formula)
             formula.elements = deref(fit1).second
             ret.append(formula)
             preinc(fit1)
@@ -286,7 +286,7 @@ cdef class IonCalculator:
         self.getIsotope(MR, &iit2)
         while iit1!=iit2:
             self.getFormula(deref(iit1).second.first, &fit1)
-            formula = Formula()
+            formula = Formula.__new__(Formula)
             formula.elements = deref(fit1).second
             formula.isotopes = deref(iit1).second.second
             ret.append(formula)

@@ -44,10 +44,17 @@ cdef:
         cdef str iToStr(int index, int m, int num)
         cpdef toStr(self, bool showProton = *, bool withCharge = *)
         cpdef double relativeAbundance(self)
-        cdef void setE(self, int index, int num)
+        cpdef void clear(self)
+        cdef void setE(self, int index, int num)except *
         cdef int getE(self, int index)
-        cdef void setI(self, int index, int m, int num)
+        cdef void setI(self, int index, int m, int num)except *
         cdef int getI(self, int index, int m)
+        cdef Formula copy(self)
+        cdef void add_(self, Formula f)except *
+        cdef void sub_(self, Formula f)except *
+        cdef void mul_(self, int times)except *
+        cdef bool eq(self, Formula f)
+        cdef bool contains(self, Formula f)
 
 
 

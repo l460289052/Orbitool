@@ -974,7 +974,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @busy
     @withoutArgs
     def qFormulaCalc(self):
-        text = self.formulaInputLineEdit.text()
+        text = self.formulaInputLineEdit.text().strip()
         try:
             mass = float(text)
             formulaList = self.ionCalculator.get(mass)
