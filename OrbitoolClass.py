@@ -10,7 +10,6 @@ import multiprocessing
 
 import scipy.optimize
 import numpy as np
-from numba import njit
 from sortedcontainers import SortedDict
 
 import OrbitoolBase
@@ -651,5 +650,9 @@ class Workspace(object):
         self.massList: MassList = OrbitoolBase.MassList()
 
         # @showTimeSerieses
-        self.timeSerieses: List[TimeSeries] = []
+        self.timeSerieses: List[OrbitoolBase.TimeSeries] = []
         self.timeSeriesIndex = None
+
+        # @showTimeSeriesCat
+        self.timeSerieses: Dict[OrbitoolFormula.FormulaHint, OrbitoolBase.TimeSeries] = {}
+

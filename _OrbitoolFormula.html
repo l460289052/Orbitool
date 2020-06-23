@@ -4348,23 +4348,61 @@ static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_16to_numpy(struct __
   __pyx_r = ((PyObject *)__pyx_v_ret);
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">434</span>: </pre>
-<pre class="cython line score-14" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">435</span>:     <span class="nd">@classmethod</span></pre>
-<pre class='cython code score-14 '>  __pyx_t_2 = <span class='pyx_c_api'>__Pyx_Method_ClassMethod</span>(__pyx_t_3);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 435, __pyx_L1_error)</span>
+<pre class="cython line score-14" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">435</span>:     <span class="nd">@staticmethod</span></pre>
+<pre class='cython code score-14 '>  __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyObject_CallOneArg</span>(__pyx_builtin_staticmethod, __pyx_t_3);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 435, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_3); __pyx_t_3 = 0;
   if (<span class='py_c_api'>PyDict_SetItem</span>((PyObject *)__pyx_ptype_4code_16_OrbitoolFormula_Formula-&gt;tp_dict, __pyx_n_s_from_numpy, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 437, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
   <span class='py_c_api'>PyType_Modified</span>(__pyx_ptype_4code_16_OrbitoolFormula_Formula);
 </pre><pre class="cython line score-0">&#xA0;<span class="">436</span>:     <span class="nd">@cython</span><span class="o">.</span><span class="n">boundscheck</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></pre>
-<pre class="cython line score-18" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">437</span>:     <span class="k">def</span> <span class="nf">from_numpy</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="mf">2</span><span class="p">]</span> <span class="n">data</span><span class="p">):</span></pre>
-<pre class='cython code score-18 '>/* Python wrapper */
-static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_19from_numpy(PyObject *__pyx_v_cls, PyObject *__pyx_v_data); /*proto*/
-static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_19from_numpy(PyObject *__pyx_v_cls, PyObject *__pyx_v_data) {
+<pre class="cython line score-54" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">437</span>:     <span class="k">def</span> <span class="nf">from_numpy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="mf">2</span><span class="p">]</span> <span class="n">data</span><span class="p">):</span></pre>
+<pre class='cython code score-54 '>/* Python wrapper */
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_19from_numpy(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_4code_16_OrbitoolFormula_7Formula_19from_numpy = {"from_numpy", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_4code_16_OrbitoolFormula_7Formula_19from_numpy, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_19from_numpy(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyArrayObject *__pyx_v_data = 0;
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("from_numpy (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&amp;__pyx_n_s_data,0};
+    PyObject* values[1] = {0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args);
+      switch (pos_args) {
+        case  1: values[0] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = <span class='py_c_api'>PyDict_Size</span>(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = <span class='pyx_c_api'>__Pyx_PyDict_GetItemStr</span>(__pyx_kwds, __pyx_n_s_data)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+      }
+      if (unlikely(kw_args &gt; 0)) {
+        if (unlikely(<span class='pyx_c_api'>__Pyx_ParseOptionalKeywords</span>(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "from_numpy") &lt; 0)) <span class='error_goto'>__PYX_ERR(0, 437, __pyx_L3_error)</span>
+      }
+    } else if (<span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args) != 1) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = <span class='py_macro_api'>PyTuple_GET_ITEM</span>(__pyx_args, 0);
+    }
+    __pyx_v_data = ((PyArrayObject *)values[0]);
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("from_numpy", 1, 1, 1, <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)); <span class='error_goto'>__PYX_ERR(0, 437, __pyx_L3_error)</span>
+  __pyx_L3_error:;
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("code._OrbitoolFormula.Formula.from_numpy", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
   if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_data), __pyx_ptype_5numpy_ndarray, 1, "data", 0))) <span class='error_goto'>__PYX_ERR(0, 437, __pyx_L1_error)</span>
-  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_18from_numpy(((PyTypeObject*)__pyx_v_cls), ((PyArrayObject *)__pyx_v_data));
+  __pyx_r = __pyx_pf_4code_16_OrbitoolFormula_7Formula_18from_numpy(__pyx_v_data);
 
   /* function exit code */
   goto __pyx_L0;
@@ -4375,7 +4413,7 @@ static PyObject *__pyx_pw_4code_16_OrbitoolFormula_7Formula_19from_numpy(PyObjec
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_18from_numpy(CYTHON_UNUSED PyTypeObject *__pyx_v_cls, PyArrayObject *__pyx_v_data) {
+static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_18from_numpy(PyArrayObject *__pyx_v_data) {
   struct __pyx_obj_4code_16_OrbitoolFormula_Formula *__pyx_v_f = 0;
   int __pyx_v_i;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_data;
@@ -4414,8 +4452,19 @@ static PyObject *__pyx_pf_4code_16_OrbitoolFormula_7Formula_18from_numpy(CYTHON_
   return __pyx_r;
 }
 /* … */
+  __pyx_tuple__17 = <span class='py_c_api'>PyTuple_Pack</span>(3, __pyx_n_s_data, __pyx_n_s_f, __pyx_n_s_i);<span class='error_goto'> if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 437, __pyx_L1_error)</span>
+  <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_tuple__17);
+  <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_tuple__17);
+/* … */
+  __pyx_t_3 = PyCFunction_NewEx(&amp;__pyx_mdef_4code_16_OrbitoolFormula_7Formula_19from_numpy, NULL, __pyx_n_s_code__OrbitoolFormula);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 437, __pyx_L1_error)</span>
+  <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
+  if (<span class='py_c_api'>PyDict_SetItem</span>((PyObject *)__pyx_ptype_4code_16_OrbitoolFormula_Formula-&gt;tp_dict, __pyx_n_s_from_numpy, __pyx_t_3) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 437, __pyx_L1_error)</span>
+  <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_3); __pyx_t_3 = 0;
+  <span class='py_c_api'>PyType_Modified</span>(__pyx_ptype_4code_16_OrbitoolFormula_Formula);
+/* … */
   <span class='pyx_c_api'>__Pyx_GetNameInClass</span>(__pyx_t_3, (PyObject *)__pyx_ptype_4code_16_OrbitoolFormula_Formula, __pyx_n_s_from_numpy);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 437, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
+  __pyx_codeobj__18 = (PyObject*)<span class='pyx_c_api'>__Pyx_PyCode_New</span>(1, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__17, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_OrbitoolFormula_pyx, __pyx_n_s_from_numpy, 437, __pyx_empty_bytes);<span class='error_goto'> if (unlikely(!__pyx_codeobj__18)) __PYX_ERR(0, 437, __pyx_L1_error)</span>
 </pre><pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">438</span>:         <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mf">1</span><span class="p">]</span><span class="o">==</span><span class="mf">3</span></pre>
 <pre class='cython code score-5 '>  #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(!Py_OptimizeFlag)) {

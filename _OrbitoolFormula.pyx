@@ -432,9 +432,9 @@ cdef class Formula:
             inc(i)
         return ret
 
-    @classmethod
+    @staticmethod
     @cython.boundscheck(False)
-    def from_numpy(cls, np.ndarray[np.int_t, ndim=2] data):
+    def from_numpy(np.ndarray[np.int_t, ndim=2] data):
         assert data.shape[1]==3
         cdef Formula f = Formula.__new__(Formula)
         cdef int i

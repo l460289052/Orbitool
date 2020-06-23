@@ -12,8 +12,6 @@ from collections.abc import Iterable
 from copy import copy
 from typing import List, Tuple
 
-import numba
-import numba.numpy_extensions
 import numpy as np
 import scipy.optimize
 import sklearn.linear_model
@@ -23,6 +21,7 @@ import statsmodels.nonparametric.smoothers_lowess as lowess
 import OrbitoolBase
 from OrbitoolUnpickler import Unpickler
 
+from _OrbitoolFunc import indexNearest as indexNearest_np, indexBetween as indexBetween_np, getPeaks as _getPeaks, peakAt as peakAt_np, getNoise as _getNoise, denoiseWithLOD as _denoiseWithLOD, linePeakCrossed, NormalDistributionFunc as _NormalDistributionFunc
 
 def nullSendStatus(fileTime: datetime.datetime, msg: str, index: int, length: int):
     pass
@@ -31,11 +30,12 @@ def nullSendStatus(fileTime: datetime.datetime, msg: str, index: int, length: in
 def defaultMethod(array, index):
     return array[index]
 
-
-defaultMethod_njit = numba.njit(defaultMethod)
-
-
 def indexFirstNotSmallerThan(array, value, indexRange: (int, int) = None, method=defaultMethod):
+    '''
+    np.searchsorted(array,value,'left')
+    or
+    np.searchsorted(array,value)
+    '''
     l, r = (0, len(array)) if indexRange is None else indexRange
     while l < r:
         t = (l + r) >> 1
@@ -44,21 +44,11 @@ def indexFirstNotSmallerThan(array, value, indexRange: (int, int) = None, method
         else:
             r = t
     return l
-
-
-@numba.njit(cache=True)
-def indexFirstNotSmallerThan_njit(array, value, indexRange: (int, int) = None, method=defaultMethod_njit):
-    l, r = (0, len(array)) if indexRange is None else indexRange
-    while l < r:
-        t = (l + r) >> 1
-        if method(array, t) < value:
-            l = t + 1
-        else:
-            r = t
-    return l
-
 
 def indexFirstBiggerThan(array, value, indexRange: (int, int) = None, method=defaultMethod):
+    '''
+    np.searchsorted(array,value,'right')
+    '''
     l, r = (0, len(array)) if indexRange is None else indexRange
     while l < r:
         t = (l + r) >> 1
@@ -67,19 +57,6 @@ def indexFirstBiggerThan(array, value, indexRange: (int, int) = None, method=def
         else:
             r = t
     return l
-
-
-@numba.njit(cache=True)
-def indexFirstBiggerThan_njit(array, value, indexRange: (int, int) = None, method=defaultMethod_njit):
-    l, r = (0, len(array)) if indexRange is None else indexRange
-    while l < r:
-        t = (l + r) >> 1
-        if method(array, t) <= value:
-            l = t + 1
-        else:
-            r = t
-    return l
-
 
 def indexNearest(array, value, indexRange: (int, int) = None, method=defaultMethod) -> int:
     '''
@@ -88,40 +65,10 @@ def indexNearest(array, value, indexRange: (int, int) = None, method=defaultMeth
     l, r = (0, len(array)) if indexRange is None else indexRange
     i = indexFirstBiggerThan(array, value, indexRange, method)
 
-    if i == r or abs(method(array, i-1)-value) < abs(method(array, i)-value):
+    if i == r or i > 0 and abs(method(array, i-1)-value) < abs(method(array, i)-value):
         return i-1
     else:
         return i
-
-
-@numba.njit(cache=True)
-def indexNearest_njit(array, value, indexRange: (int, int) = None, method=defaultMethod_njit) -> int:
-    '''
-    `indexRange`: default=(0,len(array))
-    '''
-    l, r = (0, len(array)) if indexRange is None else indexRange
-    i = indexFirstBiggerThan_njit(array, value, indexRange, method)
-
-    if i == r or abs(method(array, i-1)-value) < abs(method(array, i)-value):
-        return i-1
-    else:
-        return i
-
-
-def valueNearest(array, value, indexRange: (int, int) = None, method=defaultMethod):
-    '''
-    `indexRange`: default=(0,len(array))
-    '''
-    return method(array, indexNearest(array, value, indexRange, method))
-
-
-@numba.njit(cache=True)
-def valueNearest_njit(array, value, indexRange: (int, int) = None, method=defaultMethod_njit):
-    '''
-    `indexRange`: default=(0,len(array))
-    '''
-    return method(array, indexNearest_njit(array, value, indexRange, method))
-
 
 def indexBetween(array, valueRange, indexRange: (int, int) = None, method=defaultMethod) -> range:
     """
@@ -138,28 +85,6 @@ def indexBetween(array, valueRange, indexRange: (int, int) = None, method=defaul
         return range(l, r)
     else:
         return range(l, l)
-
-
-@numba.njit(cache=True)
-def indexBetween_njit(array, valueRange, indexRange: (int, int) = None, method=defaultMethod_njit) -> (int, int):
-    lvalue, rvalue = valueRange
-    if indexRange is None:
-        indexRange = (0, len(array))
-    l = indexFirstNotSmallerThan_njit(array, lvalue, indexRange, method)
-    r = indexFirstBiggerThan_njit(array, rvalue, indexRange, method)
-    if l < r:
-        return (l, r)
-    else:
-        return (l, l)
-
-
-def valueBetween(array, valueRange, indexRange: (int, int) = None, method=defaultMethod):
-    """
-    get list from sorted array for value in (l,r)
-    make list = [item for item in array if l<item and item<r]
-    """
-    return [method(array, x) for x in indexBetween(array, valueRange, indexRange, method)]  # [ll:t-1]->[ll:t)
-
 
 def processWithTime(func, fileTime, args, signalQueue):
     result = None
@@ -246,70 +171,13 @@ def multiProcess(func, argsList: List[Tuple], fileTime, cpu=None, sendStatusFunc
                     sendStatusFunc(fileTime, msg, length, length)
                     return results.get()
 
-
-@numba.njit(cache=True, parallel=True)
-def _getPeaks_njit(mz: np.ndarray, intensity: np.ndarray, indexRange, mzRange) -> np.ndarray:
-    start = 0
-    stop = len(mz)
-    if indexRange is not None:
-        start, stop = indexRange
-    elif mzRange is not None:
-        start, stop = indexBetween_njit(mz, mzRange)
-    mz = mz[start:stop]
-    intensity = intensity[start:stop]
-    index = np.arange(start, stop)
-
-    delta = 1e-6
-    peaksIndex = intensity > delta
-    l = index[:-1][peaksIndex[1:] > peaksIndex[:-1]]
-    r = index[1:][peaksIndex[:-1] > peaksIndex[1:]] + 1
-    if l[0] + 1 >= r[0]:
-        l = np.append((start,), l)
-    if l[-1] + 1 >= r[-1]:
-        r = np.append(r, np.array((stop,)))
-    return np.stack((l, r), 1)
-
-
 def getPeaks(spectrum: OrbitoolBase.Spectrum, indexRange: (int, int) = None, mzRange: (float, float) = None) -> List[OrbitoolBase.Peak]:
     '''
     get peak divided by 0, result peak may have many peakPoint
     '''
-    peaksRange = _getPeaks_njit(
+    peaksRange = _getPeaks(
         spectrum.mz, spectrum.intensity, indexRange, mzRange)
     return [OrbitoolBase.Peak(spectrum, range(rstart, rstop)) for rstart, rstop in peaksRange]
-
-
-@numba.njit(cache=True)
-def peakAt_njit(intensity: np.ndarray) -> np.ndarray:
-    peakAt = intensity
-    peakAt = peakAt[:-1] < peakAt[1:]
-    peakAt = peakAt[:-1] > peakAt[1:]
-    return peakAt
-
-
-@numba.njit(cache=True, parallel=True)
-def _getNoise_njit(mz, intensity,  quantile) -> np.ndarray:
-    minMz = np.floor(mz[0])  # float
-    maxMz = np.ceil(mz[1])  # float
-    peakAt = peakAt_njit(intensity)
-    mz = mz[1:-1][peakAt]
-    intensity = intensity[1:-1][peakAt]
-
-    l = 0.5
-    r = 0.8
-    tmp = mz - np.floor(mz)
-    select = (tmp > l) & (tmp < r)
-    noiseMz = mz[select]
-    noiseInt = intensity[select]
-
-    select = noiseInt < (noiseInt.mean() + noiseInt.std() * 3)
-    noiseMz = noiseMz[select]
-    noiseInt = noiseInt[select]
-    noiseQuantile = np.quantile(noiseInt, quantile)
-    noiseStd = np.std(noiseInt)
-
-    return peakAt, (noiseMz, noiseInt), (noiseQuantile, noiseStd)
-
 
 def getNoise(spectrum: OrbitoolBase.Spectrum,  quantile=0.7, sendStatus=nullSendStatus) -> Tuple[np.ndarray, np.ndarray]:
     """
@@ -318,52 +186,9 @@ def getNoise(spectrum: OrbitoolBase.Spectrum,  quantile=0.7, sendStatus=nullSend
     fileTime = spectrum.fileTime
     msg = "calc noise"
     sendStatus(fileTime, msg, -1, 0)
-    peakAt, noise, LOD = _getNoise_njit(
+    peakAt, noise, LOD = _getNoise(
         spectrum.mz, spectrum.intensity,  quantile)
     return peakAt, noise, LOD
-
-
-@numba.njit(cache=True, parallel=True)
-def _denoiseWithLOD_njit(mz: np.ndarray, intensity: np.ndarray, LOD: (float, float), peakAt: np.ndarray, minus=True) -> (np.ndarray, np.ndarray):
-    length = len(mz)
-    newIntensity = np.zeros_like(intensity)
-    mean = LOD[0]
-    std = LOD[1]
-    MAX = mean + 3 * std
-
-    # len = len(peak)
-    peakmzIndex = np.arange(0, length)[1:-1][peakAt]
-    # peakMz = mz[1:-1][peakAt]
-    peakIntensity = intensity[1:-1][peakAt]
-
-    arg = peakIntensity.argsort()
-    peakmzIndex = peakmzIndex[arg]
-    peakIntensity = peakIntensity[arg]
-
-    thresholdIndex = indexFirstBiggerThan_njit(peakIntensity, MAX)
-    peakmzIndex = peakmzIndex[thresholdIndex:]
-    for i in numba.prange(len(peakmzIndex)):
-        mzIndex = peakmzIndex[i]
-        l = mzIndex - 1
-        r = mzIndex + 1
-        while l > 0 and intensity[l] > intensity[l - 1]:
-            l -= 1
-        while r < length and intensity[r] > intensity[r + 1]:
-            r += 1
-        if minus:
-            peakI = intensity[mzIndex]
-            newIntensity[l:r + 1] = intensity[l:r + 1] / peakI * (peakI - mean)
-        else:
-            newIntensity[l:r + 1] = intensity[l:r + 1]
-
-    delta = 1e-6
-    select = newIntensity > delta
-    select[1:] = select[1:] | select[:-1]
-    select[:-1] = select[:-1] | select[1:]
-    mz = mz[select]
-    newIntensity = newIntensity[select]
-    return mz, newIntensity
-
 
 def denoiseWithLOD(spectrum: OrbitoolBase.Spectrum, LOD: (float, float), peakAt: np.ndarray = None, minus=False, sendStatus=OrbitoolBase.nullSendStatus) -> OrbitoolBase.Spectrum:
     fileTime = spectrum.fileTime
@@ -372,8 +197,8 @@ def denoiseWithLOD(spectrum: OrbitoolBase.Spectrum, LOD: (float, float), peakAt:
 
     newSpectrum = copy(spectrum)
     if peakAt is None:
-        peakAt = peakAt_njit(intensity)
-    mz, intensity = _denoiseWithLOD_njit(
+        peakAt = peakAt_np(intensity)
+    mz, intensity = _denoiseWithLOD(
         spectrum.mz, spectrum.intensity, LOD, peakAt, minus)
     newSpectrum.mz = mz
     newSpectrum.intensity = intensity
@@ -386,12 +211,7 @@ def denoise(spectrum: OrbitoolBase.Spectrum,  quantile=0.7, minus=False, sendSta
     return noise, LOD, denoiseWithLOD(spectrum, LOD, peakAt, minus, sendStatus)
 
 
-class NormalDistributionFunc:
-    @staticmethod
-    @numba.njit(cache=True)
-    def maxFitNum(num):
-        return int(np.arctan((num-5)/20)*20000+4050)
-
+class NormalDistributionFunc(_NormalDistributionFunc):
     def __init__(self, params: List[tuple]):
         params = np.array(params, dtype=np.float)
         self.paramList = params
@@ -401,11 +221,6 @@ class NormalDistributionFunc:
             (np.sqrt(peakPosition / 200) * peakPosition)
         self.peakSigmaFit = np.median(peakSigmaNorm[peakSigmaNorm > 0])
         self.peakResFit = 1/(2*math.sqrt(2*math.log(2))*self.peakSigmaFit)
-
-    @staticmethod
-    @numba.njit(cache=True)
-    def _func(mz: np.ndarray, a, mu, sigma):
-        return a / (np.sqrt(2 * np.pi) * sigma) * np.exp(-0.5 * ((mz - mu) / sigma) ** 2)
 
     @staticmethod
     def getParam(peak: OrbitoolBase.Peak):
@@ -428,14 +243,6 @@ class NormalDistributionFunc:
             peakPosition / 200), intensity=intensity / peakHeight, originalPeak=peak)
         peak.addFittedParam(param)
         return peak
-
-    @staticmethod
-    @numba.njit(cache=True)
-    def mergePeaksParam(param1: tuple, param2: tuple):
-        a1, mu1 = param1
-        a2, mu2 = param2
-        aSum = a1 + a2
-        return (a1 + a2, mu1 * a1 / aSum + mu2 * a2 / aSum)
 
     def mergePeaks(self, peak1: OrbitoolBase.Peak, peak2: OrbitoolBase.Peak):
         newparam = NormalDistributionFunc.mergePeaksParam(
@@ -514,8 +321,10 @@ class NormalDistributionFunc:
                         raise RuntimeError()
                     newIntensity = self._funcFit(mz, *p)
                     select = newIntensity > 1e-6
-                    select[:-1] = select[:-1] | select[1:]
-                    select[1:] = select[1:] | select[:-1]
+                    # select[:-1] = select[:-1] | select[1:]
+                    # select[1:] = select[1:] | select[:-1]
+                    select[:-1] |= select[1:]
+                    select[1:] |= select[:-1]
                     newIntensity = newIntensity[select]
                     newIntensity[-1] = 0
                     newIntensity[0] = 0
@@ -540,36 +349,6 @@ class NormalDistributionFunc:
         peakstr = '\n'.join(peakstr)
         raise ValueError("can't fit peak in (%.5f,%.5f) at spectrum %s\n%s" % (
             mz[0], mz[-1], peak.spectrum.timeRange[0].replace(microsecond=0).isoformat(), peakstr))
-
-
-@numba.njit(cache=True)
-def linePeakCrossed(line: ((float, float), (float, float)), mz: np.ndarray, intensity: np.ndarray):
-    line = np.array(line)
-    p1 = line[0]
-    p2 = line[1]
-    if p1[0] > p2[0]:
-        t = p1
-        p1 = p2
-        p2 = t
-    start, stop = indexBetween_njit(mz, (p1[0], p2[0]))
-    start = (start - 1) if start > 0 else 0
-    if stop >= len(mz):
-        stop = len(mz) - 1
-    for index in range(start, stop):
-        tmp = np.stack((mz[index:index + 2],
-                        intensity[index:index + 2]), axis=1)
-        p3 = tmp[0]
-        p4 = tmp[1]
-        l = p2 - p1
-        c1 = (numba.numpy_extensions.cross2d(l, p3 - p1) >
-              0) ^ (numba.numpy_extensions.cross2d(l, p4 - p1) > 0)
-        l = p4 - p3
-        c2 = (numba.numpy_extensions.cross2d(l, p1 - p3) >
-              0) ^ (numba.numpy_extensions.cross2d(l, p2 - p3) > 0)
-        if c1 and c2:
-            return True
-    return False
-
 
 class PolynomialRegressionFunc:
     def __init__(self, mz: np.ndarray, ppm: np.ndarray, degree):
@@ -728,27 +507,33 @@ def mergePeaks(peaks: List[OrbitoolBase.Peak], ppm: float, func: NormalDistribut
 def getIsoTimeWithZone(dt: datetime.datetime):
     return dt.astimezone().isoformat()
 
+def fromIsoTimeWithZone(s: str)->datetime.datetime:
+    # return datetime.datetime.fromisoformat(s).replace(tzinfo=None) # py 3.7
+    return datetime.datetime.strptime(s.split('+')[0], r"%Y-%m-%dT%H:%M:%S")
 
 igorTimeStandard = datetime.datetime(1904, 1, 1)
-
 
 def getIgorTime(dt: datetime.datetime):
     return int((dt - igorTimeStandard).total_seconds())
 
+def fromIgorTime(t: int):
+    return igorTimeStandard+datetime.timedelta(seconds=t)
 
 matlabTimeStandard = np.float64(-719529).astype('M8[D]')
-
 
 def getMatlabTime(dt: datetime.datetime):
     return (np.datetime64(dt) - matlabTimeStandard).astype('m8[s]').astype(float) / 86400.
 
+def fromMatlabTime(t: float):
+    return (matlabTimeStandard+np.float_(t*86400).astype('m8[s]')).astype(datetime.datetime)
 
 excelTimeStandard = datetime.datetime(1899, 12, 31)
-
 
 def getExcelTime(dt: datetime.datetime):
     return (dt - excelTimeStandard).total_seconds() / 86400.
 
+def fromExcelTime(t: float):
+    return excelTimeStandard+datetime.timedelta(seconds=t*86400)
 
 def getTimesExactToS(dt: datetime.datetime):
     dt = dt.replace(microsecond=0)

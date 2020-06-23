@@ -18,6 +18,7 @@ import matplotlib.figure
 import matplotlib.ticker
 import matplotlib.patches
 import numpy as np
+import pandas as pd
 import psutil
 import pyteomics.mass
 from matplotlib.backends.backend_qt5agg import (FigureCanvas,
@@ -541,6 +542,36 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         self.timeSeriesPlot = SpectraPlot(self.timeSeriesWidget)
         self.timeSeriesTag2Line: Dict[str, matplotlib.lines.Line2D] = {}
 
+        # time series cat
+        self.timeSeriesCatCsvAddPushButton.clicked.connect(
+            self.qTimeSeriesCatCsvAdd)
+        self.timeSeriesCatRawFinishPushButton.clicked.connect(
+            self.qTimeSeriesCatRawFinish)
+        self.timeSeriesCatCatPushButton.clicked.connect(
+            self.qTimeSeriesCatCat)
+        self.timeSeriesCatCatPushButton.setDisabled(True)
+
+        self.timeSeriesCatRmSelectedPushButton.clicked.connect(
+            self.qTimeSeriesCatRmSelected)
+        self.timeSeriesCatRmAllPushButton.clicked.connect(
+            self.qTimeSeriesCatRmAll)
+        self.timeSeriesCatIntSelectedPushButton.clicked.connect(
+            self.qTimeSeriesCatIntSelected)
+        self.timeSeriesCatIntAllPushButton.clicked.connect(
+            self.qTimeSeriesCatIntAll)
+        self.timeSeriesCatExportPushButton.clicked.connect(
+            self.qTimeSeriesCatExport)
+        
+        self.timeSeriesCatRescalePushButton.clicked.connect(
+            self.qTimeSeriesCatRescale)
+
+        self.timeSeriesCatPlot = SpectraPlot(self.timeSeriesCatWidget)
+
+        self.timeSeriesCatRaw:pd.DataFrame=None
+        self.timeSeriesCatProcessed:pd.DataFrame=None
+        self.timeSeriesCatFiles = []
+            
+
         # initialize splitter
         # if init too early, won't get true size
         self.show()
@@ -551,6 +582,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         splitterSetSize(self.calibrationSplitter, [True, True, False])
         self.tabWidget.setCurrentWidget(self.spectra3Tab)
         splitterSetSize(self.spectra3Splitter, [True, False])
+        self.tabWidget.setCurrentWidget(self.timeSeriesCatTab)
+        splitterSetSize(self.timeSeriesCatSplitter, [True, True, False])
 
         # variables initial
 
@@ -1267,7 +1300,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         if scroll or rescale:
             workspace = self.workspace
             self.spectrum1XAxisLeft = l
-            start, stop = OrbitoolFunc.indexBetween_njit(
+            start, stop = OrbitoolFunc.indexBetween_np(
                 workspace.spectrum1.mz, (l, r))
             if scroll:
                 self.spectrum1TableWidget.verticalScrollBar().setSliderPosition(start)
@@ -1968,7 +2001,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                 if len(peak.formulaList) == 0:
                     continue
                 opeak = peak.originalPeak
-                i = OrbitoolFunc.indexNearest_njit(
+                i = OrbitoolFunc.indexNearest_np(
                     opeak.mz, peak.peakPosition)
                 position = opeak.mz[i]
                 intensity = opeak.intensity[i]
@@ -2165,7 +2198,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             opeak: OrbitoolBase.Peak = shownSpectra3Peak[0].originalPeak
             mz = residual[0]
             intensity = residual[1]
-            index = OrbitoolFunc.indexNearest_njit(mz, opeak.mz[0])
+            index = OrbitoolFunc.indexNearest_np(mz, opeak.mz[0])
             s = slice(index, index + len(opeak.mz))
             intensity[s] = opeak.intensity
             intensity = intensity[s]
@@ -2783,3 +2816,129 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                          self.workspace.timeSerieses[self.workspace.timeSeriesIndex]], withppm))
         thread.finished.connect(self.csvExportFinished)
         return thread
+
+    def showTimeSeriesCatRaw(self, timeSeriesCatFiles:list):
+        if len(timeSeriesCatFiles)==0:
+            return
+        filepath=timeSeriesCatFiles.pop(0)
+        raw=pd.read_csv(filepath,header=None)
+        self.timeSeriesCatRaw=raw
+
+        tablewidget = self.timeSeriesCatRawTableWidget
+        tablewidget.clear()
+        tablewidget.setRowCount(0)
+        tablewidget.setColumnCount(0)
+
+        tablewidget.setRowCount(raw.shape[0])
+        tablewidget.setColumnCount(raw.shape[1])
+
+        for row, index in enumerate(raw.index):
+            for col, s in enumerate(raw.iloc[row]):
+                tablewidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(s)))
+        
+        tablewidget.show()
+        self.timeSeriesCatCatPushButton.setDisabled(True)
+        self.timeSeriesCatCsvTabWidget.setCurrentWidget(self.timeSeriesCatRawTab)
+
+    @busy
+    @withoutArgs
+    @openfile("Select one or more csv files containing time series", "csv files(*.csv)", True)
+    def qTimeSeriesCatCsvAdd(self, files):
+        self.timeSeriesCatFiles.extend(files)
+        self.showTimeSeriesCatRaw(self.timeSeriesCatFiles)
+
+    def showTimeSeriesCatProcessed(self, prd: pd.DataFrame):
+        
+        tablewidget = self.timeSeriesCatProcessedTableWidget
+        tablewidget.clear()
+        tablewidget.setRowCount(0)
+        tablewidget.setColumnCount(0)
+
+        tablewidget.setRowCount(prd.shape[0])
+        tablewidget.setColumnCount(prd.shape[1])
+
+        tablewidget.setVerticalHeaderLabels([index.isoformat() for index in prd.index])
+        tablewidget.setHorizontalHeaderLabels([str(col) for col in prd.columns])
+
+        for row, index in enumerate(prd.index):
+            for col, s in enumerate(prd.iloc[row]):
+                tablewidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(s)))
+                
+        tablewidget.show()
+        self.timeSeriesCatCatPushButton.setEnabled(True)
+        self.timeSeriesCatCsvTabWidget.setCurrentWidget(self.timeSeriesCatProcessedTab)
+
+    @busy
+    @withoutArgs
+    def qTimeSeriesCatRawFinish(self):
+        timecolumn = self.timeSeriesCatRawTimeColumnSpinBox.value() - 1
+        firstcolumn = self.timeSeriesCatRawFirstIonColumnLineEdit.value() - 1
+        ionrow = self.timeSeriesCatRawIonRowLineEdit.value() - 1
+        
+        raw=self.timeSeriesCatRaw
+        times = raw.iloc[ionrow+1:,timecolumn]
+        labels = raw.iloc[ionrow,firstcolumn:]
+        
+        if self.timeSeriesCatRawIsoRadioButton.isChecked():
+            fromtime = OrbitoolFunc.fromIsoTimeWithZone
+        elif self.timeSeriesCatRawIgorRadioButton.isChecked():
+            times=times.astype(np.int64)
+            fromtime = OrbitoolFunc.fromIgorTime
+        elif self.timeSeriesCatRawMatlabRadioButton.isChecked():
+            times = times.astype(float)
+            fromtime = OrbitoolFunc.fromMatlabTime
+        elif self.timeSeriesCatRawExcelRadioButton.isChecked():
+            times = times.astype(float)
+            fromtime = OrbitoolFunc.fromExcelTime
+        elif self.timeSeriesCatRawCustomRadioButton.isChecked():
+            timeformat = self.timeSeriesCatRawCustomLineEdit.text()
+            fromtime = lambda s: datetime.datetime.strptime(s, timeformat)
+
+        times=map(fromtime,times)
+        
+        def checklabel(label):
+            try:
+                return float(label)
+            except:
+                try:
+                    return OrbitoolFormula.Formula(label.strip().split()[0])
+                except:
+                    raise ValueError(f"'{label}' is not a mz or formula")
+
+        labels=map(checklabel,labels)
+
+        ints = raw.iloc[ionrow+1:,firstcolumn:]
+        ints.index = times
+        ints.columns = labels
+        self.timeSeriesCatProcessed = ints
+        self.showTimeSeriesCatProcessed(ints)
+
+    @threadBegin
+    @withoutArgs
+    def qTimeSeriesCatCat(self):
+        '''
+        concatenate & next file
+        '''
+        #concat
+
+        pass
+
+    def qTimeSeriesCatRmSelected(self):
+        pass
+
+    def qTimeSeriesCatRmAll(self):
+        pass
+
+    def qTimeSeriesCatIntSelected(self):
+        pass
+
+    def qTimeSeriesCatIntAll(self):
+        pass
+
+    def qTimeSeriesCatExport(self):
+        pass
+
+    def qTimeSeriesCatRescale(self):
+        pass
+
+

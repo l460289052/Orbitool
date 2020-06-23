@@ -110,7 +110,7 @@ def exportTimeSerieses(writer:csv.writer, timeSerieses: List[TimeSeries], withpp
         raise ValueError('No time serieses (selected)')
     time = []
     now = datetime.now()
-    deltaTime = np.timedelta64(timedelta(seconds=1))
+    deltaTime = np.timedelta64(timedelta(seconds=5))
     for index, timeSeries in enumerate(timeSerieses):
         sendStatus(now, msg, index, slength)
         time.extend(timeSeries.time)

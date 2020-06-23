@@ -5,7 +5,8 @@ import numpy as np
 cythonizes = [
 cythonize("_OrbitoolElement.pyx", annotate=True),
 cythonize("_OrbitoolFormula.pyx", annotate=True),
-cythonize("_OrbitoolFormulaCalc.pyx", annotate=True)
+cythonize("_OrbitoolFormulaCalc.pyx", annotate=True),
+cythonize("_OrbitoolFunc.pyx", annotate=True)
 ]
 for cy in cythonizes:
     setup(ext_modules=cy, script_args=['build_ext'], include_dirs=[np.get_include()], options={'build_ext':{'inplace':True}})
