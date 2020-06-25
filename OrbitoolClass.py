@@ -7,6 +7,7 @@ from enum import Enum
 import copy
 import heapq
 import multiprocessing
+import collections
 
 import scipy.optimize
 import numpy as np
@@ -599,7 +600,7 @@ def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OrbitoolBase.Sp
 
 
 supportedVersion = 1_02_00
-version = 1_02_09
+version = 1_03_00
 
 
 def version2Str(version):
@@ -654,5 +655,6 @@ class Workspace(object):
         self.timeSeriesIndex = None
 
         # @showTimeSeriesCat
-        self.timeSerieses: Dict[OrbitoolFormula.FormulaHint, OrbitoolBase.TimeSeries] = {}
+        self.timeSeriesesCat: Dict[OrbitoolFormula.FormulaHint, OrbitoolBase.TimeSeries] = collections.OrderedDict()
+        self.timeSeriesCatBaseTime=np.empty((0,),dtype='M8[s]')
 

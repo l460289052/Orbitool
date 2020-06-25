@@ -309,7 +309,9 @@ cdef class Formula:
             if m==0:
                 while it!=self.isotopes.end():
                     if deref(it).first == index:
-                        self.isotopes.erase(it)
+                        it=self.isotopes.erase(it)
+                    else:
+                        inc(it)
             else:
                 while it!=self.isotopes.end():
                     if deref(it).first == index and (deref(it).second >> _factor) == m:

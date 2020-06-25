@@ -362,21 +362,66 @@ you can add time series by following methods:
 
 Time series will be shown right. If you want to check a specific time series, double it in the table, or export all time series.
 
+### Concatenate time series
+
+You can add time series by importing csv files.
+
+To recognize csv file's format, your csv file should be like:
+
+| time  | formula1 | formula2 | ...  |
+| ----- | -------- | -------- | ---- |
+| time1 | ...      | ...      | ...  |
+| time2 | ...      | ...      | ...  |
+| ...   | ...      | ...      | ...  |
+
+You can change some key row/column's position to fit your csv file
+
++ Ion row ( formula row )
++ time column
++ ion ( formula) beginning column
+
+<img src="img\timeSeriesCatCsv.svg" alt="timeSeriesCatCsv" style="zoom:150%;" />
+
 ### Bugs
 
 If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Orbitool.exe'.
 
 ## log
 
+**2020.6.26 version 1.3.0**
+
+Appended
+
++ concatenate time series (beta)
++ add some formula function for future
++ time series's header in table will indicate line in plot. To achieve this, change UI's style
+
+
+
+Changed
+
++ substitute numba with cython
+
+
+
+Bug fix
+
++ caption wrong when read workspace file
++ move colorbar's label to top in mass defect tab
+
 **2020.6.21 version 1.2.9**
+
 Change
+
 + when export mass list, use 2 columns (formula,mz) instead of 1 mixed column
 
 Bug fix
 + some "index out of range"
 
 **2020.5.22 version 1.2.8**
+
 Change
+
 + when calculate mass defect, use nearest formula instead of treat it as a grey point for a peak with multi-formula.
 
 Bug fix

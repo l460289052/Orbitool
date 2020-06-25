@@ -21,7 +21,7 @@ import statsmodels.nonparametric.smoothers_lowess as lowess
 import OrbitoolBase
 from OrbitoolUnpickler import Unpickler
 
-from _OrbitoolFunc import indexNearest as indexNearest_np, indexBetween as indexBetween_np, getPeaks as _getPeaks, peakAt as peakAt_np, getNoise as _getNoise, denoiseWithLOD as _denoiseWithLOD, linePeakCrossed, NormalDistributionFunc as _NormalDistributionFunc
+from _OrbitoolFunc import indexNearest as indexNearest_np, indexBetween as indexBetween_np, getPeaks as _getPeaks, peakAt as peakAt_np, getNoise as _getNoise, denoiseWithLOD as _denoiseWithLOD, linePeakCrossed, NormalDistributionFunc as _NormalDistributionFunc, catTime, catTimeSeries as _catTimeSeries, interp1TimeSeriesAt as _interp1TimeSeriesAt
 
 def nullSendStatus(fileTime: datetime.datetime, msg: str, index: int, length: int):
     pass
@@ -503,6 +503,23 @@ def mergePeaks(peaks: List[OrbitoolBase.Peak], ppm: float, func: NormalDistribut
         newpeaks.append(peak2)
     return newpeaks
 
+def catTimeSeries(timeSeries1: OrbitoolBase.TimeSeries, timeSeries2: OrbitoolBase.TimeSeries):
+    time,ints=_catTimeSeries(timeSeries1.time,timeSeries1.intensity,timeSeries2.time,timeSeries2.intensity)
+    return OrbitoolBase.TimeSeries(time,ints,timeSeries1.mz,timeSeries1.ppm,timeSeries1.tag)
+
+def interp1TimeSeries(timeSeries: OrbitoolBase.TimeSeries, totalTime: np.ndarray) -> OrbitoolBase.TimeSeries:
+    '''
+    interpolate
+    '''
+    interAt = _interp1TimeSeriesAt(timeSeries.time, totalTime)
+    if len(interAt) == 0:
+        return timeSeries
+    func = scipy.interpolate.interp1d(timeSeries.time.astype(float), timeSeries.intensity, 'linear')
+    ints = func(interAt.astype(float))
+    time = np.concatenate((timeSeries.time, interAt))
+    ints=np.concatenate((timeSeries.intensity,ints))
+    index = time.argsort()
+    return OrbitoolBase.TimeSeries(time[index],ints[index],timeSeries.mz,timeSeries.ppm,timeSeries.tag)    
 
 def getIsoTimeWithZone(dt: datetime.datetime):
     return dt.astimezone().isoformat()

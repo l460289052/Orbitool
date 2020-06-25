@@ -9,7 +9,8 @@ import re
 import traceback
 import types
 from functools import wraps
-from typing import List, Tuple, Union
+import collections
+from typing import List, Tuple, Union, Dict
 
 import matplotlib.animation
 import matplotlib.axes
@@ -39,6 +40,10 @@ import OrbitoolUi
 
 DEBUG = False
 
+cpu = multiprocessing.cpu_count() - 1
+if cpu <= 0:
+    cpu = 1
+
 
 class QThread(QtCore.QThread):
     finished = QtCore.pyqtSignal(tuple)
@@ -60,7 +65,7 @@ class QThread(QtCore.QThread):
         self.sendStatus.emit(fileTime, msg, index, length)
 
 
-def QMultiProcess(func, argsList: list, fileTime: Union[list, datetime.datetime], cpu=None) -> QThread:
+def QMultiProcess(func, argsList: list, fileTime: Union[list, datetime.datetime]) -> QThread:
     '''
     if fileTime is a list, func's first arguement must be fileTime
     '''
@@ -529,6 +534,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             self.qTimeSeriesesExport)
         self.timeSeriesExportPushButton.clicked.connect(
             self.qTimeSeriesExport)
+        self.timeSeriesShowLegendsCheckBox.toggled.connect(
+            self.qTimeSeriesLegendsToggle)
         self.timeSeriesLogScaleCheckBox.toggled.connect(
             self.qTimeSeriesLogScaleToggle)
         self.timeSeriesRescalePushButton.clicked.connect(
@@ -551,6 +558,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             self.qTimeSeriesCatCat)
         self.timeSeriesCatCatPushButton.setDisabled(True)
 
+        self.timeSeriesCatTimeSeriesesTableWidget.itemDoubleClicked.connect(
+            self.qTimeSeriesCatDoubleClicked)
         self.timeSeriesCatRmSelectedPushButton.clicked.connect(
             self.qTimeSeriesCatRmSelected)
         self.timeSeriesCatRmAllPushButton.clicked.connect(
@@ -561,16 +570,19 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             self.qTimeSeriesCatIntAll)
         self.timeSeriesCatExportPushButton.clicked.connect(
             self.qTimeSeriesCatExport)
-        
+
+        self.timeSeriesCatShowLegendsCheckBox.toggled.connect(
+            self.qTimeSeriesCatLegendToggle)
+        self.timeSeriesCatLogScaleCheckBox.toggled.connect(
+            self.qTimeSeriesCatLogScaleToggle)
         self.timeSeriesCatRescalePushButton.clicked.connect(
             self.qTimeSeriesCatRescale)
 
         self.timeSeriesCatPlot = SpectraPlot(self.timeSeriesCatWidget)
 
-        self.timeSeriesCatRaw:pd.DataFrame=None
-        self.timeSeriesCatProcessed:pd.DataFrame=None
+        self.timeSeriesCatRaw: pd.DataFrame = None
+        self.timeSeriesCatProcessed: pd.DataFrame = None
         self.timeSeriesCatFiles = []
-            
 
         # initialize splitter
         # if init too early, won't get true size
@@ -605,6 +617,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         self.busy = False
         self.busyLimit = True
         self.tabWidget.setCurrentWidget(self.filesTab)
+
+        self.setBusy(False)
 
     def rmFinished(self):
         self.threads = [t for t in self.threads if not t.isFinished()]
@@ -745,7 +759,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
 
     @threadBegin
     @withoutArgs
-    @openfile(caption="Save as", filter="Work file(*.OrbitWork)")
+    @openfile(caption="Select Workspace file", filter="Work file(*.OrbitWork)")
     def qWorkspaceImport(self, file):
         def process(filepath, sendStatus):
             return OrbitoolFunc.file2Obj(filepath, sendStatus)
@@ -798,6 +812,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                 workspace.calibratedSpectra3[workspace.shownSpectrum3Index], workspace.spectrum3fittedPeaks, workspace.spectrum3Residual)
         self.showTimeSerieses(workspace.timeSerieses)
         self.showTimeSeries(workspace.timeSeriesIndex)
+        if hasattr(workspace, 'timeSeriesesCat'):
+            self.showTimeSeriesCat(workspace.timeSeriesesCat)
 
     @threadBegin
     @withoutArgs
@@ -1371,9 +1387,6 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             spectra = []
             length = len(operators)
             maps = SortedDict()
-            cpu = multiprocessing.cpu_count() - 1
-            if cpu <= 0:
-                cpu = 1
             with multiprocessing.Pool(cpu) as pool:
                 if not withDenoising:
                     msg = "reading and averaging"
@@ -1581,9 +1594,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @withoutArgs
     @openfile("Select one folder to save information", folder=True)
     def qPeak2Export(self, folder):
-        OrbitoolExport.exportFitInfo(folder,self.workspace.peakFitFunc,self.showStatus)
-
-
+        OrbitoolExport.exportFitInfo(
+            folder, self.workspace.peakFitFunc, self.showStatus)
 
     @busy
     @withoutArgs
@@ -1648,11 +1660,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         argsList = [(spectra, peakFitFunc, ionList, (degree,), ppm, useNIons)
                     for spectra in workspace.fileTimeSpectraMaps.values()]
 
-        # DEBUG
         thread = QMultiProcess(
             OrbitoolClass.CalibrateMass, argsList, workspace.fileTimeSpectraMaps.keys())
-        # thread = QMultiProcess(
-        #     OrbitoolClass.CalibrateMass, argsList, workspace.fileTimeSpectraMaps.keys(), 1)
 
         thread.finished.connect(self.qInitCalibrationFinished)
         return thread
@@ -1827,7 +1836,6 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
 
         thread = QMultiProcess(
             OrbitoolClass.CalibrateMass.fitSpectra, argsList, fileTime)
-        # thread = QMultiProcess(OrbitoolClass.CalibrateMass.fitSpectra, argsList, fileTime, 1)
         thread.finished.connect(self.qCalibrationFinished)
         return thread
 
@@ -2259,7 +2267,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @withoutArgs
     def qSpectrum3PeaksAdd(self):
         indexes = self.spectrum3PeakListTableWidget.selectedIndexes()
-        indexes=np.unique([index.row() for index in indexes])
+        indexes = np.unique([index.row() for index in indexes])
         workspace = self.workspace
         massList = workspace.massList
         peaks = workspace.spectrum3fittedPeaks
@@ -2284,7 +2292,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         if workspace.shownSpectrum3Index is None:
             raise ValueError('There is no spectrum shown')
         thread = QThread(OrbitoolExport.exportPeakList, (path,
-                                                          workspace.calibratedSpectra3[workspace.shownSpectrum3Index].fileTime, workspace.spectrum3fittedPeaks))
+                                                         workspace.calibratedSpectra3[workspace.shownSpectrum3Index].fileTime, workspace.spectrum3fittedPeaks))
         thread.finished.connect(self.csvExportFinished)
         return thread
 
@@ -2296,7 +2304,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         if workspace.shownSpectrum3Index is None:
             raise ValueError('There is no spectrum shown')
         thread = QThread(OrbitoolExport.exportIsotope, (path,
-                                                         workspace.calibratedSpectra3[workspace.shownSpectrum3Index].fileTime, workspace.spectrum3fittedPeaks))
+                                                        workspace.calibratedSpectra3[workspace.shownSpectrum3Index].fileTime, workspace.spectrum3fittedPeaks))
         thread.finished.connect(self.csvExportFinished)
         return thread
 
@@ -2324,17 +2332,19 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         if peaks is None:
             raise ValueError('please fit spectrum first')
         clr_peaks = [peak for peak in peaks if len(peak.formulaList) > 0]
-        clr_formula = [peak.formulaList[0] if len(peak.formulaList) == 1 else None for peak in clr_peaks]
+        clr_formula = [peak.formulaList[0] if len(
+            peak.formulaList) == 1 else None for peak in clr_peaks]
         for index in range(len(clr_formula)):
             if clr_formula[index] is None:
-                peak=clr_peaks[index]
+                peak = clr_peaks[index]
+
                 def ppm(formula: OrbitoolFormula.FormulaHint):
                     return peak.peakPosition/formula.mass()-1
-                closestformula=peak.formulaList[0]
+                closestformula = peak.formulaList[0]
                 for formula in peak.formulaList[1:]:
                     if abs(ppm(formula)) < abs(ppm(closestformula)):
                         closestformula = formula
-                clr_formula[index]=closestformula
+                clr_formula[index] = closestformula
         if DBE:
             clr_color = [formula.DBE() for formula in clr_formula]
             clr_color = np.array(clr_color, dtype=np.float)
@@ -2360,9 +2370,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             gry_x = np.zeros(0, dtype=np.float)
             gry_y = gry_x
             gry_size = gry_x
-            
-        return ((clr_x, clr_y, clr_size, clr_color), (gry_x, gry_y, gry_size))
 
+        return ((clr_x, clr_y, clr_size, clr_color), (gry_x, gry_y, gry_size))
 
     @busy
     @withoutArgs
@@ -2392,7 +2401,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             maximum = np.max((clr_size.max(), gry_size.max()))
         else:
             maximum = clr_size.max()
-        
+
         if log:
             maximum /= 70
         else:
@@ -2404,7 +2413,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         gry_size /= maximum
         gry_size[gry_size < minimum] = minimum
         ax.scatter(gry_x, gry_y, s=gry_size, c='grey',
-                    linewidths=0.5, edgecolors='k')
+                   linewidths=0.5, edgecolors='k')
 
         clr_size /= maximum
         clr_size[clr_size < minimum] = minimum
@@ -2412,7 +2421,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                         cmap=cmap, linewidths=0.5, edgecolors='k')
         clrb = fig.colorbar(sc)
         element = self.spectrum3MassDefectElementLineEdit.text()
-        clrb.set_label('DBE' if DBE else f'Element {element}', rotation=270)
+        clrb.ax.set_title('DBE' if DBE else f'Element {element}')
 
         ax.autoscale(True)
         fig.tight_layout()
@@ -2423,7 +2432,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @withoutArgs
     @savefile(caption="Save as", filter="csv file(*.csv)")
     def qSpectrum3MassDefectExport(self, path):
-        OrbitoolExport.exportMassDefect(path,*self.spectrum3MassDefect(), self.showStatus)
+        OrbitoolExport.exportMassDefect(
+            path, *self.spectrum3MassDefect(), self.showStatus)
 
     @busy
     @withoutArgs
@@ -2589,12 +2599,12 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             speaks = None
             if self.timeSeriesSelectedPeaksRadioButton.isChecked():
                 indexes = self.spectrum3PeakListTableWidget.selectedIndexes()
-                indexes=np.unique([index.row() for index in indexes])
+                indexes = np.unique([index.row() for index in indexes])
                 peaks = workspace.spectrum3fittedPeaks
                 speaks = [peaks[index] for index in indexes]
             elif self.timeSeriesSelectedMassListRadioButton.isChecked():
                 indexes = self.massListTableWidget.selectedIndexes()
-                indexes=np.unique([index.row() for index in indexes])
+                indexes = np.unique([index.row() for index in indexes])
                 massList = workspace.massList
                 speaks = [massList[index] for index in indexes]
             elif self.timeSeriesMassListRadioButton.isChecked():
@@ -2643,20 +2653,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @restore
     def showTimeSerieses(self, timeSerieses: List[OrbitoolBase.TimeSeries]):
         maps = self.timeSeriesTag2Line
-        length = len(timeSerieses)
         timeSerieses: List[OrbitoolBase.TimeSeries] = [
             timeSeries for timeSeries in timeSerieses if timeSeries.tag not in maps]
-        start = length-len(timeSerieses)
-        table = self.timeSeriesesTableWidget
-        table.setRowCount(length)
-        for index, timeSeries in enumerate(timeSerieses):
-            row = start+index
-
-            def setValue(column, s):
-                table.setItem(row, column, QtWidgets.QTableWidgetItem(str(s)))
-            setValue(0, timeSeries.tag)
-            setValue(1, timeSeries.mz)
-            setValue(2, timeSeries.ppm * 1e6)
 
         spectra = self.workspace.calibratedSpectra3
         length = 0 if spectra is None else len(spectra)
@@ -2671,10 +2669,32 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             lines = ax.plot(timeSeries.time,
                             timeSeries.intensity, label=timeSeries.tag)
             maps[timeSeries.tag] = lines[-1]
+        ax.xaxis.set_tick_params(rotation=30)
+
+        ax.legend().set_visible(self.timeSeriesShowLegendsCheckBox.isChecked())
+
+        length = len(timeSerieses)
+        start = length-len(timeSerieses)
+        table = self.timeSeriesesTableWidget
+        table.setRowCount(length)
+        for index, timeSeries in enumerate(timeSerieses):
+            row = start+index
+
+            if timeSeries.tag in maps:
+                line: matplotlib.lines.Line2D = maps[timeSeries.tag]
+                headerItem = QtWidgets.QTableWidgetItem(str(row + 1))
+                headerItem.setBackground(QtGui.QColor(line.get_color()))
+                table.setVerticalHeaderItem(row, headerItem)
+
+            def setValue(column, s):
+                table.setItem(row, column, QtWidgets.QTableWidgetItem(str(s)))
+            setValue(0, timeSeries.tag)
+            setValue(1, timeSeries.mz)
+            setValue(2, timeSeries.ppm * 1e6)
+
         if len(msg) > 1:
             showInfo('\n'.join(msg))
-        ax.xaxis.set_tick_params(rotation=30)
-        ax.legend()
+
         self.timeSeriesRescale()
 
     @busy
@@ -2786,6 +2806,17 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
+    def qTimeSeriesLegendsToggle(self):
+        plot = self.timeSeriesPlot
+        ax = plot.ax
+        if self.timeSeriesShowLegendsCheckBox.isChecked():
+            ax.legend().set_visible(True)
+        else:
+            ax.legend().set_visible(False)
+        plot.canvas.draw()
+
+    @busy
+    @withoutArgs
     def qTimeSeriesLogScaleToggle(self):
         log = self.timeSeriesLogScaleCheckBox.isChecked()
         ax = self.timeSeriesPlot.ax
@@ -2799,7 +2830,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @withoutArgs
     @savefile("Save as", "csv file(*.csv)")
     def qTimeSeriesesExport(self, path):
-        withppm=self.timeSeriesesExportWithPpmCheckBox.isChecked()
+        withppm = self.timeSeriesesExportWithPpmCheckBox.isChecked()
         thread = QThread(OrbitoolExport.exportTimeSerieses,
                          (path, self.workspace.timeSerieses, withppm))
         thread.finished.connect(self.csvExportFinished)
@@ -2811,34 +2842,44 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     def qTimeSeriesExport(self, path):
         if self.workspace.timeSeriesIndex is None:
             raise ValueError('There is no time series shown')
-        withppm=self.timeSeriesesExportWithPpmCheckBox.isChecked()
+        withppm = self.timeSeriesesExportWithPpmCheckBox.isChecked()
         thread = QThread(OrbitoolExport.exportTimeSerieses, (path, [
                          self.workspace.timeSerieses[self.workspace.timeSeriesIndex]], withppm))
         thread.finished.connect(self.csvExportFinished)
         return thread
 
-    def showTimeSeriesCatRaw(self, timeSeriesCatFiles:list):
-        if len(timeSeriesCatFiles)==0:
-            return
-        filepath=timeSeriesCatFiles.pop(0)
-        raw=pd.read_csv(filepath,header=None)
-        self.timeSeriesCatRaw=raw
-
+    def showTimeSeriesCatRaw(self, timeSeriesCatFiles: list):
         tablewidget = self.timeSeriesCatRawTableWidget
         tablewidget.clear()
         tablewidget.setRowCount(0)
         tablewidget.setColumnCount(0)
+
+        if len(timeSeriesCatFiles) == 0:
+            self.timeSeriesCatFileLabel.setText('')
+            self.timeSeriesCatCatPushButton.setDisabled(True)
+            self.timeSeriesCatCsvTabWidget.setCurrentWidget(
+                self.timeSeriesCatRawTab)
+            self.timeSeriesCatRaw = None
+            return
+        filepath = timeSeriesCatFiles.pop(0)
+        filename = os.path.split(filepath)[1]
+        self.timeSeriesCatFileLabel.setText(filename)
+
+        raw = pd.read_csv(filepath, header=None)
+        self.timeSeriesCatRaw = raw
 
         tablewidget.setRowCount(raw.shape[0])
         tablewidget.setColumnCount(raw.shape[1])
 
         for row, index in enumerate(raw.index):
             for col, s in enumerate(raw.iloc[row]):
-                tablewidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(s)))
-        
+                tablewidget.setItem(
+                    row, col, QtWidgets.QTableWidgetItem(str(s)))
+
         tablewidget.show()
         self.timeSeriesCatCatPushButton.setDisabled(True)
-        self.timeSeriesCatCsvTabWidget.setCurrentWidget(self.timeSeriesCatRawTab)
+        self.timeSeriesCatCsvTabWidget.setCurrentWidget(
+            self.timeSeriesCatRawTab)
 
     @busy
     @withoutArgs
@@ -2848,7 +2889,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         self.showTimeSeriesCatRaw(self.timeSeriesCatFiles)
 
     def showTimeSeriesCatProcessed(self, prd: pd.DataFrame):
-        
+
         tablewidget = self.timeSeriesCatProcessedTableWidget
         tablewidget.clear()
         tablewidget.setRowCount(0)
@@ -2857,16 +2898,20 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         tablewidget.setRowCount(prd.shape[0])
         tablewidget.setColumnCount(prd.shape[1])
 
-        tablewidget.setVerticalHeaderLabels([index.isoformat() for index in prd.index])
-        tablewidget.setHorizontalHeaderLabels([str(col) for col in prd.columns])
+        tablewidget.setVerticalHeaderLabels(
+            [index.isoformat() for index in prd.index])
+        tablewidget.setHorizontalHeaderLabels(
+            [str(col) for col in prd.columns])
 
         for row, index in enumerate(prd.index):
             for col, s in enumerate(prd.iloc[row]):
-                tablewidget.setItem(row, col, QtWidgets.QTableWidgetItem(str(s)))
-                
+                tablewidget.setItem(
+                    row, col, QtWidgets.QTableWidgetItem(str(s)))
+
         tablewidget.show()
         self.timeSeriesCatCatPushButton.setEnabled(True)
-        self.timeSeriesCatCsvTabWidget.setCurrentWidget(self.timeSeriesCatProcessedTab)
+        self.timeSeriesCatCsvTabWidget.setCurrentWidget(
+            self.timeSeriesCatProcessedTab)
 
     @busy
     @withoutArgs
@@ -2874,15 +2919,17 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         timecolumn = self.timeSeriesCatRawTimeColumnSpinBox.value() - 1
         firstcolumn = self.timeSeriesCatRawFirstIonColumnLineEdit.value() - 1
         ionrow = self.timeSeriesCatRawIonRowLineEdit.value() - 1
-        
-        raw=self.timeSeriesCatRaw
-        times = raw.iloc[ionrow+1:,timecolumn]
-        labels = raw.iloc[ionrow,firstcolumn:]
-        
+
+        raw = self.timeSeriesCatRaw
+        if raw is None:
+            return
+        times = raw.iloc[ionrow+1:, timecolumn]
+        labels = raw.iloc[ionrow, firstcolumn:]
+
         if self.timeSeriesCatRawIsoRadioButton.isChecked():
             fromtime = OrbitoolFunc.fromIsoTimeWithZone
         elif self.timeSeriesCatRawIgorRadioButton.isChecked():
-            times=times.astype(np.int64)
+            times = times.astype(np.int64)
             fromtime = OrbitoolFunc.fromIgorTime
         elif self.timeSeriesCatRawMatlabRadioButton.isChecked():
             times = times.astype(float)
@@ -2892,10 +2939,10 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             fromtime = OrbitoolFunc.fromExcelTime
         elif self.timeSeriesCatRawCustomRadioButton.isChecked():
             timeformat = self.timeSeriesCatRawCustomLineEdit.text()
-            fromtime = lambda s: datetime.datetime.strptime(s, timeformat)
+            def fromtime(s): return datetime.datetime.strptime(s, timeformat)
 
-        times=map(fromtime,times)
-        
+        times = map(fromtime, times)
+
         def checklabel(label):
             try:
                 return float(label)
@@ -2905,13 +2952,74 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                 except:
                     raise ValueError(f"'{label}' is not a mz or formula")
 
-        labels=map(checklabel,labels)
+        labels = list(map(checklabel, labels))
+        if len(labels) != len(set(labels)):
+            raise ValueError(f"some columns have same formula")
 
-        ints = raw.iloc[ionrow+1:,firstcolumn:]
+        ints = raw.iloc[ionrow+1:, firstcolumn:]
         ints.index = times
         ints.columns = labels
         self.timeSeriesCatProcessed = ints
         self.showTimeSeriesCatProcessed(ints)
+
+    @restore
+    def showTimeSeriesCat(self, timeSerieses: Dict[OrbitoolFormula.FormulaHint, OrbitoolBase.TimeSeries]):
+        plot = self.timeSeriesCatPlot
+        ax = plot.ax
+        ax.clear()
+
+        for timeSeries in timeSerieses.values():
+            ax.plot(timeSeries.time, timeSeries.intensity,
+                    label=str(timeSeries.tag))
+        ax.xaxis.set_tick_params(rotation=30)
+
+        ax.legend().set_visible(self.timeSeriesCatShowLegendsCheckBox.isChecked())
+
+        table = self.timeSeriesCatTimeSeriesesTableWidget
+        table.clearContents()
+        table.setRowCount(0)
+        table.setRowCount(len(timeSerieses))
+        for index, (timeSeries, line) in enumerate(zip(timeSerieses.values(), ax.get_lines())):
+            headerItem = QtWidgets.QTableWidgetItem(str(index + 1))
+            headerItem.setBackground(QtGui.QColor(line.get_color()))
+            table.setVerticalHeaderItem(index, headerItem)
+
+            def setValue(column, s):
+                table.setItem(
+                    index, column, QtWidgets.QTableWidgetItem(str(s)))
+            setValue(0, timeSeries.tag)
+            setValue(1, timeSeries.mz)
+            setValue(2, timeSeries.ppm * 1e6)
+
+        self.timeSeriesCatRescale()
+
+    def timeSeriesCatRescale(self):
+        plot = self.timeSeriesCatPlot
+        ax = plot.ax
+        workspace = self.workspace
+        if len(ax.get_lines()) == 0:
+            return
+        l, r = ax.get_xlim()
+        l = np.array(matplotlib.dates.num2date(
+            l).replace(tzinfo=None), dtype=np.datetime64)
+        r = np.array(matplotlib.dates.num2date(
+            r).replace(tzinfo=None), dtype=np.datetime64)
+        b = 0
+        t = 1
+        for timeSeries in workspace.timeSeriesesCat.values():
+            rng = OrbitoolFunc.indexBetween(timeSeries.time, (l, r))
+            if len(rng) > 0:
+                t = max(t, timeSeries.intensity[rng].max())
+
+        if self.timeSeriesCatLogScaleCheckBox.isChecked():
+            t *= 10
+            b = 1
+        else:
+            delta = 0.05 * t
+            b = -delta
+            t += delta
+        ax.set_ylim(b, t)
+        plot.canvas.draw()
 
     @threadBegin
     @withoutArgs
@@ -2919,26 +3027,199 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         '''
         concatenate & next file
         '''
-        #concat
+        newTimeSerieses = self.timeSeriesCatProcessed
+        workspace = self.workspace
+        ppm = self.timeSeriesCatPpmDoubleSpinBox.value()*1e-6
 
-        pass
+        def process(sendStatus):
+            if not hasattr(workspace, 'timeSeriesesCat'):
+                workspace.timeSeriesesCat = collections.OrderedDict()
+                workspace.timeSeriesCatBaseTime = np.empty((0,), dtype='M8[s]')
+            timeSeriesesCat = workspace.timeSeriesesCat
+            timeSeriesCatBaseTime = workspace.timeSeriesCatBaseTime
 
+            now = datetime.datetime.now()
+            baseTime = newTimeSerieses.index.to_numpy(dtype='M8[s]')
+            with multiprocessing.Pool(cpu) as pool:
+                rets = []
+                msg = "matching "
+                length = len(newTimeSerieses.columns)
+                for index, formulaOrMz in enumerate(newTimeSerieses.columns):
+                    sendStatus(now, msg+str(formulaOrMz), index, length)
+                    ints = newTimeSerieses[formulaOrMz].to_numpy(dtype=float)
+                    select = ~ np.isnan(ints)
+                    time = baseTime[select]
+                    ints = ints[select]
+                    ts = OrbitoolBase.TimeSeries(
+                        time, ints, None, ppm, formulaOrMz)
+                    if isinstance(formulaOrMz, OrbitoolFormula.Formula):
+                        ts.mz = formulaOrMz.mass()
+                        if formulaOrMz in timeSeriesesCat:
+                            ts2 = timeSeriesesCat.pop(formulaOrMz)
+                            rets.append(pool.apply_async(
+                                OrbitoolFunc.catTimeSeries, (ts, ts2)))
+                        else:
+                            timeSeriesesCat[formulaOrMz] = ts
+
+                    else:
+                        ts.mz = formulaOrMz
+                        flag = False
+                        for key, ts2 in list(timeSeriesesCat.items()):
+                            if isinstance(key, float) and abs(ts2.mz / formulaOrMz - 1) < ppm:
+                                ts2 = timeSeriesesCat.pop(key)
+                                rets.append(pool.apply_async(
+                                    OrbitoolFunc.catTimeSeries, (ts, ts2)))
+                                flag = True
+                                break
+                        if not flag:
+                            timeSeriesesCat[formulaOrMz] = ts
+
+                timeSeriesCatBaseTime = OrbitoolFunc.catTime(
+                    timeSeriesCatBaseTime, baseTime)
+
+                msg = "concatenating "
+                length = len(rets)
+                for index, ret in enumerate(rets):
+                    ts = ret.get()
+                    sendStatus(now, msg + str(ts.tag), index, length)
+                    timeSeriesesCat[ts.tag] = ts
+                sendStatus(now, msg + str(ts.tag), length, length)
+            return timeSeriesCatBaseTime, timeSeriesesCat
+
+        thread = QThread(process, tuple())
+        thread.finished.connect(self.qTimeSeriesCatCatFinished)
+        return thread
+
+    @threadEnd
+    def qTimeSeriesCatCatFinished(self, result, args):
+        baseTime, timeSeriesesCat = result
+        workspace = self.workspace
+        workspace.timeSeriesCatBaseTime = baseTime
+        workspace.timeSeriesesCat = timeSeriesesCat
+        self.showTimeSeriesCat(timeSeriesesCat)
+        self.showTimeSeriesCatRaw(self.timeSeriesCatFiles)
+
+    @busy
+    def qTimeSeriesCatDoubleClicked(self, item: QtWidgets.QTableWidgetItem):
+        index = item.row()
+        self.showTimeSeriesCatAt(index)
+
+    @restore
+    def showTimeSeriesCatAt(self, shownTimeSeriesCatIndex):
+        timeSeries: OrbitoolBase.TimeSeries = list(
+            self.workspace.timeSeriesesCat.values())[shownTimeSeriesCatIndex]
+        time = timeSeries.time
+        intes = timeSeries.intensity
+        table = self.timeSeriesCatTimeSeriesTableWidget
+        table.clearContents()
+        table.setRowCount(0)
+        table.setRowCount(len(time))
+        for index, (t, i) in enumerate(zip(time, intes)):
+            def setValue(column, s):
+                table.setItem(
+                    index, column, QtWidgets.QTableWidgetItem(str(s)))
+            setValue(0, t.astype(datetime.datetime).isoformat())
+            setValue(1, i)
+
+    @busy
+    @withoutArgs
     def qTimeSeriesCatRmSelected(self):
-        pass
+        indexes = self.timeSeriesCatTimeSeriesesTableWidget.selectedIndexes()
+        indexes = np.unique([index.row() for index in indexes])
+        workspace = self.workspace
+        timeSeriesesCat = workspace.timeSeriesesCat
 
+        keys = list(timeSeriesesCat.keys())
+        for index in indexes:
+            timeSeriesesCat.pop(keys[index])
+
+        self.showTimeSeriesCat(timeSeriesesCat)
+
+    @busy
+    @withoutArgs
     def qTimeSeriesCatRmAll(self):
-        pass
+        self.workspace.timeSeriesesCat.clear()
+        self.workspace.timeSeriesCatBaseTime = np.empty((0,), dtype='M8[s]')
+        self.timeSeriesCatTimeSeriesesTableWidget.clearContents()
+        self.timeSeriesCatTimeSeriesesTableWidget.setRowCount(0)
 
+        self.timeSeriesCatPlot.ax.clear()
+        self.timeSeriesCatPlot.canvas.draw()
+
+        self.timeSeriesCatTimeSeriesTableWidget.clearContents()
+        self.timeSeriesCatTimeSeriesTableWidget.setRowCount(0)
+
+    @threadBegin
+    @withoutArgs
     def qTimeSeriesCatIntSelected(self):
-        pass
+        workspace = self.workspace
+        timeSeriesesCat = workspace.timeSeriesesCat
+        indexes = self.timeSeriesCatTimeSeriesesTableWidget.selectedIndexes()
+        indexes = np.unique([index.row()for index in indexes])
+        baseTime = workspace.timeSeriesCatBaseTime
+        keys = list(timeSeriesesCat.keys())
+        argsList = [(timeSeriesesCat.pop(keys[index]), baseTime)
+                    for index in indexes]
 
+        thread = QMultiProcess(
+            OrbitoolFunc.interp1TimeSeries, argsList, datetime.datetime.now())
+        thread.finished.connect(self.qTimeSeriesCatIntFinished)
+        return thread
+
+    @threadBegin
+    @withoutArgs
     def qTimeSeriesCatIntAll(self):
-        pass
+        workspace = self.workspace
+        baseTime = workspace.timeSeriesCatBaseTime
+        argsList = [(timeSeries, baseTime)
+                    for timeSeries in workspace.timeSeriesesCat.values()]
+        workspace.timeSeriesesCat.clear()
 
-    def qTimeSeriesCatExport(self):
-        pass
+        thread = QMultiProcess(
+            OrbitoolFunc.interp1TimeSeries, argsList, datetime.datetime.now())
+        thread.finished.connect(self.qTimeSeriesCatIntFinished)
+        return thread
 
+    @threadEnd
+    def qTimeSeriesCatIntFinished(self, result, args):
+        timeSeriesesCat = self.workspace.timeSeriesesCat
+        for timeSeries in result:
+            timeSeriesesCat[timeSeries.tag] = timeSeries
+        self.showTimeSeriesCat(timeSeriesesCat)
+
+    @threadBegin
+    @withoutArgs
+    @savefile("Save as", "csv file(*.csv)")
+    def qTimeSeriesCatExport(self, path):
+        thread = QThread(
+            OrbitoolExport.exportTimeSeriesesWithBaseTime, (path,
+                                                            list(self.workspace.timeSeriesesCat.values()), self.workspace.timeSeriesCatBaseTime))
+        thread.finished.connect(self.csvExportFinished)
+        return thread
+
+    @busy
+    @withoutArgs
     def qTimeSeriesCatRescale(self):
-        pass
+        self.timeSeriesCatRescale()
 
+    @busy
+    @withoutArgs
+    def qTimeSeriesCatLogScaleToggle(self):
+        log = self.timeSeriesCatLogScaleCheckBox.isChecked()
+        ax = self.timeSeriesCatPlot.ax
+        ax.set_yscale('log' if log else 'linear')
+        if not log:
+            ax.yaxis.set_major_formatter(
+                matplotlib.ticker.FormatStrFormatter(r"%.1e"))
+        self.timeSeriesCatRescale()
 
+    @busy
+    @withoutArgs
+    def qTimeSeriesCatLegendToggle(self):
+        plot = self.timeSeriesCatPlot
+        ax = plot.ax
+        if self.timeSeriesCatShowLegendsCheckBox.isChecked():
+            ax.legend().set_visible(True)
+        else:
+            ax.legend().set_visible(False)
+        plot.canvas.draw()

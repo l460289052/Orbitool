@@ -2515,6 +2515,19 @@ and continue</string>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_24">
              <item>
+              <widget class="QCheckBox" name="timeSeriesShowLegendsCheckBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>show legends</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QCheckBox" name="timeSeriesLogScaleCheckBox">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -2566,6 +2579,30 @@ and continue</string>
               </widget>
              </item>
              <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_33">
+               <item>
+                <widget class="QLabel" name="label_31">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>File:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="timeSeriesCatFileLabel">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
               <widget class="QTabWidget" name="timeSeriesCatCsvTabWidget">
                <property name="currentIndex">
                 <number>0</number>
@@ -2597,8 +2634,8 @@ and continue</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>241</width>
-                      <height>379</height>
+                      <width>186</width>
+                      <height>347</height>
                      </rect>
                     </property>
                     <layout class="QVBoxLayout" name="verticalLayout_30">
@@ -2922,7 +2959,7 @@ and continue</string>
               </layout>
              </item>
              <item>
-              <widget class="QTableWidget" name="timeSeriesCatTimeSeriestableWidget">
+              <widget class="QTableWidget" name="timeSeriesCatTimeSeriesTableWidget">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                  <horstretch>0</horstretch>
@@ -2948,19 +2985,6 @@ and continue</string>
                  <string>intensity</string>
                 </property>
                </column>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="timeSeriesCatExportPpmCheckBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Export with text &quot;with ppm&quot;</string>
-               </property>
               </widget>
              </item>
              <item>
@@ -2992,6 +3016,19 @@ and continue</string>
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_32">
+               <item>
+                <widget class="QCheckBox" name="timeSeriesCatShowLegendsCheckBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>show legends</string>
+                 </property>
+                </widget>
+               </item>
                <item>
                 <widget class="QCheckBox" name="timeSeriesCatLogScaleCheckBox">
                  <property name="sizePolicy">
@@ -3074,7 +3111,7 @@ and continue</string>
               <x>0</x>
               <y>0</y>
               <width>179</width>
-              <height>554</height>
+              <height>550</height>
              </rect>
             </property>
             <layout class="QFormLayout" name="formLayout">

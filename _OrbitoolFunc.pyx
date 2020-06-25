@@ -5,11 +5,12 @@
 # from cython.parallel import prange
 from libc cimport math
 from libcpp cimport bool
+from cython.operator cimport preincrement as inc
 import numpy as np
 cimport numpy as np
 import cython
+import datetime
 
-ctypedef np.uint8_t uint8
 ctypedef np.int32_t int32
 ctypedef np.int64_t int64
 
@@ -17,7 +18,7 @@ ctypedef fused floats:
     float
     double
 
-def indexNearest(np.ndarray array, value, tuple indexRange = None) -> int:
+cpdef int indexNearest(np.ndarray array, value, tuple indexRange = None):
     '''
     `indexRange`: default=(0,len(array))
     '''
@@ -29,7 +30,7 @@ def indexNearest(np.ndarray array, value, tuple indexRange = None) -> int:
     else:
         return i
 
-def indexBetween(np.ndarray array, tuple valueRange, tuple indexRange = None) -> (int, int):
+cpdef tuple indexBetween(np.ndarray array, tuple valueRange, tuple indexRange = None):
     cdef int ll,rr,l,r
     ll, rr = (0, len(array)) if indexRange is None else indexRange
     lvalue, rvalue = valueRange
@@ -56,7 +57,7 @@ def getPeaks(np.ndarray[floats,ndim=1] mz, np.ndarray[floats,ndim=1] intensity, 
     cdef np.ndarray[int32,ndim=1] index = np.arange(start, stop, dtype=np.int32)
 
     cdef double delta = 1e-6
-    cdef np.ndarray[uint8,ndim=1] peaksIndex = intensity > delta
+    cdef np.ndarray[bool,ndim=1] peaksIndex = intensity > delta
     cdef np.ndarray[int32,ndim=1] l = index[:-1][peaksIndex[1:] > peaksIndex[:-1]]
     cdef np.ndarray[int32,ndim=1] r = index[1:][peaksIndex[:-1] > peaksIndex[1:]] + 1
     if l[0] + 1 >= r[0]:
@@ -65,20 +66,20 @@ def getPeaks(np.ndarray[floats,ndim=1] mz, np.ndarray[floats,ndim=1] intensity, 
         r = np.append(r, np.array((stop,)))
     return np.stack((l, r), 1)
 
-def peakAt(np.ndarray[floats,ndim=1] intensity)->np.ndarray:
-    cdef np.ndarray[uint8,ndim=1] peak = intensity[:-1] < intensity[1:]
+cpdef np.ndarray[floats,ndim=1] peakAt(np.ndarray[floats,ndim=1] intensity):
+    cdef np.ndarray[bool,ndim=1] peak = intensity[:-1] < intensity[1:]
     peak = peak[:-1] > peak[1:]
     return peak
 
 def getNoise(np.ndarray[floats,ndim=1] mz, np.ndarray[floats,ndim=1] intensity, floats quantile):
-    cdef np.ndarray[uint8,ndim=1] peak = peakAt(intensity)
+    cdef np.ndarray[bool,ndim=1] peak = peakAt(intensity)
     mz = mz[1:-1][peak]
     intensity = intensity[1:-1][peak]
 
     cdef double l = 0.5
     cdef double r = 0.8
     cdef np.ndarray[floats,ndim=1] tmp = mz - np.floor(mz)
-    cdef np.ndarray[np.uint8_t,ndim=1] select = (tmp > l) & (tmp < r)
+    cdef np.ndarray[bool,ndim=1] select = (tmp > l) & (tmp < r)
     mz = mz[select]
     intensity = intensity[select]
 
@@ -92,7 +93,7 @@ def getNoise(np.ndarray[floats,ndim=1] mz, np.ndarray[floats,ndim=1] intensity, 
     return peak, (mz, intensity), (noiseQuantile, noiseStd)
 
 @cython.boundscheck(False)
-def denoiseWithLOD(np.ndarray[floats,ndim=1] mz,np.ndarray[floats] intensity, tuple LOD, np.ndarray[np.uint8_t,ndim=1] peak, bool minus=True):
+def denoiseWithLOD(np.ndarray[floats,ndim=1] mz,np.ndarray[floats] intensity, tuple LOD, np.ndarray[bool,ndim=1] peak, bool minus=True):
     cdef int length = len(mz)
     cdef np.ndarray[floats,ndim=1] newIntensity = np.zeros_like(intensity)
     cdef double mean = LOD[0]
@@ -128,7 +129,7 @@ def denoiseWithLOD(np.ndarray[floats,ndim=1] mz,np.ndarray[floats] intensity, tu
             newIntensity[l:r + 1] = intensity[l:r + 1]
 
     cdef double delta = 1e-6
-    cdef np.ndarray[uint8,ndim=1] select = newIntensity > delta
+    cdef np.ndarray[bool,ndim=1] select = newIntensity > delta
     # select[1:] = select[1:] | select[:-1]
     # select[:-1] = select[:-1] | select[1:]
     select[1:] |= select[:-1]
@@ -192,3 +193,69 @@ class NormalDistributionFunc:
         a2,mu2=param2
         cdef double aSum=a1+a2
         return (a1+a2,(mu1*a1+mu2*a2)/aSum)
+
+def catTime(np.ndarray time1, np.ndarray time2)->np.ndarray:
+    if len(time1)==0:
+        return time2
+    if len(time2)==0:
+        return time1
+    cdef int l1,r1,l2,r2
+    l1,r1=indexBetween(time1,(time2[0],time2[-1]))
+    l2,r2=indexBetween(time2,(time1[0],time1[-1]))
+    cdef np.ndarray time = np.concatenate((time1,time2))
+    if r1-l1>3 and r2-l2>3:
+        raise ValueError(f"Two time serieses are crossed in [{time1[l1].astype(datetime.datetime).isoformat()},{time1[r1-1].astype(datetime.datetime).isoformat()}]")
+    time.sort()
+    return time
+
+
+# cython doesn't suppport datetime64 as dtype, and convert to int64 is costing
+def catTimeSeries(np.ndarray time1, np.ndarray[floats, ndim=1] int1, np.ndarray time2, np.ndarray[floats,ndim=1] int2):
+    if len(time1)==0:
+        return time2, int2
+    if len(time2)==0:
+        return time1,int1
+    cdef int l1,r1,l2,r2
+    l1,r1=indexBetween(time1,(time2[0],time2[-1]))
+    l2,r2=indexBetween(time2,(time1[0],time1[-1]))
+    if r1-l1>3 and r2-l2>3:
+        raise ValueError(f"Two time serieses are crossed in [{time1[l1].astype(datetime.datetime).isoformat()},{time1[r1-1].astype(datetime.datetime).isoformat()}]")
+    
+    cdef np.ndarray time = np.concatenate((time1,time2))
+    cdef np.ndarray[floats,ndim=1] ints = np.concatenate((int1,int2))
+    cdef np.ndarray[int64,ndim=1] index = time.argsort()
+    time=time[index]
+    ints=ints[index]
+    return time,ints
+
+@cython.boundscheck(False)
+def interp1TimeSeriesAt(np.ndarray time, np.ndarray totalTime):
+    '''
+    datetime64 s -> int
+
+    time is included by totalTime
+    '''
+    if len(time)==0:
+        return totalTime[0:0]
+    cdef int l,r
+    l=indexNearest(totalTime,time[0])
+    r=indexNearest(totalTime,time[-1])
+    totalTime=totalTime[l:r+1]
+    cdef int i
+    cdef object delta, tt, t
+    delta = np.timedelta64(2,'s')
+    cdef np.ndarray[bool,ndim=1] select=np.zeros_like(totalTime,dtype=np.bool)
+    l=0
+    for i in range(len(time)):
+        t=time[i]
+        tt=totalTime[l]
+        if abs(t-tt)>delta:
+            if abs(t-totalTime[l+1])<delta:
+                select[l]=True
+                inc(l)
+            else:
+                l+=2
+                while abs(t-totalTime[l])>delta:
+                    inc(l)
+        inc(l)
+    return totalTime[select]

@@ -145,6 +145,33 @@ def exportTimeSerieses(writer:csv.writer, timeSerieses: List[TimeSeries], withpp
     sendStatus(now, msg, length, length)
 
 @checkOpenCsv
+def exportTimeSeriesesWithBaseTime(writer:csv.writer, timeSerieses: List[TimeSeries], baseTime:np.ndarray, sendStatus=nullSendStatus):
+    slength = len(timeSerieses)
+    if slength < 1:
+        raise ValueError('No time serieses (selected)')
+    now = datetime.now()
+    deltaTime = np.timedelta64(timedelta(seconds=5))
+    
+    msg = 'export time serieses writing'
+    row = ['isotime', 'igor time', 'matlab time', 'excel time']
+    row.extend([str(timeSeries.tag) for timeSeries in timeSerieses])
+    writer.writerow(row)
+    indexes = np.zeros(slength, dtype=np.int)
+    maxIndexes = np.array([len(timeSeries.time) for timeSeries in timeSerieses], dtype=np.int)
+    length = len(baseTime)
+    for index in range(length):
+        if index % 10 == 0:
+            sendStatus(now, msg, index, length)
+        current = baseTime[index]
+        select = indexes < maxIndexes
+        select &= np.array([(np.abs(timeSerieses[i].time[indexes[i]] - current) < deltaTime) if select[i] else False for i in range(slength)])
+        row=OrbitoolFunc.getTimesExactToS(current.astype(datetime))
+        row.extend([timeSerieses[i].intensity[indexes[i]] if select[i] else '' for i in range(slength) ])
+        indexes[select] += 1
+        writer.writerow(row)
+    sendStatus(now, msg, length, length)
+
+@checkOpenCsv
 def exportIsotope(writer:csv.writer, fileTime: datetime, peaks: List[Peak], sendStatus=nullSendStatus):
     
     msg = "mapping isotope"
