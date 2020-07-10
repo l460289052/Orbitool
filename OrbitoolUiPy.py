@@ -38,7 +38,7 @@ import OrbitoolFunc
 import OrbitoolOption
 import OrbitoolUi
 
-DEBUG = True
+DEBUG = False
 
 cpu = multiprocessing.cpu_count() - 1
 if cpu <= 0:
