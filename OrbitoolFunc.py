@@ -345,9 +345,9 @@ class NormalDistributionFunc(_NormalDistributionFunc):
         peakstr = [f'sigma={self.peakSigmaFit}']
         peakstr.append(','.join(['mz', 'intensity']))
         for row in np.stack((mz, intensity), 1):
-            peakstr.append(','.join(row))
+            peakstr.append(','.join([str(r) for r in row]))
         peakstr = '\n'.join(peakstr)
-        raise ValueError("can't fit peak in (%.5f,%.5f) at spectrum %s\n%s" % (
+        raise ValueError("can't fit peak in (%.5f,%.5f) at spectrum %s\nIf this peak is small, larger LOD may solve it\n%s" % (
             mz[0], mz[-1], peak.spectrum.timeRange[0].replace(microsecond=0).isoformat(), peakstr))
 
 class PolynomialRegressionFunc:

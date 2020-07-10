@@ -38,7 +38,7 @@ import OrbitoolFunc
 import OrbitoolOption
 import OrbitoolUi
 
-DEBUG = False
+DEBUG = True
 
 cpu = multiprocessing.cpu_count() - 1
 if cpu <= 0:
@@ -80,21 +80,33 @@ def showInfo(content: str, cap=None):
 if DEBUG:
     showInfo('DEBUG')
 
-
-def busy(func):
-    @wraps(func)
-    def decorator(self, *args, **kargs):
-        if not self.setBusy(True):
-            return
-        try:
+    def busy(func):
+        @wraps(func)
+        def decorator(self, *args, **kargs):
+            if not self.setBusy(True):
+                return
             func(self, *args, **kargs)
-        except Exception as e:
-            showInfo(str(e))
-            with open('error.txt', 'a') as file:
-                print('', datetime.datetime.now(), str(e), sep='\n', file=file)
-                traceback.print_exc(file=file)
-        self.setBusy(False)
-    return decorator
+            self.setBusy(False)
+        return decorator
+
+
+else:
+
+    def busy(func):
+        @wraps(func)
+        def decorator(self, *args, **kargs):
+            if not self.setBusy(True):
+                return
+            try:
+                func(self, *args, **kargs)
+            except Exception as e:
+                showInfo(str(e))
+                with open('error.txt', 'a') as file:
+                    print('', datetime.datetime.now(),
+                          str(e), sep='\n', file=file)
+                    traceback.print_exc(file=file)
+            self.setBusy(False)
+        return decorator
 
 
 def busyExcept(run):
@@ -354,6 +366,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         self.spectrumPropertyTableWidget.horizontalHeader(
         ).setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.spectraTableWidget.itemClicked.connect(self.qSpectraClicked)
+
+        self.spectraExportPushButton.clicked.connect(self.qSpectraExport)
 
         # files
         self.addFolderPushButton.clicked.connect(self.qAddFolder)
@@ -1152,7 +1166,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             setValue(0, operator.shownTime[0])
             setValue(1, operator.shownTime[1])
 
-    @threadBegin
+    @busy
     def qSpectraClicked(self, item: QtWidgets.QTableWidgetItem):
         row = item.row()
         workspace = self.workspace
@@ -1168,6 +1182,33 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                     index, column, QtWidgets.QTableWidgetItem(str(s)))
             setValue(0, k)
             setValue(1, v)
+
+    @threadBegin
+    @withoutArgs
+    @openfile('Select a folder to save', folder=True)
+    def qSpectraExport(self, folder):
+        currentWidget = self.tabWidget.currentWidget()
+        errmsg = "Please switch to other tabs"
+        workspace = self.workspace
+        spectra = None
+        if currentWidget == self.filesTab:
+            raise ValueError(errmsg)
+        elif currentWidget == self.spectra1Tab:
+            raise ValueError("Please denoise or continue first")
+        elif currentWidget == self.peakFit2Tab:
+            spectra = workspace.denoisedSpectra2
+        elif currentWidget == self.calibrationTab:
+            raise ValueError("Please calibrate first")
+        elif currentWidget == self.spectra3Tab:
+            spectra = workspace.calibratedSpectra3
+
+        thread = QThread(OrbitoolExport.exportRawSpectra, (folder, spectra))
+        thread.finished.connect(self.qSpectraExportFinished)
+        return thread
+
+    @threadEnd
+    def qSpectraExportFinished(self, result, args):
+        showInfo("export finished")
 
     @busy
     @withoutArgs
@@ -1387,6 +1428,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             spectra = []
             length = len(operators)
             maps = SortedDict()
+            newoperators = []
             with multiprocessing.Pool(cpu) as pool:
                 if not withDenoising:
                     msg = "reading and averaging"
@@ -1394,11 +1436,14 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                     for index, operator in enumerate(operators):
                         sendStatus(operator.fileTime, msg, index, length)
                         spectrum = operator(fileList)
-                        spectra.append(spectrum)
-                        maps.setdefault(spectrum.fileTime, []).append(spectrum)
+                        if spectrum is not None:
+                            newoperators.append(operator)
+                            spectra.append(spectrum)
+                            maps.setdefault(spectrum.fileTime,
+                                            []).append(spectrum)
 
-                        rets.append(pool.apply_async(
-                            OrbitoolFunc.getPeaks, (spectrum, )))
+                            rets.append(pool.apply_async(
+                                OrbitoolFunc.getPeaks, (spectrum, )))
 
                     msg = "spliting peaks"
                     for index, ret in enumerate(rets):
@@ -1413,8 +1458,10 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                         sendStatus(operator.fileTime, msg, index, length)
                         spectrum = operator(fileList)
 
-                        rets.append(pool.apply_async(
-                            OrbitoolFunc.denoise, (spectrum, quantile, minus)))
+                        if spectrum is not None:
+                            newoperators.append(operator)
+                            rets.append(pool.apply_async(
+                                OrbitoolFunc.denoise, (spectrum, quantile, minus)))
 
                     msg = "spliting and denoising"
                     for index, ret in enumerate(rets):
@@ -1428,7 +1475,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                 if len(operators) > 0:
                     sendStatus(
                         operators[-1].fileTime, msg, index, length)
-            return LODs, spectra, maps
+            return LODs, spectra, maps, newoperators
         thread = QThread(process, tuple())
         thread.finished.connect(self.qDenoiseFinished)
         return thread
@@ -1468,11 +1515,13 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
 
     @threadEnd
     def qDenoiseFinished(self, result, args):
-        LODs, spectra, maps = result
+        LODs, spectra, maps, operators = result
         workspace = self.workspace
         workspace.spectra2LODs = LODs
         workspace.denoisedSpectra2 = spectra
         workspace.fileTimeSpectraMaps = maps
+        workspace.spectra1Operators = operators
+        self.showSpectra(operators)
         self.tabWidget.setCurrentWidget(self.peakFit2Tab)
 
     @busy
@@ -2489,7 +2538,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    @openfile("Select Mass list", "Mass list file(*.OrbitMassList);;csv file(*.csv)")
+    @openfile("Select Mass list", "csv file(*.csv); Mass list file(*.OrbitMassList)")
     def qMassListMerge(self, file):
         workspace = self.workspace
         ext = os.path.splitext(file)[1].lower()
@@ -2525,7 +2574,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    @openfile("Select Mass list", "Mass list file(*.OrbitMassList);;csv file(*.csv)")
+    @openfile("Select Mass list", "csv or Mass list file(*.csv; *.OrbitMassList)")
     def qMassListImport(self, file):
         workspace = self.workspace
         ext = os.path.splitext(file)[1].lower()
@@ -2562,7 +2611,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    @savefile("Save as", "Mass list file(*.OrbitMassList);;csv file(*.csv)")
+    @savefile("Save as", "csv file(*.csv);;Mass list file(*.OrbitMassList)")
     def qMassListExport(self, path):
         ext = os.path.splitext(path)[1].lower()
         massList = self.workspace.massList

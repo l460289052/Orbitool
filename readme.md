@@ -388,6 +388,16 @@ If you meet any bugs, please let me know. You can send me the 'error.txt' file w
 
 ## log
 
+**2020.7.10 version 1.3.1**
+
+Appended
+
++ export spectra
+
+Bug fix
+
++ error occured when averaging RAW file with multiple filters
+
 **2020.6.26 version 1.3.0**
 
 Appended

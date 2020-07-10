@@ -35,6 +35,7 @@ convertPolarity = {PolarityType.Any: 0,
                    PolarityType.Positive: 1,
                    PolarityType.Negative: -1}
 
+
 class File:
     def __init__(self, fullname):
         rawfile = RawFileReaderAdapter.FileFactory(fullname)
@@ -45,26 +46,34 @@ class File:
         self.rawfile = rawfile
         time = self.rawfile.FileHeader.CreationDate
         self.creationDate = datetime.datetime(year=time.Year, month=time.Month, day=time.Day, hour=time.Hour,
-                              minute=time.Minute, second=time.Second, microsecond=time.Millisecond*1000)
-        self.startTime = datetime.timedelta(minutes=self.rawfile.RunHeader.StartTime)
-        self.endTime = datetime.timedelta(minutes=self.rawfile.RunHeader.EndTime)
+                                              minute=time.Minute, second=time.Second, microsecond=time.Millisecond*1000)
+        self.startTime = datetime.timedelta(
+            minutes=self.rawfile.RunHeader.StartTime)
+        self.endTime = datetime.timedelta(
+            minutes=self.rawfile.RunHeader.EndTime)
         self.firstScanNumber = self.rawfile.RunHeader.FirstSpectrum
         self.lastScanNumber = self.rawfile.RunHeader.LastSpectrum
-        self.massResolution = int(self.rawfile.GetTrailerExtraInformation(1).Values[11])
-        
+        self.massResolution = int(
+            self.rawfile.GetTrailerExtraInformation(1).Values[11])
+
     def getSpectrumRetentionTime(self, scanNum):
         return datetime.timedelta(minutes=self.rawfile.RetentionTimeFromScanNumber(scanNum))
-    
+
     def getSpectrumRetentionTimes(self):
         return [self.getSpectrumRetentionTime(scanNum) for scanNum in range(self.firstScanNumber, self.lastScanNumber + 1)]
-        
-    def getFilter(self, polarity):
-        scanfilter = None
-        filters = self.rawfile.GetFilters()
-        for f in filters:
+
+    def checkFilter(self, polarity) -> bool:
+        for f in self.rawfile.GetFilters():
             if convertPolarity[f.Polarity] == polarity:
-                scanfilter = f
-        return scanfilter
+                return True
+        return False
+
+    def getFilter(self, start, stop, polarity):
+        for i in range(start, stop):
+            scanfilter = self.rawfile.GetFilterForScanNumber(i)
+            if convertPolarity[scanfilter.Polarity] == polarity:
+                return scanfilter
+        return None
 
     def getSpectrumPolarity(self, scanNum):
         scanfilter = self.rawfile.GetFilterForScanNumber(scanNum)
@@ -72,7 +81,8 @@ class File:
 
     def getSpectrum(self, scanNum):
         rawfile = self.rawfile
-        retentimeTime = datetime.timedelta(minutes=rawfile.RetentionTimeFromScanNumber(scanNum))
+        retentimeTime = datetime.timedelta(
+            minutes=rawfile.RetentionTimeFromScanNumber(scanNum))
         scanStatistics = rawfile.GetScanStatsForScanNumber(scanNum)
         segmentedScan = rawfile.GetSegmentedScanFromScanNumber(
             scanNum, scanStatistics)
@@ -84,9 +94,9 @@ class File:
     def timeRange2NumRange(self, timeRange: Tuple[datetime.timedelta, datetime.timedelta]):
         rawfile = self.rawfile
         r: range = OrbitoolFunc.indexBetween(self, timeRange,
-                                                (self.firstScanNumber,
-                                                self.lastScanNumber + 1),
-                                                method=(lambda f, i: f.getSpectrumRetentionTime(i)))
+                                             (self.firstScanNumber,
+                                                 self.lastScanNumber + 1),
+                                             method=(lambda f, i: f.getSpectrumRetentionTime(i)))
         return (r.start, r.stop)
 
     def checkAverageEmpty(self, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
@@ -98,14 +108,13 @@ class File:
         else:
             raise ValueError(
                 "`timeRange` or `numRange` must be provided and only one can be provided")
-        
+
         for i in range(start, end):
             if self.getSpectrumPolarity(i) == polarity:
                 return False
         return True
 
-        
-    def getAveragedSpectrum(self, ppm, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None, polarity = -1):
+    def getAveragedSpectrum(self, ppm, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
         averaged = None
 
         rawfile = self.rawfile
@@ -116,24 +125,27 @@ class File:
         else:
             raise ValueError(
                 "`timeRange` or `numRange` must be provided and only one can be provided")
-        scanfilter = self.getFilter(polarity)
+        scanfilter = self.getFilter(start, end, polarity)
+        if scanfilter is None:
+            return None
         last = end - 1
         massOption = MassOptions(ppm, ToleranceUnits.ppm)
-        sTime = self.creationDate +  self.getSpectrumRetentionTime(start)
+        sTime = self.creationDate + self.getSpectrumRetentionTime(start)
         if start <= last:
             averaged = Extensions.AverageScansInScanRange(
-                rawfile, start, last, scanfilter, massOption).SegmentedScan
+                rawfile, start, last, scanfilter, massOption)
+            if averaged is None:  # I don't know why it could be a None
+                return None
+            averaged = averaged.SegmentedScan
             mz = np.array(list(averaged.Positions), dtype=np.float)
             intensity = np.array(list(averaged.Intensities), dtype=np.float)
             eTime = self.creationDate + self.getSpectrumRetentionTime(last)
         else:
-            mz = np.zeros(0, dtype=np.float)
-            intensity = np.zeros(0, dtype=np.float)
-            eTime = sTime
+            return None
 
         timeRange = (sTime, eTime)
 
-        numRange = (start,end)
+        numRange = (start, end)
         return OrbitoolBase.Spectrum(self.creationDate, mz, intensity, timeRange, numRange)
 
     def __del__(self):

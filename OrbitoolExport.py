@@ -46,6 +46,34 @@ def exportCsv(writer: csv.writer, *args, header: Iterable = None):
         writer.writerow([arg[index] for arg in args])
     # print('finish exporting')
 
+def exportRawSpectra(folder, spectra:List[Spectrum], sendStatus=nullSendStatus):
+    length = len(spectra)
+    if length == 0:
+        return
+    filename = ""
+    for index, spectrum in enumerate(spectra):
+        filename=f"spectrum_{spectrum.timeRange[0].strftime(r'%Y-%M-%d_%H_%m_%S')}.csv"
+        sendStatus(spectra[0].fileTime,f"export {filename}", index, length)
+        exportRawSpectrum(os.path.join(folder, filename), spectrum)
+    sendStatus(spectra[-1].fileTime,f"export {filename}", length, length)
+
+@checkOpenCsv
+def exportRawSpectrum(writer:csv.writer,spectrum:Spectrum):
+    row=['','isotime','igor time','matlab time','excel time']
+    writer.writerow(row)
+    row=['from']
+    row.extend(OrbitoolFunc.getTimesExactToS(spectrum.timeRange[0]))
+    writer.writerow(row)
+    row=['to']
+    row.extend(OrbitoolFunc.getTimesExactToS(spectrum.timeRange[1]))
+    writer.writerow(row)
+
+    writer.writerow(['mz','intensity'])
+
+    writer.writerows([row for row in zip(spectrum.mz,spectrum.intensity)])
+
+
+
 
 @checkOpenCsv
 def exportSpectrum(writer:csv.writer, spectrum: Spectrum, sendStatus=nullSendStatus):

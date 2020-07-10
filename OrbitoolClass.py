@@ -223,7 +223,7 @@ class GetAveragedSpectrumAcrossFiles(OrbitoolBase.Operator):
 def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N: int = None, polarity: int = -1, timeLimit: Tuple[datetime.datetime, datetime.datetime] = None) -> List[GetSpectrum]:
     timedict = fileList.timedict
     for file in timedict.values():
-        if file.getFilter(polarity) is None:
+        if not file.checkFilter(polarity):
             raise ValueError(
                 f"Please check file {file.name}. It doesn't have spectrum with polarity = {polarity}")
 
@@ -600,7 +600,7 @@ def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OrbitoolBase.Sp
 
 
 supportedVersion = 1_02_00
-version = 1_03_00
+version = 1_03_01
 
 
 def version2Str(version):
@@ -655,6 +655,6 @@ class Workspace(object):
         self.timeSeriesIndex = None
 
         # @showTimeSeriesCat
-        self.timeSeriesesCat: Dict[OrbitoolFormula.FormulaHint, OrbitoolBase.TimeSeries] = collections.OrderedDict()
-        self.timeSeriesCatBaseTime=np.empty((0,),dtype='M8[s]')
-
+        self.timeSeriesesCat: Dict[OrbitoolFormula.FormulaHint,
+                                   OrbitoolBase.TimeSeries] = collections.OrderedDict()
+        self.timeSeriesCatBaseTime = np.empty((0,), dtype='M8[s]')
