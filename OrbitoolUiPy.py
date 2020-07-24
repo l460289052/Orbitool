@@ -445,6 +445,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             self.qCalibrationShowSelected)
         self.calibrationShowAllPushButton.clicked.connect(
             self.qCalibrationShowAll)
+        # self.calibrationContinuePushButton.clicked.connect(
+        #     self.qCalibrationContinue)
         self.calibrationFinishPushButton.clicked.connect(
             self.qCalibrationFinish)
         self.calibrationInfoExportPushButton.clicked.connect(
@@ -1687,7 +1689,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @busy
     @withoutArgs
     def qCalibrationRmIon(self):
-        indexes = self.calibrationIonsTableWidget.selectedIndexes()
+        indexes = [index.row() for index in self.calibrationIonsTableWidget.selectedIndexes()]
         indexes = np.unique(indexes)
         table = self.calibrationIonsTableWidget
         ionList = self.calibrationIonList
@@ -1870,6 +1872,11 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @withoutArgs
     def qCalibrationShowAll(self):
         self.showCalibrationInfoAll(self.workspace.fileTimeCalibrations)
+
+    @busy
+    @withoutArgs
+    def qCalibrationContinue(self):
+        pass
 
     @threadBegin
     @withoutArgs

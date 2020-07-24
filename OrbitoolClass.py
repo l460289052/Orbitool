@@ -2,6 +2,7 @@
 from typing import List, Union, Tuple, Dict
 import os
 import datetime
+import traceback
 import math
 from enum import Enum
 import copy
@@ -416,7 +417,12 @@ class PeakFitFunc:
         length = len(peaks)
         for index, peak in enumerate(peaks):
             sendStatus(fileTime, msg, index, length)
-            fittedPeaks.extend(self.fitPeak(peak))
+            try:
+                fittedPeaks.extend(self.fitPeak(peak))
+            except Exception as e:
+                with open('error.txt', 'a') as file:
+                    print('',datetime.datetime.now(),str(e), sep='\n',file=file)
+                    traceback.print_exc(file=file)
         return fittedPeaks
 
 

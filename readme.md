@@ -343,6 +343,8 @@ If you want to refit a peak, could double click a peak in peak list. You can cha
 ![peakfit2](img/peakfit2.png)
 
 > you can change 2 things in this groupbox: peak num, formulas
+>
+> Because sometimes Orbitool can't fit noise peaks, Orbitool will print those to error.txt silently.
 
 #### Mass defect
 
@@ -386,7 +388,29 @@ You can change some key row/column's position to fit your csv file
 
 If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Orbitool.exe'.
 
+## Maintainer
++ School of Electronic, Information and Electrical Engineering, Shanghai Jiao Tong University, Shanghai, 200240, China
+
+## Contributors
+
++ State Environmental Protection Key Laboratory of Formation and Prevention of Urban Air Pollution Complex, Shanghai Academy of Environmental Sciences, Shanghai, 200233, China
++ Univ. Lyon, Université Claude Bernard Lyon 1, CNRS, IRCELYON, F-69626, Villeurbanne, France.
++ Institute for Atmospheric and Earth System Research / Physics, Faculty of Science, University of Helsinki, Helsinki, 00140, Finland.
+
+## Bugs report & function require
+
+mail to: huangc@saes.sh.cn
+
+cc: yiping@sjtu.edu.cn
+
 ## log
+
+**2020.7.24 version 1.3.2**
+
+Bug fix
+
++ error when delete ions in calibration tab
++ change policy for peak failed to fit 
 
 **2020.7.10 version 1.3.1**
 
