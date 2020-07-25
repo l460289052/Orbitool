@@ -234,7 +234,7 @@ def exportIsotope(writer:csv.writer, fileTime: datetime, peaks: List[Peak], send
     sendStatus(fileTime, msg, length, length)
 
 @checkOpenCsv
-def exportCalibrationInfo(writer:csv.writer, fileList:FileList, ionList:List[Tuple[str, FormulaHint]], calibrators: SortedDict, sendStatus=nullSendStatus):
+def exportCalibrationInfo(writer:csv.writer, fileList:files.FileList, ionList:List[Tuple[str, FormulaHint]], calibrators: SortedDict, sendStatus=nullSendStatus):
     msg = "exporting calibration infomation"
     header = ['','','','ppm','formula']
     header.extend([s for s, _ in ionList])

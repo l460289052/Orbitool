@@ -19,140 +19,24 @@ import OrbitoolFormula
 import OrbitoolFunc
 from OrbitoolDll import File
 
-
-class FileList(object):
-    '''
-    file list
-    '''
-
-    def __init__(self):
-        # datetime -> File
-        self.timedict = SortedDict()
-        self.pathdict: Dict[str, File] = {}
-
-    def crossed(self, start: datetime.datetime, end: datetime.datetime) -> (bool, File):
-        timedict = self.timedict
-        index = timedict.bisect_left(start)
-        if index > 0:
-            k, v = timedict.peekitem(index - 1)
-            if v.creationDate + v.endTime > start:
-                return (True, v)
-        if index < len(timedict):
-            k, v = timedict.peekitem(index)
-            if k < end:
-                return (True, v)
-        return (False, None)
-
-    def addFile(self, filepath) -> bool:
-        '''
-        if add same file with file in timedict, return false
-        if added file have crossed time range with file in timedict, raise ValueError
-        else return True
-        '''
-        if filepath in self.pathdict:
-            return False
-        f = File(filepath)
-        crossed, crossedFile = self.crossed(
-            f.creationDate + f.startTime, f.creationDate + f.endTime)
-        if crossed:
-            raise ValueError('file "%s" and "%s" have crossed scan time' % (
-                filepath, crossedFile.path))
-
-        self.timedict[f.creationDate] = f
-        self.pathdict[f.path] = f
-        return True
-
-    def _addFile(self, f: File) -> bool:
-        if f.path in self.pathdict:
-            return False
-        crossed, crossedFile = self.crossed(
-            f.creationDate+f.startTime, f.creationDate+f.endTime)
-        if crossed:
-            raise ValueError(f.path, crossedFile.path)
-        self.timedict[f.creationDate] = f
-        self.pathdict[f.path] = f
-        return True
-
-    def addFileFromFolder(self, folder, recurrent, ext) -> List[datetime.datetime]:
-        fileTimes = []
-        for f in os.listdir(folder):
-            if os.path.splitext(f)[1].lower() == ext:
-                fullname = os.path.join(folder, f)
-                if self.addFile(fullname):
-                    time = self.pathdict[fullname].creationDate
-                    fileTimes.append(time)
-
-        if recurrent:
-            for f in os.listdir(folder):
-                if os.path.isdir(os.path.join(folder, f)):
-                    fileTimes.extend(self.addFileFromFolder(
-                        os.path.join(folder, f), recurrent, ext))
-
-        return fileTimes
-
-    def rmFile(self, filepath):
-        f: File = self.pathdict.pop(filepath, None)
-        if f == None:
-            return
-        self.timedict.pop(f.creationDate)
-
-    def subList(self, filepathsOrTime: List[Union[str, datetime.datetime]]):
-        subList = FileList()
-        for pot in filepathsOrTime:
-            if isinstance(pot, str):
-                if pot in self.pathdict:
-                    subList._addFile(self.pathdict[pot])
-            elif isinstance(pot, datetime.datetime):
-                if pot in self.timedict:
-                    subList._addFile(self.pathdict[pot])
-        return subList
-
-    def clear(self):
-        self.pathdict.clear()
-        self.timedict.clear()
-
-    def timeRange(self):
-        timedict = self.timedict
-        if len(self.timedict) > 0:
-            l: File = timedict.peekitem(0)[1]
-            r: File = timedict.peekitem(-1)[1]
-            return (l.creationDate + l.startTime, r.creationDate + r.endTime)
-        else:
-            return None
-
-    def __getitem__(self, timeOrPath: Union[datetime.datetime, str]):
-        if isinstance(timeOrPath, datetime.datetime):
-            return self.timedict[timeOrPath]
-        elif isinstance(timeOrPath, str):
-            return self.pathdict[timeOrPath]
-        else:
-            raise TypeError(timeOrPath)
-
-    def __contains__(self, timeOrPath: Union[datetime.datetime, str]):
-        if isinstance(timeOrPath, datetime.datetime):
-            return timeOrPath in self.timedict
-        elif isinstance(timeOrPath, str):
-            return timeOrPath in self.pathdict
-        else:
-            raise TypeError(timeOrPath)
-
+from utils import files
 
 class GetSpectrum(OrbitoolBase.Operator):
     def __init__(self, file: File, ppm: float, numRange: (int, int) = None, timeRange: (datetime.timedelta, datetime.timedelta) = None, polarity=-1):
-        self.fileTime = file.creationDate
+        self.fileTime = file.creationDatetime
         self.ppm = ppm
         self.numRange = numRange
         self.timeRange = timeRange
         t1 = None
         t2 = None
         if timeRange is None:
-            t1 = file.creationDate + file.getSpectrumRetentionTime(numRange[0])
-            t2 = file.creationDate + \
+            t1 = file.creationDatetime + file.getSpectrumRetentionTime(numRange[0])
+            t2 = file.creationDatetime + \
                 file.getSpectrumRetentionTime(numRange[1]-1)
         else:
             t1, t2 = timeRange
-            t1 += file.creationDate
-            t2 += file.creationDate
+            t1 += file.creationDatetime
+            t2 += file.creationDatetime
         self.shownTime = (t1.replace(microsecond=0).isoformat(),
                           t2.replace(microsecond=0).isoformat())
         self.polarity = polarity
@@ -163,9 +47,9 @@ class GetSpectrum(OrbitoolBase.Operator):
         else:
             self.empty = False
 
-    def __call__(self, fileList: FileList, sendStatus=OrbitoolBase.nullSendStatus):
+    def __call__(self, fileList: files.FileList, sendStatus=OrbitoolBase.nullSendStatus):
         fileTime = self.fileTime
-        file: File = fileList.timedict[fileTime]
+        file: File = fileList.datetimeDict[fileTime]
         msg = "averaging"
         sendStatus(fileTime, msg, -1, 0)
         numRange = self.numRange
@@ -178,7 +62,7 @@ class GetSpectrum(OrbitoolBase.Operator):
 
 
 class GetAveragedSpectrumAcrossFiles(OrbitoolBase.Operator):
-    def __init__(self, fileList: FileList, spectra: List[GetSpectrum], time, N, now=None):
+    def __init__(self, fileList: files.FileList, spectra: List[GetSpectrum], time, N, now=None):
         self.spectra = spectra
 
         if N is not None:
@@ -190,12 +74,12 @@ class GetAveragedSpectrumAcrossFiles(OrbitoolBase.Operator):
                     self.opIndex = index
 
             op = spectra[0]
-            file: File = fileList.timedict[op.fileTime]
-            s = file.creationDate + \
+            file: File = fileList.datetimeDict[op.fileTime]
+            s = file.creationDatetime + \
                 file.getSpectrumRetentionTime(op.numRange[0])
             op = spectra[-1]
-            file: File = fileList.timedict[op.fileTime]
-            t = file.creationDate + \
+            file: File = fileList.datetimeDict[op.fileTime]
+            t = file.creationDatetime + \
                 file.getSpectrumRetentionTime(op.numRange[1] - 1)
         else:
             maximum = spectra[0].timeRange[1] - spectra[0].timeRange[0]
@@ -217,13 +101,13 @@ class GetAveragedSpectrumAcrossFiles(OrbitoolBase.Operator):
         self.polarity = spectra[0].polarity
         self.empty = op.empty
 
-    def __call__(self, fileList: FileList, sendStatus=OrbitoolBase.nullSendStatus):
+    def __call__(self, fileList: files.FileList, sendStatus=OrbitoolBase.nullSendStatus):
         return self.spectra[self.opIndex](fileList, sendStatus)
 
 
-def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N: int = None, polarity: int = -1, timeLimit: Tuple[datetime.datetime, datetime.datetime] = None) -> List[GetSpectrum]:
-    timedict = fileList.timedict
-    for file in timedict.values():
+def AverageFileList(fileList: files.FileList, ppm, time: datetime.timedelta = None, N: int = None, polarity: int = -1, timeLimit: Tuple[datetime.datetime, datetime.datetime] = None) -> List[GetSpectrum]:
+    datetimeDict = fileList.datetimeDict
+    for file in datetimeDict.values():
         if not file.checkFilter(polarity):
             raise ValueError(
                 f"Please check file {file.name}. It doesn't have spectrum with polarity = {polarity}")
@@ -240,15 +124,15 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
         zero = 0
 
         def indexRange(f: File):
-            retentionStartTime = startTime - f.creationDate
-            retentionEndTime = endTime - f.creationDate
+            retentionStartTime = startTime - f.creationDatetime
+            retentionEndTime = endTime - f.creationDatetime
             return f.timeRange2NumRange((retentionStartTime, retentionEndTime))
 
         def average(f: File, left, length):
             right = left + length
             return GetSpectrum(f, ppm, numRange=(left, right), polarity=polarity)
 
-        it = OrbitoolBase.iterator(fileList.timedict.values())
+        it = OrbitoolBase.iterator(fileList.values())
         if it.end:
             return averageSpectra
         nowfile = it.value
@@ -285,21 +169,21 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
             averageSpectra.append(
                 GetAveragedSpectrumAcrossFiles(fileList, spectra, time, N))
         if N == 1:
-            averageSpectra = [spectrum for spectrum in averageSpectra if timedict[spectrum.fileTime].getSpectrumPolarity(
+            averageSpectra = [spectrum for spectrum in averageSpectra if datetimeDict[spectrum.fileTime].getSpectrumPolarity(
                 spectrum.numRange[0]) == polarity]
 
     elif time is not None:
         zero = datetime.timedelta()
 
         def average(f: File, now, nowend):
-            left = now - f.creationDate
-            right = nowend - f.creationDate
+            left = now - f.creationDatetime
+            right = nowend - f.creationDatetime
             return GetSpectrum(f, ppm, timeRange=(left, right), polarity=polarity)
 
-        it = OrbitoolBase.iterator(fileList.timedict.values())
+        it = OrbitoolBase.iterator(fileList.values())
         now = startTime
         nowfile = it.value
-        while not it.end and nowfile.creationDate + nowfile.endTime < now:
+        while not it.end and nowfile.creationDatetime + nowfile.endTimedelta < now:
             it.next()
             nowfile = it.value
         if it.end:
@@ -308,13 +192,13 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
         nowend = now + time
         if nowend > endTime:
             nowend = endTime
-        nowfstart = nowfile.creationDate + nowfile.startTime
-        nowfend = nowfile.creationDate + nowfile.endTime
+        nowfstart = nowfile.creationDatetime + nowfile.startTimedelta
+        nowfend = nowfile.creationDatetime + nowfile.endTimedelta
 
         while now <= endTime and not it.end:
             if nowfend >= nowend:
                 if nowfstart > nowend:
-                    times = int((nowfile.creationDate - now)/time)
+                    times = int((nowfile.creationDatetime - now)/time)
                     now += times * time
                     nowend = now + time
                     if now > endTime:
@@ -325,8 +209,8 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
                 if nowfend == nowend:
                     it.next()
                     nowfile = it.value
-                    nowfstart = nowfile.creationDate + nowfile.startTime
-                    nowfend = nowfile.creationDate + nowfile.endTime
+                    nowfstart = nowfile.creationDatetime + nowfile.startTimedelta
+                    nowfend = nowfile.creationDatetime + nowfile.endTimedelta
             else:
                 tmpnow = now
                 spectra = []
@@ -338,8 +222,8 @@ def AverageFileList(fileList: FileList, ppm, time: datetime.timedelta = None, N:
                         if it.end:
                             break
                         nowfile = it.value
-                        nowfstart = nowfile.creationDate + nowfile.startTime
-                        nowfend = nowfile.creationDate + nowfile.endTime
+                        nowfstart = nowfile.creationDatetime + nowfile.startTimedelta
+                        nowfend = nowfile.creationDatetime + nowfile.endTimedelta
                     else:
                         if nowfstart < nowend:
                             spectra.append(average(nowfile, tmpnow, nowend))

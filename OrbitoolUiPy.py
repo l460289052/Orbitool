@@ -27,6 +27,8 @@ from matplotlib.backends.backend_qt5agg import (FigureCanvas,
 from PyQt5 import QtCore, QtGui, QtWidgets
 from sortedcontainers import SortedDict
 
+from utils import files
+
 import OrbitoolBase
 import OrbitoolClass
 import OrbitoolDll
@@ -615,7 +617,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
 
         # variables initial
 
-        self.fileList = OrbitoolClass.FileList()
+        self.fileList = files.FileList()
         # @showFormulaOption
         self.ionCalculator: OrbitoolFormulaCalc.IonCalculatorHint = OrbitoolFormulaCalc.IonCalculator()
         self.ionCalculator.setEI('N')
@@ -798,14 +800,13 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         option: OrbitoolOption.Option = result['option']
         self.qSetOption(option)
 
-        fileTimePaths: List[Tuple[datetime.datetime, str]
-                            ] = result['fileTimePaths']
+        fileTimePaths: List[Tuple[datetime.datetime, str]] \
+            = result['fileTimePaths']
         self.workspace = workspace
-        self.fileTableWidget.setRowCount(len(fileTimePaths))
         fileList = self.fileList
         for index, (time, path) in enumerate(fileTimePaths):
             if os.path.exists(path):
-                fileList.addFile(path)
+                fileList.addFile(OrbitoolDll.File(path))
             while time not in fileList:
                 showInfo(f"cannot find file '{path}'")
                 files = QtWidgets.QFileDialog.getOpenFileNames(
@@ -813,8 +814,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                     directory='.',
                     filter="RAW files(*.RAW)")
                 for path in files[0]:
-                    fileList.addFile(path)
-            self.showFile(time, index)
+                    fileList.addFile(OrbitoolDll.File(path))
+        self.showFile(fileList)
 
         self.showMassList(workspace.massList)
 
@@ -838,7 +839,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         option = self.qGetOption()
         workspace = self.workspace
         fileTimePaths = []
-        for (time, file) in self.fileList.timedict.items():
+        for (time, file) in self.fileList.items():
             fileTimePaths.append((time, file.path))
 
         data = {'option': option, 'workspace': workspace,
@@ -1052,20 +1053,23 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             formula = OrbitoolFormula.Formula(text)
             self.formulaResultLineEdit.setText(str(formula.mass()))
 
-    def showFile(self, time: datetime.datetime, index: int):
+    def showFile(self, fileList:files.FileList):
         table = self.fileTableWidget
-
-        def setValue(column: int, s: str):
-            table.setItem(index, column, QtWidgets.QTableWidgetItem(s))
-
+        table.setRowCount(0)
+        table.setRowCount(len(fileList))
         def date2str(time: datetime.datetime):
             return time.replace(microsecond=0).isoformat()
 
-        f: OrbitoolClass.File = self.fileList[time]
-        setValue(0, f.name)
-        setValue(1, date2str(f.creationDate + f.startTime))
-        setValue(2, date2str(f.creationDate + f.endTime))
-        setValue(3, f.path)
+        for index,f in enumerate(fileList.values()):
+
+            def setValue(column: int, s: str):
+                table.setItem(index, column, QtWidgets.QTableWidgetItem(s))
+
+
+            setValue(0, f.name)
+            setValue(1, date2str(f.creationDatetime + f.startTimedelta))
+            setValue(2, date2str(f.creationDatetime + f.endTimedelta))
+            setValue(3, f.path)
 
     def showFileTimeRange(self):
         timeRange = self.fileList.timeRange()
@@ -1081,38 +1085,22 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @withoutArgs
     @openfile("Select one folder", folder=True)
     def qAddFolder(self, folder):
-        table = self.fileTableWidget
-        fileTimes = self.fileList.addFileFromFolder(
-            folder, self.recurrenceCheckBox.isChecked(), '.raw')
-        count = table.rowCount()
-        table.setRowCount(count+len(fileTimes))
-        for index, time in enumerate(fileTimes):
-            self.showFile(time, count+index)
+        for path in files.FileTraveler(folder, ext=".raw", recurrent=self.recurrenceCheckBox.isChecked()):
+            self.fileList.addFile(OrbitoolDll.File(path))
+        self.showFile(self.fileList)
         self.showFileTimeRange()
 
     def qAddFolderExcept(self):
-        table = self.fileTableWidget
-        table.clearContents()
-        table.setRowCount(0)
-        table.setRowCount(len(self.fileList.timedict))
-        for index, fileTime in enumerate(self.fileList.timedict.keys()):
-            self.showFile(fileTime, index)
-        self.showFileTimeRange()
+        self.showFile(self.fileList)
 
     @busy
     @withoutArgs
     @openfile("Select one or more files", "RAW files(*.RAW)", True)
     def qAddFile(self, files):
-        addedFiles = []
         for path in files:
-            if self.fileList.addFile(path):
-                addedFiles.append(path)
+            self.fileList.addFile(OrbitoolDll.File(path))
 
-        table = self.fileTableWidget
-        count = table.rowCount()
-        table.setRowCount(count+len(addedFiles))
-        for index, path in enumerate(addedFiles):
-            self.showFile(path, count+index)
+        self.showFile(self.fileList)
         self.showFileTimeRange()
 
     @busy

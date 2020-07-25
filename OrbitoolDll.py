@@ -11,6 +11,7 @@ from typing import List, Tuple
 import numpy as np
 import clr
 
+from utils.files import File as BaseFile
 
 clr.AddReference(os.path.join(os.getcwd(), 'ThermoFisher.CommonCore.Data.dll'))
 clr.AddReference(os.path.join(
@@ -36,7 +37,7 @@ convertPolarity = {PolarityType.Any: 0,
                    PolarityType.Negative: -1}
 
 
-class File:
+class File(BaseFile):
     def __init__(self, fullname):
         rawfile = RawFileReaderAdapter.FileFactory(fullname)
         rawfile.SelectInstrument(Device.MS, 1)
@@ -45,11 +46,11 @@ class File:
         self.name = os.path.split(fullname)[1]
         self.rawfile = rawfile
         time = self.rawfile.FileHeader.CreationDate
-        self.creationDate = datetime.datetime(year=time.Year, month=time.Month, day=time.Day, hour=time.Hour,
+        self.creationDatetime = datetime.datetime(year=time.Year, month=time.Month, day=time.Day, hour=time.Hour,
                                               minute=time.Minute, second=time.Second, microsecond=time.Millisecond*1000)
-        self.startTime = datetime.timedelta(
+        self.startTimedelta = datetime.timedelta(
             minutes=self.rawfile.RunHeader.StartTime)
-        self.endTime = datetime.timedelta(
+        self.endTimedelta = datetime.timedelta(
             minutes=self.rawfile.RunHeader.EndTime)
         self.firstScanNumber = self.rawfile.RunHeader.FirstSpectrum
         self.lastScanNumber = self.rawfile.RunHeader.LastSpectrum
@@ -88,8 +89,8 @@ class File:
             scanNum, scanStatistics)
         mz = np.array(list(segmentedScan.Positions), dtype=np.float)
         intensity = np.array(list(segmentedScan.Intensities), dtype=np.float)
-        time = retentimeTime+self.creationDate
-        return OrbitoolBase.Spectrum(self.creationDate, mz, intensity, (time, time), (scanNum, scanNum))
+        time = retentimeTime+self.creationDatetime
+        return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
 
     def timeRange2NumRange(self, timeRange: Tuple[datetime.timedelta, datetime.timedelta]):
         rawfile = self.rawfile
@@ -130,7 +131,7 @@ class File:
             return None
         last = end - 1
         massOption = MassOptions(ppm, ToleranceUnits.ppm)
-        sTime = self.creationDate + self.getSpectrumRetentionTime(start)
+        sTime = self.creationDatetime + self.getSpectrumRetentionTime(start)
         if start <= last:
             averaged = Extensions.AverageScansInScanRange(
                 rawfile, start, last, scanfilter, massOption)
@@ -139,14 +140,14 @@ class File:
             averaged = averaged.SegmentedScan
             mz = np.array(list(averaged.Positions), dtype=np.float)
             intensity = np.array(list(averaged.Intensities), dtype=np.float)
-            eTime = self.creationDate + self.getSpectrumRetentionTime(last)
+            eTime = self.creationDatetime + self.getSpectrumRetentionTime(last)
         else:
             return None
 
         timeRange = (sTime, eTime)
 
         numRange = (start, end)
-        return OrbitoolBase.Spectrum(self.creationDate, mz, intensity, timeRange, numRange)
+        return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, timeRange, numRange)
 
     def __del__(self):
         self.rawfile.Dispose()
