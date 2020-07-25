@@ -21,3 +21,16 @@ for path in os.listdir('code'):
                 shutil.copyfile(_path,path)
         else:
             shutil.copyfile(_path,path)
+
+
+from utils.files import FolderTraveler
+
+roots = ["utils", "functions"]
+ft = FolderTraveler(roots, '.pyx', True)
+for filepath in ft:
+    cy = cythonize(filepath, annotate=True)
+    setup(ext_modules=cy, script_args=['build_ext'], include_dirs=[
+          np.get_include()], options={'build_ext': {'inplace': True}})
+
+    dirpath = os.path.dirname(filepath)
+    # find and copy?

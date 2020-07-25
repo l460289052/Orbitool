@@ -490,7 +490,7 @@ def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OrbitoolBase.Sp
 
 
 supportedVersion = 1_02_00
-version = 1_03_01
+version = 1_03_03
 
 
 def version2Str(version):
@@ -538,7 +538,7 @@ class Workspace(object):
         self.shownSpectrum3Peak: List[OrbitoolBase.Peak] = None
 
         # @showMassList
-        self.massList: MassList = OrbitoolBase.MassList()
+        self.massList: OrbitoolBase.MassList = OrbitoolBase.MassList()
 
         # @showTimeSerieses
         self.timeSerieses: List[OrbitoolBase.TimeSeries] = []

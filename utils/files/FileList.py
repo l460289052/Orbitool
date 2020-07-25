@@ -1,64 +1,10 @@
-import os
 from datetime import datetime, timedelta
 from typing import List, Dict, Union
 
 from sortedcontainers import SortedDict
 
-
-class File:
-    def __init__(self):
-        self.path: str = None
-        self.creationDatetime: datetime = None
-        self.startTimedelta: timedelta = None
-        self.endTimedelta: timedelta = None
-
-    @property
-    def startDatetime(self) -> datetime:
-        return self.creationDatetime + self.startTimedelta
-        
-    @property
-    def endDatetime(self) -> datetime:
-        return self.creationDatetime + self.endTimedelta
-
-    def __str__(self):
-        return f"self.path creationDatetime {self.creationDatetime.isoformat()}"
-
-
-class FileTraveler:
-    """
-    ft = FileTraveler(".", true)
-    for path in ft:
-        print(path)
-    """
-
-    def __init__(self, rootPath: str, ext: str, recurrent: bool):
-        assert os.path.isdir(rootPath)
-        assert ext[0] == '.'
-        self.root = rootPath
-        self.ext = ext.lower()
-        self.recurrent = recurrent
-
-    def _findFile(self, folder: str):
-        for f in os.listdir(folder):
-            path = os.path.join(folder, f)
-            if not os.path.isdir(path) and os.path.splitext(f)[1].lower() == self.ext:
-                yield path
-
-    def _findFileRecurrent(self, folder: str):
-        for f in os.listdir(folder):
-            path = os.path.join(folder, f)
-            if os.path.isdir(path):
-                for file in self._findFileRecurrent(path):
-                    yield file
-            elif os.path.splitext(f)[1].lower() == self.ext:
-                yield path
-
-    def __iter__(self):
-        if self.recurrent:
-            return self._findFileRecurrent(self.root)
-        else:
-            return self._findFile(self.root)
-
+from .File import File
+from .FolderTraveler import FolderTraveler
 
 class FileList:
     '''

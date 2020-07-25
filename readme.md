@@ -405,6 +405,12 @@ cc: yiping@sjtu.edu.cn
 
 ## log
 
+**2020.7.30 version 1.3.3**
+
+Appended
+
++ skip calibration
+
 **2020.7.24 version 1.3.2**
 
 Bug fix

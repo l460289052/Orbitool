@@ -22,8 +22,7 @@ import numpy as np
 import pandas as pd
 import psutil
 import pyteomics.mass
-from matplotlib.backends.backend_qt5agg import (FigureCanvas,
-                                                NavigationToolbar2QT)
+from matplotlib.backends.backend_qt5agg import FigureCanvas, NavigationToolbar2QT
 from PyQt5 import QtCore, QtGui, QtWidgets
 from sortedcontainers import SortedDict
 
@@ -447,8 +446,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             self.qCalibrationShowSelected)
         self.calibrationShowAllPushButton.clicked.connect(
             self.qCalibrationShowAll)
-        # self.calibrationContinuePushButton.clicked.connect(
-        #     self.qCalibrationContinue)
+        self.calibrationContinuePushButton.clicked.connect(
+            self.qCalibrationContinue)
         self.calibrationFinishPushButton.clicked.connect(
             self.qCalibrationFinish)
         self.calibrationInfoExportPushButton.clicked.connect(
@@ -1085,7 +1084,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @withoutArgs
     @openfile("Select one folder", folder=True)
     def qAddFolder(self, folder):
-        for path in files.FileTraveler(folder, ext=".raw", recurrent=self.recurrenceCheckBox.isChecked()):
+        for path in files.FolderTraveler(folder, ext=".raw", recurrent=self.recurrenceCheckBox.isChecked()):
             self.fileList.addFile(OrbitoolDll.File(path))
         self.showFile(self.fileList)
         self.showFileTimeRange()
@@ -1864,7 +1863,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @busy
     @withoutArgs
     def qCalibrationContinue(self):
-        pass
+        self.tabWidget.setCurrentWidget(self.spectra3Tab)
 
     @threadBegin
     @withoutArgs
@@ -1899,10 +1898,13 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @spectraIndex
     def qSpectra3FitSpectrum(self, index):
         workspace = self.workspace
-        if workspace.calibratedSpectra3 is None:
-            raise ValueError('Please calibrate first')
         workspace.shownSpectrum3Index = index
-        spectrum: OrbitoolBase.Spectrum = workspace.calibratedSpectra3[index]
+        if workspace.calibratedSpectra3 is None:
+            spectrum: OrbitoolBase.Spectrum = workspace.denoisedSpectra2[index]
+            if spectrum is None:
+                raise Exception("Please denoise or calibrate first")
+        else:
+            spectrum: OrbitoolBase.Spectrum = workspace.calibratedSpectra3[index]
         peakFitFunc = workspace.peakFitFunc
         calc = self.ionCalculator
         fileTime = spectrum.fileTime
@@ -1933,8 +1935,10 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         workspace = self.workspace
         workspace.spectrum3fittedPeaks = peaks
         workspace.spectrum3Residual = residual
+        index=workspace.shownSpectrum3Index
+        spectrum = workspace.denoisedSpectra2[index] if workspace.calibratedSpectra3 is None else workspace.calibratedSpectra3[workspace.shownSpectrum3Index]
         self.showSpectrum3Peaks(
-            workspace.calibratedSpectra3[workspace.shownSpectrum3Index], peaks, residual)
+            spectrum, peaks, residual)
 
     @restore
     def showSpectrum3Peaks(self, spectrum: OrbitoolBase.Spectrum, peaks: List[OrbitoolBase.Peak], residual: (np.ndarray, np.ndarray)):
@@ -2274,12 +2278,15 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @spectraIndex
     def qSpectrum3FitUseMassList(self, index):
         workspace = self.workspace
-        if workspace.calibratedSpectra3 is None:
-            raise ValueError('Please calibrate first')
         ppm = self.massListPpmDoubleSpinBox.value()*1e-6
         workspace.shownSpectrum3Index = index
-        spectrum: OrbitoolClass.CalibratedSpectrum = workspace.calibratedSpectra3[index]
-        massList: OrbitoolClass.MassList = workspace.massList
+        if workspace.calibratedSpectra3 is None:
+            spectrum: OrbitoolBase.Spectrum = workspace.denoisedSpectra2[index]
+            if spectrum is None:
+                raise Exception("Please denoise or calibrate first")
+        else:
+            spectrum:  OrbitoolBase.Spectrum = workspace.calibratedSpectra3[index]
+        massList: OrbitoolBase.MassList = workspace.massList
         massList.ppm = ppm
         peakFitFunc = workspace.peakFitFunc
         calc = self.ionCalculator

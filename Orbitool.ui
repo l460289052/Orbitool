@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>984</width>
-    <height>549</height>
+    <width>988</width>
+    <height>558</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -1284,6 +1284,13 @@ without averaging</string>
                 </widget>
                </item>
               </layout>
+             </item>
+             <item>
+              <widget class="QPushButton" name="calibrationContinuePushButton">
+               <property name="text">
+                <string>Don't calibrate</string>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QPushButton" name="calibratePushButton">
@@ -2641,8 +2648,8 @@ and continue</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>198</width>
-                      <height>299</height>
+                      <width>192</width>
+                      <height>294</height>
                      </rect>
                     </property>
                     <layout class="QVBoxLayout" name="verticalLayout_30">
@@ -3117,7 +3124,7 @@ and continue</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>178</width>
+              <width>179</width>
               <height>554</height>
              </rect>
             </property>
@@ -3900,7 +3907,7 @@ and continue</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>984</width>
+     <width>988</width>
      <height>22</height>
     </rect>
    </property>
