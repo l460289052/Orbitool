@@ -5,7 +5,7 @@ import OrbitoolFunc
 
 import os
 import copy
-import datetime
+from datetime import datetime, timedelta
 from typing import List, Tuple
 
 import numpy as np
@@ -13,13 +13,14 @@ import clr
 
 from utils.files import File as BaseFile
 
-clr.AddReference(os.path.join(os.getcwd(), 'ThermoFisher.CommonCore.Data.dll'))
+pwd = os.path.dirname(__file__)
+clr.AddReference(os.path.join(pwd, 'ThermoFisher.CommonCore.Data.dll'))
 clr.AddReference(os.path.join(
-    os.getcwd(), 'ThermoFisher.CommonCore.RawFileReader.dll'))
+    pwd, 'ThermoFisher.CommonCore.RawFileReader.dll'))
 clr.AddReference(os.path.join(
-    os.getcwd(), 'ThermoFisher.CommonCore.BackgroundSubtraction.dll'))
+    pwd, 'ThermoFisher.CommonCore.BackgroundSubtraction.dll'))
 clr.AddReference(os.path.join(
-    os.getcwd(), 'ThermoFisher.CommonCore.MassPrecisionEstimator.dll'))
+    pwd, 'ThermoFisher.CommonCore.MassPrecisionEstimator.dll'))
 
 clr.AddReference('System.Collections')
 
@@ -36,21 +37,25 @@ convertPolarity = {PolarityType.Any: 0,
                    PolarityType.Positive: 1,
                    PolarityType.Negative: -1}
 
+def initRawFile(path):
+    rawfile = RawFileReaderAdapter.FileFactory(path)
+    rawfile.SelectInstrument(Device.MS, 1)
+    rawfile.IncludeReferenceAndExceptionData = True
+    return rawfile
+
 
 class File(BaseFile):
     def __init__(self, fullname):
-        rawfile = RawFileReaderAdapter.FileFactory(fullname)
-        rawfile.SelectInstrument(Device.MS, 1)
-        rawfile.IncludeReferenceAndExceptionData = True
         self.path = fullname
         self.name = os.path.split(fullname)[1]
-        self.rawfile = rawfile
+        self.rawfile = initRawFile(fullname)
+
         time = self.rawfile.FileHeader.CreationDate
-        self.creationDatetime = datetime.datetime(year=time.Year, month=time.Month, day=time.Day, hour=time.Hour,
+        self.creationDatetime = datetime(year=time.Year, month=time.Month, day=time.Day, hour=time.Hour,
                                               minute=time.Minute, second=time.Second, microsecond=time.Millisecond*1000)
-        self.startTimedelta = datetime.timedelta(
+        self.startTimedelta = timedelta(
             minutes=self.rawfile.RunHeader.StartTime)
-        self.endTimedelta = datetime.timedelta(
+        self.endTimedelta = timedelta(
             minutes=self.rawfile.RunHeader.EndTime)
         self.firstScanNumber = self.rawfile.RunHeader.FirstSpectrum
         self.lastScanNumber = self.rawfile.RunHeader.LastSpectrum
@@ -58,7 +63,7 @@ class File(BaseFile):
             self.rawfile.GetTrailerExtraInformation(1).Values[11])
 
     def getSpectrumRetentionTime(self, scanNum):
-        return datetime.timedelta(minutes=self.rawfile.RetentionTimeFromScanNumber(scanNum))
+        return timedelta(minutes=self.rawfile.RetentionTimeFromScanNumber(scanNum))
 
     def getSpectrumRetentionTimes(self):
         return [self.getSpectrumRetentionTime(scanNum) for scanNum in range(self.firstScanNumber, self.lastScanNumber + 1)]
@@ -82,7 +87,7 @@ class File(BaseFile):
 
     def getSpectrum(self, scanNum):
         rawfile = self.rawfile
-        retentimeTime = datetime.timedelta(
+        retentimeTime = timedelta(
             minutes=rawfile.RetentionTimeFromScanNumber(scanNum))
         scanStatistics = rawfile.GetScanStatsForScanNumber(scanNum)
         segmentedScan = rawfile.GetSegmentedScanFromScanNumber(
@@ -92,7 +97,7 @@ class File(BaseFile):
         time = retentimeTime+self.creationDatetime
         return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
 
-    def timeRange2NumRange(self, timeRange: Tuple[datetime.timedelta, datetime.timedelta]):
+    def timeRange2NumRange(self, timeRange: Tuple[timedelta, timedelta]):
         rawfile = self.rawfile
         r: range = OrbitoolFunc.indexBetween(self, timeRange,
                                              (self.firstScanNumber,
@@ -100,7 +105,7 @@ class File(BaseFile):
                                              method=(lambda f, i: f.getSpectrumRetentionTime(i)))
         return (r.start, r.stop)
 
-    def checkAverageEmpty(self, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
+    def checkAverageEmpty(self, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
         rawfile = self.rawfile
         if timeRange is not None and numRange is None:
             start, end = self.timeRange2NumRange(timeRange)
@@ -115,7 +120,7 @@ class File(BaseFile):
                 return False
         return True
 
-    def getAveragedSpectrum(self, ppm, timeRange: Tuple[datetime.timedelta, datetime.timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
+    def getAveragedSpectrum(self, ppm, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
         averaged = None
 
         rawfile = self.rawfile

@@ -31,6 +31,3 @@ for filepath in ft:
     cy = cythonize(filepath, annotate=True)
     setup(ext_modules=cy, script_args=['build_ext'], include_dirs=[
           np.get_include()], options={'build_ext': {'inplace': True}})
-
-    dirpath = os.path.dirname(filepath)
-    # find and copy?

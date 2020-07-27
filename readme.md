@@ -405,11 +405,17 @@ cc: yiping@sjtu.edu.cn
 
 ## log
 
-**2020.7.30 version 1.3.3**
+
+**2020.7.29 version 1.3.3**
 
 Appended
 
-+ skip calibration
++ could skip calibration
+
+Bug fix
+
++ error when spectra merge peaks
++ multiple same peaks in mass list
 
 **2020.7.24 version 1.3.2**
 

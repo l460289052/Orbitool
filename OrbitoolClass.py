@@ -17,12 +17,12 @@ from sortedcontainers import SortedDict
 import OrbitoolBase
 import OrbitoolFormula
 import OrbitoolFunc
-from OrbitoolDll import File
 
 from utils import files
+from utils.readers import ThermoFile
 
 class GetSpectrum(OrbitoolBase.Operator):
-    def __init__(self, file: File, ppm: float, numRange: (int, int) = None, timeRange: (datetime.timedelta, datetime.timedelta) = None, polarity=-1):
+    def __init__(self, file: ThermoFile, ppm: float, numRange: (int, int) = None, timeRange: (datetime.timedelta, datetime.timedelta) = None, polarity=-1):
         self.fileTime = file.creationDatetime
         self.ppm = ppm
         self.numRange = numRange
@@ -49,7 +49,7 @@ class GetSpectrum(OrbitoolBase.Operator):
 
     def __call__(self, fileList: files.FileList, sendStatus=OrbitoolBase.nullSendStatus):
         fileTime = self.fileTime
-        file: File = fileList.datetimeDict[fileTime]
+        file: ThermoFile = fileList.datetimeDict[fileTime]
         msg = "averaging"
         sendStatus(fileTime, msg, -1, 0)
         numRange = self.numRange
@@ -74,11 +74,11 @@ class GetAveragedSpectrumAcrossFiles(OrbitoolBase.Operator):
                     self.opIndex = index
 
             op = spectra[0]
-            file: File = fileList.datetimeDict[op.fileTime]
+            file: ThermoFile = fileList.datetimeDict[op.fileTime]
             s = file.creationDatetime + \
                 file.getSpectrumRetentionTime(op.numRange[0])
             op = spectra[-1]
-            file: File = fileList.datetimeDict[op.fileTime]
+            file: ThermoFile = fileList.datetimeDict[op.fileTime]
             t = file.creationDatetime + \
                 file.getSpectrumRetentionTime(op.numRange[1] - 1)
         else:
@@ -123,12 +123,12 @@ def AverageFileList(fileList: files.FileList, ppm, time: datetime.timedelta = No
     if N is not None:
         zero = 0
 
-        def indexRange(f: File):
+        def indexRange(f: ThermoFile):
             retentionStartTime = startTime - f.creationDatetime
             retentionEndTime = endTime - f.creationDatetime
             return f.timeRange2NumRange((retentionStartTime, retentionEndTime))
 
-        def average(f: File, left, length):
+        def average(f: ThermoFile, left, length):
             right = left + length
             return GetSpectrum(f, ppm, numRange=(left, right), polarity=polarity)
 
@@ -175,7 +175,7 @@ def AverageFileList(fileList: files.FileList, ppm, time: datetime.timedelta = No
     elif time is not None:
         zero = datetime.timedelta()
 
-        def average(f: File, now, nowend):
+        def average(f: ThermoFile, now, nowend):
             left = now - f.creationDatetime
             right = nowend - f.creationDatetime
             return GetSpectrum(f, ppm, timeRange=(left, right), polarity=polarity)

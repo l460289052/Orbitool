@@ -27,10 +27,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from sortedcontainers import SortedDict
 
 from utils import files
+from utils.readers import ThermoFile
 
 import OrbitoolBase
 import OrbitoolClass
-import OrbitoolDll
 import OrbitoolElement
 import OrbitoolExport
 import OrbitoolFormula
@@ -803,9 +803,10 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             = result['fileTimePaths']
         self.workspace = workspace
         fileList = self.fileList
+        fileList.clear()
         for index, (time, path) in enumerate(fileTimePaths):
             if os.path.exists(path):
-                fileList.addFile(OrbitoolDll.File(path))
+                fileList.addFile(ThermoFile(path))
             while time not in fileList:
                 showInfo(f"cannot find file '{path}'")
                 files = QtWidgets.QFileDialog.getOpenFileNames(
@@ -813,7 +814,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                     directory='.',
                     filter="RAW files(*.RAW)")
                 for path in files[0]:
-                    fileList.addFile(OrbitoolDll.File(path))
+                    fileList.addFile(ThermoFile(path))
         self.showFile(fileList)
 
         self.showMassList(workspace.massList)
@@ -1052,18 +1053,18 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             formula = OrbitoolFormula.Formula(text)
             self.formulaResultLineEdit.setText(str(formula.mass()))
 
-    def showFile(self, fileList:files.FileList):
+    def showFile(self, fileList: files.FileList):
         table = self.fileTableWidget
         table.setRowCount(0)
         table.setRowCount(len(fileList))
+
         def date2str(time: datetime.datetime):
             return time.replace(microsecond=0).isoformat()
 
-        for index,f in enumerate(fileList.values()):
+        for index, f in enumerate(fileList.values()):
 
             def setValue(column: int, s: str):
                 table.setItem(index, column, QtWidgets.QTableWidgetItem(s))
-
 
             setValue(0, f.name)
             setValue(1, date2str(f.creationDatetime + f.startTimedelta))
@@ -1085,7 +1086,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @openfile("Select one folder", folder=True)
     def qAddFolder(self, folder):
         for path in files.FolderTraveler(folder, ext=".raw", recurrent=self.recurrenceCheckBox.isChecked()):
-            self.fileList.addFile(OrbitoolDll.File(path))
+            self.fileList.addFile(ThermoFile(path))
         self.showFile(self.fileList)
         self.showFileTimeRange()
 
@@ -1097,7 +1098,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @openfile("Select one or more files", "RAW files(*.RAW)", True)
     def qAddFile(self, files):
         for path in files:
-            self.fileList.addFile(OrbitoolDll.File(path))
+            self.fileList.addFile(ThermoFile(path))
 
         self.showFile(self.fileList)
         self.showFileTimeRange()
@@ -1676,7 +1677,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @busy
     @withoutArgs
     def qCalibrationRmIon(self):
-        indexes = [index.row() for index in self.calibrationIonsTableWidget.selectedIndexes()]
+        indexes = [index.row()
+                   for index in self.calibrationIonsTableWidget.selectedIndexes()]
         indexes = np.unique(indexes)
         table = self.calibrationIonsTableWidget
         ionList = self.calibrationIonList
@@ -1935,7 +1937,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         workspace = self.workspace
         workspace.spectrum3fittedPeaks = peaks
         workspace.spectrum3Residual = residual
-        index=workspace.shownSpectrum3Index
+        index = workspace.shownSpectrum3Index
         spectrum = workspace.denoisedSpectra2[index] if workspace.calibratedSpectra3 is None else workspace.calibratedSpectra3[workspace.shownSpectrum3Index]
         self.showSpectrum3Peaks(
             spectrum, peaks, residual)
@@ -2304,7 +2306,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             raise ValueError('Please fit first')
 
         def process(ionCalc, sendStatus):
-            fileTime = workspace.calibratedSpectra3[workspace.shownSpectrum3Index].fileTime
+            fileTime = workspace.denoisedSpectra2[workspace.shownSpectrum3Index].fileTime if workspace.calibratedSpectra3 is None else workspace.calibratedSpectra3[workspace.shownSpectrum3Index].fileTime
             sendStatus(fileTime, 'merge peaks', -1, 0)
             newpeaks = OrbitoolFunc.mergePeaks(workspace.spectrum3fittedPeaks, self.spectrum3PeaksMergePpmDoubleSpinBox.value(
             ) * 1e-6, workspace.peakFitFunc.func, self.ionCalculator)
@@ -2540,7 +2542,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
 
     @busy
     @withoutArgs
-    @openfile("Select Mass list", "csv file(*.csv); Mass list file(*.OrbitMassList)")
+    @openfile("Select Mass list", "csv or Mass list file(*.csv; *.OrbitMassList)")
     def qMassListMerge(self, file):
         workspace = self.workspace
         ext = os.path.splitext(file)[1].lower()

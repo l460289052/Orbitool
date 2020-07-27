@@ -177,6 +177,11 @@ ctypedef fused p_or_np:
     np.ndarray[float]
     np.ndarray[double]
 
+ctypedef fused tuple_or_np:
+    tuple
+    np.ndarray[float]
+    np.ndarray[double]
+
 class NormalDistributionFunc:
     @staticmethod
     def maxFitNum(int num)->int:
@@ -187,7 +192,7 @@ class NormalDistributionFunc:
         return a/(math.sqrt(2*math.pi)*sigma)*np.exp(-0.5*np.power((mz-mu)/sigma,2))
 
     @staticmethod
-    def mergePeaksParam(tuple param1, tuple param2)->tuple:
+    def mergePeaksParam(tuple_or_np param1, tuple_or_np param2)->tuple:
         cdef double a1,a2,mu1,mu2
         a1,mu1=param1
         a2,mu2=param2

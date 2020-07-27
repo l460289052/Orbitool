@@ -3,6 +3,7 @@
 import abc
 from datetime import datetime, timedelta
 from typing import List, Tuple, Union, Iterable
+from sortedcontainers import SortedKeyList
 from OrbitoolFormula import FormulaHint
 from OrbitoolFormulaCalc import IonCalculatorHint
 
@@ -144,6 +145,11 @@ class MassList:
     def addPeaks(self, peaks: Union[Peak, List[Peak], MassListPeak, List[MassListPeak]]):
         if not isinstance(peaks, Iterable):
             peaks = [peaks]
+
+        def getPeakPosition(peak: Peak):
+            return peak.peakPosition
+        def calcPpm(peak1, peak2):
+            return abs(peak1.peakPosition/peak2.peakPosition-1)
         newPeaks = []
         for peak in peaks:
             newPeak = MassListPeak(
@@ -153,56 +159,43 @@ class MassList:
             if len(newPeak.formulaList) == 1:
                 newPeak.peakPosition = newPeak.formulaList[0].mass()
             newPeaks.append(newPeak)
-        newPeaks.sort(key=lambda peak: peak.peakPosition)
-        peaks1 = self._peaks
-        peaks2 = newPeaks
-        iter1 = iterator(peaks1)
-        iter2 = iterator(peaks2)
-        peaks = []
-        ppm = self.ppm
-        while not (iter1.end and iter2.end):
-            if iter1.end:
-                peaks.extend(peaks2[iter2.index:])
-                break
-            if iter2.end:
-                peaks.extend(peaks1[iter1.index:])
-                break
-            peak1: MassListPeak = iter1.value
-            peak2: MassListPeak = iter2.value
-            if abs(peak2.peakPosition / peak1.peakPosition - 1) < ppm:
-                if peak1.handled and not peak2.handled:
-                    iter2.next()
-                elif not peak1.handled and peak2.handled:
-                    iter1.next()
+        peaks = self._peaks
+        peaks.extend(newPeaks)
+        newPeaks = SortedKeyList(key=getPeakPosition)
+        for peak in peaks:
+            right = newPeaks.bisect_left(peak)
+            left = right-1
+            if left < 0:
+                if len(newPeaks) == 0:
+                    newPeaks.add(peak)
+                    continue
                 else:
-                    if peak1.formulaList == peak2.formulaList:
-                        peak = MassListPeak((peak1.peakPosition + peak2.peakPosition) / 2, peak1.formulaList, max(peak1.splitNum, peak2.splitNum), peak1.handled)
-                        iter1._value = peak
-                        iter2.next()
-                    elif peak1.handled and peak2.handled:
-                        raise ValueError("can't merge peak in mass list at %.5f with peak at %.5f using ppm = %.2f" % (
-                            peak1.peakPosition, peak2.peakPosition, ppm*1e6))
-                    elif len(peak1.formulaList) < len(peak2.formulaList):
-                        iter2.next()
-                    elif len(peak1.formulaList) > len(peak2.formulaList):
-                        iter1.next()
-                    else:
-                        formulaList = list(
-                            set(peak1.formulaList) & set(peak2.formulaList))
-                        formulaList.sort(key=lambda formula: formula.mass())
-                        if len(formulaList) == 1:
-                            peak = MassListPeak(formulaList[0].mass(), formulaList, max(peak1.splitNum, peak2.splitNum))
-                        else:
-                            peak = MassListPeak((peak1.peakPosition + peak2.peakPosition) / 2, formulaList, max(peak1.splitNum, peak2.splitNum))
-                        iter1._value = peak
-                        iter2.next()
-            elif peak1.peakPosition < peak2.peakPosition:
-                peaks.append(peak1)
-                iter1.next()
+                    fIndex = right
+                    fPpm = calcPpm(peak, newPeaks[right])
+            elif right == len(newPeaks):
+                fIndex = left
+                fPpm = calcPpm(peak, newPeaks[left])
             else:
-                peaks.append(peak2)
-                iter2.next()
-        self._peaks = peaks
+                lPpm = calcPpm(peak, newPeaks[left])
+                rPpm = calcPpm(peak, newPeaks[right])
+                if lPpm < rPpm:
+                    fPpm = lPpm
+                    fIndex = left
+                else:
+                    fPpm = rPpm
+                    fIndex = right
+
+            if fPpm > self.ppm:
+                newPeaks.add(peak)
+            else:
+                fPeak = newPeaks[fIndex]
+                if peak.formulaList != fPeak.formulaList:
+                    if len(peak.formulaList) != 0:
+                        if len(fPeak.formulaList) == 0:
+                            newPeaks.pop(fIndex)
+                        newPeaks.add(peak)
+
+        self._peaks = newPeaks
 
     def popPeaks(self, indexes: Union[int, List[int]]):
         if isinstance(indexes, int):

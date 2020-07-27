@@ -19,3 +19,4 @@ build
 *.cpp
 *.pyd
 code
+*.pickle
