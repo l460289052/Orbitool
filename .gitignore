@@ -5,8 +5,6 @@ __pycache__
 *.RAW
 data
 ref
-test
-test*.*
 error.txt
 *.wks
 *.Oribit*
