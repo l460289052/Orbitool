@@ -2495,6 +2495,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         masses = [mass.strip() for mass in masses]
         masses = [mass for mass in masses if len(mass) > 0]
         massList = self.workspace.massList
+        massList.ppm = self.massListPpmDoubleSpinBox.value()/1e6
         peaks = []
         for mass in masses:
             peakPosition = None
@@ -2524,6 +2525,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             setValue(0, speak.peakPosition)
             setValue(1, ', '.join([str(f) for f in speak.formulaList]))
             setValue(2, speak.splitNum)
+        self.massListPpmDoubleSpinBox.setValue(massList.ppm*1e6)
 
     @busy
     @withoutArgs
@@ -2545,7 +2547,9 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @openfile("Select Mass list", "csv or Mass list file(*.csv; *.OrbitMassList)")
     def qMassListMerge(self, file):
         workspace = self.workspace
+        ppm = self.massListPpmDoubleSpinBox.value()/1e6
         ext = os.path.splitext(file)[1].lower()
+        workspace.massList.ppm = ppm
         if ext == '.OrbitMassList'.lower():
             massList: OrbitoolBase.MassList = OrbitoolFunc.file2Obj(file)
             if not isinstance(massList, OrbitoolBase.MassList):
@@ -2608,7 +2612,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                         peakPosition = formula.mass()
                     peaks.append(OrbitoolBase.MassListPeak(
                         peakPosition, formulaList, 1, True))
-                massList = OrbitoolBase.MassList()
+                massList = OrbitoolBase.MassList(self.massListPpmDoubleSpinBox.value()/1e6)
                 massList.addPeaks(peaks)
         workspace.massList = massList
         self.showMassList(massList)

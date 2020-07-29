@@ -195,7 +195,7 @@ class MassList:
                             newPeaks.pop(fIndex)
                         newPeaks.add(peak)
 
-        self._peaks = newPeaks
+        self._peaks = list(newPeaks)
 
     def popPeaks(self, indexes: Union[int, List[int]]):
         if isinstance(indexes, int):

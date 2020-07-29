@@ -178,6 +178,8 @@ you can add an item to mass list like those:
 
 *.OrbitMassList
 
+ps: If you import a OrbitMassList file, peak within this mass list won't be merged automatically.
+
 ##### csv file
 
 Two columns
@@ -204,7 +206,7 @@ When export mass list to csv file, Orbitool will fill mz column and formula for 
 
 #### Merge
 
-similar to 'Import', but don't delete original mass list.
+similar to 'Import', but don't delete original mass list. Use merge will merge peaks within ppm.
 
 eg. your mass list has 3 peaks a, b, c. And a OrbitMassList file or csv file contains a mass list including peaks a, b, d, e. You can use merge to make your mass list become peaks a, b, c, d, e
 
@@ -399,9 +401,7 @@ If you meet any bugs, please let me know. You can send me the 'error.txt' file w
 
 ## Bugs report & function require
 
-mail to: huangc@saes.sh.cn
-
-cc: yiping@sjtu.edu.cn
+mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huang"\<<huangc@saes.sh.cn>\>
 
 ## log
 
