@@ -405,6 +405,11 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2020.8.24 version 1.3.4**
+
+Bug fix
+
++ number of isotope couldn't larger than non isotope element when type a formula, like "N[15]O3-". It's legal now, thanks to Runlong for finding bugs.
 
 **2020.7.29 version 1.3.3**
 

@@ -184,13 +184,12 @@ cdef class Formula:
         cdef int index = elementsMap.get(element, -1)
         if index == -1:
             raise ValueError(f'unknown element:{element}')
-        cdef unordered_map[int, int] * d
+        self.setE(index, self.getE(index) + num)
         if m > 0:
             if elementMassDist[index].find(m) == elementMassDist[index].end():
                 raise ValueError(f'unknown element:{element}[{m}]')
             if elementMassNum[index] != m:  # isotope
                 self.setI(index, m, self.getI(index, m) + num)
-        self.setE(index, self.getE(index) + num)
 
     @staticmethod
     cdef str eToStr(int index, int num, bool showProton):

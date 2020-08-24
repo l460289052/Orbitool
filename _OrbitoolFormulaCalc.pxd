@@ -35,4 +35,5 @@ cdef:
         cdef bool getFormula(self, double& mass, map[double, unordered_map[int, int]].iterator * out)
         cdef void insertElements(self, unordered_map[int, int]& elements, double mass = *)
         cdef void insertIsotopes(self, unordered_map[int, int]& elements, double mass = *)
+        cdef void insertIsotope(self, double& mass, cpplist[pair[int, int]]& isotopes)
         cdef bool getIsotope(self, double& mass, map[double, pair[double, cpplist[pair[int, int]]]].iterator *out)

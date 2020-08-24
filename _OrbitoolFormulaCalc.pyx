@@ -333,32 +333,41 @@ cdef class IonCalculator:
         cdef unordered_map[int, int].iterator it
         cdef cpplist[pair[int, int]] isotopes
         cdef double isomass
-        cdef map[double, pair[double, cpplist[pair[int, int]]]].iterator isoit
         for i in self.calcedIsotopes:
             index=i>>_factor
             m=i&_andfactor
             # single
-            if elements.find(index)==elements.end():
+            it = elements.find(index)
+            if it==elements.end():
                 continue
             isotopes.clear()
             isotopes.push_back(pair[int,int](index, (m<<_factor)+1))
-            isomass = _mass_isotopes_mass(mass, isotopes)
-            if not self.getIsotope(isomass, &isoit):
-                self.isotopes.insert(isoit, pair[double, pair[double, cpplist[pair[int, int]]]](isomass, pair[double, cpplist[pair[int, int]]](mass, isotopes)))
+            self.insertIsotope(mass, isotopes)
 
+            # multi(2)
             for j in self.calcedIsotopes:
                 if i==j:
                     break
-                # multi(2)
                 index=j>>_factor
                 m=j&_andfactor
                 if elements.find(index)==elements.end():
                     continue
                 isotopes.push_back(pair[int,int](index,(m<<_factor)+1))
-                isomass=_mass_isotopes_mass(mass, isotopes)
-                if not self.getIsotope(isomass, &isoit):
-                    self.isotopes.insert(isoit, pair[double, pair[double, cpplist[pair[int, int]]]](isomass, pair[double, cpplist[pair[int, int]]](mass, isotopes)))
+                self.insertIsotope(mass, isotopes)
                 isotopes.pop_back()
+
+            # # double
+            # if deref(it).second > 1:
+            #     isotopes.clear()
+            #     isotopes.push_back(pair[int,int](index,(m<<_factor)+2))
+            #     self.insertIsotope(mass, isotopes)
+
+    cdef void insertIsotope(self, double& mass, cpplist[pair[int, int]]& isotopes):
+        cdef map[double, pair[double, cpplist[pair[int, int]]]].iterator isoit
+        isomass = _mass_isotopes_mass(mass, isotopes)
+        if not self.getIsotope(isomass, &isoit):
+            self.isotopes.insert(isoit, pair[double, pair[double, cpplist[pair[int, int]]]](isomass, pair[double, cpplist[pair[int, int]]](mass, isotopes)))
+
 
     cdef bool getIsotope(self, double& mass, map[double, pair[double, cpplist[pair[int, int]]]].iterator* out):
         '''
