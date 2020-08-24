@@ -348,6 +348,7 @@ cdef class Formula:
 
     cdef Formula copy(self):
         cdef Formula ret = Formula.__new__(Formula)
+        # c++, value rather than reference
         ret.elements=self.elements
         ret.isotopes=self.isotopes
         return ret

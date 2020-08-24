@@ -7,6 +7,8 @@ dsts = [
     "C:/CODE/Python/Orbitool",
     "../codeexport" ]
 
+shutil.rmtree("../codeexport")
+
 notRecurrent = "."
 recurrent = ["utils","functions"]
 
