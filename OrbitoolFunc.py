@@ -179,7 +179,7 @@ def getPeaks(spectrum: OrbitoolBase.Spectrum, indexRange: (int, int) = None, mzR
         spectrum.mz, spectrum.intensity, indexRange, mzRange)
     return [OrbitoolBase.Peak(spectrum, range(rstart, rstop)) for rstart, rstop in peaksRange]
 
-def getNoise(spectrum: OrbitoolBase.Spectrum,  quantile=0.7, sendStatus=nullSendStatus) -> Tuple[np.ndarray, np.ndarray]:
+def getNoise(spectrum: OrbitoolBase.Spectrum,  quantile=0.7, sendStatus=nullSendStatus) -> (np.ndarray, np.ndarray):
     """
     @quantile: sort peaks by intensity, select num*quantile-th biggest peak
     """

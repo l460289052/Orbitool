@@ -97,7 +97,7 @@ class File(BaseFile):
         time = retentimeTime+self.creationDatetime
         return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
 
-    def timeRange2NumRange(self, timeRange: Tuple[timedelta, timedelta]):
+    def timeRange2NumRange(self, timeRange: (timedelta, timedelta)):
         rawfile = self.rawfile
         r: range = OrbitoolFunc.indexBetween(self, timeRange,
                                              (self.firstScanNumber,
@@ -105,7 +105,7 @@ class File(BaseFile):
                                              method=(lambda f, i: f.getSpectrumRetentionTime(i)))
         return (r.start, r.stop)
 
-    def checkAverageEmpty(self, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
+    def checkAverageEmpty(self, timeRange: (timedelta, timedelta) = None, numRange: (int, int) = None, polarity=-1):
         rawfile = self.rawfile
         if timeRange is not None and numRange is None:
             start, end = self.timeRange2NumRange(timeRange)
@@ -120,17 +120,12 @@ class File(BaseFile):
                 return False
         return True
 
-    def getAveragedSpectrum(self, ppm, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
+    def getAveragedSpectrum(self, ppm, timeRange: (timedelta, timedelta) = None, numRange: (int, int) = None, polarity=-1):
         averaged = None
 
         rawfile = self.rawfile
-        if timeRange is not None and numRange is None:
-            start, end = self.timeRange2NumRange(timeRange)
-        elif numRange is not None and timeRange is None:
-            start, end = numRange
-        else:
-            raise ValueError(
-                "`timeRange` or `numRange` must be provided and only one can be provided")
+        start, end = self.bothToNumRange(numRange, timeRange)
+
         scanfilter = self.getFilter(start, end, polarity)
         if scanfilter is None:
             return None
@@ -153,6 +148,16 @@ class File(BaseFile):
 
         numRange = (start, end)
         return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, timeRange, numRange)
+
+    def bothToNumRange(self, timeRange: (timedelta, timedelta), numRange: (int, int)) -> (int, int):
+        if timeRange is not None and numRange is None:
+            return self.timeRange2NumRange(timeRange)
+        elif numRange is not None and timeRange is None:
+            return numRange
+        else:
+            raise ValueError(
+                "`timeRange` or `numRange` must be provided and only one can be provided")
+
 
     def __del__(self):
         self.rawfile.Dispose()

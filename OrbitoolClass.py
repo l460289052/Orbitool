@@ -105,7 +105,7 @@ class GetAveragedSpectrumAcrossFiles(OrbitoolBase.Operator):
         return self.spectra[self.opIndex](fileList, sendStatus)
 
 
-def AverageFileList(fileList: files.FileList, ppm, time: datetime.timedelta = None, N: int = None, polarity: int = -1, timeLimit: Tuple[datetime.datetime, datetime.datetime] = None) -> List[GetSpectrum]:
+def AverageFileList(fileList: files.FileList, ppm, time: datetime.timedelta = None, N: int = None, polarity: int = -1, timeLimit: (datetime.datetime, datetime.datetime) = None) -> List[GetSpectrum]:
     datetimeDict = fileList.datetimeDict
     for file in datetimeDict.values():
         if not file.checkFilter(polarity):
