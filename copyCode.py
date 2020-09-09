@@ -8,6 +8,7 @@ dsts = [
     "../codeexport" ]
 
 shutil.rmtree("../codeexport")
+os.mkdir("../codeexport")
 
 notRecurrent = "."
 recurrent = ["utils","functions"]
