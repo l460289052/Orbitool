@@ -98,7 +98,6 @@ class File(BaseFile):
         return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
 
     def timeRange2NumRange(self, timeRange: (timedelta, timedelta)):
-        rawfile = self.rawfile
         r: range = OrbitoolFunc.indexBetween(self, timeRange,
                                              (self.firstScanNumber,
                                                  self.lastScanNumber + 1),
@@ -106,7 +105,6 @@ class File(BaseFile):
         return (r.start, r.stop)
 
     def checkAverageEmpty(self, timeRange: (timedelta, timedelta) = None, numRange: (int, int) = None, polarity=-1):
-        rawfile = self.rawfile
         if timeRange is not None and numRange is None:
             start, end = self.timeRange2NumRange(timeRange)
         elif numRange is not None and timeRange is None:
@@ -121,26 +119,21 @@ class File(BaseFile):
         return True
 
     def getAveragedSpectrum(self, ppm, timeRange: (timedelta, timedelta) = None, numRange: (int, int) = None, polarity=-1):
-        averaged = None
-
-        rawfile = self.rawfile
         start, end = self.bothToNumRange(numRange, timeRange)
 
         scanfilter = self.getFilter(start, end, polarity)
         if scanfilter is None:
             return None
+
         last = end - 1
         massOption = MassOptions(ppm, ToleranceUnits.ppm)
         sTime = self.creationDatetime + self.getSpectrumRetentionTime(start)
         if start <= last:
             averaged = Extensions.AverageScansInScanRange(
-                rawfile, start, last, scanfilter, massOption)
+                self.rawfile, start, last, scanfilter, massOption)
             if averaged is None:  # I don't know why it could be a None
                 return None
-            averaged = averaged.SegmentedScan
-            mz = np.array(list(averaged.Positions), dtype=np.float)
-            intensity = np.array(list(averaged.Intensities), dtype=np.float)
-            eTime = self.creationDatetime + self.getSpectrumRetentionTime(last)
+            mz, intensity, eTime = self.parseSpectrum(averaged)
         else:
             return None
 
@@ -158,6 +151,13 @@ class File(BaseFile):
             raise ValueError(
                 "`timeRange` or `numRange` must be provided and only one can be provided")
 
+    def parseSpectrum(self, averaged):
+        averaged = averaged.SegmentedScan
+        mz = np.array(list(averaged.Positions), dtype=np.float)
+        intensity = np.array(list(averaged.Intensities), dtype=np.float)
+        eTime = self.creationDatetime + self.getSpectrumRetentionTime(last)
+
+        return mz, intensity, eTime
 
     def __del__(self):
         self.rawfile.Dispose()
