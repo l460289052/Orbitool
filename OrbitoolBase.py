@@ -4,8 +4,7 @@ import abc
 from datetime import datetime, timedelta
 from typing import List, Tuple, Union, Iterable
 from sortedcontainers import SortedKeyList
-from OrbitoolFormula import FormulaHint
-from OrbitoolFormulaCalc import IonCalculatorHint
+from utils.formula import FormulaHint, IonCalculatorHint
 
 import numpy as np
 

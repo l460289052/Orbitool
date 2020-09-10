@@ -10,19 +10,24 @@ class FolderTraveler:
     """
 
     def __init__(self, rootPath: Union[str, List[str]], ext: Union[str, List[str]], recurrent: bool):
+
         if isinstance(rootPath, str):
             rootPaths = [rootPath]
         else:
             rootPaths = rootPath
+
         if isinstance(ext, str):
             exts = [ext]
         else:
             exts = ext
+
         for ext in exts:
             assert ext[0] == '.'
+
         exts = [ext.lower() for ext in exts]
         for path in rootPaths:
             assert os.path.isdir(path)
+
         self.roots = rootPaths
         self.exts = set(exts)
         self.recurrent = recurrent

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import Union, List
-from OrbitoolFormula import Formula, FormulaHint
-from _OrbitoolFormulaCalc import IonCalculator
+from .OrbitoolFormula import Formula, FormulaHint
+from ._OrbitoolFormulaCalc import IonCalculator
 
 class IonCalculatorHint:
     def __init__(self):
