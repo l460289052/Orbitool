@@ -8,11 +8,6 @@ from typing import Dict
 from utils.files import FolderTraveler
 
 roots = ["utils", "functions"]
-ft = FolderTraveler(roots, '.pyx', True)
-
-def getModelName(path: str):
-    name = os.path.split(path)[1]
-    return os.path.splitext(name)[0]
 
 class Node:
     def __init__(self, path):
@@ -20,11 +15,9 @@ class Node:
         self.ref = set()
         self.refed = set()
 
-modelNodes: Dict[str, Node]= {}
-
-for path in ft:
-    node = Node(path)
-    modelNodes[getModelName(path)] = node
+def getModelName(path: str):
+    name = os.path.split(path)[1]
+    return os.path.splitext(name)[0]
 
 def variableIn(variable: str, text: str):
     pattern = r'(\W|^)'+variable+r'(\W|$)'
@@ -35,14 +28,6 @@ def variableIn(variable: str, text: str):
             return True
     return False
 
-for model1, node1 in modelNodes.items():
-    with open(node1.path, 'r') as f:
-        text = f.read()
-        for model2, node2 in modelNodes.items():
-            if variableIn(model2, text):
-                node1.ref.add(model2)
-                node2.refed.add(model1)
-                
                 
 def cythonSetup(filepath):
     cy = cythonize(filepath, annotate=True)
@@ -50,19 +35,36 @@ def cythonSetup(filepath):
           np.get_include()], options={'build_ext': {'inplace': True}})
 
 
-while len(modelNodes) > 0:
-    processed = []
+if __name__ == "__main__":
+    ft = FolderTraveler(roots, '.pyx', True)
+    modelNodes: Dict[str, Node]= {}
+
+    for path in ft:
+        node = Node(path)
+        modelNodes[getModelName(path)] = node
 
     for model1, node1 in modelNodes.items():
-        if len(node1.ref) == 0:
-            cythonSetup(node1.path)
-            processed.append(model1)
+        with open(node1.path, 'r') as f:
+            text = f.read()
+            for model2, node2 in modelNodes.items():
+                if variableIn(model2, text):
+                    node1.ref.add(model2)
+                    node2.refed.add(model1)
+                    
+    while len(modelNodes) > 0:
+        processed = []
 
-            for model2 in node1.refed:
-                node2 = modelNodes[model2]
-                node2.ref.remove(model1)
+        for model1, node1 in modelNodes.items():
+            if len(node1.ref) == 0:
+                print(f"process {node1.path}")
+                cythonSetup(node1.path)
+                processed.append(model1)
 
-    if len(processed) == 0:
-        raise Exception("Loop", modelNodes.keys())
-    for pro in processed:
-        modelNodes.pop(pro)
+                for model2 in node1.refed:
+                    node2 = modelNodes[model2]
+                    node2.ref.remove(model1)
+
+        if len(processed) == 0:
+            raise Exception("Loop", modelNodes.keys())
+        for pro in processed:
+            modelNodes.pop(pro)
