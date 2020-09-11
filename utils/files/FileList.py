@@ -4,7 +4,6 @@ from typing import List, Dict, Union
 from sortedcontainers import SortedDict
 
 from .File import File
-from .FolderTraveler import FolderTraveler
 
 class FileList:
     '''

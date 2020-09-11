@@ -19,7 +19,7 @@ import cython
 import numpy as np
 cimport numpy as np
 
-from ._OrbitoolElement cimport str2element, _factor, _andfactor, elements, elementsMap, elementMass,\
+from ._element cimport str2element, _factor, _andfactor, elements, elementsMap, elementMass,\
      elementMassNum , elementMassDist, elementNumMap, elementParasMap, CHmin
 
 _elementsOrder = ['C', 'H', 'O', 'N', 'S']

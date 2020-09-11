@@ -15,11 +15,11 @@ import numpy as np
 from sortedcontainers import SortedDict
 
 import OrbitoolBase
-import OrbitoolFormula
 import OrbitoolFunc
 
 from utils import files
 from utils.readers import ThermoFile
+from utils.formula import FormulaHint
 
 class GetSpectrum(OrbitoolBase.Operator):
     def __init__(self, file: ThermoFile, ppm: float, numRange: (int, int) = None, timeRange: (datetime.timedelta, datetime.timedelta) = None, polarity=-1):
@@ -315,7 +315,7 @@ class CalibrateMass:
     calibrate for file
     '''
 
-    def __init__(self, fileTime, averagedSpectra: List[OrbitoolBase.Spectrum], peakFitFunc: PeakFitFunc, ionList: List[OrbitoolFormula.FormulaHint], funcArgs, ppm=5e-6, useNIons=None):
+    def __init__(self, fileTime, averagedSpectra: List[OrbitoolBase.Spectrum], peakFitFunc: PeakFitFunc, ionList: List[FormulaHint], funcArgs, ppm=5e-6, useNIons=None):
         ionsMz = []
         ionsMzTho = np.zeros(len(ionList))
         ionsPositions = []
@@ -545,6 +545,6 @@ class Workspace(object):
         self.timeSeriesIndex = None
 
         # @showTimeSeriesCat
-        self.timeSeriesesCat: Dict[OrbitoolFormula.FormulaHint,
+        self.timeSeriesesCat: Dict[FormulaHint,
                                    OrbitoolBase.TimeSeries] = collections.OrderedDict()
         self.timeSeriesCatBaseTime = np.empty((0,), dtype='M8[s]')

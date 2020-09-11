@@ -15,9 +15,9 @@ from libcpp.pair cimport pair
 from libcpp cimport bool
 from libc.math cimport fabs, ceil, floor, remainder, fabs
 
-from ._OrbitoolElement cimport _factor, _andfactor, str2element, elements, elementMass,\
+from ._element cimport _factor, _andfactor, str2element, elements, elementMass,\
      elementMassNum, elementMassDist, elementNumMap, elementParasMap, CHmin #, isotopeNumMap
-from ._OrbitoolFormula cimport _elements_mass, _elements_DBE, _elements_Omin,\
+from ._formula cimport _elements_mass, _elements_DBE, _elements_Omin,\
      _elements_Omax, _elements_Hmin, _elements_Hmax, _elements_eq, _mass_isotopes_mass,\
      _elements_isotopes_mass, Formula
 

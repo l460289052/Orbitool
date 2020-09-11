@@ -28,18 +28,17 @@ from sortedcontainers import SortedDict
 
 from utils import files
 from utils.readers import ThermoFile
+import utils.formula
+from utils.formula import Formula, IonCalculator, FormulaHint, IonCalculatorHint
 
 import OrbitoolBase
 import OrbitoolClass
-import OrbitoolElement
 import OrbitoolExport
-import OrbitoolFormula
-import OrbitoolFormulaCalc
 import OrbitoolFunc
 import OrbitoolOption
 import OrbitoolUi
 
-DEBUG = False
+DEBUG = True
 
 cpu = multiprocessing.cpu_count() - 1
 if cpu <= 0:
@@ -618,13 +617,13 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
 
         self.fileList = files.FileList()
         # @showFormulaOption
-        self.ionCalculator: OrbitoolFormulaCalc.IonCalculatorHint = OrbitoolFormulaCalc.IonCalculator()
+        self.ionCalculator: IonCalculatorHint = IonCalculator()
         self.ionCalculator.setEI('N')
         self.ionCalculator.setEI('C[13]')
         self.ionCalculator.setEI('O[18]')
         self.ionCalculator.setEI('S[34]')
         # @showCalibrationIon
-        self.calibrationIonList: List[(str, OrbitoolFormula.FormulaHint)] = []
+        self.calibrationIonList: List[(str, FormulaHint)] = []
 
         self.workspace = OrbitoolClass.Workspace()
         self.threads = []
@@ -747,7 +746,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         option = OrbitoolOption.Option()
         option.addAllWidgets(self)
         option.addObjects(self, ['calibrationIonList', 'ionCalculator'])
-        option.objects['elementParas'] = OrbitoolElement.getParas()
+        option.objects['elementParas'] = utils.formula.getParas()
         return option
 
     def qSetOption(self, option: OrbitoolOption.Option):
@@ -756,7 +755,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         self.busyLimit = True
         option.applyObjects(self)
         for key, para in option.objects['elementParas'].items():
-            OrbitoolElement.setPara(key, para)
+            utils.formula.setPara(key, para)
         self.showFormulaOption(self.ionCalculator)
         self.showCalibrationIon(self.calibrationIonList)
 
@@ -867,7 +866,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     def qFormulaElementAdd(self):
         key = self.formulaElementLineEdit.text().strip()
         self.formulaElementLineEdit.setText('')
-        OrbitoolElement.setPara(key, [0] * 7)
+        utils.formula.setPara(key, [0] * 7)
         self.showFormulaOption(self.ionCalculator)
 
     @busy
@@ -893,7 +892,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         table.show()
 
     @restore
-    def showFormulaOption(self, calculator: OrbitoolFormulaCalc.IonCalculatorHint = None):
+    def showFormulaOption(self, calculator: IonCalculatorHint = None):
         if calculator.charge == 1:
             self.formulaPositiveRadioButton.setChecked(True)
         elif calculator.charge == -1:
@@ -911,7 +910,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
 
         constElement = ['e', 'C', 'H', 'O']
         paras = list()
-        getparas = OrbitoolElement.getParas()
+        getparas = utils.formula.getParas()
         for ce in constElement:
             paras.append((ce, getparas[ce]))
             getparas.pop(ce)
@@ -1015,10 +1014,10 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             if label == 'C':
                 para[3] = 0
             para = [float(p) for p in para]
-            getpara = np.array(OrbitoolElement.getPara(label), dtype=np.float)
+            getpara = np.array(utils.formula.getPara(label), dtype=np.float)
             if np.abs(np.array(para, dtype=np.float) - getpara).max() > eps:
                 changed = True
-                OrbitoolElement.setPara(label, para)
+                utils.formula.setPara(label, para)
 
         table = self.formulaIsotopeTableWidget
         isotopes = set(calculator.getIsotopes())
@@ -1050,7 +1049,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             else:
                 self.formulaResultLineEdit.setText('None')
         except ValueError:
-            formula = OrbitoolFormula.Formula(text)
+            formula = Formula(text)
             self.formulaResultLineEdit.setText(str(formula.mass()))
 
     def showFile(self, fileList: files.FileList):
@@ -1648,7 +1647,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             tmp = ion.strip()
             if len(tmp) == 0:
                 continue
-            formula = OrbitoolFormula.Formula(tmp)
+            formula = Formula(tmp)
             for text, f in ionList:
                 if formula == f:
                     raise ValueError('There is same ion added')
@@ -1660,12 +1659,12 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         self.calibrationLineEdit.setText('')
 
     @restore
-    def showCalibrationIon(self, ionList: List[Tuple[str, OrbitoolBase.FormulaHint]]):
+    def showCalibrationIon(self, ionList: List[Tuple[str, FormulaHint]]):
         self.calibrationIonsTableWidget.setRowCount(len(ionList))
         for index, pair in enumerate(ionList):
             self.showCalibrationIonAt(index, pair)
 
-    def showCalibrationIonAt(self, index, strFormulaPair: (str, OrbitoolBase.FormulaHint)):
+    def showCalibrationIonAt(self, index, strFormulaPair: (str, FormulaHint)):
         ion, formula = strFormulaPair
         table = self.calibrationIonsTableWidget
 
@@ -2234,7 +2233,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                     ss = s.strip()
                     if len(ss) == 0:
                         continue
-                    l.append(OrbitoolFormula.Formula(ss))
+                    l.append(Formula(ss))
                 peak.formulaList = l
 
         for i in r:
@@ -2391,7 +2390,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             if clr_formula[index] is None:
                 peak = clr_peaks[index]
 
-                def ppm(formula: OrbitoolFormula.FormulaHint):
+                def ppm(formula: FormulaHint):
                     return peak.peakPosition/formula.mass()-1
                 closestformula = peak.formulaList[0]
                 for formula in peak.formulaList[1:]:
@@ -2503,7 +2502,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             try:
                 peakPosition = float(mass)
             except ValueError:
-                formula = OrbitoolFormula.Formula(mass)
+                formula = Formula(mass)
                 formulaList.append(formula)
                 peakPosition = formula.mass()
             peaks.append(OrbitoolBase.MassListPeak(
@@ -2570,7 +2569,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                     try:
                         peakPosition = float(mass)
                     except ValueError:
-                        formula = OrbitoolFormula.Formula(mass)
+                        formula = Formula(mass)
                         formulaList.append(formula)
                         peakPosition = formula.mass()
                     peaks.append(OrbitoolBase.MassListPeak(
@@ -2607,7 +2606,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                     try:
                         peakPosition = float(mass)
                     except ValueError:
-                        formula = OrbitoolFormula.Formula(mass)
+                        formula = Formula(mass)
                         formulaList.append(formula)
                         peakPosition = formula.mass()
                     peaks.append(OrbitoolBase.MassListPeak(
@@ -2643,7 +2642,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             tag.append("%.4f with ppm=%.2f" % (tmp, ppm*1e6))
         elif self.timeSeriesFormulaRadioButton.isChecked():
             tmp = self.timeSeriesFormulaLineEdit.text().strip()
-            formula = OrbitoolFormula.Formula(tmp)
+            formula = Formula(tmp)
             mz.append(formula.mass())
             tag.append("%s with ppm=%.2f" % (tmp, ppm*1e6))
         elif self.timeSeriesMzRangeRadioButton.isChecked():
@@ -3005,7 +3004,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                 return float(label)
             except:
                 try:
-                    return OrbitoolFormula.Formula(label.strip().split()[0])
+                    return Formula(label.strip().split()[0])
                 except:
                     raise ValueError(f"'{label}' is not a mz or formula")
 
@@ -3020,7 +3019,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         self.showTimeSeriesCatProcessed(ints)
 
     @restore
-    def showTimeSeriesCat(self, timeSerieses: Dict[OrbitoolFormula.FormulaHint, OrbitoolBase.TimeSeries]):
+    def showTimeSeriesCat(self, timeSerieses: Dict[FormulaHint, OrbitoolBase.TimeSeries]):
         plot = self.timeSeriesCatPlot
         ax = plot.ax
         ax.clear()
@@ -3109,7 +3108,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
                     ints = ints[select]
                     ts = OrbitoolBase.TimeSeries(
                         time, ints, None, ppm, formulaOrMz)
-                    if isinstance(formulaOrMz, OrbitoolFormula.Formula):
+                    if isinstance(formulaOrMz, Formula):
                         ts.mz = formulaOrMz.mass()
                         if formulaOrMz in timeSeriesesCat:
                             ts2 = timeSeriesesCat.pop(formulaOrMz)

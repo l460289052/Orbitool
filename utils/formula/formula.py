@@ -4,8 +4,8 @@ from typing import Union
 
 import numpy as np
 
-from ._OrbitoolElement import setPara, getPara, getParas
-from ._OrbitoolFormula import Formula
+from ._element import setPara, getPara, getParas
+from ._formula import Formula
 
 class FormulaHint:
     def __init__(self, formula: Union[str, dict] = None, **kwargs):

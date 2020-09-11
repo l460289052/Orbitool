@@ -27,7 +27,13 @@ for path in ft:
     modelNodes[getModelName(path)] = node
 
 def variableIn(variable: str, text: str):
-    return re.search(r'(\W|^)'+variable+r'(\W|$)', text) is not None
+    pattern = r'(\W|^)'+variable+r'(\W|$)'
+
+    for piece in re.finditer(r'[^\n]*import[^\n]*', text):
+        piece: re.match
+        if re.search(pattern, piece.group()) is not None:
+            return True
+    return False
 
 for model1, node1 in modelNodes.items():
     with open(node1.path, 'r') as f:
