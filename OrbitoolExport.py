@@ -10,6 +10,7 @@ from sortedcontainers import SortedSet
 from OrbitoolClass import *
 from OrbitoolBase import *
 import OrbitoolFunc
+from utils import time_convert
 
 def checkPathExt(ext):
     def f(func):
@@ -62,10 +63,10 @@ def exportRawSpectrum(writer:csv.writer,spectrum:Spectrum):
     row=['','isotime','igor time','matlab time','excel time']
     writer.writerow(row)
     row=['from']
-    row.extend(OrbitoolFunc.getTimesExactToS(spectrum.timeRange[0]))
+    row.extend(time_convert.getTimesExactToS(spectrum.timeRange[0]))
     writer.writerow(row)
     row=['to']
-    row.extend(OrbitoolFunc.getTimesExactToS(spectrum.timeRange[1]))
+    row.extend(time_convert.getTimesExactToS(spectrum.timeRange[1]))
     writer.writerow(row)
 
     writer.writerow(['mz','intensity'])
@@ -166,7 +167,7 @@ def exportTimeSerieses(writer:csv.writer, timeSerieses: List[TimeSeries], withpp
         current = time[index]
         select = indexes < maxIndexes
         select &= np.array([(np.abs(timeSerieses[i].time[indexes[i]] - current) < deltaTime) if select[i] else False for i in range(slength)])
-        row=OrbitoolFunc.getTimesExactToS(current.astype('M8[s]').astype(datetime))
+        row=time_convert.getTimesExactToS(current.astype('M8[s]').astype(datetime))
         row.extend([timeSerieses[i].intensity[indexes[i]] if select[i] else '' for i in range(slength) ])
         indexes[select] += 1
         writer.writerow(row)
@@ -193,7 +194,7 @@ def exportTimeSeriesesWithBaseTime(writer:csv.writer, timeSerieses: List[TimeSer
         current = baseTime[index]
         select = indexes < maxIndexes
         select &= np.array([(np.abs(timeSerieses[i].time[indexes[i]] - current) < deltaTime) if select[i] else False for i in range(slength)])
-        row=OrbitoolFunc.getTimesExactToS(current.astype(datetime))
+        row=time_convert.getTimesExactToS(current.astype(datetime))
         row.extend([timeSerieses[i].intensity[indexes[i]] if select[i] else '' for i in range(slength) ])
         indexes[select] += 1
         writer.writerow(row)
@@ -249,7 +250,7 @@ def exportCalibrationInfo(writer:csv.writer, fileList:files.FileList, ionList:Li
         sendStatus(fileTime, msg, index, length)
         file = fileList[fileTime]
         row = [file.name]
-        row.extend(OrbitoolFunc.getTimesExactToS(fileTime.replace(microsecond=0)))
+        row.extend(time_convert.getTimesExactToS(fileTime.replace(microsecond=0)))
         row.extend(list(calibrator.ionsPpm * 1e6))
         writer.writerow(row)
 

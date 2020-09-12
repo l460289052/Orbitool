@@ -30,6 +30,7 @@ from utils import files
 from utils.readers import ThermoFile
 import utils.formula
 from utils.formula import Formula, IonCalculator, FormulaHint, IonCalculatorHint
+from utils import time_convert
 
 import OrbitoolBase
 import OrbitoolClass
@@ -38,7 +39,7 @@ import OrbitoolFunc
 import OrbitoolOption
 import OrbitoolUi
 
-DEBUG = True
+DEBUG = False
 
 cpu = multiprocessing.cpu_count() - 1
 if cpu <= 0:
@@ -2983,16 +2984,16 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         labels = raw.iloc[ionrow, firstcolumn:]
 
         if self.timeSeriesCatRawIsoRadioButton.isChecked():
-            fromtime = OrbitoolFunc.fromIsoTimeWithZone
+            fromtime = time_convert.fromIsoTimeWithZone
         elif self.timeSeriesCatRawIgorRadioButton.isChecked():
             times = times.astype(np.int64)
-            fromtime = OrbitoolFunc.fromIgorTime
+            fromtime = time_convert.fromIgorTime
         elif self.timeSeriesCatRawMatlabRadioButton.isChecked():
             times = times.astype(float)
-            fromtime = OrbitoolFunc.fromMatlabTime
+            fromtime = time_convert.fromMatlabTime
         elif self.timeSeriesCatRawExcelRadioButton.isChecked():
             times = times.astype(float)
-            fromtime = OrbitoolFunc.fromExcelTime
+            fromtime = time_convert.fromExcelTime
         elif self.timeSeriesCatRawCustomRadioButton.isChecked():
             timeformat = self.timeSeriesCatRawCustomLineEdit.text()
             def fromtime(s): return datetime.datetime.strptime(s, timeformat)
