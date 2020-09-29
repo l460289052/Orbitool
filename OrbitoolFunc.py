@@ -4,11 +4,8 @@ import csv
 import datetime
 import gzip
 import math
-import multiprocessing
 import os
 import pickle
-import traceback
-from collections.abc import Iterable
 from copy import copy
 from typing import List, Tuple
 
@@ -21,155 +18,14 @@ import statsmodels.nonparametric.smoothers_lowess as lowess
 import OrbitoolBase
 from utils import unpickler
 
-from functions._func import indexNearest as indexNearest_np, indexBetween as indexBetween_np, getPeaks as _getPeaks, peakAt as peakAt_np, getNoise as _getNoise, denoiseWithLOD as _denoiseWithLOD, linePeakCrossed, NormalDistributionFunc as _NormalDistributionFunc, catTime, catTimeSeries as _catTimeSeries, interp1TimeSeriesAt as _interp1TimeSeriesAt
+import functions
 
-def nullSendStatus(fileTime: datetime.datetime, msg: str, index: int, length: int):
-    pass
+from functions.binary_search import *
+from functions.abstract import *
 
+from functions import *
+from functions import _getPeaks, _getNoise, _denoiseWithLOD, _NormalDistributionFunc, _catTimeSeries, _interp1TimeSeriesAt
 
-def defaultMethod(array, index):
-    return array[index]
-
-def indexFirstNotSmallerThan(array, value, indexRange: (int, int) = None, method=defaultMethod):
-    '''
-    np.searchsorted(array,value,'left')
-    or
-    np.searchsorted(array,value)
-    '''
-    l, r = (0, len(array)) if indexRange is None else indexRange
-    while l < r:
-        t = (l + r) >> 1
-        if method(array, t) < value:
-            l = t + 1
-        else:
-            r = t
-    return l
-
-def indexFirstBiggerThan(array, value, indexRange: (int, int) = None, method=defaultMethod):
-    '''
-    np.searchsorted(array,value,'right')
-    '''
-    l, r = (0, len(array)) if indexRange is None else indexRange
-    while l < r:
-        t = (l + r) >> 1
-        if method(array, t) <= value:
-            l = t + 1
-        else:
-            r = t
-    return l
-
-def indexNearest(array, value, indexRange: (int, int) = None, method=defaultMethod) -> int:
-    '''
-    `indexRange`: default=(0,len(array))
-    '''
-    l, r = (0, len(array)) if indexRange is None else indexRange
-    i = indexFirstBiggerThan(array, value, indexRange, method)
-
-    if i == r or i > 0 and abs(method(array, i-1)-value) < abs(method(array, i)-value):
-        return i-1
-    else:
-        return i
-
-def indexBetween(array, valueRange, indexRange: (int, int) = None, method=defaultMethod) -> range:
-    """
-    get range from sorted array for value in (l,r)
-    `indexRange`: (start,stop), contain array[start] to array[stop-1]
-    make list = [index for index, item in enumerate(array) if l<item and item<r]
-    """
-    lvalue, rvalue = valueRange
-    if indexRange is None:
-        indexRange = (0, len(array))
-    l = indexFirstNotSmallerThan(array, lvalue, indexRange, method)
-    r = indexFirstBiggerThan(array, rvalue, indexRange, method)
-    if l < r:
-        return range(l, r)
-    else:
-        return range(l, l)
-
-def processWithTime(func, fileTime, args, signalQueue):
-    result = None
-    try:
-        result = func(fileTime, *args)
-    except Exception as e:
-        with open('error.txt', 'a') as file:
-            print('', datetime.datetime.now, str(e), sep='\n', file=file)
-            traceback.print_exc(file=file)
-            print(str(e))
-            traceback.print_exc()
-    signalQueue.put(fileTime)
-    return result
-
-
-def processWithoutTime(func, args, signalQueue):
-    result = None
-    try:
-        result = func(*args)
-    except Exception as e:
-        with open('error.txt', 'a') as file:
-            print('', datetime.datetime.now, str(e), sep='\n', file=file)
-            traceback.print_exc(file=file)
-            print(str(e))
-            traceback.print_exc()
-    signalQueue.put(True)
-    return result
-
-
-def multiProcess(func, argsList: List[Tuple], fileTime, cpu=None, sendStatusFunc=nullSendStatus):
-    '''
-    multi process
-    the first line of func.__doc__ will be shown message
-    if fileTime is a list, func's first arguement must be fileTime
-    '''
-    if isinstance(fileTime, Iterable):
-        if len(argsList) != len(fileTime):
-            raise ValueError('len(fileTime)!=len(argsList)')
-    if cpu is None or cpu >= multiprocessing.cpu_count():
-        cpu = multiprocessing.cpu_count() - 1
-    if cpu <= 0:
-        cpu = 1
-    msg = ''
-    if func.__doc__ is not None:
-        for line in func.__doc__.splitlines():
-            strip = line.strip()
-            if len(strip) > 0:
-                msg = strip
-                break
-    length = len(argsList)
-    if cpu == 1:
-        results = []
-        if isinstance(fileTime, Iterable):
-            for i, args in enumerate(argsList):
-                sendStatusFunc(fileTime[i], msg, i, length)
-                results.append(func(fileTime[i], *args))
-            sendStatusFunc(fileTime[-1], msg, length, length)
-        else:
-            for i, args in enumerate(argsList):
-                sendStatusFunc(fileTime, msg, i, length)
-                results.append(func(*args))
-            sendStatusFunc(fileTime, msg, length, length)
-        return results
-    else:
-        with multiprocessing.Manager() as manager:
-            queue = manager.Queue()
-            with multiprocessing.Pool(cpu) as pool:
-                if isinstance(fileTime, Iterable):
-                    results: multiprocessing.pool.MapResult = pool.starmap_async(
-                        processWithTime, [(func, time, args, queue) for time, args in zip(fileTime, argsList)])
-                    pool.close()
-                    sendStatusFunc(fileTime[0], msg, 0, length)
-                    for i in range(length):
-                        time = queue.get()
-                        sendStatusFunc(time, msg, i, length)
-                    return results.get()
-                else:
-                    results: multiprocessing.pool.MapResult = pool.starmap_async(
-                        processWithoutTime, [(func, args, queue) for args in argsList])
-                    pool.close()
-                    for i in range(length):
-                        sendStatusFunc(fileTime, msg, i, length)
-                        queue.get()
-                    sendStatusFunc(fileTime, msg, length, length)
-                    return results.get()
 
 def getPeaks(spectrum: OrbitoolBase.Spectrum, indexRange: (int, int) = None, mzRange: (float, float) = None) -> List[OrbitoolBase.Peak]:
     '''

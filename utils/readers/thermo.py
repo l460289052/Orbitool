@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import OrbitoolBase
-import OrbitoolFunc
+import functions
 
 import os
 import copy
@@ -98,7 +98,7 @@ class File(BaseFile):
         return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
 
     def timeRange2NumRange(self, timeRange: (timedelta, timedelta)):
-        r: range = OrbitoolFunc.indexBetween(self, timeRange,
+        r: range = functions.binary_search.indexBetween(self, timeRange,
                                              (self.firstScanNumber,
                                                  self.lastScanNumber + 1),
                                              method=(lambda f, i: f.getSpectrumRetentionTime(i)))
