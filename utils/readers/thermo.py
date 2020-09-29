@@ -119,7 +119,7 @@ class File(BaseFile):
         return True
 
     def getAveragedSpectrum(self, ppm, timeRange: (timedelta, timedelta) = None, numRange: (int, int) = None, polarity=-1):
-        start, end = self.bothToNumRange(numRange, timeRange)
+        start, end = self.bothToNumRange(timeRange, numRange)
 
         scanfilter = self.getFilter(start, end, polarity)
         if scanfilter is None:
@@ -133,7 +133,7 @@ class File(BaseFile):
                 self.rawfile, start, last, scanfilter, massOption)
             if averaged is None:  # I don't know why it could be a None
                 return None
-            mz, intensity, eTime = self.parseSpectrum(averaged)
+            mz, intensity, eTime = self.parseSpectrum(averaged, last)
         else:
             return None
 
@@ -151,7 +151,7 @@ class File(BaseFile):
             raise ValueError(
                 "`timeRange` or `numRange` must be provided and only one can be provided")
 
-    def parseSpectrum(self, averaged):
+    def parseSpectrum(self, averaged, last):
         averaged = averaged.SegmentedScan
         mz = np.array(list(averaged.Positions), dtype=np.float)
         intensity = np.array(list(averaged.Intensities), dtype=np.float)
