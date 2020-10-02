@@ -1,5 +1,7 @@
 __pycache__
 .vscode/.*
+.vs
+TestResults
 *~
 *.dll
 *.RAW

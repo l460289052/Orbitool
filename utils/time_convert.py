@@ -35,3 +35,5 @@ def fromExcelTime(t: float):
 def getTimesExactToS(dt: datetime):
     dt = dt.replace(microsecond=0)
     return [getIsoTimeWithZone(dt), getIgorTime(dt), getMatlabTime(dt), getExcelTime(dt)]
+
+__all__ = [s for s in locals() if s.find('get')==0 or s.find('from')==0]

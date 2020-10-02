@@ -20,52 +20,13 @@ from utils import unpickler
 
 import functions
 
-from functions.binary_search import *
+from functions.binary_search import * 
 from functions.abstract import *
 
 from functions import *
-from functions import _getPeaks, _getNoise, _denoiseWithLOD, _NormalDistributionFunc, _catTimeSeries, _interp1TimeSeriesAt
+from functions import _NormalDistributionFunc, _catTimeSeries, _interp1TimeSeriesAt
 
-
-def getPeaks(spectrum: OrbitoolBase.Spectrum, indexRange: (int, int) = None, mzRange: (float, float) = None) -> List[OrbitoolBase.Peak]:
-    '''
-    get peak divided by 0, result peak may have many peakPoint
-    '''
-    peaksRange = _getPeaks(
-        spectrum.mz, spectrum.intensity, indexRange, mzRange)
-    return [OrbitoolBase.Peak(spectrum, range(rstart, rstop)) for rstart, rstop in peaksRange]
-
-def getNoise(spectrum: OrbitoolBase.Spectrum,  quantile=0.7, sendStatus=nullSendStatus) -> (np.ndarray, np.ndarray):
-    """
-    @quantile: sort peaks by intensity, select num*quantile-th biggest peak
-    """
-    fileTime = spectrum.fileTime
-    msg = "calc noise"
-    sendStatus(fileTime, msg, -1, 0)
-    peakAt, noise, LOD = _getNoise(
-        spectrum.mz, spectrum.intensity,  quantile)
-    return peakAt, noise, LOD
-
-def denoiseWithLOD(spectrum: OrbitoolBase.Spectrum, LOD: (float, float), peakAt: np.ndarray = None, minus=False, sendStatus=OrbitoolBase.nullSendStatus) -> OrbitoolBase.Spectrum:
-    fileTime = spectrum.fileTime
-    msg = "denoising"
-    sendStatus(fileTime, msg, -1, 0)
-
-    newSpectrum = copy(spectrum)
-    if peakAt is None:
-        peakAt = peakAt_np(intensity)
-    mz, intensity = _denoiseWithLOD(
-        spectrum.mz, spectrum.intensity, LOD, peakAt, minus)
-    newSpectrum.mz = mz
-    newSpectrum.intensity = intensity
-    newSpectrum.peaks = getPeaks(newSpectrum)
-    return newSpectrum
-
-
-def denoise(spectrum: OrbitoolBase.Spectrum,  quantile=0.7, minus=False, sendStatus=OrbitoolBase.nullSendStatus):
-    peakAt, noise, LOD = getNoise(spectrum,  quantile, sendStatus)
-    return noise, LOD, denoiseWithLOD(spectrum, LOD, peakAt, minus, sendStatus)
-
+from utils.time_convert import *
 
 class NormalDistributionFunc(_NormalDistributionFunc):
     def __init__(self, params: List[tuple]):
@@ -376,5 +337,3 @@ def interp1TimeSeries(timeSeries: OrbitoolBase.TimeSeries, totalTime: np.ndarray
     ints=np.concatenate((timeSeries.intensity,ints))
     index = time.argsort()
     return OrbitoolBase.TimeSeries(time[index],ints[index],timeSeries.mz,timeSeries.ppm,timeSeries.tag)    
-
-from utils.time_convert import *
