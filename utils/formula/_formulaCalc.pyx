@@ -346,8 +346,11 @@ cdef class IonCalculator:
 
             # multi(2)
             for j in self.calcedIsotopes:
-                if i==j:
-                    break
+                if i==j: # double
+                    if deref(it).second > 1:
+                        isotopes.clear()
+                        isotopes.push_back(pair[int,int](index,(m<<_factor)+2))
+                        self.insertIsotope(mass, isotopes)
                 index=j>>_factor
                 m=j&_andfactor
                 if elements.find(index)==elements.end():
@@ -356,11 +359,6 @@ cdef class IonCalculator:
                 self.insertIsotope(mass, isotopes)
                 isotopes.pop_back()
 
-            # # double
-            # if deref(it).second > 1:
-            #     isotopes.clear()
-            #     isotopes.push_back(pair[int,int](index,(m<<_factor)+2))
-            #     self.insertIsotope(mass, isotopes)
 
     cdef void insertIsotope(self, double& mass, cpplist[pair[int, int]]& isotopes):
         cdef map[double, pair[double, cpplist[pair[int, int]]]].iterator isoit

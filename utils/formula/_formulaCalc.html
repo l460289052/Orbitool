@@ -2152,45 +2152,54 @@ static PyObject *__pyx_pf_5utils_7formula_12_formulaCalc_13IonCalculator_12clear
 /* … */
       __pyx_L7_continue:;
     }
-    __pyx_L8_break:;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">349</span>:                 <span class="k">if</span> <span class="n">i</span><span class="o">==</span><span class="n">j</span><span class="p">:</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">349</span>:                 <span class="k">if</span> <span class="n">i</span><span class="o">==</span><span class="n">j</span><span class="p">:</span> <span class="c"># double</span></pre>
 <pre class='cython code score-0 '>      __pyx_t_1 = ((__pyx_v_i == __pyx_v_j) != 0);
       if (__pyx_t_1) {
 /* … */
       }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">350</span>:                     <span class="k">break</span></pre>
-<pre class='cython code score-0 '>        goto __pyx_L8_break;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">351</span>:                 <span class="n">index</span><span class="o">=</span><span class="n">j</span><span class="o">&gt;&gt;</span><span class="n">_factor</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">350</span>:                     <span class="k">if</span> <span class="n">deref</span><span class="p">(</span><span class="n">it</span><span class="p">)</span><span class="o">.</span><span class="n">second</span> <span class="o">&gt;</span> <span class="mf">1</span><span class="p">:</span></pre>
+<pre class='cython code score-0 '>        __pyx_t_1 = (((*__pyx_v_it).second &gt; 1) != 0);
+        if (__pyx_t_1) {
+/* … */
+        }
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">351</span>:                         <span class="n">isotopes</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></pre>
+<pre class='cython code score-0 '>          __pyx_v_isotopes.clear();
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">352</span>:                         <span class="n">isotopes</span><span class="o">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">int</span><span class="p">](</span><span class="n">index</span><span class="p">,(</span><span class="n">m</span><span class="o">&lt;&lt;</span><span class="n">_factor</span><span class="p">)</span><span class="o">+</span><span class="mf">2</span><span class="p">))</span></pre>
+<pre class='cython code score-0 '>          try {
+            __pyx_t_5 = std::pair&lt;int,int&gt; (__pyx_v_index, ((__pyx_v_m &lt;&lt; __pyx_v_5utils_7formula_8_element__factor) + 2));
+          } catch(...) {
+            __Pyx_CppExn2PyErr();
+            <span class='error_goto'>__PYX_ERR(0, 352, __pyx_L1_error)</span>
+          }
+          __pyx_v_isotopes.push_back(__pyx_t_5);
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">353</span>:                         <span class="bp">self</span><span class="o">.</span><span class="n">insertIsotope</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">isotopes</span><span class="p">)</span></pre>
+<pre class='cython code score-0 '>          ((struct __pyx_vtabstruct_5utils_7formula_12_formulaCalc_IonCalculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;insertIsotope(__pyx_v_self, __pyx_v_mass, __pyx_v_isotopes);
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">354</span>:                 <span class="n">index</span><span class="o">=</span><span class="n">j</span><span class="o">&gt;&gt;</span><span class="n">_factor</span></pre>
 <pre class='cython code score-0 '>      __pyx_v_index = (__pyx_v_j &gt;&gt; __pyx_v_5utils_7formula_8_element__factor);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">352</span>:                 <span class="n">m</span><span class="o">=</span><span class="n">j</span><span class="o">&amp;</span><span class="n">_andfactor</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">355</span>:                 <span class="n">m</span><span class="o">=</span><span class="n">j</span><span class="o">&amp;</span><span class="n">_andfactor</span></pre>
 <pre class='cython code score-0 '>      __pyx_v_m = (__pyx_v_j &amp; __pyx_v_5utils_7formula_8_element__andfactor);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">353</span>:                 <span class="k">if</span> <span class="n">elements</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">==</span><span class="n">elements</span><span class="o">.</span><span class="n">end</span><span class="p">():</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">356</span>:                 <span class="k">if</span> <span class="n">elements</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">==</span><span class="n">elements</span><span class="o">.</span><span class="n">end</span><span class="p">():</span></pre>
 <pre class='cython code score-0 '>      __pyx_t_1 = ((__pyx_v_elements.find(__pyx_v_index) == __pyx_v_elements.end()) != 0);
       if (__pyx_t_1) {
 /* … */
       }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">354</span>:                     <span class="k">continue</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">357</span>:                     <span class="k">continue</span></pre>
 <pre class='cython code score-0 '>        goto __pyx_L7_continue;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">355</span>:                 <span class="n">isotopes</span><span class="o">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">int</span><span class="p">](</span><span class="n">index</span><span class="p">,(</span><span class="n">m</span><span class="o">&lt;&lt;</span><span class="n">_factor</span><span class="p">)</span><span class="o">+</span><span class="mf">1</span><span class="p">))</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">358</span>:                 <span class="n">isotopes</span><span class="o">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">int</span><span class="p">](</span><span class="n">index</span><span class="p">,(</span><span class="n">m</span><span class="o">&lt;&lt;</span><span class="n">_factor</span><span class="p">)</span><span class="o">+</span><span class="mf">1</span><span class="p">))</span></pre>
 <pre class='cython code score-0 '>      try {
         __pyx_t_5 = std::pair&lt;int,int&gt; (__pyx_v_index, ((__pyx_v_m &lt;&lt; __pyx_v_5utils_7formula_8_element__factor) + 1));
       } catch(...) {
         __Pyx_CppExn2PyErr();
-        <span class='error_goto'>__PYX_ERR(0, 355, __pyx_L1_error)</span>
+        <span class='error_goto'>__PYX_ERR(0, 358, __pyx_L1_error)</span>
       }
       __pyx_v_isotopes.push_back(__pyx_t_5);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">356</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">insertIsotope</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">isotopes</span><span class="p">)</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">359</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">insertIsotope</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">isotopes</span><span class="p">)</span></pre>
 <pre class='cython code score-0 '>      ((struct __pyx_vtabstruct_5utils_7formula_12_formulaCalc_IonCalculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;insertIsotope(__pyx_v_self, __pyx_v_mass, __pyx_v_isotopes);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">357</span>:                 <span class="n">isotopes</span><span class="o">.</span><span class="n">pop_back</span><span class="p">()</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">360</span>:                 <span class="n">isotopes</span><span class="o">.</span><span class="n">pop_back</span><span class="p">()</span></pre>
 <pre class='cython code score-0 '>      __pyx_v_isotopes.pop_back();
-</pre><pre class="cython line score-0">&#xA0;<span class="">358</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">359</span>:             <span class="c"># # double</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">360</span>:             <span class="c"># if deref(it).second &gt; 1:</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">361</span>:             <span class="c">#     isotopes.clear()</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">362</span>:             <span class="c">#     isotopes.push_back(pair[int,int](index,(m&lt;&lt;_factor)+2))</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">363</span>:             <span class="c">#     self.insertIsotope(mass, isotopes)</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">364</span>: </pre>
-<pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">365</span>:     <span class="k">cdef</span> <span class="kt">void</span> <span class="nf">insertIsotope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">double</span><span class="o">&amp;</span> <span class="n">mass</span><span class="p">,</span> <span class="n">cpplist</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span><span class="o">&amp;</span> <span class="n">isotopes</span><span class="p">):</span></pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">361</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">362</span>: </pre>
+<pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">363</span>:     <span class="k">cdef</span> <span class="kt">void</span> <span class="nf">insertIsotope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">double</span><span class="o">&amp;</span> <span class="n">mass</span><span class="p">,</span> <span class="n">cpplist</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span><span class="o">&amp;</span> <span class="n">isotopes</span><span class="p">):</span></pre>
 <pre class='cython code score-2 '>static void __pyx_f_5utils_7formula_12_formulaCalc_13IonCalculator_insertIsotope(struct __pyx_obj_5utils_7formula_12_formulaCalc_IonCalculator *__pyx_v_self, double &amp;__pyx_v_mass, std::list&lt;std::pair&lt;int,int&gt; &gt;  &amp;__pyx_v_isotopes) {
   std::map&lt;double,std::pair&lt;double,std::list&lt;std::pair&lt;int,int&gt; &gt; &gt; &gt; ::iterator __pyx_v_isoit;
   double __pyx_v_isomass;
@@ -2204,36 +2213,36 @@ static PyObject *__pyx_pf_5utils_7formula_12_formulaCalc_13IonCalculator_12clear
   __pyx_L0:;
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
 }
-</pre><pre class="cython line score-0">&#xA0;<span class="">366</span>:         <span class="k">cdef</span> <span class="kt">map</span>[<span class="nf">double</span><span class="p">,</span> <span class="kt">pair</span>[<span class="nf">double</span><span class="p">,</span> <span class="kt">cpplist</span>[<span class="kt">pair</span>[<span class="nf">int</span><span class="p">,</span> <span class="kt">int</span>]]]].<span class="kt">iterator</span> <span class="nf">isoit</span></pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">367</span>:         <span class="n">isomass</span> <span class="o">=</span> <span class="n">_mass_isotopes_mass</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">isotopes</span><span class="p">)</span></pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">364</span>:         <span class="k">cdef</span> <span class="kt">map</span>[<span class="nf">double</span><span class="p">,</span> <span class="kt">pair</span>[<span class="nf">double</span><span class="p">,</span> <span class="kt">cpplist</span>[<span class="kt">pair</span>[<span class="nf">int</span><span class="p">,</span> <span class="kt">int</span>]]]].<span class="kt">iterator</span> <span class="nf">isoit</span></pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">365</span>:         <span class="n">isomass</span> <span class="o">=</span> <span class="n">_mass_isotopes_mass</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">isotopes</span><span class="p">)</span></pre>
 <pre class='cython code score-0 '>  __pyx_v_isomass = __pyx_f_5utils_7formula_8_formula__mass_isotopes_mass(__pyx_v_mass, __pyx_v_isotopes);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">368</span>:         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">getIsotope</span><span class="p">(</span><span class="n">isomass</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">isoit</span><span class="p">):</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">366</span>:         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">getIsotope</span><span class="p">(</span><span class="n">isomass</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">isoit</span><span class="p">):</span></pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((!(((struct __pyx_vtabstruct_5utils_7formula_12_formulaCalc_IonCalculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getIsotope(__pyx_v_self, __pyx_v_isomass, (&amp;__pyx_v_isoit)) != 0)) != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">369</span>:             <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">isoit</span><span class="p">,</span> <span class="n">pair</span><span class="p">[</span><span class="n">double</span><span class="p">,</span> <span class="n">pair</span><span class="p">[</span><span class="n">double</span><span class="p">,</span> <span class="n">cpplist</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]](</span><span class="n">isomass</span><span class="p">,</span> <span class="n">pair</span><span class="p">[</span><span class="n">double</span><span class="p">,</span> <span class="n">cpplist</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]](</span><span class="n">mass</span><span class="p">,</span> <span class="n">isotopes</span><span class="p">)))</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">367</span>:             <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">isoit</span><span class="p">,</span> <span class="n">pair</span><span class="p">[</span><span class="n">double</span><span class="p">,</span> <span class="n">pair</span><span class="p">[</span><span class="n">double</span><span class="p">,</span> <span class="n">cpplist</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]](</span><span class="n">isomass</span><span class="p">,</span> <span class="n">pair</span><span class="p">[</span><span class="n">double</span><span class="p">,</span> <span class="n">cpplist</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]](</span><span class="n">mass</span><span class="p">,</span> <span class="n">isotopes</span><span class="p">)))</span></pre>
 <pre class='cython code score-0 '>    try {
       __pyx_t_2 = std::pair&lt;double,std::list&lt;std::pair&lt;int,int&gt; &gt; &gt; (__pyx_v_mass, __pyx_v_isotopes);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      <span class='error_goto'>__PYX_ERR(0, 369, __pyx_L1_error)</span>
+      <span class='error_goto'>__PYX_ERR(0, 367, __pyx_L1_error)</span>
     }
     try {
       __pyx_t_3 = std::pair&lt;double,std::pair&lt;double,std::list&lt;std::pair&lt;int,int&gt; &gt; &gt; &gt; (__pyx_v_isomass, __pyx_t_2);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      <span class='error_goto'>__PYX_ERR(0, 369, __pyx_L1_error)</span>
+      <span class='error_goto'>__PYX_ERR(0, 367, __pyx_L1_error)</span>
     }
     try {
       __pyx_v_self-&gt;isotopes.insert(__pyx_v_isoit, __pyx_t_3);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      <span class='error_goto'>__PYX_ERR(0, 369, __pyx_L1_error)</span>
+      <span class='error_goto'>__PYX_ERR(0, 367, __pyx_L1_error)</span>
     }
-</pre><pre class="cython line score-0">&#xA0;<span class="">370</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">371</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">372</span>:     <span class="k">cdef</span> <span class="kt">bool</span> <span class="nf">getIsotope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">double</span><span class="o">&amp;</span> <span class="n">mass</span><span class="p">,</span> <span class="nb">map</span><span class="p">[</span><span class="n">double</span><span class="p">,</span> <span class="n">pair</span><span class="p">[</span><span class="n">double</span><span class="p">,</span> <span class="n">cpplist</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]]</span><span class="o">.</span><span class="n">iterator</span><span class="o">*</span> <span class="n">out</span><span class="p">):</span></pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">368</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">369</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">370</span>:     <span class="k">cdef</span> <span class="kt">bool</span> <span class="nf">getIsotope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">double</span><span class="o">&amp;</span> <span class="n">mass</span><span class="p">,</span> <span class="nb">map</span><span class="p">[</span><span class="n">double</span><span class="p">,</span> <span class="n">pair</span><span class="p">[</span><span class="n">double</span><span class="p">,</span> <span class="n">cpplist</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]]</span><span class="o">.</span><span class="n">iterator</span><span class="o">*</span> <span class="n">out</span><span class="p">):</span></pre>
 <pre class='cython code score-0 '>static bool __pyx_f_5utils_7formula_12_formulaCalc_13IonCalculator_getIsotope(struct __pyx_obj_5utils_7formula_12_formulaCalc_IonCalculator *__pyx_v_self, double &amp;__pyx_v_mass, std::map&lt;double,std::pair&lt;double,std::list&lt;std::pair&lt;int,int&gt; &gt; &gt; &gt; ::iterator *__pyx_v_out) {
   bool __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
@@ -2244,60 +2253,60 @@ static PyObject *__pyx_pf_5utils_7formula_12_formulaCalc_13IonCalculator_12clear
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
-</pre><pre class="cython line score-0">&#xA0;<span class="">373</span>:         <span class="sd">&#39;&#39;&#39;</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">374</span>: <span class="sd">        if return True, out will be the iterator pointing mass</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">375</span>: <span class="sd">        if return False, out will point the position to be added</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">376</span>: <span class="sd">        &#39;&#39;&#39;</span></pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">377</span>:         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span></pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">371</span>:         <span class="sd">&#39;&#39;&#39;</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">372</span>: <span class="sd">        if return True, out will be the iterator pointing mass</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">373</span>: <span class="sd">        if return False, out will point the position to be added</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">374</span>: <span class="sd">        &#39;&#39;&#39;</span></pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">375</span>:         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span></pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = (__pyx_v_self-&gt;isotopes.empty() != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">378</span>:             <span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">end</span><span class="p">()</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">376</span>:             <span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">end</span><span class="p">()</span></pre>
 <pre class='cython code score-0 '>    (__pyx_v_out[0]) = __pyx_v_self-&gt;isotopes.end();
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">379</span>:             <span class="k">return</span> <span class="bp">False</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">377</span>:             <span class="k">return</span> <span class="bp">False</span></pre>
 <pre class='cython code score-0 '>    __pyx_r = 0;
     goto __pyx_L0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">380</span>:         <span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">upper_bound</span><span class="p">(</span><span class="n">mass</span><span class="p">)</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">378</span>:         <span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">upper_bound</span><span class="p">(</span><span class="n">mass</span><span class="p">)</span></pre>
 <pre class='cython code score-0 '>  (__pyx_v_out[0]) = __pyx_v_self-&gt;isotopes.upper_bound(__pyx_v_mass);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">381</span>:         <span class="k">if</span> <span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">end</span><span class="p">():</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">379</span>:         <span class="k">if</span> <span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">end</span><span class="p">():</span></pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = (((__pyx_v_out[0]) != __pyx_v_self-&gt;isotopes.end()) != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">382</span>:             <span class="k">if</span> <span class="n">fabs</span><span class="p">(</span><span class="n">deref</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">])</span><span class="o">.</span><span class="n">first</span><span class="o">-</span><span class="n">mass</span><span class="p">)</span><span class="o">&lt;</span><span class="n">eps</span><span class="p">:</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">380</span>:             <span class="k">if</span> <span class="n">fabs</span><span class="p">(</span><span class="n">deref</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">])</span><span class="o">.</span><span class="n">first</span><span class="o">-</span><span class="n">mass</span><span class="p">)</span><span class="o">&lt;</span><span class="n">eps</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>    __pyx_t_1 = ((fabs(((*(__pyx_v_out[0])).first - __pyx_v_mass)) &lt; __pyx_v_5utils_7formula_12_formulaCalc_eps) != 0);
     if (__pyx_t_1) {
 /* … */
     }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">383</span>:                 <span class="k">return</span> <span class="bp">True</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">381</span>:                 <span class="k">return</span> <span class="bp">True</span></pre>
 <pre class='cython code score-0 '>      __pyx_r = 1;
       goto __pyx_L0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">384</span>:             <span class="k">elif</span> <span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">begin</span><span class="p">():</span> <span class="c"># begin and end will occur concurrently</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">382</span>:             <span class="k">elif</span> <span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="o">.</span><span class="n">begin</span><span class="p">():</span> <span class="c"># begin and end will occur concurrently</span></pre>
 <pre class='cython code score-0 '>    __pyx_t_1 = (((__pyx_v_out[0]) == __pyx_v_self-&gt;isotopes.begin()) != 0);
     if (__pyx_t_1) {
 /* … */
     }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">385</span>:                 <span class="k">return</span> <span class="bp">False</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">383</span>:                 <span class="k">return</span> <span class="bp">False</span></pre>
 <pre class='cython code score-0 '>      __pyx_r = 0;
       goto __pyx_L0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">386</span>:         <span class="k">if</span> <span class="n">fabs</span><span class="p">(</span><span class="n">deref</span><span class="p">(</span><span class="n">predec</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">]))</span><span class="o">.</span><span class="n">first</span><span class="o">-</span><span class="n">mass</span><span class="p">)</span><span class="o">&lt;</span><span class="n">eps</span><span class="p">:</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">384</span>:         <span class="k">if</span> <span class="n">fabs</span><span class="p">(</span><span class="n">deref</span><span class="p">(</span><span class="n">predec</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">]))</span><span class="o">.</span><span class="n">first</span><span class="o">-</span><span class="n">mass</span><span class="p">)</span><span class="o">&lt;</span><span class="n">eps</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((fabs(((*(--(__pyx_v_out[0]))).first - __pyx_v_mass)) &lt; __pyx_v_5utils_7formula_12_formulaCalc_eps) != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">387</span>:             <span class="k">return</span> <span class="bp">True</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">385</span>:             <span class="k">return</span> <span class="bp">True</span></pre>
 <pre class='cython code score-0 '>    __pyx_r = 1;
     goto __pyx_L0;
-</pre><pre class="cython line score-0">&#xA0;<span class="">388</span>:         <span class="k">else</span><span class="p">:</span></pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">389</span>:             <span class="n">preinc</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">])</span></pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">386</span>:         <span class="k">else</span><span class="p">:</span></pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">387</span>:             <span class="n">preinc</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">])</span></pre>
 <pre class='cython code score-0 '>  /*else*/ {
     (void)((++(__pyx_v_out[0])));
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">390</span>:             <span class="k">return</span> <span class="bp">False</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">388</span>:             <span class="k">return</span> <span class="bp">False</span></pre>
 <pre class='cython code score-0 '>    __pyx_r = 0;
     goto __pyx_L0;
   }
-</pre><pre class="cython line score-0">&#xA0;<span class="">391</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">392</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">393</span>: </pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">389</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">390</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">391</span>: </pre>
 </div></body></html>
