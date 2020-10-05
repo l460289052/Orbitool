@@ -184,10 +184,16 @@ cdef class Formula:
         cdef int index = elementsMap.get(element, -1)
         if index == -1:
             raise ValueError(f'unknown element:{element}')
+        self.addEI(index, m, num)
+
+
+    cdef void addEI(self, int index, int m, int num) except *:
+        # if num == 0:
+        #     return
         self.setE(index, self.getE(index) + num)
         if m > 0:
             if elementMassDist[index].find(m) == elementMassDist[index].end():
-                raise ValueError(f'unknown element:{element}[{m}]')
+                raise ValueError(f'unknown element:{elements[index]}[{m}]')
             if elementMassNum[index] != m:  # isotope
                 self.setI(index, m, self.getI(index, m) + num)
 
@@ -316,6 +322,8 @@ cdef class Formula:
                     if deref(it).first == index and (deref(it).second >> _factor) == m:
                         self.isotopes.erase(it)
                         return
+                    else:
+                        inc(it)
         else:
             if m==0:
                 raise ValueError("if m==0, index must equal to 0")

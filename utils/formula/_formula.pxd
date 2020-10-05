@@ -38,6 +38,7 @@ cdef:
         cdef double Hmin(self)
         cdef double Hmax(self)
         cpdef void addElement(self, str element, int m=*, int num=*) except *
+        cdef void addEI(self, int index, int m, int num) except *
         @staticmethod
         cdef str eToStr(int index, int num, bool showProton)
         @staticmethod

@@ -34,8 +34,7 @@ def cythonSetup(filepath):
     setup(ext_modules=cy, script_args=['build_ext'], include_dirs=[
           np.get_include()], options={'build_ext': {'inplace': True}})
 
-
-if __name__ == "__main__":
+def main():
     ft = FolderTraveler(roots, '.pyx', True)
     modelNodes: Dict[str, Node]= {}
 
@@ -68,3 +67,7 @@ if __name__ == "__main__":
             raise Exception("Loop", modelNodes.keys())
         for pro in processed:
             modelNodes.pop(pro)
+
+
+if __name__ == "__main__":
+    main()
