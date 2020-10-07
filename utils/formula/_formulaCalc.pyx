@@ -5,6 +5,7 @@ from cpython cimport *
 from cython.operator cimport dereference as deref, preincrement as preinc,\
      postincrement as postinc, predecrement as predec, postdecrement as postdec
 from libcpp.vector cimport vector
+from libcpp.deque cimport deque
 from libcpp.string cimport string
 from libcpp.list cimport list as cpplist
 from libcpp.map cimport map
@@ -51,13 +52,18 @@ cdef void _state_add(State& state, vector[double]& para, int num):
 
 cdef double eps = 1e-9
 
-cdef class IonCalculator:
+cdef class BaseCalculator:
     def __init__(self):
+        self.ppm = 1e-6
+        self.charge = -1
+
+
+cdef class IonCalculator(BaseCalculator):
+    def __init__(self):
+        BaseCalculator.__init__(self)
         self.calcedElements.push_back(Cindex)
         self.calcedElements.push_back(Hindex)
         self.calcedElements.push_back(Oindex)
-        self.ppm = 1e-6
-        self.charge = -1
         self.DBEmin = 0
         self.DBEmax = 8
         self.Mmin = 50
@@ -336,21 +342,24 @@ cdef class IonCalculator:
         for i in self.calcedIsotopes:
             index=i>>_factor
             m=i&_andfactor
-            # single
             it = elements.find(index)
             if it==elements.end():
                 continue
             isotopes.clear()
-            isotopes.push_back(pair[int,int](index, (m<<_factor)+1))
+            # double
+            if deref(it).second > 1:
+                isotopes.push_back(pair[int,int](index,(m<<_factor)+2))
+                self.insertIsotope(mass, isotopes)
+            # single
+                isotopes.back().second = isotopes.back().second-1
+            else:
+                isotopes.push_back(pair[int,int](index,(m<<_factor)+1))
             self.insertIsotope(mass, isotopes)
 
             # multi(2)
             for j in self.calcedIsotopes:
-                if i==j: # double
-                    if deref(it).second > 1:
-                        isotopes.clear()
-                        isotopes.push_back(pair[int,int](index,(m<<_factor)+2))
-                        self.insertIsotope(mass, isotopes)
+                if i==j: 
+                    break
                 index=j>>_factor
                 m=j&_andfactor
                 if elements.find(index)==elements.end():
@@ -387,5 +396,146 @@ cdef class IonCalculator:
             preinc(out[0])
             return False
         
+cdef pair[double, int] convert_isotopes2pair(int index, int m):
+    if m == elementMassNum[index]:
+        m = 0
+    return pair[double, int]( elementMassDist[index][m].first,(index<<_factor)+m)
+
+cdef void parse_pair2isotopes(pair[double, int] p, int *index, int* m):
+    index[0] = p.second >>_factor
+    m[0] = p.second & _andfactor
+
+cdef str convert_pair2str(pair[double, int] p):
+    cdef int index, m
+    parse_pair2isotopes(p, &index, &m)
+    return elements[index] if m ==0 else f"{elements[index]}[{m}]"
+
+cdef struct ForceState:
+    int isotope, num, numMax
+    double mass, massSum
+
+cdef void incForceState(ForceState*state):
+    preinc(deref(state).num)
+    deref(state).massSum=deref(state).massSum + deref(state).mass # += is not supported well in cython
+
+cdef void calcForceStateNum(ForceState*state, double MR):
+    cdef double mass = deref(state).massSum
+    deref(state).numMax = <int>((MR-mass)/deref(state).mass)
 
 
+cdef Formula isotopes2formula(deque[ForceState]&isotopes, int charge):
+    cdef ForceState i
+    cdef Formula f = Formula.__new__(Formula)
+    for i in isotopes:
+        f.addEI(i.isotope>>_factor, i.isotope&_andfactor, i.num)
+    f.charge = charge
+    # print(f)
+    return f
+
+
+cdef class ForceCalculator(BaseCalculator):
+    def __init__(self):
+        BaseCalculator.__init__(self)
+        self.calcedIsotopes.insert(convert_isotopes2pair(Cindex,0))
+        self.calcedIsotopes.insert(convert_isotopes2pair(Hindex,0)) 
+        self.calcedIsotopes.insert(convert_isotopes2pair(Oindex,0))
+
+    cdef map[double, int].iterator findIsotope(self, int index, int m):
+        cdef isotope = (index<<_factor)+m
+        cdef map[double, int].iterator iterator = self.calcedIsotopes.begin()
+        while iterator!= self.calcedIsotopes.end():
+            if deref(iterator).second == isotope:
+                break
+            preinc(iterator)
+        return iterator
+        
+    def setEI(self, str key, bool use = True):
+        cdef int index, m
+
+        str2element(key, &index, &m)
+        if m == elementMassNum[index]:
+            m = 0
+        cdef map[double, int].iterator iterator = self.findIsotope(index, m)
+        if iterator == self.calcedIsotopes.end():
+            if use:
+                self.calcedIsotopes.insert(convert_isotopes2pair(index, m))
+        else:
+            if use:
+                self.calcedIsotopes.insert(iterator, convert_isotopes2pair(index,m))
+            else:
+                self.calcedIsotopes.erase(iterator)
+        
+
+    def getEI(self):
+        cdef list ret = list()
+        cdef pair[double, int] iterator
+        for iterator in self.calcedIsotopes:
+            ret.append(convert_pair2str(iterator))
+
+        return ret
+
+
+    def get(self, double M):
+        M += self.charge*elementMass[0]
+        cdef double ML, MR, delta
+        delta = self.ppm *M
+        ML = M - delta
+        MR = M + delta
+        # print(ML,MR)
+
+        cdef deque[ForceState] isotopes
+        cdef ForceState state
+        cdef int index, m, top, length, i , numMin
+
+        cdef pair[double, int] iterator
+        for iterator in self.calcedIsotopes:
+            state = ForceState(isotope=iterator.second, num = 0, mass = iterator.first, massSum = 0.0,numMax=0)
+            isotopes.push_front(state)
+
+        # for iso in isotopes:
+        #     print(iso)
+
+        cdef list ret = list()
+
+        top = 0
+        length = isotopes.size() - 1
+        cdef ForceState* ref
+        cdef double mass
+        calcForceStateNum(&isotopes[0], MR)
+        while True:
+            # printState(isotopes, top)
+            ref = &isotopes[top]
+            if deref(ref).num > deref(ref).numMax:
+                if predec(top) < 0:
+                    break
+                incForceState(&isotopes[top])
+            else:
+                ref = &isotopes[preinc(top)]
+                deref(ref).num = 0
+                deref(ref).massSum=isotopes[top-1].massSum
+                calcForceStateNum(ref, MR)
+                if top==length:
+                    numMin = <int>ceil((ML-deref(ref).massSum)/deref(ref).mass)
+
+                    # print(numMin, deref(ref).numMax)
+
+                    for i in range(numMin,deref(ref).numMax+1):
+                        deref(ref).num = i
+                        # print(i)
+                        ret.append(isotopes2formula(isotopes, self.charge)) # C10H[2]O[18]- bug
+
+                    # print('exit')
+
+                    incForceState(&isotopes[predec(top)])
+
+        return ret
+
+cdef void printState(deque[ForceState] states, int top):
+    print(end=f'{top}, {states[top].massSum}, {states[top].numMax}:')
+    for state in states:
+        if top == -1:
+            break
+        top-=1
+        print(convert_pair2str(pair[double,int]( state.mass, state.isotope))+str(state.num), end = '')
+
+    print()

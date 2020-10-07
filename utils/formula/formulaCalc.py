@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import Union, List
 from .formula import Formula, FormulaHint
-from ._formulaCalc import IonCalculator
+from ._formulaCalc import IonCalculator, ForceCalculator
 
 class IonCalculatorHint:
     def __init__(self):
@@ -24,4 +24,15 @@ class IonCalculatorHint:
     def get(self, M:float) -> List[FormulaHint]:
         pass
     def clear(self):
+        pass
+
+class ForceCalculatorHint:
+    def __init__(self):
+        self.ppm: float = None
+        self.charge: int = None
+    def setEI(self, key: str, use: bool = True):
+        pass
+    def getEI(self) -> List[str]:
+        pass
+    def get(self, M: float) -> List[FormulaHint]:
         pass

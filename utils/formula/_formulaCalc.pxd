@@ -12,7 +12,11 @@ from libcpp cimport bool
 # ctypedef will cause runerror
 cdef:
     double eps
-    class IonCalculator:
+    class BaseCalculator:
+        cdef public double ppm
+        cdef public int charge
+
+    class IonCalculator(BaseCalculator):
         cdef map[double, unordered_map[int, int]] formulas
         cdef map[double, pair[double, cpplist[pair[int, int]]]] isotopes # mass -> (elements' mass, list(index, (m<<_factor) + num))
         cdef map[double, double] mcover
@@ -20,8 +24,6 @@ cdef:
         cdef cpplist[int] calcedElements
         cdef cpplist[int] calcedIsotopes # (index << _factor) + m
 
-        cdef public double ppm
-        cdef public int charge
         cdef public double DBEmin
         cdef public double DBEmax
         cdef public double Mmin
@@ -37,3 +39,8 @@ cdef:
         cdef void insertIsotopes(self, unordered_map[int, int]& elements, double mass = *)
         cdef void insertIsotope(self, double& mass, cpplist[pair[int, int]]& isotopes)
         cdef bool getIsotope(self, double& mass, map[double, pair[double, cpplist[pair[int, int]]]].iterator *out)
+
+    class ForceCalculator(BaseCalculator):
+        cdef map[double, int] calcedIsotopes
+        
+        cdef map[double, int].iterator findIsotope(self, int index, int m)
