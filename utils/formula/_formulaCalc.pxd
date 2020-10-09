@@ -40,8 +40,18 @@ cdef:
         cdef void insertIsotope(self, double& mass, cpplist[pair[int, int]]& isotopes)
         cdef bool getIsotope(self, double& mass, map[double, pair[double, cpplist[pair[int, int]]]].iterator *out)
 
+    struct ForceCalculatorReturner:
+        map[double, int].iterator iterator
+        int index, m, code
+
+    struct ForceState:
+        int isotope, num, numMax
+        double mass, massSum
+
     class ForceCalculator(BaseCalculator):
         cdef map[double, int] calcedIsotopes
         cdef map[int, int] isotopeMaximum
         
-        cdef map[double, int].iterator findIsotope(self, int index, int m)
+        cdef map[double, int].iterator findIsotope(self, int code)
+        cdef ForceCalculatorReturner strFindIsotope(self, str key)
+        cdef void calcForceStateNum(self, ForceState*state, double MR)

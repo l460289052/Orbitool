@@ -400,32 +400,23 @@ cdef class IonCalculator(BaseCalculator):
 cdef pair[double, int] convert_isotopes2pair(int index, int m):
     if m == elementMassNum[index]:
         m = 0
-    return pair[double, int]( elementMassDist[index][m].first,(index<<_factor)+m)
+    return pair[double, int]( elementMassDist[index][m].first,encodeIsotope(index, m))
 
 cdef str convert_pair2str(pair[double, int] p):
     cdef int index, m
     decodeIsotope(p.second, &index, &m)
     return elements[index] if m ==0 else f"{elements[index]}[{m}]"
 
-cdef struct ForceState:
-    int isotope, num, numMax
-    double mass, massSum
-
 cdef void incForceState(ForceState*state):
     preinc(deref(state).num)
     deref(state).massSum=deref(state).massSum + deref(state).mass # += is not supported well in cython
-
-cdef void calcForceStateNum(ForceState*state, double MR):
-    cdef double mass = deref(state).massSum
-    deref(state).numMax = <int>((MR-mass)/deref(state).mass)
-
 
 cdef Formula isotopes2formula(deque[ForceState]&isotopes, int charge):
     cdef ForceState i
     cdef Formula f = Formula.__new__(Formula)
     for i in isotopes:
         f.addEI(i.isotope>>_factor, i.isotope&_andfactor, i.num)
-    f.charge = charge
+    f.setE(0, -charge)
     # print(f)
     return f
 
@@ -433,35 +424,51 @@ cdef Formula isotopes2formula(deque[ForceState]&isotopes, int charge):
 cdef class ForceCalculator(BaseCalculator):
     def __init__(self):
         BaseCalculator.__init__(self)
-        self.calcedIsotopes.insert(convert_isotopes2pair(Cindex,0))
-        self.calcedIsotopes.insert(convert_isotopes2pair(Hindex,0)) 
-        self.calcedIsotopes.insert(convert_isotopes2pair(Oindex,0))
+        cdef int i
+        cdef vector[int] l = [Cindex, Hindex, Oindex]
+        for i in l:
+            self.calcedIsotopes.insert(convert_isotopes2pair(i,0))
+            self.isotopeMaximum.insert(pair[int, int](encodeIsotope(i, 0), 999))
 
-    cdef map[double, int].iterator findIsotope(self, int index, int m):
-        cdef isotope = encodeIsotope(index, m)
+    cdef map[double, int].iterator findIsotope(self, int code):
         cdef map[double, int].iterator iterator = self.calcedIsotopes.begin()
         while iterator!= self.calcedIsotopes.end():
-            if deref(iterator).second == isotope:
+            if deref(iterator).second == code:
                 break
             preinc(iterator)
         return iterator
 
-    def setEI(self, str key, bool use = True):
-        cdef int index, m
-
+    cdef ForceCalculatorReturner strFindIsotope(self, str key):
+        cdef int index, m, code
         str2element(key, &index, &m)
         if m == elementMassNum[index]:
             m = 0
-        cdef map[double, int].iterator iterator = self.findIsotope(index, m)
-        if iterator == self.calcedIsotopes.end():
-            if use:
-                self.calcedIsotopes.insert(convert_isotopes2pair(index, m))
+        code = encodeIsotope(index, m)
+        cdef map[double, int].iterator iterator = self.findIsotope(code)
+        return ForceCalculatorReturner(iterator=iterator, index = index, m=m,code=code)
+
+    cdef void calcForceStateNum(self, ForceState*state, double MR):
+        cdef double mass = deref(state).massSum
+        deref(state).numMax = min(<int>((MR-mass)/deref(state).mass), self.isotopeMaximum[deref(state).isotope])
+
+    def __setitem__(self, str key, int value):
+        cdef ForceCalculatorReturner returner = self.strFindIsotope(key)
+        if returner.iterator == self.calcedIsotopes.end():
+            if value > 0:
+                self.calcedIsotopes.insert(convert_isotopes2pair(returner.index, returner.m))
+                self.isotopeMaximum.insert(pair[int,int]((returner.code, value)))
         else:
-            if use:
-                self.calcedIsotopes.insert(iterator, convert_isotopes2pair(index,m))
+            if value == 0:
+                self.calcedIsotopes.erase(returner.iterator)
+                self.isotopeMaximum.erase(returner.code)
             else:
-                self.calcedIsotopes.erase(iterator)
-        
+                self.isotopeMaximum[returner.code] = value
+
+    def __getitem__(self, str key):
+        cdef ForceCalculatorReturner returner = self.strFindIsotope(key)
+        if returner.iterator == self.calcedIsotopes.end():
+            return 0
+        return self.isotopeMaximum[returner.code]
 
     def getEI(self):
         cdef list ret = list()
@@ -498,7 +505,7 @@ cdef class ForceCalculator(BaseCalculator):
         length = isotopes.size() - 1
         cdef ForceState* ref
         cdef double mass
-        calcForceStateNum(&isotopes[0], MR)
+        self.calcForceStateNum(&isotopes[0], MR)
         while True:
             # printState(isotopes, top)
             ref = &isotopes[top]
@@ -510,7 +517,7 @@ cdef class ForceCalculator(BaseCalculator):
                 ref = &isotopes[preinc(top)]
                 deref(ref).num = 0
                 deref(ref).massSum=isotopes[top-1].massSum
-                calcForceStateNum(ref, MR)
+                self.calcForceStateNum(ref, MR)
                 if top==length:
                     numMin = <int>ceil((ML-deref(ref).massSum)/deref(ref).mass)
 

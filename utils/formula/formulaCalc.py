@@ -30,7 +30,9 @@ class ForceCalculatorHint:
     def __init__(self):
         self.ppm: float = None
         self.charge: int = None
-    def setEI(self, key: str, use: bool = True):
+    def __setitem__(self, key:str, value:int):
+        pass
+    def __getitem__(self, key:str)->int:
         pass
     def getEI(self) -> List[str]:
         pass
