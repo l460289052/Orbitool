@@ -16,8 +16,10 @@ from libcpp.pair cimport pair
 from libcpp cimport bool
 from libc.math cimport fabs, ceil, floor, remainder, fabs
 
-from ._element cimport _factor, _andfactor, str2element, elements, elementMass,\
-     elementMassNum, elementMassDist, elementNumMap, elementParasMap, CHmin #, isotopeNumMap
+from ._element cimport _factor, _andfactor, elements, elementMass,\
+     elementMassNum, elementMassDist, elementNumMap, elementParasMap, CHmin, \
+     encodeIsotope, decodeIsotope, str2element, element2str, str2code, code2str #, isotopeNumMap
+
 from ._formula cimport _elements_mass, _elements_DBE, _elements_Omin,\
      _elements_Omax, _elements_Hmin, _elements_Hmax, _elements_eq, _mass_isotopes_mass,\
      _elements_isotopes_mass, Formula
@@ -80,7 +82,7 @@ cdef class IonCalculator(BaseCalculator):
                 raise KeyError('cannot enable or disable C, H, O')
             clist = &self.calcedElements
         else:
-            index = (index<<_factor)+m
+            index = encodeIsotope(index, m)
             clist = &self.calcedIsotopes
 
         cdef bool has = False
@@ -106,9 +108,10 @@ cdef class IonCalculator(BaseCalculator):
 
     def getIsotopes(self):
         cdef list e = list()
-        cdef int i
+        cdef int i, index, m
         for i in self.calcedIsotopes:
-            e.append( f"{elements[i>>_factor]}[{i&_andfactor}]" )
+            decodeIsotope(i, &index, &m)
+            e.append( f"{elements[index]}[{m}]" )
         return e
 
     cdef bool iscovered(self, double l, double r):
@@ -340,8 +343,7 @@ cdef class IonCalculator(BaseCalculator):
         cdef cpplist[pair[int, int]] isotopes
         cdef double isomass
         for i in self.calcedIsotopes:
-            index=i>>_factor
-            m=i&_andfactor
+            decodeIsotope(i, &index, &m)
             it = elements.find(index)
             if it==elements.end():
                 continue
@@ -360,8 +362,7 @@ cdef class IonCalculator(BaseCalculator):
             for j in self.calcedIsotopes:
                 if i==j: 
                     break
-                index=j>>_factor
-                m=j&_andfactor
+                decodeIsotope(i, &index, &m)
                 if elements.find(index)==elements.end():
                     continue
                 isotopes.push_back(pair[int,int](index,(m<<_factor)+1))
@@ -401,13 +402,9 @@ cdef pair[double, int] convert_isotopes2pair(int index, int m):
         m = 0
     return pair[double, int]( elementMassDist[index][m].first,(index<<_factor)+m)
 
-cdef void parse_pair2isotopes(pair[double, int] p, int *index, int* m):
-    index[0] = p.second >>_factor
-    m[0] = p.second & _andfactor
-
 cdef str convert_pair2str(pair[double, int] p):
     cdef int index, m
-    parse_pair2isotopes(p, &index, &m)
+    decodeIsotope(p.second, &index, &m)
     return elements[index] if m ==0 else f"{elements[index]}[{m}]"
 
 cdef struct ForceState:
@@ -441,14 +438,14 @@ cdef class ForceCalculator(BaseCalculator):
         self.calcedIsotopes.insert(convert_isotopes2pair(Oindex,0))
 
     cdef map[double, int].iterator findIsotope(self, int index, int m):
-        cdef isotope = (index<<_factor)+m
+        cdef isotope = encodeIsotope(index, m)
         cdef map[double, int].iterator iterator = self.calcedIsotopes.begin()
         while iterator!= self.calcedIsotopes.end():
             if deref(iterator).second == isotope:
                 break
             preinc(iterator)
         return iterator
-        
+
     def setEI(self, str key, bool use = True):
         cdef int index, m
 

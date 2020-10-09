@@ -15,19 +15,7 @@ import re
 cdef int _factor = 10
 cdef int _andfactor = (1 << _factor) - 1
 
-cdef void str2element(str key, int*index, int*m) except *:
-    match = re.fullmatch(r"(e-?|[A-Z][a-z]{0,2})(\[\d+\])?", key)
-    if match is None:
-        raise KeyError(f'have no element {key}')
-    cdef str e = match.group(1)
-    index[0] = elementsMap.get(e, -1)
-    if index[0] ==-1:
-        raise KeyError(f'have no element {key}')
-    cdef str mm = match.group(2)
-    if mm is None:
-        m[0] = 0
-    else:
-        m[0] = int(mm[1:-1])
+
 
 _pyelements = ['e', 'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O',
    'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S',
@@ -163,6 +151,41 @@ for k, l in _pyelmentsPara:
     setPara(k, l)
             
 cdef vector[int] CHmin=[CHfunc(c) for c in range(int(elementNumMap[6][1]+1))]
+
+
+cdef int encodeIsotope(int index, int m):
+    return (index<<_factor)+m
+
+cdef void decodeIsotope(int code, int*index, int*m):
+    index[0] = code>>_factor
+    m[0] = code&_andfactor
+
+cdef void str2element(str key, int*index, int*m) except *:
+    match = re.fullmatch(r"(e-?|[A-Z][a-z]{0,2})(\[\d+\])?", key)
+    if match is None:
+        raise KeyError(f'have no element {key}')
+    cdef str e = match.group(1)
+    index[0] = elementsMap.get(e, -1)
+    if index[0] ==-1:
+        raise KeyError(f'have no element {key}')
+    cdef str mm = match.group(2)
+    if mm is None:
+        m[0] = 0
+    else:
+        m[0] = int(mm[1:-1])
+
+cdef str element2str(int index, int m):
+    return f"{elements[index]}[{m}]" if m>0 else f"{elements[index]}"
+
+cdef int str2code(str key) except *:
+    cdef int index, m
+    str2element(key, &index, &m)
+    return encodeIsotope(index, m)
+
+cdef str code2str(int code):
+    cdef int index, m
+    decodeIsotope(code, &index, &m)
+    return element2str(index, m)
             
 # cdef unordered_map[int, int] isotopeNumMap
 # cdef int m

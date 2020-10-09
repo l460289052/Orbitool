@@ -19,15 +19,22 @@ import cython
 import numpy as np
 cimport numpy as np
 
-from ._element cimport str2element, _factor, _andfactor, elements, elementsMap, elementMass,\
-     elementMassNum , elementMassDist, elementNumMap, elementParasMap, CHmin
+from ._element cimport _factor, _andfactor, elements, elementsMap, elementMass,\
+     elementMassNum , elementMassDist, elementNumMap, elementParasMap, CHmin, \
+     encodeIsotope, decodeIsotope, str2element, element2str, str2code, code2str
+
 
 _elementsOrder = ['C', 'H', 'O', 'N', 'S']
 
 cdef vector[int] elementsOrder = [elementsMap[e] for e in _elementsOrder]
 cdef unordered_set[int] elementsOrderSet = set(elementsOrder)
 
+cdef int encodeMNum(int m, int num):
+    return (m<<_factor)+num
 
+cdef void decodeMNum(int code, int*m, int*num):
+    m[0] = code>>_factor
+    num[0] = code&_andfactor
 
 cdef double _elements_mass(unordered_map[int, int] & elements):
     cdef double mass = 0
@@ -87,8 +94,10 @@ cdef bool _elements_eq(unordered_map[int, int]&_f1,unordered_map[int, int]&_f2):
 
 cdef double _mass_isotopes_mass(double mass, cpplist[pair[int, int]]&isotopes):
     cdef pair[int, int] i
+    cdef int m, num
     for i in isotopes:
-        mass+=(i.second&_andfactor)*(elementMassDist[i.first][i.second>>_factor].first-elementMass[i.first])
+        decodeMNum(i.second, &m, &num)
+        mass+=num*(elementMassDist[i.first][m].first-elementMass[i.first])
     return mass
 
 cdef double _elements_isotopes_mass(unordered_map[int, int]&elements, cpplist[pair[int, int]]&isotopes):
@@ -331,10 +340,10 @@ cdef class Formula:
                 raise ValueError(f"the number of {index} '{elements[index]}[{m}]' shouldn't be greater than {self.getE(index)-self.getI(index,0)+self.getI(index,m)}")
             while it!=self.isotopes.end():
                 if deref(it).first == index and (deref(it).second >> _factor) == m:
-                    deref(it).second = (m << _factor) + num
+                    deref(it).second = encodeMNum(m, num)
                     return
                 inc(it)
-            self.isotopes.push_back(pair[int,int](index, (m<<_factor)+num))
+            self.isotopes.push_back(pair[int,int](index, encodeMNum(m, num)))
 
     cdef int getI(self, int index, int m):
         '''

@@ -42,5 +42,6 @@ cdef:
 
     class ForceCalculator(BaseCalculator):
         cdef map[double, int] calcedIsotopes
+        cdef map[int, int] isotopeMaximum
         
         cdef map[double, int].iterator findIsotope(self, int index, int m)
