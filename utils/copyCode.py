@@ -1,19 +1,19 @@
 import os
 import shutil
 
-from utils.files import FolderTraveler
+from files import FolderTraveler
 
 dsts = [
     "C:/CODE/Python/Orbitool",
-    "../codeexport" ]
+    "../../codeexport" ]
 
-shutil.rmtree("../codeexport")
-os.mkdir("../codeexport")
+shutil.rmtree("../../codeexport")
+os.mkdir("../../codeexport")
 
-notRecurrent = "."
-recurrent = ["utils","functions"]
+notRecurrent = ".."
+recurrent = ["../utils","../functions"]
 
-exts = [".py", ".pyx", ".pyd", ".dll", ".md"]
+exts = [".py", ".pyx", ".pxd", ".pyd", ".dll", ".md"]
 
 def iterator(*args):
     for i in args:
