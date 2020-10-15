@@ -150,6 +150,12 @@ I will add some mass constrains within iteration.
 
 for a ion 'C10H15O11N-', $DBE=\frac{2_{initial:2DBE}+1*(-1)_{e:2DBE}+10*2_{C:2DBE}+1*1_{N:2DBE}+15*(-1)_{H:2DBE}}{2}=3.5$
 
+#### Unstricted Calculator
+
+This calculator will ignore DBE, search all formulas which is correspond with ppm restriction and elements/isotopes number constrain.
+
+It can find formulas like 'C5HO5-' or 'C[13]3H3O[18]-'. So the result maybe very long.
+
 ### Mass list
 
 this part is for fitting peaks in 'Spectra&Peak fit' tab using 'mass list' button, or for calculating time series in 'Time series' tab.

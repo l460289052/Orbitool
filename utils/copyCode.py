@@ -3,15 +3,22 @@ import shutil
 
 from files import FolderTraveler
 
+root = os.path.abspath(__file__)
+while os.path.split(root)[1] != 'code':
+    root = os.path.split(root)[0]
+
+codeexport = os.path.join(os.path.split(root)[0], 'codeexport')
+
 dsts = [
     "C:/CODE/Python/Orbitool",
-    "../../codeexport" ]
+    codeexport ]
 
-shutil.rmtree("../../codeexport")
-os.mkdir("../../codeexport")
+shutil.rmtree(codeexport)
+os.mkdir(codeexport)
 
-notRecurrent = ".."
-recurrent = ["../utils","../functions"]
+notRecurrent = root
+recurrent = ['utils', 'functions']
+recurrent = [os.path.join(root, r) for r in recurrent]
 
 exts = [".py", ".pyx", ".pxd", ".pyd", ".dll", ".md"]
 
@@ -35,8 +42,8 @@ def copyTo(folder):
     ftNot = FolderTraveler(notRecurrent, exts, False)
     ftRec = FolderTraveler(recurrent, exts, True)
     for file in iterator(ftNot, ftRec):
-        if file != "copy.py":
-            copyFileTo(file, os.path.join(folder,file))
+        file = os.path.relpath(file, root)
+        copyFileTo(file, os.path.join(folder,file))
 
 if __name__ == "__main__":
     for dst in dsts:

@@ -1202,8 +1202,10 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         fileIndexes = table.selectedIndexes()
         if not fileIndexes:
             raise ValueError('No file was selected')
+        fileIndexes = [index.row() for index in fileIndexes]
+        fileIndexes = np.unique(fileIndexes)
         fileList = self.fileList.subList(
-            [table.item(index.row(), 3).text() for index in fileIndexes])
+            [table.item(index, 3).text() for index in fileIndexes])
 
         operators = OrbitoolClass.AverageFileList(
             fileList, None, None, 1, polarity, (startTime, endTime))
@@ -1293,9 +1295,11 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         fileIndexes = table.selectedIndexes()
         if not fileIndexes:
             raise ValueError('No file was selected')
+        fileIndexes = [index.row() for index in fileIndexes]
+        fileIndexes = np.unique(fileIndexes)
 
         fileList = self.fileList.subList(
-            [table.item(index.row(), 3).text() for index in fileIndexes])
+            [table.item(index, 3).text() for index in fileIndexes])
 
         workspace.spectra1Operators = OrbitoolClass.AverageFileList(
             fileList, ppm, time, N, polarity, (startTime, endTime))
@@ -1933,6 +1937,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     @busy
     @withoutArgs
     def qCalibrationContinue(self):
+        self.workspace.calibratedSpectra3 = self.workspace.denoisedSpectra2
         self.tabWidget.setCurrentWidget(self.spectra3Tab)
 
     @threadBegin
@@ -1970,11 +1975,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         workspace = self.workspace
         workspace.shownSpectrum3Index = index
         if workspace.calibratedSpectra3 is None:
-            spectrum: OrbitoolBase.Spectrum = workspace.denoisedSpectra2[index]
-            if spectrum is None:
-                raise Exception("Please denoise or calibrate first")
-        else:
-            spectrum: OrbitoolBase.Spectrum = workspace.calibratedSpectra3[index]
+            raise Exception("Please denoise or calibrate first")
+        spectrum: OrbitoolBase.Spectrum = workspace.calibratedSpectra3[index]
         peakFitFunc = workspace.peakFitFunc
         calc = self.ionCalculator
         fileTime = spectrum.fileTime
@@ -2006,7 +2008,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         workspace.spectrum3fittedPeaks = peaks
         workspace.spectrum3Residual = residual
         index = workspace.shownSpectrum3Index
-        spectrum = workspace.denoisedSpectra2[index] if workspace.calibratedSpectra3 is None else workspace.calibratedSpectra3[workspace.shownSpectrum3Index]
+        spectrum = workspace.calibratedSpectra3[workspace.shownSpectrum3Index]
         self.showSpectrum3Peaks(
             spectrum, peaks, residual)
 
@@ -2351,11 +2353,8 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         ppm = self.massListPpmDoubleSpinBox.value()*1e-6
         workspace.shownSpectrum3Index = index
         if workspace.calibratedSpectra3 is None:
-            spectrum: OrbitoolBase.Spectrum = workspace.denoisedSpectra2[index]
-            if spectrum is None:
-                raise Exception("Please denoise or calibrate first")
-        else:
-            spectrum:  OrbitoolBase.Spectrum = workspace.calibratedSpectra3[index]
+            raise Exception("Please denoise or calibrate first")
+        spectrum:  OrbitoolBase.Spectrum = workspace.calibratedSpectra3[index]
         massList: OrbitoolBase.MassList = workspace.massList
         massList.ppm = ppm
         peakFitFunc = workspace.peakFitFunc
