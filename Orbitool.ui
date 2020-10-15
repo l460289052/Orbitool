@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>988</width>
-    <height>558</height>
+    <width>1107</width>
+    <height>596</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -191,7 +191,7 @@
         <enum>QTabWidget::Rounded</enum>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>6</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -1664,7 +1664,7 @@ and continue</string>
            </widget>
            <widget class="QTabWidget" name="spectrum3TabWidget">
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="spectrum3PlotPeakTab">
              <attribute name="title">
@@ -2648,8 +2648,8 @@ and continue</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>192</width>
-                      <height>294</height>
+                      <width>172</width>
+                      <height>342</height>
                      </rect>
                     </property>
                     <layout class="QVBoxLayout" name="verticalLayout_30">
@@ -3123,9 +3123,9 @@ and continue</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
-              <width>179</width>
-              <height>554</height>
+              <y>-48</y>
+              <width>177</width>
+              <height>1020</height>
              </rect>
             </property>
             <layout class="QFormLayout" name="formLayout">
@@ -3221,6 +3221,27 @@ and continue</string>
                </property>
               </widget>
              </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_10">
+               <property name="text">
+                <string>DBE</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QDoubleSpinBox" name="formulaDBEminDoubleSpinBox">
+               <property name="decimals">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QDoubleSpinBox" name="formulaDBEmaxDoubleSpinBox">
+               <property name="decimals">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
              <item row="5" column="0">
               <widget class="QLabel" name="label_5">
                <property name="text">
@@ -3282,7 +3303,7 @@ and continue</string>
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>200</height>
+                 <height>300</height>
                 </size>
                </property>
                <property name="maximumSize">
@@ -3436,6 +3457,18 @@ and continue</string>
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>200</height>
+                </size>
+               </property>
+               <property name="verticalScrollMode">
+                <enum>QAbstractItemView::ScrollPerPixel</enum>
+               </property>
+               <property name="horizontalScrollMode">
+                <enum>QAbstractItemView::ScrollPerPixel</enum>
                </property>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
@@ -3594,25 +3627,100 @@ and continue</string>
                </item>
               </layout>
              </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_10">
+             <item row="13" column="0" colspan="2">
+              <widget class="QLabel" name="label_32">
                <property name="text">
-                <string>DBE</string>
+                <string>unrestricted calculator</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="0">
-              <widget class="QDoubleSpinBox" name="formulaDBEminDoubleSpinBox">
-               <property name="decimals">
-                <number>1</number>
-               </property>
-              </widget>
+             <item row="15" column="0">
+              <widget class="QLineEdit" name="formulaUnrestrictedLineEdit"/>
              </item>
-             <item row="4" column="1">
-              <widget class="QDoubleSpinBox" name="formulaDBEmaxDoubleSpinBox">
-               <property name="decimals">
-                <number>1</number>
+             <item row="15" column="1">
+              <layout class="QHBoxLayout" name="horizontalLayout_34">
+               <item>
+                <widget class="QToolButton" name="formulaUnrestrictedAddToolButton">
+                 <property name="minimumSize">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Consolas</family>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>+</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="formulaUnrestrictedDelToolButton">
+                 <property name="minimumSize">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Consolas</family>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>-</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="14" column="0" colspan="2">
+              <widget class="QTableWidget" name="formulaUnrestrictedTableWidget">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>200</height>
+                </size>
                </property>
+               <property name="editTriggers">
+                <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+               </property>
+               <property name="verticalScrollMode">
+                <enum>QAbstractItemView::ScrollPerPixel</enum>
+               </property>
+               <property name="horizontalScrollMode">
+                <enum>QAbstractItemView::ScrollPerPixel</enum>
+               </property>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>element/isotope</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>number</string>
+                </property>
+               </column>
               </widget>
              </item>
             </layout>
@@ -3644,19 +3752,7 @@ and continue</string>
             <string>Calculator</string>
            </property>
            <layout class="QFormLayout" name="formLayout_5">
-            <item row="0" column="0" colspan="2">
-             <widget class="QLabel" name="label_19">
-              <property name="font">
-               <font>
-                <pointsize>7</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>input formula or mass</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
+            <item row="1" column="0">
              <widget class="QPushButton" name="formulaCalcPushButton">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -3675,7 +3771,7 @@ and continue</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="1" column="1">
              <widget class="QLineEdit" name="formulaInputLineEdit">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -3685,7 +3781,7 @@ and continue</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
+            <item row="2" column="0">
              <widget class="QLabel" name="label_12">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -3701,16 +3797,32 @@ and continue</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
-             <widget class="QLineEdit" name="formulaResultLineEdit">
-              <property name="enabled">
-               <bool>true</bool>
+            <item row="0" column="0" colspan="2">
+             <widget class="QCheckBox" name="formulaUnrestrictedCheckBox">
+              <property name="text">
+               <string>unrestricted calculator</string>
               </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QPlainTextEdit" name="formulaResultPlainTextEdit">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>100</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <family>Consolas</family>
+                <pointsize>7</pointsize>
+               </font>
               </property>
              </widget>
             </item>
@@ -3907,8 +4019,8 @@ and continue</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>988</width>
-     <height>22</height>
+     <width>1107</width>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuWorkspace">

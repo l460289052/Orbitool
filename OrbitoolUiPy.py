@@ -29,7 +29,7 @@ from sortedcontainers import SortedDict
 from utils import files
 from utils.readers import ThermoFile
 import utils.formula
-from utils.formula import Formula, IonCalculator, FormulaHint, IonCalculatorHint
+from utils.formula import Formula, IonCalculator, FormulaHint, IonCalculatorHint, ForceCalculator, ForceCalculatorHint
 from utils import time_convert
 
 import OrbitoolBase
@@ -340,6 +340,12 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             self.qFormulaIsotopeAdd)
         self.formulaIsotopeDelToolButton.clicked.connect(
             self.qFormulaIsotopeDel)
+
+        self.formulaUnrestrictedAddToolButton.clicked.connect(
+            self.qFormulaUnrestrictedAdd)
+        self.formulaUnrestrictedDelToolButton.clicked.connect(
+            self.qFormulaUnrestrictedDel)
+
         self.formulaApplyPushButton.clicked.connect(self.qFormulaApply)
         self.formulaCalcPushButton.clicked.connect(self.qFormulaCalc)
 
@@ -623,6 +629,15 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         self.ionCalculator.setEI('C[13]')
         self.ionCalculator.setEI('O[18]')
         self.ionCalculator.setEI('S[34]')
+
+        self.forceIonCalculator: ForceCalculatorHint = ForceCalculator()
+        self.forceIonCalculator['C[13]'] = 3
+        self.forceIonCalculator['O[18]'] = 3
+        self.forceIonCalculator['N'] = 5
+        self.forceIonCalculator['H'] = 60
+        self.forceIonCalculator['C'] = 40
+        self.forceIonCalculator['O'] = 30
+
         # @showCalibrationIon
         self.calibrationIonList: List[(str, FormulaHint)] = []
 
@@ -630,7 +645,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         self.threads = []
         self.windows = []
 
-        self.showFormulaOption(self.ionCalculator)
+        self.showFormulaOption(self.ionCalculator, self.forceIonCalculator)
         self.busy = False
         self.busyLimit = True
         self.tabWidget.setCurrentWidget(self.filesTab)
@@ -746,7 +761,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
     def qGetOption(self):
         option = OrbitoolOption.Option()
         option.addAllWidgets(self)
-        option.addObjects(self, ['calibrationIonList', 'ionCalculator'])
+        option.addObjects(self, ['calibrationIonList', 'ionCalculator', 'forceIonCalculator'])
         option.objects['elementParas'] = utils.formula.getParas()
         return option
 
@@ -757,7 +772,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         option.applyObjects(self)
         for key, para in option.objects['elementParas'].items():
             utils.formula.setPara(key, para)
-        self.showFormulaOption(self.ionCalculator)
+        self.showFormulaOption(self.ionCalculator, self.forceIonCalculator)
         self.showCalibrationIon(self.calibrationIonList)
 
     @busy
@@ -868,7 +883,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         key = self.formulaElementLineEdit.text().strip()
         self.formulaElementLineEdit.setText('')
         utils.formula.setPara(key, [0] * 7)
-        self.showFormulaOption(self.ionCalculator)
+        self.showFormulaOption(self.ionCalculator, self.forceIonCalculator)
 
     @busy
     @withoutArgs
@@ -891,9 +906,34 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         for index in indexes[::-1]:
             table.removeRow(index)
         table.show()
+    
+    @busy
+    @withoutArgs
+    def qFormulaUnrestrictedAdd(self):
+        key = self.formulaUnrestrictedLineEdit.text().strip()
+        self.formulaUnrestrictedLineEdit.setText('')
+        table = self.formulaUnrestrictedTableWidget
+        row = table.rowCount()
+        table.setRowCount(row + 1)
+        def setValue(column, s):
+            table.setItem(row, column, QtWidgets.QTableWidgetItem(s))
+        setValue(0, key)
+        setValue(1, '99')
+        table.showRow(row)
+
+    @busy
+    @withoutArgs
+    def qFormulaUnrestrictedDel(self):
+        table = self.formulaUnrestrictedTableWidget
+        indexes = table.selectedIndexes()
+        indexes = [index.row() for index in indexes]
+        indexes = np.unique(indexes)
+        for index in indexes[::-1]:
+            table.removeRow(index)
+        table.show()
 
     @restore
-    def showFormulaOption(self, calculator: IonCalculatorHint = None):
+    def showFormulaOption(self, calculator: IonCalculatorHint, forceIonCalculator: ForceCalculator):
         if calculator.charge == 1:
             self.formulaPositiveRadioButton.setChecked(True)
         elif calculator.charge == -1:
@@ -967,7 +1007,19 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             setValue(0, key)
             setValue(1, pyteomics.mass.calculate_mass(composition={key: 1}))
 
-    @busyExcept(lambda self: self.showFormulaOption(self.ionCalculator))
+        isotopes = forceIonCalculator.getEI()
+        table = self.formulaUnrestrictedTableWidget
+        table.clearContents()
+        table.setRowCount(0)
+        table.setRowCount(len(isotopes))
+        for index, isotope in enumerate(isotopes):
+            def setValue(column, s):
+                table.setItem(
+                    index, column, QtWidgets.QTableWidgetItem(str(s)))
+            setValue(0, isotope)
+            setValue(1, forceIonCalculator[isotope])
+
+    @busyExcept(lambda self: self.showFormulaOption(self.ionCalculator, self.forceIonCalculator))
     @withoutArgs
     def qFormulaApply(self):
         eps = 1e-9
@@ -998,6 +1050,7 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         changed |= setAndReturn(
             'nitrogenRule', self.formulaNitrogenRuleCheckBox.isChecked())
 
+        # calculator
         table = self.formulaElementTableWidget
         elements = set(calculator.getElements())
         for index in range(table.rowCount()):
@@ -1035,7 +1088,20 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
             calculator.setEI(isotope, False)
         if changed:
             calculator.clear()
-        self.showFormulaOption(calculator)
+
+        #forceIonCalculator
+        forceIonCalculator = self.forceIonCalculator
+        isotopes = set(forceIonCalculator.getEI())
+        table = self.formulaUnrestrictedTableWidget
+
+        for isotope in isotopes:
+            forceIonCalculator[isotope] = 0
+        for index in range(table.rowCount()):
+            isotope = table.item(index, 0).text().strip()
+            num = int(table.item(index, 1).text())
+            forceIonCalculator[isotope] = num
+
+        self.showFormulaOption(calculator, forceIonCalculator)
 
     @busy
     @withoutArgs
@@ -1043,15 +1109,17 @@ class Window(QtWidgets.QMainWindow, OrbitoolUi.Ui_MainWindow):
         text = self.formulaInputLineEdit.text().strip()
         try:
             mass = float(text)
-            formulaList = self.ionCalculator.get(mass)
+            calc = self.forceIonCalculator if self.formulaUnrestrictedCheckBox.isChecked() else self.ionCalculator
+            formulaList = calc.get(mass)
+            formulaList.sort(key = lambda formula: abs(formula.mass()-mass))
             if len(formulaList) > 0:
-                self.formulaResultLineEdit.setText(
+                self.formulaResultPlainTextEdit.setPlainText(
                     ', '.join([str(f) for f in formulaList]))
             else:
-                self.formulaResultLineEdit.setText('None')
+                self.formulaResultPlainTextEdit.setPlainText('None')
         except ValueError:
             formula = Formula(text)
-            self.formulaResultLineEdit.setText(str(formula.mass()))
+            self.formulaResultPlainTextEdit.setPlainText(str(formula.mass()))
 
     def showFile(self, fileList: files.FileList):
         table = self.fileTableWidget

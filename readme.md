@@ -405,6 +405,16 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2020.10.5 version 1.4.0**
+
+Bug fix
++ When a formula contains isotope, it's difficult to set another isotope to zero.
+
+Appended
++ Normal formula calculator could get formula with same 2 isotopes like 'C13C[13]2...'
++ Unrestricted formula calculator
+  + Unrestricted calculator will treat elements and isotopes fairly. It only relays on isotopes' mass and could get formula like 'C10H[2]O[18]18-'
+
 **2020.8.24 version 1.3.4**
 
 Bug fix
