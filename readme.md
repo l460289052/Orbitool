@@ -1,7 +1,7 @@
 # Orbitool Readme
 
 [TOC]
-# test by runlong Cai
+
 This tool can help you process with spectrum averaging, denoising, calibrating, peak fitting and generating time series.
 
 There are 3 parts: Toolbar, Tabs, Formula/Masslist.
