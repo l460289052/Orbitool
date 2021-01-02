@@ -475,7 +475,7 @@ def getTimeSeries(mz: float, ppm: float, calibratedSpectra: List[OrbitoolBase.Sp
         if len(peaks) > 0:
             i = 0 if len(peaks) == 1 else OrbitoolFunc.indexNearest(
                 peaks, mz, method=(lambda peaks, i: peaks[i].peakPosition))
-            peak: FittedPeak = peaks[i]
+            peak = peaks[i]
             if peak.peakPosition > minmz and peak.peakPosition < maxmz:
                 time.append(calibratedSpectrum.timeRange[0])  # use start time
                 fmz.append(peak.peakPosition)

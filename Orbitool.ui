@@ -2648,8 +2648,8 @@ and continue</string>
                      <rect>
                       <x>0</x>
                       <y>0</y>
-                      <width>172</width>
-                      <height>342</height>
+                      <width>205</width>
+                      <height>384</height>
                      </rect>
                     </property>
                     <layout class="QVBoxLayout" name="verticalLayout_30">
@@ -3123,9 +3123,9 @@ and continue</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-48</y>
-              <width>177</width>
-              <height>1020</height>
+              <y>0</y>
+              <width>198</width>
+              <height>986</height>
              </rect>
             </property>
             <layout class="QFormLayout" name="formLayout">
@@ -4020,7 +4020,7 @@ and continue</string>
      <x>0</x>
      <y>0</y>
      <width>1107</width>
-     <height>20</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuWorkspace">
@@ -4029,6 +4029,7 @@ and continue</string>
     </property>
     <addaction name="workspaceImportAction"/>
     <addaction name="workspaceExportAction"/>
+    <addaction name="workspaceHDF5ExportAction"/>
    </widget>
    <widget class="QMenu" name="menuOption">
     <property name="title">
@@ -4065,6 +4066,11 @@ and continue</string>
   <action name="optionActionSetting">
    <property name="text">
     <string>Setting</string>
+   </property>
+  </action>
+  <action name="workspaceHDF5ExportAction">
+   <property name="text">
+    <string>Export to HDF5</string>
    </property>
   </action>
  </widget>

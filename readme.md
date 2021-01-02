@@ -411,7 +411,7 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
-**2020.10.5 version 1.4.0**
+**2020.10.15 version 1.4.0**
 
 Bug fix
 + When a formula contains isotope, it's difficult to set another isotope to zero.
