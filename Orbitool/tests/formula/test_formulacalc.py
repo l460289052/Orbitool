@@ -1,6 +1,6 @@
 import copy
 
-from utils.formula import *
+from Orbitool.utils.formula import *
 
 def test_calc1():
     calc:IonCalculatorHint = IonCalculator()

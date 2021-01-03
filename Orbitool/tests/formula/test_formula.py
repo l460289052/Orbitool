@@ -1,4 +1,4 @@
-from utils.formula import Formula, FormulaHint
+from Orbitool.utils.formula import Formula, FormulaHint
 import threading
 
 def test_formula1():

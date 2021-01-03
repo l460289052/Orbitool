@@ -1,4 +1,4 @@
-from utils.readers import ThermoFile
+from Orbitool.utils.readers import ThermoFile
 from PyQt5 import QtWidgets
 
 class TestThermo:
