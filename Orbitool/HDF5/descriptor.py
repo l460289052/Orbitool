@@ -111,5 +111,5 @@ class GroupDescriptor(Descriptor):
         self.group_type(obj.location[self.name])
 
 
-__all__ = [k for k, v in globals().items() if issubclass(
+__all__ = [k for k, v in globals().items() if isinstance(v, type) and issubclass(
     v, (Descriptor, MainTypeHandler))]

@@ -10,8 +10,8 @@ _names = {}
 
 
 def add_type(name: str, typ: type):
-    assert isinstance(name) and issubclass(typ, Group)
-    assert name not in _names, f"type name `{name}` repeated, `{str(typ)}` and `{str(_types[name])}`"
+    assert isinstance(name, str) and issubclass(typ, Group)
+    assert name not in _types, f"type name `{name}` repeated, `{str(typ)}` and `{str(_types[name])}`"
     _types[name] = typ
     _names[typ] = name
 
@@ -34,21 +34,24 @@ descriptor.BaseHDF5Group = _Group
 class Group(_Group, metaclass=ABCMeta):
     '''
     以后可以加个缓存把所有location相同的都缓存一下
+    每个Group应该可以有一个不在文件中的副本，例如list在append的时候就可以先创建一个内存中的副本进去了
+    需要的时候再通过其他方式挪到文件中。
     '''
     h5_type = descriptor.RegisterType("Group")
 
-    def __init__(self, location: h5py.Group):
+    def __init__(self, location: h5py.Group, inited=True):
         self.location = location
-
-        if self.h5_type.attr_type_name is None:
-            self.init_group()
+        assert not inited or self.h5_type.attr_type_name == self.h5_type.type_name
 
     def __init_subclass__(cls):
         add_type(cls.h5_type.type_name, cls)
 
+    @classmethod
     @abstractmethod
-    def init_group(self):
-        self.h5_type.set_type_name()
+    def create_at(cls, location: h5py.Group, key, *args, **kwargs):
+        gp = cls(location.create_group(key), False)
+        gp.h5_type.set_type_name()
+        return gp
 
     @classmethod
     def descriptor(cls, name=None):
@@ -62,20 +65,23 @@ class Dict(Group):
     h5_type = descriptor.RegisterType("Dict")
     child_type: str = descriptor.ChildType()
 
-    def __init__(self, child_type: type = None, *args, **kwargs):
-        self.type_child_type = child_type
-        super().__init__(*args, **kwargs)
-        assert self.child_type == get_name(self.type_child_type)
+    @classmethod
+    def create_at(cls, child_type: type, *args, **kwargs):
+        instance = super().create_at(*args, **kwargs)
+        name = get_name(child_type)
+        assert name is not None
+        instance.child_type = name
+        return instance
 
-    def init_group(self):
-        super().init_group()
-        self.child_type = get_name(self.type_child_type)
+    @property
+    def type_child_type(self):
+        return get_type(self.child_type)
 
     def __getitem__(self, key):
         return self.type_child_type(self.location[key])
 
-    def additem(self, key):
-        return self.type_child_type(self.location.create_group(key))
+    def get_additem_location(self):
+        return self.location
 
     def __delitem__(self, key):
         del self.location[key]
@@ -98,16 +104,20 @@ class List(Group):
     sequence = descriptor.SmallNumpy()
     max_index = descriptor.Int()
 
-    def __init__(self, child_type: type = None, *args, **kwargs):
-        self.type_child_type = child_type
-        super().__init__(*args, **kwargs)
-        assert self.child_type == get_name(self.type_child_type)
+    index_dtype = np.dtype('S')
+    @classmethod
+    def create_at(cls, child_type: type, *args, **kwargs):
+        instance = super().create_at(*args, **kwargs)
+        name = get_name(child_type)
+        assert name is not None
+        instance.child_type = name
+        instance.max_index = -1
+        instance.sequence = np.array(tuple(), dtype=List.index_dtype)
+        return instance
 
-    def init_group(self):
-        super().init_group()
-        self.child_type = get_name(self.type_child_type)
-        self.max_index = -1
-        self.sequence = np.array(tuple(), dtype=str)
+    @property
+    def type_child_type(self):
+        return get_type(self.child_type)
 
     def __getitem__(self, index: Union[int, slice]):
         indexes = self.sequence[index]
@@ -116,11 +126,11 @@ class List(Group):
         location = self.location
         return list(map(self.type_child_type, (location[index] for index in indexes)))
 
-    def append(self):
+    def get_append_location(self) -> (h5py.Group, str):
         self.max_index += 1
-        index = str(self.max_index)
+        index = str(self.max_index).encode('ascii')
         self.sequence = np.concatenate((self.sequence, (index,)))
-        return self.type_child_type(self.location.create_group(index))
+        return self.location, index
 
     def __delitem__(self, index: Union[int, slice]):
         sequence = self.sequence
@@ -131,14 +141,21 @@ class List(Group):
             del location[ind]
         self.sequence = sequence[slt]
 
-    def insert(self, index):
+    def get_insert_location(self, index):
         sequence = self.sequence
         part1 = sequence[:index]
         part2 = sequence[index:]
         self.max_index += 1
-        index = str(self.max_index)
+        index = str(self.max_index).encode('ascii')
         self.sequence = np.concatenate((part1, (index,), part2))
-        return self.type_child_type(self.location.create_group(index))
+        return self.location, index
+
+    def __iter__(self):
+        location = self.location
+        child_type = self.type_child_type
+        for index in self.sequence:
+            yield child_type(location[index])
 
 
-__all__ = [k for k, v in globals().items() if issubclass(v, Group)]
+__all__ = [k for k, v in globals().items() if isinstance(v, type)
+           and issubclass(v, Group)]

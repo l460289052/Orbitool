@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import OrbitoolBase
-import functions
+from Orbitool import functions
 
 import os
 import copy
@@ -11,7 +11,7 @@ from typing import List, Tuple
 import numpy as np
 import clr
 
-from utils.files import File as BaseFile
+from Orbitool.utils.files import File as BaseFile
 
 pwd = os.path.dirname(__file__)
 clr.AddReference(os.path.join(pwd, 'ThermoFisher.CommonCore.Data.dll'))

@@ -16,17 +16,17 @@ import sklearn.preprocessing
 import statsmodels.nonparametric.smoothers_lowess as lowess
 
 import OrbitoolBase
-from utils import unpickler
+from Orbitool.utils import unpickler
 
-import functions
+from Orbitool import functions
 
-from functions.binary_search import * 
-from functions.abstract import *
+from Orbitool.functions.binary_search import * 
+from Orbitool.functions.abstract import *
 
-from functions import *
-from functions import _NormalDistributionFunc, _catTimeSeries, _interp1TimeSeriesAt
+from Orbitool.functions import *
+from Orbitool.functions import _NormalDistributionFunc, _catTimeSeries, _interp1TimeSeriesAt
 
-from utils.time_convert import *
+from Orbitool.utils.time_convert import *
 
 class NormalDistributionFunc(_NormalDistributionFunc):
     def __init__(self, params: List[tuple]):

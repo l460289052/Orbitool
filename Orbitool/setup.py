@@ -7,7 +7,7 @@ from typing import Dict
 
 from utils.files import FolderTraveler
 
-roots = ["utils", "functions"]
+roots = [os.path.abspath(os.path.split(__file__)[0])]
 
 class Node:
     def __init__(self, path):
