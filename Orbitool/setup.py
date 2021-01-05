@@ -7,7 +7,8 @@ from typing import Dict
 
 from utils.files import FolderTraveler
 
-roots = [os.path.abspath(os.path.split(__file__)[0])]
+root = os.path.abspath(os.path.dirname(__file__))
+os.chdir(os.path.dirname(root))
 
 class Node:
     def __init__(self, path):
@@ -35,7 +36,7 @@ def cythonSetup(filepath):
           np.get_include()], options={'build_ext': {'inplace': True}})
 
 def main():
-    ft = FolderTraveler(roots, '.pyx', True)
+    ft = FolderTraveler(root, '.pyx', True)
     modelNodes: Dict[str, Node]= {}
 
     for path in ft:

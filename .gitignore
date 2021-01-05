@@ -21,3 +21,4 @@ build
 code
 *.pickle
 tmptest
+.pytest_cache
