@@ -22,3 +22,5 @@ code
 *.pickle
 tmptest
 .pytest_cache
+.coverage
+htmlcov

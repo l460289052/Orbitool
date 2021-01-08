@@ -5,6 +5,7 @@ import numpy as np
 
 BaseHDF5Group = None
 
+
 class Descriptor(metaclass=ABCMeta):
     def __init__(self, name=None):
         self.name = name
@@ -29,6 +30,8 @@ class Attr(Descriptor):
 
 
 class Dataset(Descriptor):
+    kwargs = dict(compression='gzip', compression_opts=1)
+
     def __get__(self, obj, objtype=None):
         dataset = obj.location.get(self.name, None)
         if dataset is None:
@@ -38,9 +41,9 @@ class Dataset(Descriptor):
         return ret
 
     def __set__(self, obj, value):
-        obj.location.create_dataset(
-            self.name, shape=value.shape, dtype=value.dtype,)
-        obj.location[self.name] = value
+        if self.name in obj.location:
+            del obj.location[self.name]
+        obj.location.create_dataset(self.name, data=value, **Dataset.kwargs)
 
 
 class Int(Attr):
@@ -103,12 +106,20 @@ class ChildType(Str):
 
 
 class GroupDescriptor(Descriptor):
-    def __init__(self, group_type: type, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, group_type: type, name: str = None, init=False, init_args=None):
+        """
+        if `init` is True, will be initialize after created
+        """
+        super().__init__(name)
         self.group_type = group_type
+        self.init = init
+        self.init_args = init_args
 
     def __get__(self, obj, objtype):
-        self.group_type(obj.location[self.name])
+        return self.group_type(obj.location[self.name])
+
+    def __set__(self, obj, value: BaseHDF5Group):
+        raise NotImplementedError("Will be implement in some days")
 
 
 __all__ = [k for k, v in globals().items() if isinstance(v, type) and issubclass(
