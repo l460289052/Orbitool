@@ -1,4 +1,4 @@
-from . import descriptor, memory_h5_location
+from . import descriptor, memory_h5_location, h5obj
 import h5py
 import numpy as np
 from abc import ABCMeta, abstractmethod
@@ -6,35 +6,7 @@ from typing import Union
 import numpy as np
 
 
-class _Group:
-    pass
-
-
-descriptor.BaseHDF5Group = _Group
-
-
-class ChildTypeManager:
-    def __init__(self):
-        self.types = {}
-        self.names = {}
-
-    def __set_name__(self, owner, name):
-        self.base_type = owner
-
-    def add_type(self, name: str, typ: type):
-        assert isinstance(name, str) and issubclass(typ, self.base_type)
-        assert name not in self.types, f"type name `{name}` repeated, `{str(typ)}` and `{str(self.types[name])}`"
-        self.types[name] = typ
-        self.names[typ] = name
-
-    def get_type(self, name: str, default=None):
-        return self.types.get(name, default)
-
-    def get_name(self, typ: type, default=None):
-        return self.names.get(typ, default)
-
-
-class Group(_Group, metaclass=ABCMeta):
+class Group(h5obj.H5Obj):
     '''
     以后可以加个缓存把所有location相同的都缓存一下
     每个Group应该可以有一个不在文件中的副本，例如list在append的时候就可以先创建一个内存中的副本进去了
@@ -42,22 +14,12 @@ class Group(_Group, metaclass=ABCMeta):
     '''
     h5_type = descriptor.RegisterType("Group")
 
-    _child_type_maneger = ChildTypeManager()
-
-    _export_value_names = {}
     _export_group_names = {}
 
-    def __init__(self, location: h5py.Group, inited=True):
-        self.location = location
-        assert not inited or self.h5_type.attr_type_name == self.h5_type.type_name
-
     def __init_subclass__(cls):
-        Group._child_type_maneger.add_type(cls.h5_type.type_name, cls)
-        assert Group._export_value_names == cls._export_value_names, "`_export_names` shouldn't be replaced"
-        Group._export_value_names[cls.h5_type.type_name] = [
-            k for k, v in cls.__dict__.items() if issubclass(type(v), descriptor.Descriptor) and not issubclass(type(v), (descriptor.GroupDescriptor, descriptor.RegisterType))]
+        super().__init_subclass__()
         Group._export_group_names[cls.h5_type.type_name] = [
-            k for k, v in cls.__dict__.items() if issubclass(type(v), descriptor.GroupDescriptor)]
+            k for k, v in cls.__dict__.items() if issubclass(type(v), descriptor.H5ObjectDescriptor)]
 
     @classmethod
     def create_at(cls, location: Union[h5py.Group, memory_h5_location.Location], key):
@@ -65,33 +27,17 @@ class Group(_Group, metaclass=ABCMeta):
         gp.h5_type.set_type_name()
 
         for group_name in cls._export_group_names[gp.h5_type.type_name]:
-            gd: descriptor.GroupDescriptor = cls.__dict__[group_name]
-            sub_gp = gd.group_type.create_at(gp.location, gd.name)
+            gd: descriptor.H5ObjectDescriptor = cls.__dict__[group_name]
+            sub_gp = gd.h5obj_type.create_at(gp.location, gd.name)
             if gd.init:
                 sub_gp.initialize(*gd.init_args)
 
         return gp
 
-    def initialize(self):
-        pass
-
-    @classmethod
-    def descriptor(cls, name=None):
-        return descriptor.GroupDescriptor(cls, name)
-
-    def to_memory(self):
-        mg = type(self).create_at(memory_h5_location.Location(), 'mem')
-        mg.copy_from(self)
-        return mg
-
     def copy_from(self, another):
-        for value_name in self._export_value_names[self.h5_type.type_name]:
-            setattr(self, value_name, getattr(another, value_name))
+        super().copy_from(another)
         for group_name in self._export_group_names[self.h5_type.type_name]:
             getattr(self, group_name).copy_from(getattr(another, group_name))
-
-
-Group.__init_subclass__()
 
 
 class Dict(Group):
@@ -129,7 +75,7 @@ class Dict(Group):
 
     @classmethod
     def descriptor(cls, child_type: type, name=None):
-        return descriptor.GroupDescriptor(cls, name, True, (child_type, ))
+        return descriptor.H5ObjectDescriptor(cls, name, True, (child_type, ))
 
     def copy_from(self, another):
         super().copy_from(another)
@@ -198,7 +144,7 @@ class List(Group):
 
     @classmethod
     def descriptor(cls, child_type: type, name=None):
-        return descriptor.GroupDescriptor(cls, name, True, (child_type, ))
+        return descriptor.H5ObjectDescriptor(cls, name, True, (child_type, ))
 
     def copy_from(self, another):
         super().copy_from(another)

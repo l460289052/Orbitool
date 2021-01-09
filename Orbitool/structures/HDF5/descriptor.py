@@ -3,7 +3,7 @@ from datetime import datetime
 
 import numpy as np
 
-BaseHDF5Group = None
+BaseHDF5Obj = None
 
 
 class Descriptor(metaclass=ABCMeta):
@@ -12,7 +12,7 @@ class Descriptor(metaclass=ABCMeta):
 
     def __set_name__(self, owner, name):
         assert issubclass(
-            owner, BaseHDF5Group), "Owner class must be a subclass of `HDF5Group`"
+            owner, BaseHDF5Obj), "Owner class must be a subclass of `HDF5Group`"
         if self.name is None:
             self.name = name
 
@@ -105,20 +105,20 @@ class ChildType(Str):
     pass
 
 
-class GroupDescriptor(Descriptor):
-    def __init__(self, group_type: type, name: str = None, init=False, init_args=None):
+class H5ObjectDescriptor(Descriptor):
+    def __init__(self, h5obj_type: type, name: str = None, init=False, init_args=None):
         """
         if `init` is True, will be initialize after created
         """
         super().__init__(name)
-        self.group_type = group_type
+        self.h5obj_type = h5obj_type
         self.init = init
         self.init_args = init_args
 
     def __get__(self, obj, objtype):
-        return self.group_type(obj.location[self.name])
+        return self.h5obj_type(obj.location[self.name])
 
-    def __set__(self, obj, value: BaseHDF5Group):
+    def __set__(self, obj, value: BaseHDF5Obj):
         raise NotImplementedError("Will be implement in some days")
 
 
