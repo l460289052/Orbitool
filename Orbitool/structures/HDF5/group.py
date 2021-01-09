@@ -1,4 +1,4 @@
-from . import descriptor
+from . import descriptor, memory_h5_location
 import h5py
 import numpy as np
 from abc import ABCMeta, abstractmethod
@@ -7,10 +7,6 @@ import numpy as np
 
 
 class _Group:
-    pass
-
-
-class MemoryGroup:
     pass
 
 
@@ -59,12 +55,12 @@ class Group(_Group, metaclass=ABCMeta):
         Group._child_type_maneger.add_type(cls.h5_type.type_name, cls)
         assert Group._export_value_names == cls._export_value_names, "`_export_names` shouldn't be replaced"
         Group._export_value_names[cls.h5_type.type_name] = [
-            k for k, v in cls.__dict__.items() if issubclass(type(v), descriptor.Descriptor) and not issubclass(type(v), descriptor.GroupDescriptor)]
+            k for k, v in cls.__dict__.items() if issubclass(type(v), descriptor.Descriptor) and not issubclass(type(v), (descriptor.GroupDescriptor, descriptor.RegisterType))]
         Group._export_group_names[cls.h5_type.type_name] = [
             k for k, v in cls.__dict__.items() if issubclass(type(v), descriptor.GroupDescriptor)]
 
     @classmethod
-    def create_at(cls, location: h5py.Group, key):
+    def create_at(cls, location: Union[h5py.Group, memory_h5_location.Location], key):
         gp = cls(location.create_group(key), False)
         gp.h5_type.set_type_name()
 
@@ -83,19 +79,16 @@ class Group(_Group, metaclass=ABCMeta):
     def descriptor(cls, name=None):
         return descriptor.GroupDescriptor(cls, name)
 
-    def to_memory(self) -> MemoryGroup:
-        mg = MemoryGroup()
-        for value_name in self._export_value_names[self.h5_type.type_name]:
-            setattr(mg, value_name, getattr(self, value_name))
-        for group_name in self._export_group_names[self.h5_type.type_name]:
-            setattr(mg, group_name, getattr(self, group_name).to_memory())
+    def to_memory(self):
+        mg = type(self).create_at(memory_h5_location.Location(), 'mem')
+        mg.copy_from(self)
         return mg
 
-    def from_memory(self, mg: MemoryGroup):
+    def copy_from(self, another):
         for value_name in self._export_value_names[self.h5_type.type_name]:
-            setattr(self, value_name, getattr(mg, value_name))
+            setattr(self, value_name, getattr(another, value_name))
         for group_name in self._export_group_names[self.h5_type.type_name]:
-            getattr(self, group_name).from_memory(getattr(mg, group_name))
+            getattr(self, group_name).copy_from(getattr(another, group_name))
 
 
 Group.__init_subclass__()
@@ -137,6 +130,14 @@ class Dict(Group):
     @classmethod
     def descriptor(cls, child_type: type, name=None):
         return descriptor.GroupDescriptor(cls, name, True, (child_type, ))
+
+    def copy_from(self, another):
+        super().copy_from(another)
+        location = self.location
+        chlid_type = self.type_child_type
+        for k, v in another.items():
+            child = chlid_type.create_at(location, k)
+            child.copy_from(v)
 
 
 class List(Group):
@@ -198,6 +199,15 @@ class List(Group):
     @classmethod
     def descriptor(cls, child_type: type, name=None):
         return descriptor.GroupDescriptor(cls, name, True, (child_type, ))
+
+    def copy_from(self, another):
+        super().copy_from(another)
+        location_s = self.location
+        location_a = another.location
+        child_type = self.type_child_type
+        for index in another.sequence:
+            child = child_type.create_at(location_s, index)
+            child.copy_from(child_type(location_a[index]))
 
 
 __all__ = [k for k, v in globals().items() if isinstance(v, type)
