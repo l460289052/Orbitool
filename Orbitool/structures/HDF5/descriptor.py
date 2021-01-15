@@ -3,8 +3,6 @@ from datetime import datetime
 from typing import Union
 
 import numpy as np
-from numpy.lib.arraysetops import isin
-from numpy.lib.index_tricks import IndexExpression
 
 BaseHDF5Obj = None
 
@@ -14,10 +12,12 @@ def get_type(name: str) -> type:
     get_type = BaseHDF5Obj._child_type_manager.get_type
     return get_type(name)
 
-def get_name(typ:type)->str:
+
+def get_name(typ: type) -> str:
     global get_name
     get_name = BaseHDF5Obj._child_type_manager.get_name
     return get_name(typ)
+
 
 class Descriptor(metaclass=ABCMeta):
     def __init__(self, name=None):
@@ -162,7 +162,8 @@ class H5ObjectDescriptor(Descriptor):
         self.__get__(obj_dst).copy_from(self.__get__(obj_src))
 
     def on_create(self, obj):
-        sub_group = get_type(self.h5obj_type).create_at(obj.location, self.name)
+        sub_group = get_type(self.h5obj_type).create_at(
+            obj.location, self.name)
         if self.init:
             sub_group.initialize(*self.init_args)
 

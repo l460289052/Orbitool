@@ -79,4 +79,4 @@ descriptor.BaseHDF5Obj = H5Obj
 
 def infer_from(location: Union[h5py.Group, memory_h5_location.Location]):
     type_name = location.attrs['type']
-    return H5Obj._child_type_maneger.get_type(type_name)(location)
+    return H5Obj._child_type_manager.get_type(type_name)(location)
