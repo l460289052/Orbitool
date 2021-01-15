@@ -8,13 +8,15 @@ BaseHDF5Obj = None
 
 class Descriptor(metaclass=ABCMeta):
     def __init__(self, name=None):
-        self.name = name
+        self.name: str = name
 
     def __set_name__(self, owner, name):
         assert issubclass(
             owner, BaseHDF5Obj), "Owner class must be a subclass of `HDF5Group`"
         if self.name is None:
             self.name = name
+        # elif self.name.endswith('/'):
+        #     self.name += name
 
 
 class Attr(Descriptor):
@@ -44,6 +46,10 @@ class Dataset(Descriptor):
         if self.name in obj.location:
             del obj.location[self.name]
         obj.location.create_dataset(self.name, data=value, **Dataset.kwargs)
+
+    # def generate_attr(self, attr_type: type, name=None):
+    #     assert issubclass(attr_type, Attr)
+    #     return attr_type('/'.join((self.name, name)) if name is not None else self.name+'/')
 
 
 class Int(Attr):
@@ -121,6 +127,19 @@ class H5ObjectDescriptor(Descriptor):
     def __set__(self, obj, value: BaseHDF5Obj):
         raise NotImplementedError("Will be implement in some days")
 
+
+class Ref_Attr(Attr):
+    def __init__(self, h5obj_type: type, name: str = None):
+        super().__init__(name)
+        self.h5obj_type = h5obj_type
+
+    def __set__(self, obj, value: BaseHDF5Obj):
+        obj.location.attrs[self.name] = value.location.ref
+
+    def __get__(self, obj, objtype):
+        return self.h5obj_type(obj.location.attrs[self.name])
+
+    # 在拷贝的时候不要拷贝就好，能不能在每个属性这里定义拷贝的属性？感觉一直在group那里定义不太好
 
 __all__ = [k for k, v in globals().items() if isinstance(v, type) and issubclass(
     v, (Descriptor, MainTypeHandler))]

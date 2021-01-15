@@ -39,7 +39,7 @@ class H5Obj(_H5Obj):
 
     _export_value_names = {}
 
-    def __init__(self, location: Union[h5py.File, h5py.Group, h5py.Dataset], inited=True):
+    def __init__(self, location: Union[h5py.Group, h5py.Dataset, memory_h5_location.Location], inited=True):
         self.location = location
         assert not inited or self.h5_type.attr_type_name == self.h5_type.type_name
 
@@ -50,7 +50,7 @@ class H5Obj(_H5Obj):
 
     @classmethod
     @abstractmethod
-    def create_at(cls, location: Union[h5py.File, h5py.Group], key: str):
+    def create_at(cls, location: Union[h5py.File, h5py.Group, memory_h5_location.Location], key: str):
         pass
 
     def initialize(self):
@@ -59,7 +59,7 @@ class H5Obj(_H5Obj):
     @classmethod
     def descriptor(cls, name=None):
         return descriptor.H5ObjectDescriptor(cls, name)
-        
+
     def to_memory(self):
         m_obj = type(self).create_at(memory_h5_location.Location(), 'mem')
         m_obj.copy_from(self)
@@ -69,5 +69,10 @@ class H5Obj(_H5Obj):
         for value_name in self._export_value_names[self.h5_type.type_name]:
             setattr(self, value_name, getattr(another, value_name))
 
+
 H5Obj.__init_subclass__()
 
+
+def infer_from(location: Union[h5py.Group, memory_h5_location.Location]):
+    type_name = location.attrs['type']
+    return H5Obj._child_type_maneger.get_type(type_name)(location)
