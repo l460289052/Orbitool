@@ -9,9 +9,15 @@ from numpy.lib.index_tricks import IndexExpression
 BaseHDF5Obj = None
 
 
-def str_to_type(name: str) -> type:
-    return BaseHDF5Obj._child_type_manager.get_type(name)
+def get_type(name: str) -> type:
+    global get_type
+    get_type = BaseHDF5Obj._child_type_manager.get_type
+    return get_type(name)
 
+def get_name(typ:type)->str:
+    global get_name
+    get_name = BaseHDF5Obj._child_type_manager.get_name
+    return get_name(typ)
 
 class Descriptor(metaclass=ABCMeta):
     def __init__(self, name=None):
@@ -119,6 +125,7 @@ class RegisterType(Str):
     def on_create(self, obj):
         obj.location.attrs[self.name] = self.type_name
 
+
 class MainTypeHandler:
     def __init__(self, name, obj, type_name):
         self.name = name
@@ -140,22 +147,22 @@ class H5ObjectDescriptor(Descriptor):
         if `init` is True, will be initialize after created
         """
         super().__init__(*args, **kwargs)
-        self.h5obj_type = str_to_type(h5obj_type) if isinstance(
-            h5obj_type, str)else h5obj_type
+        self.h5obj_type = h5obj_type if isinstance(
+            h5obj_type, str)else get_name(h5obj_type)
         self.init = init
         self.init_args = init_args
 
     def __get__(self, obj, objtype=None):
-        return self.h5obj_type(obj.location[self.name])
+        return get_type(self.h5obj_type)(obj.location[self.name])
 
     def __set__(self, obj, value: BaseHDF5Obj):
         raise NotImplementedError("Will be implement in some days")
 
     def copy_from_to(self, obj_src, obj_dst):
-        self.__get__(obj_src).copy_from(self.__get__(obj_dst))
+        self.__get__(obj_dst).copy_from(self.__get__(obj_src))
 
     def on_create(self, obj):
-        sub_group = self.h5obj_type.create_at(obj.location, self.name)
+        sub_group = get_type(self.h5obj_type).create_at(obj.location, self.name)
         if self.init:
             sub_group.initialize(*self.init_args)
 
@@ -163,14 +170,14 @@ class H5ObjectDescriptor(Descriptor):
 class Ref_Attr(Attr):
     def __init__(self, h5obj_type: Union[type, str], *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.h5obj_type = str_to_type(h5obj_type) if isinstance(
-            h5obj_type, str) else h5obj_type
+        self.h5obj_type = h5obj_type if isinstance(
+            h5obj_type, str) else get_name(h5obj_type)
 
     def __set__(self, obj, value: BaseHDF5Obj):
         obj.location.attrs[self.name] = value.location.ref
 
     def __get__(self, obj, objtype):
-        return self.h5obj_type(obj.location.attrs[self.name])
+        return get_type(self.h5obj_type)(obj.location[obj.location.attrs[self.name]])
 
     def copy_from_to(self, obj_src, obj_dst):
         pass

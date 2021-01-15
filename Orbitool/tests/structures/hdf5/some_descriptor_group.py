@@ -83,4 +83,13 @@ def test_group_descriptor(location):
 
 
 def test_ref_attr(location):
-    pass
+    s:Spectra=Spectra.create_at(location,'s')
+    m:Spectrum=s.spectra.append()
+    m.initialize(np.arange(10),np.arange(10),datetime(1970,1,1))
+
+    m.father = s
+
+    f = m.father
+    mm = f.spectra[0]
+    assert np.array_equal(mm.mz, range(10))
+    assert np.array_equal(mm.intensity, range(10))

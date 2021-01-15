@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 from datetime import datetime
 
-from .spectrum import Spectrum
+from .spectrum import Spectrum, Spectra
 
 
 @pytest.fixture
@@ -93,3 +93,20 @@ def test_dict_copy_from(h5file):
     d_h5: HDF5.Dict = HDF5.Dict.create_at(h5file, 'd')
     d_h5.copy_from(d_m)
     check_dict(d_h5)
+
+def test_spectra_to_momery(h5file):
+    s_h5:Spectra = Spectra.create_at(h5file, 's')
+    s_h5.initialize()
+
+    init_list(s_h5.spectra)
+    s_m = s_h5.to_memory()
+    check_list(s_m.spectra)
+
+def test_spectra_copy_from(h5file):
+    s_m:Spectra = Spectra.create_at(HDF5.MemoryLocation(), 's')
+    s_m.initialize()
+
+    init_list(s_m.spectra)
+    s_h5 = Spectra.create_at(h5file, 's')
+    s_h5.copy_from(s_m)
+    check_list(s_h5.spectra)

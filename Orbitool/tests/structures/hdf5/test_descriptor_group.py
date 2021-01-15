@@ -25,3 +25,6 @@ def test_dict(h5file):
 
 def test_group_descriptor(h5file):
     some_descriptor_group.test_group_descriptor(h5file)
+
+def test_ref_attr(h5file):
+    some_descriptor_group.test_ref_attr(h5file)
