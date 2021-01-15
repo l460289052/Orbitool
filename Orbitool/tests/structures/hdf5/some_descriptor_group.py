@@ -18,7 +18,7 @@ def test_group(location):
 
     with pytest.raises(NotImplementedError):
         a.h5_type = "123"
-    assert a.h5_type.attr_type_name == a.h5_type.type_name and a.h5_type.type_name == type_name
+    assert a.h5_type.attr_type_name == a.h5_type.type_name == type_name
 
     b = Spectrum(location['spec'])
 

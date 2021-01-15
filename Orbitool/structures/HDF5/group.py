@@ -34,11 +34,6 @@ class Group(h5obj.H5Obj):
 
         return gp
 
-    def copy_from(self, another):
-        super().copy_from(another)
-        for group_name in self._export_group_names[self.h5_type.type_name]:
-            getattr(self, group_name).copy_from(getattr(another, group_name))
-
 
 class Dict(Group):
     h5_type = descriptor.RegisterType("Dict")

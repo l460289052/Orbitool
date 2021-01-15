@@ -1,4 +1,4 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
 import numpy as np
@@ -17,6 +17,17 @@ class Descriptor(metaclass=ABCMeta):
             self.name = name
         # elif self.name.endswith('/'):
         #     self.name += name
+
+    @abstractmethod
+    def __set__(self, obj, value):
+        pass
+
+    @abstractmethod
+    def __get__(self, obj, objtype = None):
+        pass
+
+    def copy_from_to(self, obj_src, obj_dst):
+        self.__set__(obj_dst, self.__get__(obj_src))
 
 
 class Attr(Descriptor):
@@ -92,6 +103,9 @@ class RegisterType(Str):
     def __get__(self, obj, objtype):
         return MainTypeHandler(self.name, obj, self.type_name)
 
+    def copy_from_to(self, obj_src, obj_dst):
+        assert obj_src.h5_type.attr_type_name == obj_dst.h5_type.attr_type_name
+
 
 class MainTypeHandler:
     def __init__(self, name, obj, type_name):
@@ -121,11 +135,14 @@ class H5ObjectDescriptor(Descriptor):
         self.init = init
         self.init_args = init_args
 
-    def __get__(self, obj, objtype):
+    def __get__(self, obj, objtype=None):
         return self.h5obj_type(obj.location[self.name])
 
     def __set__(self, obj, value: BaseHDF5Obj):
         raise NotImplementedError("Will be implement in some days")
+
+    def copy_from_to(self, obj_src, obj_dst):
+        self.__get__(obj_src).copy_from(self.__get__(obj_dst))
 
 
 class Ref_Attr(Attr):
@@ -139,7 +156,9 @@ class Ref_Attr(Attr):
     def __get__(self, obj, objtype):
         return self.h5obj_type(obj.location.attrs[self.name])
 
-    # 在拷贝的时候不要拷贝就好，能不能在每个属性这里定义拷贝的属性？感觉一直在group那里定义不太好
+    def copy_from_to(self, obj_src, obj_dst):
+        pass
+
 
 __all__ = [k for k, v in globals().items() if isinstance(v, type) and issubclass(
     v, (Descriptor, MainTypeHandler))]

@@ -45,8 +45,7 @@ class H5Obj(_H5Obj):
 
     def __init_subclass__(cls):
         H5Obj._child_type_maneger.add_type(cls.h5_type.type_name, cls)
-        H5Obj._export_value_names[cls.h5_type.type_name] = [k for k, v in cls.__dict__.items() if issubclass(type(
-            v), descriptor.Descriptor) and not issubclass(type(v), (descriptor.H5ObjectDescriptor, descriptor.RegisterType))]
+        H5Obj._export_value_names[cls.h5_type.type_name] = {k: v for k, v in cls.__dict__.items() if issubclass(type(v), descriptor.Descriptor)}
 
     @classmethod
     @abstractmethod
@@ -57,22 +56,22 @@ class H5Obj(_H5Obj):
         pass
 
     @classmethod
-    def descriptor(cls, name=None):
+    def descriptor(cls, name = None):
         return descriptor.H5ObjectDescriptor(cls, name)
 
     def to_memory(self):
-        m_obj = type(self).create_at(memory_h5_location.Location(), 'mem')
+        m_obj=type(self).create_at(memory_h5_location.Location(), 'mem')
         m_obj.copy_from(self)
         return m_obj
 
     def copy_from(self, another):
-        for value_name in self._export_value_names[self.h5_type.type_name]:
-            setattr(self, value_name, getattr(another, value_name))
+        for name, desc in self._export_value_names[self.h5_type.type_name].items():
+            desc.copy_from_to(another, self)
 
 
 H5Obj.__init_subclass__()
 
 
 def infer_from(location: Union[h5py.Group, memory_h5_location.Location]):
-    type_name = location.attrs['type']
+    type_name=location.attrs['type']
     return H5Obj._child_type_maneger.get_type(type_name)(location)
