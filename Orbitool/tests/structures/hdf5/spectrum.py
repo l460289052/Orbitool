@@ -1,3 +1,4 @@
+from Orbitool.tests.structures import hdf5
 from Orbitool.structures import HDF5
 
 type_name = 'Spectrum'
@@ -8,6 +9,8 @@ class Spectrum(HDF5.Group):
     mz = HDF5.SmallNumpy()
     intensity = HDF5.BigNumpy()
     time = HDF5.Datetime()
+
+    father = HDF5.Ref_Attr('Spectra')
 
     def initialize(self, mz, intensity, time):
         self.mz = mz

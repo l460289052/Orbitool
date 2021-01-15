@@ -80,3 +80,7 @@ def test_group_descriptor(location):
     m: Spectrum = s.spectra[0]
     assert np.array_equal(m.mz, range(10))
     assert np.array_equal(m.intensity, range(10))
+
+
+def test_ref_attr(location):
+    pass

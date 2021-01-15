@@ -14,39 +14,19 @@ class Group(h5obj.H5Obj):
     '''
     h5_type = descriptor.RegisterType("Group")
 
-    _export_group_names = {}
-
-    def __init_subclass__(cls):
-        super().__init_subclass__()
-        Group._export_group_names[cls.h5_type.type_name] = [
-            k for k, v in cls.__dict__.items() if issubclass(type(v), descriptor.H5ObjectDescriptor)]
-
-    @classmethod
-    def create_at(cls, location: Union[h5py.Group, memory_h5_location.Location], key):
-        gp = cls(location.create_group(key), False)
-        gp.h5_type.set_type_name()
-
-        for group_name in cls._export_group_names[gp.h5_type.type_name]:
-            gd: descriptor.H5ObjectDescriptor = cls.__dict__[group_name]
-            sub_gp = gd.h5obj_type.create_at(gp.location, gd.name)
-            if gd.init:
-                sub_gp.initialize(*gd.init_args)
-
-        return gp
-
 
 class Dict(Group):
     h5_type = descriptor.RegisterType("Dict")
     child_type: str = descriptor.ChildType()
 
     def initialize(self, child_type: type):
-        name = self._child_type_maneger.get_name(child_type)
+        name = self._child_type_manager.get_name(child_type)
         assert name is not None
         self.child_type = name
 
     @property
     def type_child_type(self) -> Group:
-        return self._child_type_maneger.get_type(self.child_type)
+        return self._child_type_manager.get_type(self.child_type)
 
     def __getitem__(self, key):
         return self.type_child_type(self.location[key])
@@ -69,7 +49,7 @@ class Dict(Group):
             yield self.type_child_type(v)
 
     @classmethod
-    def descriptor(cls, child_type: type, name=None):
+    def descriptor(cls, child_type: Union[type, str], name=None):
         return descriptor.H5ObjectDescriptor(cls, name, True, (child_type, ))
 
     def copy_from(self, another):
@@ -90,7 +70,7 @@ class List(Group):
     index_dtype = np.dtype('S')
 
     def initialize(self, child_type: type):
-        name = self._child_type_maneger.get_name(child_type)
+        name = self._child_type_manager.get_name(child_type)
         assert name is not None
         self.child_type = name
         self.max_index = -1
@@ -98,7 +78,7 @@ class List(Group):
 
     @property
     def type_child_type(self) -> Group:
-        return self._child_type_maneger.get_type(self.child_type)
+        return self._child_type_manager.get_type(self.child_type)
 
     def __getitem__(self, index: Union[int, slice]):
         true_index = self.sequence[index]
@@ -138,8 +118,8 @@ class List(Group):
             yield child_type(location[index])
 
     @classmethod
-    def descriptor(cls, child_type: type, name=None):
-        return descriptor.H5ObjectDescriptor(cls, name, True, (child_type, ))
+    def descriptor(cls, child_type: Union[type, str], name=None):
+        return descriptor.H5ObjectDescriptor(cls, True, (child_type, ), name=name)
 
     def copy_from(self, another):
         super().copy_from(another)

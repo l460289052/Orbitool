@@ -1,9 +1,16 @@
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
+from typing import Union
 
 import numpy as np
+from numpy.lib.arraysetops import isin
+from numpy.lib.index_tricks import IndexExpression
 
 BaseHDF5Obj = None
+
+
+def str_to_type(name: str) -> type:
+    return BaseHDF5Obj._child_type_manager.get_type(name)
 
 
 class Descriptor(metaclass=ABCMeta):
@@ -23,11 +30,14 @@ class Descriptor(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def __get__(self, obj, objtype = None):
+    def __get__(self, obj, objtype=None):
         pass
 
     def copy_from_to(self, obj_src, obj_dst):
         self.__set__(obj_dst, self.__get__(obj_src))
+
+    def on_create(self, obj):
+        pass
 
 
 class Attr(Descriptor):
@@ -106,15 +116,14 @@ class RegisterType(Str):
     def copy_from_to(self, obj_src, obj_dst):
         assert obj_src.h5_type.attr_type_name == obj_dst.h5_type.attr_type_name
 
+    def on_create(self, obj):
+        obj.location.attrs[self.name] = self.type_name
 
 class MainTypeHandler:
     def __init__(self, name, obj, type_name):
         self.name = name
         self.obj = obj
         self.type_name = type_name
-
-    def set_type_name(self):
-        self.obj.location.attrs[self.name] = self.type_name
 
     @property
     def attr_type_name(self):
@@ -126,12 +135,13 @@ class ChildType(Str):
 
 
 class H5ObjectDescriptor(Descriptor):
-    def __init__(self, h5obj_type: type, name: str = None, init=False, init_args=None):
+    def __init__(self, h5obj_type: Union[type, str], init=False, init_args=None, *args, **kwargs):
         """
         if `init` is True, will be initialize after created
         """
-        super().__init__(name)
-        self.h5obj_type = h5obj_type
+        super().__init__(*args, **kwargs)
+        self.h5obj_type = str_to_type(h5obj_type) if isinstance(
+            h5obj_type, str)else h5obj_type
         self.init = init
         self.init_args = init_args
 
@@ -144,11 +154,17 @@ class H5ObjectDescriptor(Descriptor):
     def copy_from_to(self, obj_src, obj_dst):
         self.__get__(obj_src).copy_from(self.__get__(obj_dst))
 
+    def on_create(self, obj):
+        sub_group = self.h5obj_type.create_at(obj.location, self.name)
+        if self.init:
+            sub_group.initialize(*self.init_args)
+
 
 class Ref_Attr(Attr):
-    def __init__(self, h5obj_type: type, name: str = None):
-        super().__init__(name)
-        self.h5obj_type = h5obj_type
+    def __init__(self, h5obj_type: Union[type, str], *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.h5obj_type = str_to_type(h5obj_type) if isinstance(
+            h5obj_type, str) else h5obj_type
 
     def __set__(self, obj, value: BaseHDF5Obj):
         obj.location.attrs[self.name] = value.location.ref
