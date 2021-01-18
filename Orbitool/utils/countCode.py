@@ -1,10 +1,10 @@
 import os
 import shutil
 
-from files import FolderTraveler
+from .files import FolderTraveler
 
-notRecurrent = ".."
-recurrent = ['../utils', '../tests', '../functions']
+recurrent = os.path.dirname(os.path.dirname(__file__))
+notRecurrent = os.path.dirname(recurrent)
 
 exts = ['.py','.pyx','.pxd']
 
@@ -18,7 +18,7 @@ def main():
     fts = [FolderTraveler(notRecurrent, exts, False), FolderTraveler(recurrent, exts, True)]
 
     for file in iterator(*fts):
-        if 'Ui.Py' not in file:
+        if not file.lower().endswith('ui.py'):
             with open(file,'r', encoding='utf-8') as f:
                 lines = f.readlines()
                 lines = [line for line in lines if len(line) > 5]
