@@ -38,8 +38,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>220</width>
-            <height>265</height>
+            <width>148</width>
+            <height>154</height>
            </rect>
           </property>
           <attribute name="label">
@@ -150,7 +150,7 @@
             <x>0</x>
             <y>0</y>
             <width>220</width>
-            <height>265</height>
+            <height>225</height>
            </rect>
           </property>
           <attribute name="label">
@@ -264,34 +264,34 @@
              </property>
             </spacer>
            </item>
-           <item>
-            <widget class="QCheckBox" name="dependentCheckBox">
-             <property name="text">
-              <string>Spectrum-dependent params</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QPushButton" name="denoisePushButton">
-               <property name="text">
-                <string>denoise</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="skipPushButton">
-               <property name="text">
-                <string>skip</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
           </layout>
          </widget>
         </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="dependentCheckBox">
+         <property name="text">
+          <string>Spectrum-dependent params</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QPushButton" name="denoisePushButton">
+           <property name="text">
+            <string>denoise</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="skipPushButton">
+           <property name="text">
+            <string>skip</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>

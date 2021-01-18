@@ -15,8 +15,8 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
     
-    import OrbitoolUiPy
+    from Orbitool.UI import MainUiPy
 
-    MainWin = OrbitoolUiPy.Window()
+    MainWin = MainUiPy.Window()
     MainWin.show()
     sys.exit(app.exec_())
