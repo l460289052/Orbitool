@@ -5,7 +5,7 @@ import io
 from datetime import datetime
 import pytest
 
-from .spectrum import Spectrum, type_name, Spectra
+from .spectrum import Spectrum, type_name, Spectra, MassList
 
 
 def test_group(location):
@@ -83,9 +83,9 @@ def test_group_descriptor(location):
 
 
 def test_ref_attr(location):
-    s:Spectra=Spectra.create_at(location,'s')
-    m:Spectrum=s.spectra.append()
-    m.initialize(np.arange(10),np.arange(10),datetime(1970,1,1))
+    s: Spectra = Spectra.create_at(location, 's')
+    m: Spectrum = s.spectra.append()
+    m.initialize(np.arange(10), np.arange(10), datetime(1970, 1, 1))
 
     m.father = s
 
@@ -93,3 +93,20 @@ def test_ref_attr(location):
     mm = f.spectra[0]
     assert np.array_equal(mm.mz, range(10))
     assert np.array_equal(mm.intensity, range(10))
+
+
+def test_datatable(location):
+    m: MassList = MassList.create_at(location, 'm')
+    m.initialize()
+
+    m.masslist.extend([(10, "C2H3;C5H10")])
+    m.masslist.extend([(i, str(i)) for i in range(10)])
+
+    mm: MassList = HDF5.infer_from(location['m'])
+
+    ml = mm.masslist
+    ds = ml.dataset
+    assert np.array_equal(ds['location'], np.concatenate(
+        [(10,), np.arange(10, dtype=np.float32)]))
+    assert np.array_equal(
+        ds['formulas'], ['C2H3;C5H10']+[str(i) for i in range(10)])

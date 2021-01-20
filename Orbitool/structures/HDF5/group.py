@@ -131,5 +131,3 @@ class List(Group):
             child.copy_from(child_type(location_a[index]))
 
 
-__all__ = [k for k, v in globals().items() if isinstance(v, type)
-           and issubclass(v, Group)]

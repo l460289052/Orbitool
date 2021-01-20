@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Union
 
 import numpy as np
@@ -58,26 +58,68 @@ class Attr(Descriptor):
         obj.location.attrs[self.name] = value
 
 
-class Dataset(Descriptor):
+class SimpleDataset(Descriptor):
+    """
+    numpy.ndarray in hdf5, please read to memory before frequent access.
+    for i in ins.simpleDataset:
+        pass        (x)
+    for i in ins.simpleDataset[:]:
+        pass        (v)
+    """
     kwargs = dict(compression='gzip', compression_opts=1)
 
     def __get__(self, obj, objtype=None):
-        dataset = obj.location.get(self.name, None)
-        if dataset is None:
-            return None
-        ret = np.empty(dataset.shape, dtype=dataset.dtype)
-        dataset.read_direct(ret)
-        return ret
+        return obj.location.get(self.name, None)
 
     def __set__(self, obj, value):
         if self.name in obj.location:
             del obj.location[self.name]
-        obj.location.create_dataset(self.name, data=value, **Dataset.kwargs)
+        obj.location.create_dataset(
+            self.name, data=value, **SimpleDataset.kwargs)
 
     # def generate_attr(self, attr_type: type, name=None):
     #     assert issubclass(attr_type, Attr)
     #     return attr_type('/'.join((self.name, name)) if name is not None else self.name+'/')
 
+
+class DataTable(SimpleDataset):
+    def __init__(self, dtype, obj=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.dtype = dtype
+        self.obj = obj
+
+    def __set__(self, obj, value):
+        raise NotImplementedError()
+
+    def __get__(self, obj, objtype = None):
+        return DataTable(self.dtype, obj, name=self.name)
+
+    def on_create(self, obj):
+        ds = obj.location.create_dataset(
+            self.name, (0,), self.dtype, maxshape=(None,), **DataTable.kwargs)
+
+    def clear(self):
+        del self.obj.location[self.name]
+        self.on_create(self.obj)
+
+    @property
+    def dataset(self):
+        return self.obj.location[self.name]
+
+    def extend(self, items):
+        dataset = self.dataset
+        length = len(items)
+        if isinstance(dataset, np.ndarray):
+            dataset.resize((len(dataset)+length,),refcheck=False)
+        else:
+            dataset.resize((len(dataset)+length,))
+        dataset[-length:] = items
+
+    def copy_from_to(self, obj_src, obj_dst):
+        dt_dst = self.__get__(obj_dst)
+        dt_src = self.__get__(obj_src)
+        dt_dst.clear()
+        dt_dst.extend(dt_src.dataset)
 
 class Int(Attr):
     pass
@@ -91,7 +133,7 @@ class Float(Attr):
     pass
 
 
-class Datetime(Attr):
+class Datetime(Str):
     def __get__(self, *args):
         ret = super().__get__(*args)
         return np.datetime64(ret).astype(datetime)
@@ -100,37 +142,40 @@ class Datetime(Attr):
         super().__set__(obj, value.isoformat())
 
 
+class TimeDelta(Float):
+    def __get__(self, *args):
+        ret = super().__get__(*args)
+        return timedelta(seconds=ret)
+
+    def __set__(self, obj, value: timedelta):
+        return super().__set__(obj, value.total_seconds())
+
+
 class SmallNumpy(Attr):
     pass
 
 
-class BigNumpy(Dataset):
+class BigNumpy(SimpleDataset):
     pass
 
 
 class RegisterType(Str):
-    def __init__(self, type_name: str):
+    def __init__(self, type_name: str, obj=None):
         super().__init__("type")
         self.type_name = type_name
+        self.obj = obj
 
     def __set__(self, obj, value):
         raise NotImplementedError()
 
     def __get__(self, obj, objtype):
-        return MainTypeHandler(self.name, obj, self.type_name)
+        return RegisterType(self.type_name, obj)
 
     def copy_from_to(self, obj_src, obj_dst):
         assert obj_src.h5_type.attr_type_name == obj_dst.h5_type.attr_type_name
 
     def on_create(self, obj):
         obj.location.attrs[self.name] = self.type_name
-
-
-class MainTypeHandler:
-    def __init__(self, name, obj, type_name):
-        self.name = name
-        self.obj = obj
-        self.type_name = type_name
 
     @property
     def attr_type_name(self):
@@ -182,7 +227,3 @@ class Ref_Attr(Attr):
 
     def copy_from_to(self, obj_src, obj_dst):
         pass
-
-
-__all__ = [k for k, v in globals().items() if isinstance(v, type) and issubclass(
-    v, (Descriptor, MainTypeHandler))]

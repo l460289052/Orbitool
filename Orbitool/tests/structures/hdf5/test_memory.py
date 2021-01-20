@@ -19,3 +19,6 @@ def test_dict(location):
 
 def test_group_descriptor(location):
     some_descriptor_group.test_group_descriptor(location)
+
+def test_datatable(location):
+    some_descriptor_group.test_datatable(location)

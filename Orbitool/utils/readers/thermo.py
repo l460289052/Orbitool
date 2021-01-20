@@ -11,7 +11,6 @@ from typing import List, Tuple
 import numpy as np
 import clr
 
-from Orbitool.utils.files import File as BaseFile
 
 pwd = os.path.dirname(__file__)
 clr.AddReference(os.path.join(pwd, 'ThermoFisher.CommonCore.Data.dll'))
@@ -44,7 +43,7 @@ def initRawFile(path):
     return rawfile
 
 
-class File(BaseFile):
+class File:
     def __init__(self, fullname):
         self.path = fullname
         self.name = os.path.split(fullname)[1]

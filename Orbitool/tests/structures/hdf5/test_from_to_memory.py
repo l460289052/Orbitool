@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 from datetime import datetime
 
-from .spectrum import Spectrum, Spectra
+from .spectrum import Spectrum, Spectra, MassList
 
 
 @pytest.fixture
@@ -53,6 +53,24 @@ def check_list(l: HDF5.List):
         check_spectrum(s, i)
 
 
+def init_massList(m: MassList):
+    data = [(10, 'C2H3;C5H10')] +\
+        [(i, str(i)) for i in range(10)]
+
+    m.masslist.extend(data)
+
+
+def check_massList(m: MassList):
+    ds = m.masslist.dataset
+    assert np.array_equal(ds['location'], np.concatenate(
+        [(10,), np.arange(10, dtype=np.float32)]))
+    assert np.array_equal(ds['formulas'], ['C2H3;C5H10']+[str(i) for i in range(10)])
+    data = [(10, 'C2H3;C5H10')] +\
+        [(i, str(i)) for i in range(10)]
+    for i, j in zip(ds[:], data):
+        assert i[0] == j[0] and i[1] == j[1]
+
+
 def test_list_to_memory(h5file):
     l_h5: HDF5.List = HDF5.List.create_at(h5file, 'l')
     l_h5.initialize(Spectrum)
@@ -69,14 +87,17 @@ def test_list_copy_from(h5file):
     l_h5.copy_from(l_m)
     check_list(l_h5)
 
+
 def init_dict(d: HDF5.Dict):
     for i in range(10):
         s: Spectrum = d.additem(str(i))
         init_spectrum(s, i)
-        
+
+
 def check_dict(d: HDF5.Dict):
     for k, v in d.items():
-        check_spectrum(v,int(k))
+        check_spectrum(v, int(k))
+
 
 def test_dict_to_momery(h5file):
     d_h5: HDF5.Dict = HDF5.Dict.create_at(h5file, 'd')
@@ -94,19 +115,39 @@ def test_dict_copy_from(h5file):
     d_h5.copy_from(d_m)
     check_dict(d_h5)
 
+
 def test_spectra_to_momery(h5file):
-    s_h5:Spectra = Spectra.create_at(h5file, 's')
+    s_h5: Spectra = Spectra.create_at(h5file, 's')
     s_h5.initialize()
 
     init_list(s_h5.spectra)
     s_m = s_h5.to_memory()
     check_list(s_m.spectra)
 
+
 def test_spectra_copy_from(h5file):
-    s_m:Spectra = Spectra.create_at(HDF5.MemoryLocation(), 's')
+    s_m: Spectra = Spectra.create_at(HDF5.MemoryLocation(), 's')
     s_m.initialize()
 
     init_list(s_m.spectra)
     s_h5 = Spectra.create_at(h5file, 's')
     s_h5.copy_from(s_m)
     check_list(s_h5.spectra)
+
+def test_massList_to_memory(h5file):
+    m_h5: MassList = MassList.create_at(h5file, 'm')
+    m_h5.initialize()
+
+    init_massList(m_h5)
+    m_m = m_h5.to_memory()
+    check_massList(m_m)
+
+
+def test_massList_copy_from(h5file):
+    m_m: MassList = MassList.create_at(HDF5.MemoryLocation(), 'm')
+    m_m.initialize()
+
+    init_massList(m_m)
+    m_h5 = MassList.create_at(h5file,'m')
+    m_h5.copy_from(m_m)
+    check_massList(m_h5)
