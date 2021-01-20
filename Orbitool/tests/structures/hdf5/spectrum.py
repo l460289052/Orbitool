@@ -1,7 +1,8 @@
-from Orbitool.tests.structures import hdf5
 from Orbitool.structures import HDF5
+import numpy as np
+import h5py
 
-type_name = 'Spectrum'
+type_name = 'testSpectrum'
 
 
 class Spectrum(HDF5.Group):
@@ -10,7 +11,7 @@ class Spectrum(HDF5.Group):
     intensity = HDF5.BigNumpy()
     time = HDF5.Datetime()
 
-    father = HDF5.Ref_Attr('Spectra')
+    father = HDF5.Ref_Attr('testSpectra')
 
     def initialize(self, mz, intensity, time):
         self.mz = mz
@@ -18,5 +19,10 @@ class Spectrum(HDF5.Group):
         self.time = time
 
 class Spectra(HDF5.Group):
-    h5_type = HDF5.RegisterType('Spectra')
+    h5_type = HDF5.RegisterType('testSpectra')
     spectra: HDF5.List = HDF5.List.descriptor(Spectrum)
+
+
+class MassList(HDF5.Group):
+    h5_type=HDF5.RegisterType("testMasslist")
+    masslist = HDF5.DataTable([("location", np.float32), ("formulas", h5py.string_dtype())])
