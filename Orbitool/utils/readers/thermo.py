@@ -1,13 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from ThermoFisher.CommonCore.RawFileReader import RawFileReaderAdapter
-from ThermoFisher.CommonCore.MassPrecisionEstimator import PrecisionEstimate
-from ThermoFisher.CommonCore.Data.Interfaces import IChromatogramSettings, IScanEventBase, \
-    IScanFilter, RawFileClassification
-from ThermoFisher.CommonCore.Data.FilterEnums import IonizationModeType, MSOrderType, PolarityType
-from ThermoFisher.CommonCore.Data.Business import ChromatogramSignal, ChromatogramTraceSettings, \
-    DataUnits, Device, GenericDataTypes, SampleType, Scan, TraceType, MassOptions
-from ThermoFisher.CommonCore.Data import ToleranceUnits, Extensions
 import OrbitoolBase
 from Orbitool import functions
 
@@ -31,6 +23,14 @@ clr.AddReference(os.path.join(
 
 clr.AddReference('System.Collections')
 
+from ThermoFisher.CommonCore.RawFileReader import RawFileReaderAdapter
+from ThermoFisher.CommonCore.MassPrecisionEstimator import PrecisionEstimate
+from ThermoFisher.CommonCore.Data.Interfaces import IChromatogramSettings, IScanEventBase, \
+    IScanFilter, RawFileClassification
+from ThermoFisher.CommonCore.Data.FilterEnums import IonizationModeType, MSOrderType, PolarityType
+from ThermoFisher.CommonCore.Data.Business import ChromatogramSignal, ChromatogramTraceSettings, \
+    DataUnits, Device, GenericDataTypes, SampleType, Scan, TraceType, MassOptions
+from ThermoFisher.CommonCore.Data import ToleranceUnits, Extensions
 
 convertPolarity = {PolarityType.Any: 0,
                    PolarityType.Positive: 1,
@@ -52,7 +52,7 @@ class File:
 
         time = self.rawfile.FileHeader.CreationDate
         self.creationDatetime = datetime(year=time.Year, month=time.Month, day=time.Day, hour=time.Hour,
-                                         minute=time.Minute, second=time.Second, microsecond=time.Millisecond*1000)
+                                         minute=time.Minute, second=time.Second, microsecond=time.Millisecond * 1000)
         self.startTimedelta = timedelta(
             minutes=self.rawfile.RunHeader.StartTime)
         self.endTimedelta = timedelta(
@@ -64,11 +64,11 @@ class File:
 
     @property
     def startDatetime(self):
-        return self.creationDatetime+self.startTimedelta
+        return self.creationDatetime + self.startTimedelta
 
     @property
     def endDatetime(self):
-        return self.creationDatetime+self.endTimedelta
+        return self.creationDatetime + self.endTimedelta
 
     def getSpectrumRetentionTime(self, scanNum):
         return timedelta(minutes=self.rawfile.RetentionTimeFromScanNumber(scanNum))
@@ -102,7 +102,7 @@ class File:
             scanNum, scanStatistics)
         mz = np.array(list(segmentedScan.Positions), dtype=np.float)
         intensity = np.array(list(segmentedScan.Intensities), dtype=np.float)
-        time = retentimeTime+self.creationDatetime
+        time = retentimeTime + self.creationDatetime
         return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
 
     def timeRange2NumRange(self, timeRange: (timedelta, timedelta)):
