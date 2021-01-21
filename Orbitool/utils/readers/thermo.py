@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from ThermoFisher.CommonCore.RawFileReader import RawFileReaderAdapter
+from ThermoFisher.CommonCore.MassPrecisionEstimator import PrecisionEstimate
+from ThermoFisher.CommonCore.Data.Interfaces import IChromatogramSettings, IScanEventBase, \
+    IScanFilter, RawFileClassification
+from ThermoFisher.CommonCore.Data.FilterEnums import IonizationModeType, MSOrderType, PolarityType
+from ThermoFisher.CommonCore.Data.Business import ChromatogramSignal, ChromatogramTraceSettings, \
+    DataUnits, Device, GenericDataTypes, SampleType, Scan, TraceType, MassOptions
+from ThermoFisher.CommonCore.Data import ToleranceUnits, Extensions
 import OrbitoolBase
 from Orbitool import functions
 
@@ -23,18 +31,11 @@ clr.AddReference(os.path.join(
 
 clr.AddReference('System.Collections')
 
-from ThermoFisher.CommonCore.Data import ToleranceUnits, Extensions
-from ThermoFisher.CommonCore.Data.Business import ChromatogramSignal, ChromatogramTraceSettings, \
-     DataUnits, Device, GenericDataTypes, SampleType, Scan, TraceType, MassOptions
-from ThermoFisher.CommonCore.Data.FilterEnums import IonizationModeType, MSOrderType, PolarityType
-from ThermoFisher.CommonCore.Data.Interfaces import IChromatogramSettings, IScanEventBase, \
-     IScanFilter, RawFileClassification
-from ThermoFisher.CommonCore.MassPrecisionEstimator import PrecisionEstimate
-from ThermoFisher.CommonCore.RawFileReader import RawFileReaderAdapter
 
 convertPolarity = {PolarityType.Any: 0,
                    PolarityType.Positive: 1,
                    PolarityType.Negative: -1}
+
 
 def initRawFile(path):
     rawfile = RawFileReaderAdapter.FileFactory(path)
@@ -51,7 +52,7 @@ class File:
 
         time = self.rawfile.FileHeader.CreationDate
         self.creationDatetime = datetime(year=time.Year, month=time.Month, day=time.Day, hour=time.Hour,
-                                              minute=time.Minute, second=time.Second, microsecond=time.Millisecond*1000)
+                                         minute=time.Minute, second=time.Second, microsecond=time.Millisecond*1000)
         self.startTimedelta = timedelta(
             minutes=self.rawfile.RunHeader.StartTime)
         self.endTimedelta = timedelta(
@@ -60,6 +61,14 @@ class File:
         self.lastScanNumber = self.rawfile.RunHeader.LastSpectrum
         self.massResolution = int(
             self.rawfile.GetTrailerExtraInformation(1).Values[11])
+
+    @property
+    def startDatetime(self):
+        return self.creationDatetime+self.startTimedelta
+
+    @property
+    def endDatetime(self):
+        return self.creationDatetime+self.endTimedelta
 
     def getSpectrumRetentionTime(self, scanNum):
         return timedelta(minutes=self.rawfile.RetentionTimeFromScanNumber(scanNum))
@@ -98,9 +107,9 @@ class File:
 
     def timeRange2NumRange(self, timeRange: (timedelta, timedelta)):
         r: range = functions.binary_search.indexBetween(self, timeRange,
-                                             (self.firstScanNumber,
-                                                 self.lastScanNumber + 1),
-                                             method=(lambda f, i: f.getSpectrumRetentionTime(i)))
+                                                        (self.firstScanNumber,
+                                                         self.lastScanNumber + 1),
+                                                        method=(lambda f, i: f.getSpectrumRetentionTime(i)))
         return (r.start, r.stop)
 
     def checkAverageEmpty(self, timeRange: (timedelta, timedelta) = None, numRange: (int, int) = None, polarity=-1):
