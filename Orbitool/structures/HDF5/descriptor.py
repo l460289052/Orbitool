@@ -134,12 +134,12 @@ class Float(Attr):
 
 
 class Datetime(Str):
+    dateFormat = r"%Y-%m-%d %H:%M:%S"
     def __get__(self, *args):
-        ret = super().__get__(*args)
-        return np.datetime64(ret).astype(datetime)
+        return datetime.strptime(super().__get__(*args), self.dateFormat)
 
     def __set__(self, obj, value: datetime):
-        super().__set__(obj, value.isoformat())
+        super().__set__(obj, value.strftime(self.dateFormat))
 
 
 class TimeDelta(Float):
