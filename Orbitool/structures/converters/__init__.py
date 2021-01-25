@@ -1,1 +1,2 @@
-from .converter import convert, register, BaseConverter as _BaseConverter, VersionCheckError as ConvertVersionCheckError, clear as _clear
+from . import converter as _converter
+from .converter import convert, register, BaseConverter as _BaseConverter, VersionCheckError as ConvertVersionCheckError

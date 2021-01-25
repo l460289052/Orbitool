@@ -1,4 +1,5 @@
-from typing import Dict, Set
+from collections import deque
+from typing import Dict, Set, Deque
 
 
 class BaseConverter:
@@ -21,19 +22,37 @@ class VersionCheckError(Exception):
     pass
 
 
-class VersionChainItem:
-    __slots__ = ['front', 'version', 'next']
+def generate_chain(maps: dict):
+    beginers = maps.copy()
+    enders = {v: k for k, v in maps.items()}
 
-    def __init__(self, version=None) -> None:
-        self.front = None
-        self.version = version
-        self.next = None
+    chains = []
+
+    while beginers:
+        v_from = next(iter(beginers.keys()))
+        v_to = beginers.pop(v_from)
+        enders.pop(v_to)
+
+        c = deque((v_from, v_to))
+
+        while v_from in enders:
+            v_from = enders.pop(v_from)
+            beginers.pop(v_from)
+            c.appendleft(v_from)
+        while v_to in beginers:
+            v_to = beginers.pop(v_to)
+            enders.pop(v_to)
+            c.append(v_to)
+        chains.append(c)
+
+    return chains
 
 
 class _Converters:
     def __init__(self) -> None:
         self.converters: Dict[str, type] = {}
-        self.chain: Dict[str, VersionChainItem] = None
+        self.chain: list = None
+        self.chainMap: Dict[str, int] = None
 
     def register(self, converter: type):
         assert issubclass(converter, BaseConverter)
@@ -41,58 +60,28 @@ class _Converters:
         self.chain = None
 
     def generate_chain(self):
-        chainBeginers: Dict[str, VersionChainItem] = {}
-        chainEnders: Dict[str, VersionChainItem] = {}
-
-        chain = {}
-        for converter in self.converters.values():
-            version_from = converter.version_from
-            item = VersionChainItem(version_from)
-            version_to = converter.version_to
-
-            chain[version_from] = item
-            chainEnders[version_to] = item
-            chainBeginers[version_from] = item
-            if version_from in chainEnders:
-                chainItem = chainEnders.pop(version_from)
-                chainBeginers.pop(version_from)
-                chainItem.next = item
-                item.front = chainItem
-            if version_to in chainBeginers:
-                chainItem = chainBeginers.pop(version_to)
-                chainEnders.pop(version_to)
-                chainItem.front = item
-                item.next = chainItem
-
-        if len(chainBeginers) > 1:
-            converters = self.converters
-            chains = []
-            for item in chainBeginers.values():
-                chain = []
-                while item is not None:
-                    converter = converters[item.version]
-                    chain.append(
-                        (converter.version_from, converter.version_to))
-                    item = item.next
+        chains = generate_chain(
+            {c.version_from: c.version_to for c in self.converters})
+        if len(chains) > 1:
             raise VersionCheckError("Find more than 1 chain", chains)
 
-        self.chain = chain
+        self.chain = list(chains[0])
+        self.chainMap = {c: i for i, c in enumerate(self.chain)}
 
     def convert(self, h5file):
         if self.chain is None:
             self.generate_chain()
         version = BaseConverter.get_version(h5file)
         converters = self.converters
-        item = self.chain[version]
-        while item is not None:
-            converter = converters[item.version]
+        for version in self.chain[self.chainMap[version]:]:
+            converter = converters[version]
             converter = converter()
             converter.convert(h5file)
-            item = item.next
 
     def clear(self):
         self.converters.clear()
         self.chain = None
+        self.chainMap = None
 
 
 converter = _Converters()
