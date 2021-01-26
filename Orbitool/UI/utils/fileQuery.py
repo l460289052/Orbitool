@@ -1,46 +1,41 @@
 import os
 from PyQt5 import QtWidgets
 from functools import wraps
-from types import FunctionType
+from typing import Tuple, List
+
+openfile_dir = '../.'
+openfolder_dir = './..'
 
 
-def openfile(caption, filter=None, multi=False):
-    assert not isinstance(caption, FunctionType)
-    openfile_dir = '../.'
+def openfile(caption, filter) -> Tuple[bool, str]:
+    global openfile_dir
+    f, typ = QtWidgets.QFileDialog.getOpenFileName(
+        caption=caption, directory=openfile_dir, filter=filter)
 
-    def f(func):
-        @wraps(func)
-        def ff(self):
+    if len(f) == 0:
+        return False, f
+    assert os.path.isfile(f), "file not exist"
 
-            kwargs = dict(caption=caption,
-                          directory=openfile_dir, filter=filter)
+    openfile_dir = os.path.dirname(f)
+    return True, f
 
-            files, typ = QtWidgets.QFileDialog.getOpenFileNames(
-                **kwargs) if multi else QtWidgets.QFileDialog.getOpenFileName(**kwargs)
 
-            if not multi:
-                files = [files]
-            if len(files) == 0:
-                return
-            for f in files:
-                assert os.path.isfile(f), "file not exist"
-            return func(self, files if multi else files[0])
-        return ff
+def openfiles(caption, filter) -> List[str]:
+    global openfile_dir
+    f, typ = QtWidgets.QFileDialog.getOpenFileNames(
+        caption=caption, directory=openfile_dir, filter=filter)
+
+    if len(f) > 0:
+        openfile_dir = os.path.dirname(f[0])
     return f
 
 
-def openfolder(caption):
-    openfolder_dir = './..'
+def openfolder(caption) -> Tuple[bool, str]:
+    global openfolder_dir
+    folder, typ = QtWidgets.QFileDialog.getExistingDirectory(
+        caption=caption, directory=openfolder_dir)
 
-    def f(func):
-        @wraps(func)
-        def ff(self):
-
-            folder, typ = QtWidgets.QFileDialog.getExistingDirectory(
-                caption=caption, directory=openfolder_dir)
-
-            if len(folder) == 0:
-                return
-            return func(self, folder)
-        return ff
-    return f
+    if len(folder) == 0:
+        return False, folder
+    openfolder_dir = os.path.dirname(folder)
+    return True, folder

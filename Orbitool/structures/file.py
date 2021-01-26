@@ -2,60 +2,49 @@ from typing import Dict, Tuple, Union, Iterable, List
 from datetime import datetime
 
 from sortedcontainers import SortedDict
+import numpy as np
+import h5py
 
 from Orbitool.structures import HDF5
-from Orbitool.utils.readers import ThermoFile
+
+fileDtype = [
+    ("path", h5py.string_dtype('utf-8')),
+    ("creationDatetime", h5py.string_dtype()),
+    ("startDatetime", h5py.string_dtype()),
+    ("endDatetime", h5py.string_dtype())]
+
+fileReader = None
 
 
-class File(HDF5.Group):
-    h5_type = HDF5.RegisterType("File")
-    path = HDF5.Str()
-    creationDatatime = HDF5.Datetime()
-    startTimedelta = HDF5.TimeDelta()
-    endTimedelta = HDF5.TimeDelta()
-
-    def initialize(self, path, creationDatatime, startTimedelta, endTimedelta):
-        self.path = path
-        self.creationDatatime = creationDatatime
-        self.startTimedelta = startTimedelta
-        self.endTimedelta = endTimedelta
-
-    @property
-    def startDatetime(self):
-        return self.creationDatatime+self.startTimedelta
-
-    @property
-    def endDatetime(self):
-        return self.creationDatatime+self.endTimedelta
+def setFileReader(fr):
+    global fileReader
+    fileReader = fr
 
 
 class FileList(HDF5.Group):
     h5_type = HDF5.RegisterType("FileList")
-    files: HDF5.Dict = HDF5.Dict.descriptor(File)
+    files: HDF5.DataTable = HDF5.DataTable(fileDtype)
 
-    def _crossed(self, start: datetime, end: datetime) -> Tuple[bool, File]:
-        for file in self.files.values():
-            file: File
-            if start < file.endDatetime and file.startDatetime < end:
-                return False, file
+    def _crossed(self, start: datetime, end: datetime) -> Tuple[bool, str]:
+        ds = self.files.dataset
+        startDatetimes = ds['startDatetime'].astype('M8[s]')
+        endDatetimes = ds['endDatetime'].astype('M8[s]')
+        slt = (start < startDatetimes) & (endDatetimes < end)
+        where = np.where(slt)
+        if len(where) > 0:
+            return False, ds[where]["path"]
         return True, None
 
     def timeRange(self):
         if len(self.files) == 0:
             return None, None
-        files = iter(self.files.values())
-        f: File = next(files)
-        s = f.startDatetime
-        e = f.endDatetime
-        for f in files:
-            if f.startDatetime < s:
-                s = f.startDatetime
-            if f.endDatetime > e:
-                e = f.endDatetime
-        return s, e
+        ds = self.files.dataset
+        startDatetimes = ds['startDatetime'].astype('M8[s]')
+        endDatetimes = ds['endDatetime'].astype('M8[s]')
+        return startDatetimes.min().astype(datetime), endDatetimes.min().astype(datetime)
 
     def addFile(self, filepath):
-        f = ThermoFile(filepath)
+        f = fileReader(filepath)
 
         crossed, crossedFile = self._crossed(
             f.startDatetime, f.endDatetime)
@@ -63,32 +52,37 @@ class FileList(HDF5.Group):
             raise ValueError('file "%s" and "%s" have crossed scan time' % (
                 f.path, crossedFile.path))
 
-        addf: File = self.files.additem(f.path)
-        addf.initialize(addf.path, addf.creationDatatime,
-                        addf.startTimedelta, addf.endTimedelta)
+        self.files.extend([(f.path, HDF5.Datetime.strftime(f.creationDatetime), HDF5.Datetime.strftime(
+            f.creationDatetime + f.startTimedelta), HDF5.Datetime.strftime(f.creationDatetime + f.endTimedelta))])
 
     def rmFile(self, filepath: Union[str, Iterable]):
         files = self.files
         if isinstance(filepath, str):
             filepath = [filepath]
+        ds = self.files.dataset
+        path = ds['path']
+        slt = np.zeros(len(ds), dtype=bool)
         for p in filepath:
-            del files[p]
+            slt |= path == p
+        ds[:slt.sum()] = ds[slt]
+        ds.resize((slt.sum(),))
 
     def subList(self, filepath: List[str]):
-        subList = FileList.create_at(HDF5.MemoryLocation(), 'tmp')
-        t_files: HDF5.Dict = subList.files
-        files = self.files
+        ds = self.files.dataset
+        path = ds['path']
+        slt = np.zeros(len(ds), dtype=bool)
         for p in filepath:
-            t_f: File = t_files.additem(p)
-            f = files[p]
-            t_f.copy_from(f)
+            slt |= path == p
+
+        subList: FileList = FileList.create_at(HDF5.MemoryLocation(), 'tmp')
+        subList.files.extend(ds[slt])
 
     def clear(self):
         self.files.clear()
         self.initialize()
 
-    def keys(self):
-        return self.files.keys()
+    def __iter__(self):
+        return iter(self.files.dataset[:])
 
-    def values(self):
-        return self.files.values()
+    def __len__(self):
+        return len(self.files.dataset)

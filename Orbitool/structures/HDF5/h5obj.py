@@ -48,6 +48,9 @@ class H5Obj(_H5Obj):
         H5Obj._child_type_manager.add_type(cls.h5_type.type_name, cls)
         H5Obj._export_value_names[cls.h5_type.type_name] = {
             k: v for k, v in cls.__dict__.items() if issubclass(type(v), descriptor.Descriptor)}
+        
+    def __set_name__(self, owner, name):
+        raise TypeError(f"You cannot set a H5Obj {str(type(self))} as a descriptor")
 
     @classmethod
     def create_at(cls, location: Union[h5py.Group, memory_h5_location.Location], key):
@@ -58,6 +61,14 @@ class H5Obj(_H5Obj):
 
     def initialize(self):
         pass
+        
+    @classmethod
+    def openOrCreateInitialize(cls, location:Union[h5py.Group, memory_h5_location.Location], key):
+        if key in location:
+            return cls(location)
+        obj = cls.create_at(location, key)
+        obj.initialize()
+        return obj
 
     @classmethod
     def descriptor(cls, name=None):

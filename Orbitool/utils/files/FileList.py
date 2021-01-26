@@ -15,7 +15,7 @@ class FileList:
         self.datetimeDict: Dict[datetime, File] = SortedDict()
         self.pathDict: Dict[str, File] = dict()
 
-    def _crossed(self, start: datetime, end: datetime) -> (bool, File):
+    def _crossed(self, start: datetime, end: datetime) -> Union[bool, File]:
         datetimeDict = self.datetimeDict
         index = datetimeDict.bisect_left(start)
         if index > 0:

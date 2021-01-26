@@ -1,6 +1,6 @@
 from typing import Union
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from . import MainUi
 
 from . import FileUiPy, NoiseUiPy, PeakShapeUiPy, CalibrationUiPy, PeakFitUiPy, MassDefectUiPy
@@ -10,18 +10,22 @@ from . import FormulaUiPy, MassListUiPy, SpectraListUiPy, PeakListUiPy, Spectrum
 from . import CalibrationInfoUiPy, TimeseriesUiPy
 from . import PeakFitFloatUiPy
 
+from Orbitool.structures import WorkSpace
+
 
 class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setupUi(self)
+        self.workspace = WorkSpace()
 
-
+    def getWorkspace(self):
+        return self.workspace
 
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
 
-        self.fileUi = self.add_tab(FileUiPy.Widget(), "File")
+        self.fileUi = self.add_tab(FileUiPy.Widget(self.getWorkspace), "File")
         self.noiseUi = NoiseUiPy.Widget()
         self.add_tab(self.noiseUi, "Noise")
         self.peakShapeUi =PeakShapeUiPy.Widget()
@@ -51,10 +55,6 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.timeseriesDw = self.add_dockerwidget(
             "Timeseries", self.timeseries, self.peakListDw)
 
-        self.peakfloat = PeakFitFloatUiPy.Widget()
-        self.peakfloat.show()
-        self.peakfloat.setWindowTitle("Peak Fit Float")
-
         self.noiseUi.showAveragePushButton.clicked.connect(lambda: self.spectrumDw.setHidden(False))
         self.spectraList.splitPushButton.clicked.connect(lambda:self.peakListDw.setHidden(False))
 
@@ -71,3 +71,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     def add_tab(self, title, widget):
         self.tabWidget.addTab(title, widget)
         return widget
+
+    def closeEvent(self, e: QtGui.QCloseEvent) -> None:
+        self.workspace.close()
+        e.accept()

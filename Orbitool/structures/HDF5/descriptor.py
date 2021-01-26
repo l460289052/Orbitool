@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Union, List, Tuple
 
 import numpy as np
 
@@ -91,7 +91,7 @@ class DataTable(SimpleDataset):
     def __set__(self, obj, value):
         raise NotImplementedError()
 
-    def __get__(self, obj, objtype = None):
+    def __get__(self, obj, objtype=None):
         return DataTable(self.dtype, obj, name=self.name)
 
     def on_create(self, obj):
@@ -106,13 +106,13 @@ class DataTable(SimpleDataset):
     def dataset(self):
         return self.obj.location[self.name]
 
-    def extend(self, items):
+    def extend(self, items: Union[np.ndarray, List[Union[Tuple, np.ndarray]] ]):
         dataset = self.dataset
         length = len(items)
         if isinstance(dataset, np.ndarray):
-            dataset.resize((len(dataset)+length,),refcheck=False)
+            dataset.resize((len(dataset) + length,), refcheck=False)
         else:
-            dataset.resize((len(dataset)+length,))
+            dataset.resize((len(dataset) + length,))
         dataset[-length:] = items
 
     def copy_from_to(self, obj_src, obj_dst):
@@ -120,6 +120,7 @@ class DataTable(SimpleDataset):
         dt_src = self.__get__(obj_src)
         dt_dst.clear()
         dt_dst.extend(dt_src.dataset)
+
 
 class Int(Attr):
     pass
@@ -135,11 +136,19 @@ class Float(Attr):
 
 class Datetime(Str):
     dateFormat = r"%Y-%m-%d %H:%M:%S"
+    @classmethod
+    def strftime(cls, datetime):
+        return datetime.strftime(Datetime.dateFormat)
+
+    @classmethod
+    def strptime(cls, s):
+        return datetime.strptime(s, Datetime.dateFormat)
+
     def __get__(self, *args):
-        return datetime.strptime(super().__get__(*args), self.dateFormat)
+        return Datetime.strptime(super().__get__(*args))
 
     def __set__(self, obj, value: datetime):
-        super().__set__(obj, value.strftime(self.dateFormat))
+        super().__set__(obj, Datetime.strftime(value))
 
 
 class TimeDelta(Float):

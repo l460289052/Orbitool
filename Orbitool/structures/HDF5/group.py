@@ -36,6 +36,9 @@ class Dict(Group):
 
     def __delitem__(self, key):
         del self.location[key]
+        
+    def __len__(self):
+        return len(self.location.keys())
 
     def items(self):
         for k, v in self.location.items():
@@ -47,6 +50,10 @@ class Dict(Group):
     def values(self):
         for v in self.location.values():
             yield self.type_child_type(v)
+            
+    def clear(self):
+        for k in self.location.keys():
+            del self.location[k]
 
     @classmethod
     def descriptor(cls, child_type: Union[type, str], name=None):
