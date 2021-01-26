@@ -82,29 +82,29 @@ class _LoggerSender:
             target=_LogListen, args=(self.queue,))
         self.listenerThread.start()
 
-    def _log(self, level: int, content: str, trackback: str, otherinfos: str):
+    def _log(self, level: int, content: str, traceback: str, otherinfos: str):
         if level < _logLevel:
             return
         if not self.isListen:
             self.beginListen()
         record = (datetime.datetime.now().isoformat(),
-                  level, content, trackback, otherinfos)
+                  level, content, traceback, otherinfos)
         self.queue.put(record)
 
-    def debug(self, content: str, otherinfos=None, trackback: str = None):
-        self._log(LogLevel.DEBUG.value, content, trackback, otherinfos)
+    def debug(self, content: str, otherinfos=None, traceback: str = None):
+        self._log(LogLevel.DEBUG.value, content, traceback, otherinfos)
 
-    def info(self, content: str, otherinfos=None, trackback: str = None):
-        self._log(LogLevel.INFO.value, content, trackback, otherinfos)
+    def info(self, content: str, otherinfos=None, traceback: str = None):
+        self._log(LogLevel.INFO.value, content, traceback, otherinfos)
 
-    def warning(self, content: str, trackback: str = None, otherinfos=None):
-        self._log(LogLevel.WARNING.value, content, trackback, otherinfos)
+    def warning(self, content: str, traceback: str = None, otherinfos=None):
+        self._log(LogLevel.WARNING.value, content, traceback, otherinfos)
 
-    def error(self, content: str, trackback, otherinfos=None):
-        self._log(LogLevel.ERROR.value, content, trackback, otherinfos)
+    def error(self, content: str, traceback, otherinfos=None):
+        self._log(LogLevel.ERROR.value, content, traceback, otherinfos)
 
-    def critical(self, content: str, trackback, otherinfos=None):
-        self._log(LogLevel.CRITICAL.value, content, trackback, otherinfos)
+    def critical(self, content: str, traceback, otherinfos=None):
+        self._log(LogLevel.CRITICAL.value, content, traceback, otherinfos)
 
     def __del__(self):
         self.queue.put(None)
