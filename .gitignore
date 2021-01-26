@@ -24,3 +24,4 @@ tmptest
 .pytest_cache
 .coverage
 htmlcov
+*.sqlite3

@@ -5,10 +5,7 @@ import os
 import re
 from typing import Dict
 
-from utils.files import FolderTraveler
-
-root = os.path.abspath(os.path.dirname(__file__))
-os.chdir(os.path.dirname(root))
+from Orbitool.utils.files import FolderTraveler
 
 class Node:
     def __init__(self, path):
@@ -35,7 +32,7 @@ def cythonSetup(filepath):
     setup(ext_modules=cy, script_args=['build_ext'], include_dirs=[
           np.get_include()], options={'build_ext': {'inplace': True}})
 
-def main():
+def main(root):
     ft = FolderTraveler(root, '.pyx', True)
     modelNodes: Dict[str, Node]= {}
 
@@ -68,7 +65,3 @@ def main():
             raise Exception("Loop", modelNodes.keys())
         for pro in processed:
             modelNodes.pop(pro)
-
-
-if __name__ == "__main__":
-    main()

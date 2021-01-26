@@ -1,10 +1,7 @@
 import os
 import shutil
 
-from .files import FolderTraveler
-
-recurrent = os.path.dirname(os.path.dirname(__file__))
-notRecurrent = os.path.dirname(recurrent)
+from Orbitool.utils.files import FolderTraveler
 
 exts = ['.py','.pyx','.pxd']
 
@@ -13,9 +10,9 @@ def iterator(*args):
         for j in i:
             yield j
 
-def main():
+def count(recurrent_path, not_recurrent_path):
     cnt = 0
-    fts = [FolderTraveler(notRecurrent, exts, False), FolderTraveler(recurrent, exts, True)]
+    fts = [FolderTraveler(not_recurrent_path, exts, False), FolderTraveler(recurrent_path, exts, True)]
 
     for file in iterator(*fts):
         if not file.lower().endswith('ui.py'):
@@ -27,7 +24,3 @@ def main():
                 cnt += len(lines)
 
     print('Total:', cnt)
-
-
-if __name__ == "__main__":
-    main()
