@@ -28,6 +28,3 @@ def test_group_descriptor(h5file):
 
 def test_ref_attr(h5file):
     some_descriptor_group.test_ref_attr(h5file)
-
-def test_datatable(h5file):
-    some_descriptor_group.test_datatable(h5file)

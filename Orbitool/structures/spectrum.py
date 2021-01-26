@@ -14,7 +14,7 @@ class FittedPeak(Peak):
     fitted_param = HDF5.SmallNumpy()
     peak_position = HDF5.SmallNumpy()
     peak_intensity = HDF5.SmallNumpy()
-    formula_list = HDF5.SmallNumpy()
+    formula_list = HDF5.LightList.descriptor()
 
 
 class Spectrum(HDF5.Group):
@@ -24,3 +24,6 @@ class Spectrum(HDF5.Group):
     intensity = HDF5.BigNumpy()
     startTime = HDF5.Datetime()
     endTime = HDF5.Datetime()
+
+
+# class MassListItem

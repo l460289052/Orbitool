@@ -1,5 +1,5 @@
 from numpy.lib.arraysetops import union1d
-from . import descriptor, memory_h5_location
+from . import descriptor
 import h5py
 from typing import Union
 from abc import abstractmethod
@@ -40,7 +40,7 @@ class H5Obj(_H5Obj):
 
     _export_value_names = {}
 
-    def __init__(self, location: Union[h5py.Group, h5py.Dataset, memory_h5_location.Location], inited=True):
+    def __init__(self, location: Union[h5py.Group, h5py.Dataset], inited=True):
         self.location = location
         assert not inited or self.h5_type.attr_type_name == self.h5_type.type_name
 
@@ -53,7 +53,7 @@ class H5Obj(_H5Obj):
         raise TypeError(f"You cannot set a H5Obj {str(type(self))} as a descriptor")
 
     @classmethod
-    def create_at(cls, location: Union[h5py.Group, memory_h5_location.Location], key):
+    def create_at(cls, location: h5py.Group, key):
         obj = cls(location.create_group(key), False)
         for name, desc in cls._export_value_names[obj.h5_type.type_name].items():
             desc.on_create(obj)
@@ -63,7 +63,7 @@ class H5Obj(_H5Obj):
         pass
         
     @classmethod
-    def openOrCreateInitialize(cls, location:Union[h5py.Group, memory_h5_location.Location], key):
+    def openOrCreateInitialize(cls, location:h5py.Group, key):
         if key in location:
             return cls(location)
         obj = cls.create_at(location, key)
@@ -74,11 +74,6 @@ class H5Obj(_H5Obj):
     def descriptor(cls, name=None):
         return descriptor.H5ObjectDescriptor(cls, name)
 
-    def to_memory(self):
-        m_obj = type(self).create_at(memory_h5_location.Location(), 'mem')
-        m_obj.copy_from(self)
-        return m_obj
-
     def copy_from(self, another):
         for name, desc in self._export_value_names[self.h5_type.type_name].items():
             desc.copy_from_to(another, self)
@@ -88,6 +83,6 @@ H5Obj.__init_subclass__()
 descriptor.BaseHDF5Obj = H5Obj
 
 
-def infer_from(location: Union[h5py.Group, memory_h5_location.Location]):
+def infer_from(location: h5py.Group):
     type_name = location.attrs['type']
     return H5Obj._child_type_manager.get_type(type_name)(location)

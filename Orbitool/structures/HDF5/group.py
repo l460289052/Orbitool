@@ -1,4 +1,4 @@
-from . import descriptor, memory_h5_location, h5obj
+from . import descriptor, h5obj
 import h5py
 import numpy as np
 from abc import ABCMeta, abstractmethod

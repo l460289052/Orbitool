@@ -82,46 +82,6 @@ class SimpleDataset(Descriptor):
     #     return attr_type('/'.join((self.name, name)) if name is not None else self.name+'/')
 
 
-class DataTable(SimpleDataset):
-    def __init__(self, dtype, obj=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.dtype = dtype
-        self.obj = obj
-
-    def __set__(self, obj, value):
-        raise NotImplementedError()
-
-    def __get__(self, obj, objtype=None):
-        return DataTable(self.dtype, obj, name=self.name)
-
-    def on_create(self, obj):
-        ds = obj.location.create_dataset(
-            self.name, (0,), self.dtype, maxshape=(None,), **DataTable.kwargs)
-
-    def clear(self):
-        del self.obj.location[self.name]
-        self.on_create(self.obj)
-
-    @property
-    def dataset(self):
-        return self.obj.location[self.name]
-
-    def extend(self, items: Union[np.ndarray, List[Union[Tuple, np.ndarray]] ]):
-        dataset = self.dataset
-        length = len(items)
-        if isinstance(dataset, np.ndarray):
-            dataset.resize((len(dataset) + length,), refcheck=False)
-        else:
-            dataset.resize((len(dataset) + length,))
-        dataset[-length:] = items
-
-    def copy_from_to(self, obj_src, obj_dst):
-        dt_dst = self.__get__(obj_dst)
-        dt_src = self.__get__(obj_src)
-        dt_dst.clear()
-        dt_dst.extend(dt_src.dataset)
-
-
 class Int(Attr):
     pass
 

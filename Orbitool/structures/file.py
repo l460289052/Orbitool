@@ -23,7 +23,7 @@ def setFileReader(fr):
 
 class FileList(HDF5.Group):
     h5_type = HDF5.RegisterType("FileList")
-    files: HDF5.DataTable = HDF5.DataTable(fileDtype)
+    # files: HDF5.DataTable = HDF5.DataTable(fileDtype)
 
     def _crossed(self, start: datetime, end: datetime) -> Tuple[bool, str]:
         ds = self.files.dataset
@@ -74,7 +74,8 @@ class FileList(HDF5.Group):
         for p in filepath:
             slt |= path == p
 
-        subList: FileList = FileList.create_at(HDF5.MemoryLocation(), 'tmp')
+        raise NotImplementedError()
+        # subList: FileList = FileList.create_at(HDF5.MemoryLocation(), 'tmp')
         subList.files.extend(ds[slt])
 
     def clear(self):
