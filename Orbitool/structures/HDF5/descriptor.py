@@ -156,15 +156,14 @@ class ChildType(Str):
 
 
 class H5ObjectDescriptor(Descriptor):
-    def __init__(self, h5obj_type: Union[type, str], init=False, init_args=None, *args, **kwargs):
+    def __init__(self, h5obj_type: Union[type, str], create_args=tuple(), *args, **kwargs):
         """
         if `init` is True, will be initialize after created
         """
         super().__init__(*args, **kwargs)
         self.h5obj_type = h5obj_type if isinstance(
             h5obj_type, str)else get_name(h5obj_type)
-        self.init = init
-        self.init_args = init_args
+        self.create_args = create_args
 
     def __get__(self, obj, objtype=None):
         return get_type(self.h5obj_type)(obj.location[self.name])
@@ -177,9 +176,8 @@ class H5ObjectDescriptor(Descriptor):
 
     def on_create(self, obj):
         sub_group = get_type(self.h5obj_type).create_at(
-            obj.location, self.name)
-        if self.init:
-            sub_group.initialize(*self.init_args)
+            obj.location, self.name, *self.create_args)
+        sub_group.initialize()
 
 
 class Ref_Attr(Attr):

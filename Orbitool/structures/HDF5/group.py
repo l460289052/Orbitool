@@ -19,10 +19,13 @@ class Dict(Group):
     h5_type = descriptor.RegisterType("Dict")
     child_type: str = descriptor.ChildType()
 
-    def initialize(self, child_type: type):
-        name = self._child_type_manager.get_name(child_type)
-        assert name is not None
-        self.child_type = name
+    @classmethod
+    def create_at(cls, location: h5py.Group, key, child_type: Union[type, str]):
+        obj = super().create_at(location, key)
+        if isinstance(child_type, type):
+            child_type = cls._child_type_manager.get_name(child_type)
+        obj.child_type = child_type
+        return obj
 
     @property
     def type_child_type(self) -> Group:
@@ -36,7 +39,7 @@ class Dict(Group):
 
     def __delitem__(self, key):
         del self.location[key]
-        
+
     def __len__(self):
         return len(self.location.keys())
 
@@ -50,14 +53,14 @@ class Dict(Group):
     def values(self):
         for v in self.location.values():
             yield self.type_child_type(v)
-            
+
     def clear(self):
         for k in self.location.keys():
             del self.location[k]
 
     @classmethod
     def descriptor(cls, child_type: Union[type, str], name=None):
-        return descriptor.H5ObjectDescriptor(cls, name, True, (child_type, ))
+        return descriptor.H5ObjectDescriptor(cls, name, (child_type, ))
 
     def copy_from(self, another):
         super().copy_from(another)
@@ -76,10 +79,15 @@ class List(Group):
 
     index_dtype = np.dtype('S')
 
-    def initialize(self, child_type: type):
-        name = self._child_type_manager.get_name(child_type)
-        assert name is not None
-        self.child_type = name
+    @classmethod
+    def create_at(cls, location: h5py.Group, key, child_type: Union[type, str]):
+        obj = super().create_at(location, key)
+        if isinstance(child_type, type):
+            child_type = cls._child_type_manager.get_name(child_type)
+        obj.child_type = child_type
+        return obj
+
+    def initialize(self):
         self.max_index = -1
         self.sequence = np.array(tuple(), dtype=List.index_dtype)
 
@@ -126,7 +134,7 @@ class List(Group):
 
     @classmethod
     def descriptor(cls, child_type: Union[type, str], name=None):
-        return descriptor.H5ObjectDescriptor(cls, True, (child_type, ), name=name)
+        return descriptor.H5ObjectDescriptor(cls, (child_type, ), name=name)
 
     def copy_from(self, another):
         super().copy_from(another)
@@ -136,5 +144,3 @@ class List(Group):
         for index in another.sequence:
             child = child_type.create_at(location_s, index)
             child.copy_from(child_type(location_a[index]))
-
-
