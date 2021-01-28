@@ -3,10 +3,7 @@ import traceback
 import multiprocessing
 import threading
 
-from Orbitool.utils import logger
-
 from Orbitool.structures import WorkSpace
-
 from Orbitool.UI.utils import showInfo
 
 

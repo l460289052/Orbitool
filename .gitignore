@@ -8,6 +8,7 @@ TestResults
 data
 ref
 error.txt
+log.txt
 *.wks
 *.Oribit*
 *.Orbit*

@@ -1,10 +1,10 @@
 from typing import Any, Callable
 import functools
 import traceback
+import logging
 from enum import Enum
 
 from Orbitool import config
-from Orbitool.utils import logger
 from Orbitool.UI.utils import showInfo
 
 from .baseWidget import BaseWidget
@@ -52,7 +52,7 @@ class node:
                     selfWidget.setBusy(False)
             except Exception as e:
                 showInfo(str(e))
-                logger.error(str(e), traceback.format_exc())
+                logging.error(str(e), exc_info=e, stack_info=True)
                 if self.except_node.func is not None:
                     self.except_node.func(selfWidget)
                 else:

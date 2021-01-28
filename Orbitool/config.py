@@ -1,4 +1,5 @@
 import os
+import logging
 DEBUG = False
 
 if DEBUG:
@@ -11,6 +12,12 @@ class TempFile:
     tempPath = None
 
 
-logPath = os.path.join(os.path.dirname(
-    os.path.dirname(__file__)), 'log.sqlite3')
-logLevel = "DEBUG"
+rootPath = os.path.dirname(os.path.dirname(__file__))
+
+logPath = os.path.join(rootPath, 'log.txt')
+
+logLevel = "DEBUG" if DEBUG else "WARNING"
+
+log_file_handler = logging.FileHandler(logPath, encoding='utf-8')
+logging.basicConfig(format=r"%(asctime)s - %(filename)s - %(levelname)s \n %(message)s",
+                    level=logLevel, handlers=[log_file_handler])

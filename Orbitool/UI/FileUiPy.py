@@ -18,7 +18,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
 
     @manager_node
     def addFile(self):
-        raise Exception()
+        raise Exception(123,456)
         files = UiUtils.openfiles(
             "Select one or more files", "RAW files(*.RAW)")
         fileList = self.workspace.fileList
