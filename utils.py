@@ -9,8 +9,9 @@ if __name__ == "__main__":
     count_parser = subparsers.add_parser('count')
     setup_parser = subparsers.add_parser('setup')
     copy_parser = subparsers.add_parser('copy')
+    clear_parser = subparsers.add_parser('clear')
 
-    args = parser.parse_args()
+    args = parser.parse_args(["clear"])
 
     root = os.path.dirname(os.path.abspath(__file__))
     root = os.path.relpath(root)
@@ -27,4 +28,7 @@ if __name__ == "__main__":
     elif args.subparser_name == "copy":
         from utils.copyCode import copy as copyCode
         pass
+    elif args.subparser_name == "clear":
+        from utils.clear_temp import clear
+        clear()
         

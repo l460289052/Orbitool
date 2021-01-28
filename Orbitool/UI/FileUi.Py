@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Orbitool/UI\File.ui'
+# Form implementation generated from reading ui file '.\Orbitool\UI\File.ui'
 #
 # Created by: PyQt5 UI code generator 5.9.2
 #
@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(499, 319)
+        Form.resize(694, 365)
         self.horizontalLayout = QtWidgets.QHBoxLayout(Form)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.verticalLayout_5 = QtWidgets.QVBoxLayout()
@@ -33,7 +33,7 @@ class Ui_Form(object):
         self.addFolderPushButton.setObjectName("addFolderPushButton")
         self.verticalLayout_5.addWidget(self.addFolderPushButton)
         self.recursionCheckBox = QtWidgets.QCheckBox(Form)
-        self.recursionCheckBox.setChecked(False)
+        self.recursionCheckBox.setChecked(True)
         self.recursionCheckBox.setObjectName("recursionCheckBox")
         self.verticalLayout_5.addWidget(self.recursionCheckBox)
         spacerItem = QtWidgets.QSpacerItem(20, 15, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
@@ -53,6 +53,7 @@ class Ui_Form(object):
         self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectItems)
         self.tableWidget.setTextElideMode(QtCore.Qt.ElideNone)
+        self.tableWidget.setHorizontalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(4)
         self.tableWidget.setRowCount(0)
@@ -65,7 +66,7 @@ class Ui_Form(object):
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(3, item)
         self.tableWidget.horizontalHeader().setCascadingSectionResizes(False)
-        self.tableWidget.horizontalHeader().setDefaultSectionSize(100)
+        self.tableWidget.horizontalHeader().setDefaultSectionSize(150)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.horizontalLayout.addWidget(self.tableWidget)
         self.verticalLayout_6 = QtWidgets.QVBoxLayout()

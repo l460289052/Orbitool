@@ -22,22 +22,24 @@
      <widget class="QTabWidget" name="tabWidget"/>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QProgressBar" name="progressBar">
-        <property name="value">
-         <number>24</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButton">
-        <property name="text">
-         <string>Abort</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <widget class="QWidget" name="processWidget" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QProgressBar" name="progressBar">
+         <property name="value">
+          <number>24</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="abortPushButton">
+         <property name="text">
+          <string>Abort</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -47,7 +49,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>18</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

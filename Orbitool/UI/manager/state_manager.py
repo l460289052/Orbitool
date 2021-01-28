@@ -7,7 +7,7 @@ from enum import Enum
 from Orbitool import config
 from Orbitool.UI.utils import showInfo
 
-from .baseWidget import BaseWidget
+from .base_widget import BaseWidget
 from .thread import Thread, MultiProcess, threadtype
 
 
@@ -34,11 +34,18 @@ class node:
 
         @functools.wraps(func)
         def decorator(selfWidget: BaseWidget, *args, **kwargs):
-            if self._root is None and not selfWidget.setBusy(True):
-                return
+            if self._root is None:
+                if selfWidget.busy.get():
+                    # if manager.process_pool.
+                        # showInfo("Wait for process or abort", 'busy')
+                    # else:
+                    showInfo("Wait for process", 'busy')
+                    return
+                else:
+                    selfWidget.busy.set(True)
             try:
                 ret = func(selfWidget, *args, **
-                           kwargs) if self._withArgs else func(self)
+                           kwargs) if self._withArgs else func(selfWidget)
                 if self.thread_node.func is not None:
                     ttype, *ret = ret
                     thread = Thread(
@@ -49,14 +56,14 @@ class node:
                         self.thread_node.func, selfWidget))
                     thread.start()
                 else:
-                    selfWidget.setBusy(False)
+                    selfWidget.busy.set(False)
             except Exception as e:
                 showInfo(str(e))
-                logging.error(str(e), exc_info=e, stack_info=True)
+                logging.error(str(e), exc_info=e)
                 if self.except_node.func is not None:
                     self.except_node.func(selfWidget)
                 else:
-                    selfWidget.setBusy(False)
+                    selfWidget.busy.set(False)
         return decorator
 
     @func.setter

@@ -6,12 +6,17 @@ import numpy as np
 import h5py
 
 from Orbitool.structures import HDF5
+from Orbitool.structures.HDF5 import datatable
 
-fileDtype = [
-    ("path", h5py.string_dtype('utf-8')),
-    ("creationDatetime", h5py.string_dtype()),
-    ("startDatetime", h5py.string_dtype()),
-    ("endDatetime", h5py.string_dtype())]
+
+class File(datatable.DatatableItem):
+    item_name = "File"
+
+    path = datatable.str_utf8()
+    createDatetime = datatable.Datetime64s()
+    startDatetime = datatable.Datetime64s()
+    endDatetime = datatable.Datetime64s()
+
 
 fileReader = None
 
@@ -23,67 +28,64 @@ def setFileReader(fr):
 
 class FileList(HDF5.Group):
     h5_type = HDF5.RegisterType("FileList")
-    # files: HDF5.DataTable = HDF5.DataTable(fileDtype)
+    files: datatable.Datatable = datatable.Datatable.descriptor(File)
 
     def _crossed(self, start: datetime, end: datetime) -> Tuple[bool, str]:
-        ds = self.files.dataset
-        startDatetimes = ds['startDatetime'].astype('M8[s]')
-        endDatetimes = ds['endDatetime'].astype('M8[s]')
+        startDatetimes = self.files.get_column("startDatetime")
+        endDatetimes = self.files.get_column("endDatetime")
         slt = (start < startDatetimes) & (endDatetimes < end)
         where = np.where(slt)
         if len(where) > 0:
-            return False, ds[where]["path"]
+            return False, list(self.files[where])
         return True, None
 
     def timeRange(self):
         if len(self.files) == 0:
             return None, None
-        ds = self.files.dataset
-        startDatetimes = ds['startDatetime'].astype('M8[s]')
-        endDatetimes = ds['endDatetime'].astype('M8[s]')
+        startDatetimes = self.files.get_column("startDatetimes")
+        endDatetimes = self.files.get_column("endDatetimes")
         return startDatetimes.min().astype(datetime), endDatetimes.min().astype(datetime)
 
     def addFile(self, filepath):
         f = fileReader(filepath)
 
-        crossed, crossedFile = self._crossed(
+        crossed, crossedFiles = self._crossed(
             f.startDatetime, f.endDatetime)
         if crossed:
-            raise ValueError('file "%s" and "%s" have crossed scan time' % (
-                f.path, crossedFile.path))
+            raise ValueError(
+                f'file "{f.path}" and "{[f.path for f in crossedFiles]}" have crossed scan time')
 
-        self.files.extend([(f.path, HDF5.Datetime.strftime(f.creationDatetime), HDF5.Datetime.strftime(
-            f.creationDatetime + f.startTimedelta), HDF5.Datetime.strftime(f.creationDatetime + f.endTimedelta))])
+        file = File(f.path, f.creationDatetime, f.creationDatetime +
+                    f.startTimedelta, f.creationDatetime + f.endTimedelta)
+        self.files.extend([file])
 
     def rmFile(self, filepath: Union[str, Iterable]):
         files = self.files
         if isinstance(filepath, str):
             filepath = [filepath]
-        ds = self.files.dataset
-        path = ds['path']
-        slt = np.zeros(len(ds), dtype=bool)
+        paths = self.files.get_column('path')
+        slt = np.zeros(len(self.files), dtype=bool)
         for p in filepath:
-            slt |= path == p
-        ds[:slt.sum()] = ds[slt]
-        ds.resize((slt.sum(),))
+            slt |= paths == p
+        del self.files[slt]
 
-    def subList(self, filepath: List[str]):
-        ds = self.files.dataset
-        path = ds['path']
-        slt = np.zeros(len(ds), dtype=bool)
-        for p in filepath:
-            slt |= path == p
+    # def subList(self, filepath: List[str]): # need a tmp location in h5file
+    #     ds = self.files.dataset
+    #     path = ds['path']
+    #     slt = np.zeros(len(ds), dtype=bool)
+    #     for p in filepath:
+    #         slt |= path == p
 
-        raise NotImplementedError()
-        # subList: FileList = FileList.create_at(HDF5.MemoryLocation(), 'tmp')
-        subList.files.extend(ds[slt])
+    #     raise NotImplementedError()
+    #     # subList: FileList = FileList.create_at(HDF5.MemoryLocation(), 'tmp')
+    #     subList.files.extend(ds[slt])
 
     def clear(self):
         self.files.clear()
         self.initialize()
 
     def __iter__(self):
-        return iter(self.files.dataset[:])
+        return iter(self.files)
 
     def __len__(self):
-        return len(self.files.dataset)
+        return len(self.files)

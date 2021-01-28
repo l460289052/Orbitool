@@ -32,7 +32,7 @@ def openfiles(caption, filter) -> List[str]:
 
 def openfolder(caption) -> Tuple[bool, str]:
     global openfolder_dir
-    folder, typ = QtWidgets.QFileDialog.getExistingDirectory(
+    folder = QtWidgets.QFileDialog.getExistingDirectory(
         caption=caption, directory=openfolder_dir)
 
     if len(folder) == 0:

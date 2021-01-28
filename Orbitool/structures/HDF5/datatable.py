@@ -35,6 +35,12 @@ class DatatableItem:
         DatatableItem._child_type_manager.add_type(cls.item_name, cls)
         cls.dtype = DatatableItem._child_datatable_dtypes.get(
             cls.item_name, [])
+        
+    def __str__(self) -> str:
+        '\n'.join(f"{name}: {getattr(self, name)}" for name in self.dtype.names)
+        
+    def __repr__(self) -> str:
+        '\n'.join(f"{name}: {repr(getattr(self, name))}" for name in self.dtype.names)
 
 
 DatatableItem.__init_subclass__()
@@ -86,6 +92,9 @@ class Datatable(H5Obj):
 
     def __iter__(self):
         return self[:]
+    
+    def __len__(self):
+        return len(self.location)
 
     def get_column(self, dtype_name):
         dataDescriptor: DataDescriptor = get_type(
@@ -110,15 +119,14 @@ class Datatable(H5Obj):
 class DataDescriptor:
     dtype: np.dtype = None
 
-    def __init__(self, name=None) -> None:
-        self.name = name
+    def __init__(self) -> None:
+        self.name = None
         self.index = None
         self.shape = None
 
     def __set_name__(self, owner, name):
         assert issubclass(owner, DatatableItem)
-        if self.name is None:
-            self.name = name
+        self.name = name
         dtypes = DatatableItem._child_datatable_dtypes
         if owner.item_name not in dtypes:
             dtype = []
@@ -190,7 +198,7 @@ class str_ascii_limit(DataDescriptor):
         return self.dtype.type(value)
 
 
-class Datatime64s(Int64):
+class Datetime64s(Int64):
     def multi_convert_from_h5(self, column):
         return column.astype('M8[s]')
 

@@ -1,42 +1,51 @@
 from typing import Union, Optional
 from . import FileUi, utils as UiUtils
-from .utils import showInfo
-from .base_widget import BaseWidget, manager_node
+from .utils import showInfo, set_header_sizes
+from .manager import BaseWidget, state_node
 from PyQt5 import QtWidgets, QtCore
 import os
 
+from Orbitool.structures import file
+from Orbitool import utils
+
 
 class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
-    def __init__(self, getWorkspace, parent: Optional['QWidget'] = None) -> None:
+    def __init__(self, widget_root: BaseWidget, parent: Optional['QWidget'] = None) -> None:
         super().__init__(parent=parent)
+        self.widget_root = widget_root
         self.setupUi(self)
 
-        self.busy = False
-        self.getWorkspace = getWorkspace
-        self.addFilePushButton.clicked.connect(self.addFile)
-        # self.addFolderPushButton.clicked.connect(self.addFolder)
+        set_header_sizes(self.tableWidget.horizontalHeader(), [150, 100, 100])
 
-    @manager_node
+        self.addFilePushButton.clicked.connect(self.addFile)
+        self.addFolderPushButton.clicked.connect(self.addFolder)
+
+    @state_node
     def addFile(self):
-        raise Exception(123,456)
         files = UiUtils.openfiles(
             "Select one or more files", "RAW files(*.RAW)")
         fileList = self.workspace.fileList
         for f in files:
             fileList.addFile(f)
         self.showFiles()
-        
+
     @addFile.except_node
     def addFile(self):
-        showInfo('busy-except')
-        raise Exception()
+        self.showFiles()
 
-    @addFile.except_node.except_node
-    def addFile(self):
-        showInfo('busy-except-except')
-        
-    # def addFoldew(self);
+    @state_node
+    def addFolder(self):
+        ret, folder = UiUtils.openfolder("Select one folder")
+        if not ret:
+            return
+        fileList = self.workspace.fileList
+        for path in utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.recursionCheckBox.isChecked()):
+            fileList.addFile(path)
+        self.showFiles()
 
+    @addFolder.except_node
+    def addFolder(self):
+        self.showFiles()
 
     def showFiles(self):
         table = self.tableWidget
@@ -45,10 +54,9 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         table.setRowCount(len(fileList))
 
         for i, f in enumerate(fileList):
-            v = [os.path.split(f['path'])[1], f[2], f[3], f[0]]
+            v = [os.path.split(f.path)[1], f.startDatetime,
+                 f.endDatetime, f.path]
             for j, vv in enumerate(v):
-                table.setItem(i,j,QtWidgets.QTableWidgetItem(vv))
-        
-        table.show()
+                table.setItem(i, j, QtWidgets.QTableWidgetItem(str(vv)))
 
-                
+        table.show()

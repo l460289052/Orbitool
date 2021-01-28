@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Orbitool/UI\Main.ui'
+# Form implementation generated from reading ui file '.\Orbitool\UI\Main.ui'
 #
 # Created by: PyQt5 UI code generator 5.9.2
 #
@@ -20,19 +20,21 @@ class Ui_MainWindow(object):
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
         self.tabWidget.setObjectName("tabWidget")
         self.verticalLayout.addWidget(self.tabWidget)
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
+        self.processWidget = QtWidgets.QWidget(self.centralwidget)
+        self.processWidget.setObjectName("processWidget")
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.processWidget)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.progressBar = QtWidgets.QProgressBar(self.processWidget)
         self.progressBar.setProperty("value", 24)
         self.progressBar.setObjectName("progressBar")
-        self.horizontalLayout.addWidget(self.progressBar)
-        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton.setObjectName("pushButton")
-        self.horizontalLayout.addWidget(self.pushButton)
-        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.horizontalLayout_2.addWidget(self.progressBar)
+        self.abortPushButton = QtWidgets.QPushButton(self.processWidget)
+        self.abortPushButton.setObjectName("abortPushButton")
+        self.horizontalLayout_2.addWidget(self.abortPushButton)
+        self.verticalLayout.addWidget(self.processWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 18))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -45,5 +47,5 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.pushButton.setText(_translate("MainWindow", "Abort"))
+        self.abortPushButton.setText(_translate("MainWindow", "Abort"))
 

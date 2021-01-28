@@ -19,8 +19,8 @@ class file(datatable.DatatableItem):
     item_name = "test_datatable_file"
 
     path = datatable.str_utf8()
-    startDatetime = datatable.Datatime64s()
-    endDatetime = datatable.Datatime64s()
+    startDatetime = datatable.Datetime64s()
+    endDatetime = datatable.Datetime64s()
     append = datatable.str_ascii_limit(length=10)
 
 
