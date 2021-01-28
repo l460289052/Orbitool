@@ -66,10 +66,10 @@ def check_list(l: HDF5.List):
 
 
 def test_list_copy_from(h5file):
-    l_m: HDF5.List = HDF5.List.create_at(h5file, 'm')
-    l_m.initialize(Spectrum)
+    l_m: HDF5.List = HDF5.List.create_at(h5file, 'm', Spectrum)
+    l_m.initialize()
     init_list(l_m)
-    l_h5: HDF5.List = HDF5.List.create_at(h5file, 'l')
+    l_h5: HDF5.List = HDF5.List.create_at(h5file, 'l', Spectrum)
     l_h5.copy_from(l_m)
     check_list(l_h5)
 
@@ -86,10 +86,10 @@ def check_dict(d: HDF5.Dict):
 
 
 def test_dict_copy_from(h5file):
-    d_m: HDF5.Dict = HDF5.Dict.create_at(h5file, 'm')
-    d_m.initialize(Spectrum)
+    d_m: HDF5.Dict = HDF5.Dict.create_at(h5file, 'm', Spectrum)
+    d_m.initialize()
     init_dict(d_m)
-    d_h5: HDF5.Dict = HDF5.Dict.create_at(h5file, 'd')
+    d_h5: HDF5.Dict = HDF5.Dict.create_at(h5file, 'd', Spectrum)
     d_h5.copy_from(d_m)
     check_dict(d_h5)
 
@@ -102,4 +102,3 @@ def test_spectra_copy_from(h5file):
     s_h5 = Spectra.create_at(h5file, 's')
     s_h5.copy_from(s_m)
     check_list(s_h5.spectra)
-

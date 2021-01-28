@@ -28,8 +28,8 @@ def test_group(location):
 
 
 def test_list(location):
-    l: HDF5.List = HDF5.List.create_at(location, 'list')
-    l.initialize(Spectrum)
+    l: HDF5.List = HDF5.List.create_at(location, 'list', Spectrum)
+    l.initialize()
     for i in range(10):
         s: Spectrum = l.append()
         s.initialize([i] * 10, [i] * 10, datetime(1970 + i, 1, 1))
@@ -48,12 +48,12 @@ def test_list(location):
     s: Spectrum = l.insert(0)
     s.initialize([0] * 10, [0] * 10, datetime(1970, 1, 1))
     assert np.array_equal(r[-1].mz, [9] * 10)
-    assert np.array_equal(r[0].mz, [0]*10)
+    assert np.array_equal(r[0].mz, [0] * 10)
 
 
 def test_dict(location):
-    d: HDF5.Dict = HDF5.Dict.create_at(location, 'dict')
-    d.initialize(Spectrum)
+    d: HDF5.Dict = HDF5.Dict.create_at(location, 'dict', Spectrum)
+    d.initialize()
     for i in range(10):
         s: Spectrum = d.additem(str(i))
         s.initialize([i] * 10, [i] * 10, datetime(1970 + i, 1, 1))
@@ -67,7 +67,7 @@ def test_dict(location):
         assert v.h5_type.type_name == type_name
         assert np.array_equal(v.mz, [int(k)] * 10)
         assert np.array_equal(v.mz, np.array([int(k)] * 10))
-        assert v.time == datetime(1970+int(k), 1, 1)
+        assert v.time == datetime(1970 + int(k), 1, 1)
 
 
 def test_group_descriptor(location):
@@ -93,4 +93,3 @@ def test_ref_attr(location):
     mm = f.spectra[0]
     assert np.array_equal(mm.mz, range(10))
     assert np.array_equal(mm.intensity, range(10))
-

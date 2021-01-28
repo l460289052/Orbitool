@@ -22,12 +22,14 @@ def get_name(typ: type) -> str:
 class Descriptor(metaclass=ABCMeta):
     def __init__(self, name=None):
         self.name: str = name
+        self.descriptor_name = None
 
     def __set_name__(self, owner, name):
         assert issubclass(
             owner, BaseHDF5Obj), "Owner class must be a subclass of `HDF5Group`"
         if self.name is None:
             self.name = name
+        self.descriptor_name = name
         # elif self.name.endswith('/'):
         #     self.name += name
 
@@ -152,7 +154,8 @@ class RegisterType(Str):
 
 
 class ChildType(Str):
-    pass
+    def copy_from_to(self, obj_src, obj_dst):
+        assert getattr(obj_src, self.descriptor_name) == getattr(obj_dst, self.descriptor_name)
 
 
 class H5ObjectDescriptor(Descriptor):
