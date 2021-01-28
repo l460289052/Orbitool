@@ -84,6 +84,10 @@ class SimpleDataset(Descriptor):
     #     return attr_type('/'.join((self.name, name)) if name is not None else self.name+'/')
 
 
+class Bool(Attr):
+    pass
+
+
 class Int(Attr):
     pass
 
@@ -155,7 +159,8 @@ class RegisterType(Str):
 
 class ChildType(Str):
     def copy_from_to(self, obj_src, obj_dst):
-        assert getattr(obj_src, self.descriptor_name) == getattr(obj_dst, self.descriptor_name)
+        assert getattr(obj_src, self.descriptor_name) == getattr(
+            obj_dst, self.descriptor_name)
 
 
 class H5ObjectDescriptor(Descriptor):

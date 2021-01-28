@@ -43,27 +43,12 @@ get_type = DatatableItem._child_type_manager.get_type
 get_name = DatatableItem._child_type_manager.get_name
 
 
-class _iter:
-    def __init__(self, dt) -> None:
-        self.dt = dt
-
-    def __getitem__(self, s):
-        t = get_type(self.dt.item_type)
-        ds = self.dt.location[s]
-        for row in ds:
-            yield t(row, from_hdf5=True)
-
-    def __iter__(self):
-        return self[:]
-
-
 class Datatable(H5Obj):
     h5_type = _descriptor.RegisterType('Datatable')
     item_type = _descriptor.ChildType()
 
     def __init__(self, location, inited=True):
         super().__init__(location, inited)
-        self.iter_range = _iter(self)
         self.dtype: np.dtype = get_type(
             self.item_type).dtype if inited else None
 
@@ -83,7 +68,26 @@ class Datatable(H5Obj):
         obj.item_type = item_type
         return obj
 
-    def __getitem__(self, dtype_name):
+    def __getitem__(self, s):
+        t = get_type(self.item_type)
+        ds = self.location[s]
+        for row in ds:
+            yield t(row, from_hdf5=True)
+
+    def __setitem__(self, s, value: List[DatatableItem]):
+        self.location[s] = [tuple(r.row) for r in value]
+
+    def __delitem__(self, s):
+        slt = np.ones(len(self.location), dtype=np.bool)
+        slt[s] = False
+        length = slt.sum()
+        self.location[:length] = self.location[slt]
+        self.location.resize((length,))
+
+    def __iter__(self):
+        return self[:]
+
+    def get_column(self, dtype_name):
         dataDescriptor: DataDescriptor = get_type(
             self.item_type).__dict__[dtype_name]
         return dataDescriptor.multi_convert_from_h5(self.location[dataDescriptor.name])
@@ -101,9 +105,6 @@ class Datatable(H5Obj):
         length = len(rows)
         self.location.resize((self.location.shape[0] + length,))
         self.location[-length:] = [tuple(r.row) for r in rows]
-
-    def update(self, index: Union[np.ndarray, list], rows: List[DatatableItem]):
-        self.location[index] = [tuple(r.row) for r in rows]
 
 
 class DataDescriptor:
@@ -146,20 +147,24 @@ class DataDescriptor:
         return value
 
 
+class Bool(DataDescriptor):
+    dtype = np.dtype(bool)
+
+
 class Int32(DataDescriptor):
-    dtype = np.int32
+    dtype = np.dtype(np.int32)
 
 
 class Int64(DataDescriptor):
-    dtype = np.int64
+    dtype = np.dtype(np.int64)
 
 
 class Float32(DataDescriptor):
-    dtype = np.float32
+    dtype = np.dtype(np.float32)
 
 
 class Float64(DataDescriptor):
-    dtype = np.float64
+    dtype = np.dtype(np.float64)
 
 
 class str_utf8(DataDescriptor):
@@ -185,9 +190,7 @@ class str_ascii_limit(DataDescriptor):
         return self.dtype.type(value)
 
 
-class Datatime64s(DataDescriptor):
-    dtype = np.int64
-
+class Datatime64s(Int64):
     def multi_convert_from_h5(self, column):
         return column.astype('M8[s]')
 
@@ -198,9 +201,7 @@ class Datatime64s(DataDescriptor):
         return np.datetime64(value, 's').astype(np.int64)
 
 
-class Timedelta64s(DataDescriptor):
-    dtype = np.int64
-
+class Timedelta64s(Int64):
     def multi_convert_from_h5(self, column):
         return column.astype('m8[s]')
 
