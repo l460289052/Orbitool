@@ -1,4 +1,4 @@
 from .fileQuery import openfile, openfiles, openfolder
 from .showinfo import showInfo
 
-from .set_size import set_header_sizes
+from .utils import set_header_sizes, get_tablewidget_selected_row

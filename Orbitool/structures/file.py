@@ -42,9 +42,9 @@ class FileList(HDF5.Group):
     def timeRange(self):
         if len(self.files) == 0:
             return None, None
-        startDatetimes = self.files.get_column("startDatetimes")
-        endDatetimes = self.files.get_column("endDatetimes")
-        return startDatetimes.min().astype(datetime), endDatetimes.min().astype(datetime)
+        startDatetimes = self.files.get_column("startDatetime")
+        endDatetimes = self.files.get_column("endDatetime")
+        return startDatetimes.min().astype(datetime), endDatetimes.max().astype(datetime)
 
     def addFile(self, filepath):
         f = fileReader(filepath)
@@ -59,15 +59,10 @@ class FileList(HDF5.Group):
                     f.startTimedelta, f.creationDatetime + f.endTimedelta)
         self.files.extend([file])
 
-    def rmFile(self, filepath: Union[str, Iterable]):
-        files = self.files
-        if isinstance(filepath, str):
-            filepath = [filepath]
-        paths = self.files.get_column('path')
-        slt = np.zeros(len(self.files), dtype=bool)
-        for p in filepath:
-            slt |= paths == p
-        del self.files[slt]
+    def rmFile(self, indexes: Union[int, Iterable[int]]):
+        if isinstance(indexes, int):
+            indexes = (indexes,)
+        del self.files[indexes]
 
     # def subList(self, filepath: List[str]): # need a tmp location in h5file
     #     ds = self.files.dataset

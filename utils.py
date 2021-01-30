@@ -11,7 +11,7 @@ if __name__ == "__main__":
     copy_parser = subparsers.add_parser('copy')
     clear_parser = subparsers.add_parser('clear')
 
-    args = parser.parse_args(["clear"])
+    args = parser.parse_args()
 
     root = os.path.dirname(os.path.abspath(__file__))
     root = os.path.relpath(root)

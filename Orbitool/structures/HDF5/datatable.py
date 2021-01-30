@@ -35,12 +35,13 @@ class DatatableItem:
         DatatableItem._child_type_manager.add_type(cls.item_name, cls)
         cls.dtype = DatatableItem._child_datatable_dtypes.get(
             cls.item_name, [])
-        
+
     def __str__(self) -> str:
         '\n'.join(f"{name}: {getattr(self, name)}" for name in self.dtype.names)
-        
+
     def __repr__(self) -> str:
-        '\n'.join(f"{name}: {repr(getattr(self, name))}" for name in self.dtype.names)
+        '\n'.join(
+            f"{name}: {repr(getattr(self, name))}" for name in self.dtype.names)
 
 
 DatatableItem.__init_subclass__()
@@ -91,8 +92,8 @@ class Datatable(H5Obj):
         self.location.resize((length,))
 
     def __iter__(self):
-        return self[:]
-    
+        return self[:]  # self.__getitem__(slice(None,None,None))
+
     def __len__(self):
         return len(self.location)
 

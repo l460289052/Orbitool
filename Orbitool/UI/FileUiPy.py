@@ -1,6 +1,6 @@
 from typing import Union, Optional
 from . import FileUi, utils as UiUtils
-from .utils import showInfo, set_header_sizes
+from .utils import showInfo, set_header_sizes, get_tablewidget_selected_row
 from .manager import BaseWidget, state_node
 from PyQt5 import QtWidgets, QtCore
 import os
@@ -19,6 +19,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
 
         self.addFilePushButton.clicked.connect(self.addFile)
         self.addFolderPushButton.clicked.connect(self.addFolder)
+        self.removeFilePushButton.clicked.connect(self.removeFile)
 
     @state_node
     def addFile(self):
@@ -47,6 +48,16 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
     def addFolder(self):
         self.showFiles()
 
+    @state_node
+    def removeFile(self):
+        indexes = get_tablewidget_selected_row(self.tableWidget)
+        self.workspace.fileList.rmFile(indexes)
+        self.showFiles()
+
+    @removeFile.except_node
+    def removeFile(self):
+        self.showFiles()
+
     def showFiles(self):
         table = self.tableWidget
         fileList = self.workspace.fileList
@@ -60,3 +71,8 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
                 table.setItem(i, j, QtWidgets.QTableWidgetItem(str(vv)))
 
         table.show()
+
+        if self.checkBox.isChecked():
+            time_range = self.workspace.fileList.timeRange()
+            self.startDateTimeEdit.setDateTime(time_range[0])
+            self.endDateTimeEdit.setDateTime(time_range[1])
