@@ -32,16 +32,18 @@ class DatatableItem:
                      for ind, r in enumerate(self.row) if r == None])
 
     def __init_subclass__(cls):
+        assert cls.__base__ == DatatableItem or cls == DatatableItem, "forbid multi inherit"
         DatatableItem._child_type_manager.add_type(cls.item_name, cls)
         cls.dtype = DatatableItem._child_datatable_dtypes.get(
             cls.item_name, [])
 
     def __str__(self) -> str:
-        '\n'.join(f"{name}: {getattr(self, name)}" for name in self.dtype.names)
+        return '\n'.join(
+            f"{dtype[0]}: {getattr(self, dtype[0])}" for dtype in self.dtype)
 
     def __repr__(self) -> str:
-        '\n'.join(
-            f"{name}: {repr(getattr(self, name))}" for name in self.dtype.names)
+        return '\n'.join(
+            f"{dtype[0]}: {repr(getattr(self, dtype[0]))}" for dtype in self.dtype)
 
 
 DatatableItem.__init_subclass__()
@@ -56,8 +58,7 @@ class Datatable(H5Obj):
 
     def __init__(self, location, inited=True):
         super().__init__(location, inited)
-        self.dtype: np.dtype = get_type(
-            self.item_type).dtype if inited else None
+        self.dtype: list = get_type(self.item_type).dtype if inited else None
 
     @classmethod
     def create_at(cls, location: h5py.Group, key, item_type: Union[str, type]):
@@ -115,6 +116,17 @@ class Datatable(H5Obj):
         length = len(rows)
         self.location.resize((self.location.shape[0] + length,))
         self.location[-length:] = [tuple(r.row) for r in rows]
+
+    def clear(self):
+        self.location.resize((0,))
+
+    def sort(self, rowIndex: Union[str, int]):
+        if isinstance(rowIndex, int):
+            rowIndex = get_type(self.item_type).dtype[rowIndex][0]
+        args = self.get_column(rowIndex).argsort()
+        items = self.location[:]
+        items = items[args]
+        self.location[:] = items
 
 
 class DataDescriptor:
