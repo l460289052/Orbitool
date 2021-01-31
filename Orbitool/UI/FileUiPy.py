@@ -1,7 +1,9 @@
 from typing import Union, Optional
+from datetime import datetime
+
 from . import FileUi, utils as UiUtils
 from .utils import showInfo, set_header_sizes, get_tablewidget_selected_row
-from .manager import BaseWidget, state_node
+from .manager import BaseWidget, state_node, Thread
 from PyQt5 import QtWidgets, QtCore
 import os
 
@@ -26,8 +28,14 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         files = UiUtils.openfiles(
             "Select one or more files", "RAW files(*.RAW)")
         fileList = self.workspace.fileList
-        for f in files:
-            fileList.addFile(f)
+
+        def func():
+            for f in files:
+                fileList.addFile(f)
+        return Thread(func)
+
+    @addFile.thread_node
+    def addFile(self, result, args):
         self.showFiles()
 
     @addFile.except_node
@@ -38,10 +46,16 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
     def addFolder(self):
         ret, folder = UiUtils.openfolder("Select one folder")
         if not ret:
-            return
+            return None
         fileList = self.workspace.fileList
-        for path in utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.recursionCheckBox.isChecked()):
-            fileList.addFile(path)
+
+        def func():
+            for path in utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.recursionCheckBox.isChecked()):
+                fileList.addFile(path)
+        return Thread(func)
+
+    @addFolder.thread_node
+    def addFolder(self, result, args):
         self.showFiles()
 
     @addFolder.except_node
@@ -73,6 +87,8 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         table.show()
 
         if self.checkBox.isChecked():
-            time_range = self.workspace.fileList.timeRange()
-            self.startDateTimeEdit.setDateTime(time_range[0])
-            self.endDateTimeEdit.setDateTime(time_range[1])
+            time_start, time_end = self.workspace.fileList.timeRange()
+            if time_start is None:
+                return
+            self.startDateTimeEdit.setDateTime(time_start)
+            self.endDateTimeEdit.setDateTime(time_end)

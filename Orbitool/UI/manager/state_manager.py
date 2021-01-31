@@ -44,24 +44,24 @@ class node:
                 else:
                     selfWidget.busy.set(True)
             try:
-                ret = func(selfWidget, *args, **
-                           kwargs) if self._withArgs else func(selfWidget)
-                if self.thread_node.func is not None:
-                    ttype, *ret = ret
-                    thread = Thread(
-                        ret) if ttype == threadtype.thread else MultiProcess(ret)
+                thread = func(selfWidget, *args[0]) if self._nodeType == NodeType.ThreadEnd \
+                    else func(selfWidget, *args, **kwargs) if self._withArgs else func(selfWidget)
+
+                tmpfunc = self.thread_node.func
+                if thread is not None and tmpfunc:
                     selfWidget.thread = thread
                     # thread.sendStatus.connect()
                     thread.finished.connect(functools.partial(
-                        self.thread_node.func, selfWidget))
+                        tmpfunc, selfWidget))
                     thread.start()
                 else:
                     selfWidget.busy.set(False)
             except Exception as e:
                 showInfo(str(e))
                 logging.error(str(e), exc_info=e)
-                if self.except_node.func is not None:
-                    self.except_node.func(selfWidget)
+                tmpfunc = self.except_node.func
+                if tmpfunc:
+                    tmpfunc(selfWidget)
                 else:
                     selfWidget.busy.set(False)
         return decorator

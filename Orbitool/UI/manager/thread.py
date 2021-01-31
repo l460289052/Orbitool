@@ -11,11 +11,11 @@ class Thread(QtCore.QThread):
     finished = QtCore.pyqtSignal(tuple)
     sendStatus = QtCore.pyqtSignal(str, int, int)
 
-    def __init__(self, args) -> None:
+    def __init__(self, func, args = (), kwargs = {}) -> None:
         super().__init__()
-        self.func = args[0]
-        self.args = args[1] if len(args) > 1 else tuple()
-        self.kwargs = args[2] if len(args) > 2 else {}
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
 
     def run(self):
         try:
