@@ -105,14 +105,17 @@ class File:
         time = retentimeTime + self.creationDatetime
         return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
 
-    def timeRange2NumRange(self, timeRange: (timedelta, timedelta)):
+    def timeRange2NumRange(self, timeRange: Tuple[timedelta, timedelta]):
         r: range = functions.binary_search.indexBetween(self, timeRange,
                                                         (self.firstScanNumber,
                                                          self.lastScanNumber + 1),
                                                         method=(lambda f, i: f.getSpectrumRetentionTime(i)))
         return (r.start, r.stop)
 
-    def checkAverageEmpty(self, timeRange: (timedelta, timedelta) = None, numRange: (int, int) = None, polarity=-1):
+    def numRange2TimeRange(self, numRange: Tuple[int, int]) -> Tuple[timedelta, timedelta]:
+        return self.getSpectrumRetentionTime(numRange[0]), self.getSpectrumRetentionTime(numRange[1] - 1)
+
+    def checkAverageEmpty(self, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
         if timeRange is not None and numRange is None:
             start, end = self.timeRange2NumRange(timeRange)
         elif numRange is not None and timeRange is None:
@@ -126,7 +129,7 @@ class File:
                 return False
         return True
 
-    def getAveragedSpectrum(self, ppm, timeRange: (timedelta, timedelta) = None, numRange: (int, int) = None, polarity=-1):
+    def getAveragedSpectrum(self, ppm, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
         start, end = self.bothToNumRange(timeRange, numRange)
 
         scanfilter = self.getFilter(start, end, polarity)
@@ -150,7 +153,7 @@ class File:
         numRange = (start, end)
         return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, timeRange, numRange)
 
-    def bothToNumRange(self, timeRange: (timedelta, timedelta), numRange: (int, int)) -> (int, int):
+    def bothToNumRange(self, timeRange: Tuple[timedelta, timedelta], numRange: Tuple[int, int]) -> (int, int):
         if timeRange is not None and numRange is None:
             return self.timeRange2NumRange(timeRange)
         elif numRange is not None and timeRange is None:

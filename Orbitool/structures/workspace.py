@@ -5,7 +5,7 @@ import h5py
 
 
 from . import HDF5
-from .file import FileList, setFileReader
+from .file import FileList, setFileReader, SpectrumInfoList, SpectrumInfo
 
 from Orbitool import config
 from Orbitool.utils import readers
@@ -24,8 +24,11 @@ class WorkSpace:
             self.tempDir = None
             self.h5 = h5py.File(path, 'a')
 
-        self.fileList: FileList = FileList.openOrCreateInitialize(
-            self.h5, 'fileList')
-        
+        self.file_list: FileList = FileList.openOrCreateInitialize(
+            self.h5, 'file_list')
+
+        self.spectrum_info_list: SpectrumInfoList = SpectrumInfoList.openOrCreateInitialize(
+            self.h5, 'spectrum_info_list')
+
     def close(self):
         self.h5.close()

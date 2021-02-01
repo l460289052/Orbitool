@@ -19,11 +19,15 @@ class FittedPeak(Peak):
 
 class Spectrum(HDF5.Group):
     h5_type = HDF5.RegisterType("Spectrum")
-    fileTime = HDF5.Datetime()
+    file_path = HDF5.Str()
     mz = HDF5.BigNumpy()
     intensity = HDF5.BigNumpy()
     startTime = HDF5.Datetime()
     endTime = HDF5.Datetime()
 
+
+class SpectrumList(HDF5.Group):
+    h5_type = HDF5.RegisterType("SpectrumList")
+    
 
 # class MassListItem

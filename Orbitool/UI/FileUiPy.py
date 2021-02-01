@@ -1,5 +1,6 @@
 from typing import Union, Optional
 from datetime import datetime
+from functools import partial
 
 from . import FileUi, utils as UiUtils
 from .utils import showInfo, set_header_sizes, get_tablewidget_selected_row
@@ -22,16 +23,19 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         self.addFilePushButton.clicked.connect(self.addFile)
         self.addFolderPushButton.clicked.connect(self.addFolder)
         self.removeFilePushButton.clicked.connect(self.removeFile)
+        self.selectedPushButton.clicked.connect(self.processSelected)
+        self.allPushButton.clicked.connect(self.processAll)
 
     @state_node
     def addFile(self):
         files = UiUtils.openfiles(
             "Select one or more files", "RAW files(*.RAW)")
-        fileList = self.workspace.fileList
+        file_list = self.workspace.file_list
 
         def func():
             for f in files:
-                fileList.addFile(f)
+                file_list.addFile(f)
+            file_list.sort()
         return Thread(func)
 
     @addFile.thread_node
@@ -47,11 +51,12 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         ret, folder = UiUtils.openfolder("Select one folder")
         if not ret:
             return None
-        fileList = self.workspace.fileList
+        file_list = self.workspace.file_list
 
         def func():
             for path in utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.recursionCheckBox.isChecked()):
-                fileList.addFile(path)
+                file_list.addFile(path)
+            file_list.sort()
         return Thread(func)
 
     @addFolder.thread_node
@@ -65,7 +70,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
     @state_node
     def removeFile(self):
         indexes = get_tablewidget_selected_row(self.tableWidget)
-        self.workspace.fileList.rmFile(indexes)
+        self.workspace.file_list.rmFile(indexes)
         self.showFiles()
 
     @removeFile.except_node
@@ -74,11 +79,11 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
 
     def showFiles(self):
         table = self.tableWidget
-        fileList = self.workspace.fileList
+        file_list = self.workspace.file_list
         table.setRowCount(0)
-        table.setRowCount(len(fileList))
+        table.setRowCount(len(file_list))
 
-        for i, f in enumerate(fileList):
+        for i, f in enumerate(file_list):
             v = [os.path.split(f.path)[1], f.startDatetime,
                  f.endDatetime, f.path]
             for j, vv in enumerate(v):
@@ -87,8 +92,57 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         table.show()
 
         if self.checkBox.isChecked():
-            time_start, time_end = self.workspace.fileList.timeRange()
+            time_start, time_end = self.workspace.file_list.timeRange()
             if time_start is None:
                 return
             self.startDateTimeEdit.setDateTime(time_start)
             self.endDateTimeEdit.setDateTime(time_end)
+
+    @state_node
+    def processSelected(self):
+        workspace = self.workspace
+        file_list = workspace.file_list
+        indexes = get_tablewidget_selected_row(self.tableWidget)
+        paths = file_list.files.get_column("path")[indexes]
+        return self.processPaths(paths)
+
+    @state_node
+    def processAll(self):
+        return self.processPaths(self.workspace.file_list.files.get_column("path"))
+    
+    @processSelected.thread_node
+    def processSelected_end(self, *args):
+        pass
+    
+    @processAll.thread_node
+    def processAll_end(self, *args):
+        pass
+
+    def processPaths(self, paths):
+        time_range = (self.startDateTimeEdit.dateTime().toPyDateTime(),
+                      self.endDateTimeEdit.dateTime().toPyDateTime())
+
+        rtol = self.rtolDoubleSpinBox.value()
+        if self.positiveRadioButton.isChecked():
+            polarity = 1
+        elif self.negativeRadioButton.isChecked():
+            polarity = -1
+        else:
+            raise ValueError("Please select a polarity")
+
+        if self.averageYesRadioButton.isChecked():
+            if self.nSpectraRadioButton.isChecked():
+                pass
+            elif self.nMinutesRadioButton.isChecked():
+                interval = self.nMinutesDoubleSpinBox.value()
+                func = partial(file.SpectrumInfo.generate_infos_from_paths_by_time_interval, paths, rtol, interval, polarity, time_range)
+        elif self.averageNoRadioButton.isChecked():
+            func = partial(file.SpectrumInfo.generate_infos_from_paths, paths, rtol, polarity, time_range)
+        
+        info_list = self.workspace.spectrum_info_list
+        def thread_func():
+             infos = func()
+             info_list.spectrumList.clear()
+             info_list.spectrumList.extend(infos)
+
+        return Thread(thread_func)
