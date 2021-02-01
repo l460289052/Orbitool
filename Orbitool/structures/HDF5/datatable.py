@@ -61,7 +61,7 @@ class Datatable(H5Obj):
         self.dtype: list = get_type(self.item_type).dtype if inited else None
 
     @classmethod
-    def create_at(cls, location: h5py.Group, key, item_type: Union[str, type]):
+    def create_at(cls, location: h5py.Group, key, item_type: Union[str, type]) -> 'Datatable':
         if isinstance(item_type, type):
             item_type = get_name(item_type)
         dtype = get_type(item_type).dtype

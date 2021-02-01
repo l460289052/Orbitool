@@ -20,7 +20,7 @@ class Dict(Group):
     child_type: str = descriptor.ChildType()
 
     @classmethod
-    def create_at(cls, location: h5py.Group, key, child_type: Union[type, str]):
+    def create_at(cls, location: h5py.Group, key, child_type: Union[type, str]) -> 'Dict':
         obj = super().create_at(location, key)
         if isinstance(child_type, type):
             child_type = cls._child_type_manager.get_name(child_type)
@@ -80,7 +80,7 @@ class List(Group):
     index_dtype = np.dtype('S')
 
     @classmethod
-    def create_at(cls, location: h5py.Group, key, child_type: Union[type, str]):
+    def create_at(cls, location: h5py.Group, key, child_type: Union[type, str]) -> 'List':
         obj = super().create_at(location, key)
         if isinstance(child_type, type):
             child_type = cls._child_type_manager.get_name(child_type)

@@ -1,6 +1,6 @@
 from functools import wraps
 from multiprocessing.pool import Pool
-from threading import Thread
+from PyQt5.QtCore import QThread
 
 from Orbitool.structures import WorkSpace
 from Orbitool.UI.utils import showInfo
@@ -45,7 +45,7 @@ class Event:
 
 
 class BaseWidget:
-    thread: Thread = Item()
+    node_thread: QThread = Item()
     process_pool: Pool = ReadOnlyItem()
     busy: Event = ReadOnlyItem()
     workspace: WorkSpace = Item()

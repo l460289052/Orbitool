@@ -66,7 +66,7 @@ class node:
 
                 tmpfunc = self.thread_node.func
                 if thread is not None and tmpfunc:
-                    selfWidget.thread = thread
+                    selfWidget.node_thread = thread
                     # thread.sendStatus.connect()
                     thread.finished.connect(functools.partial(
                         tmpfunc, selfWidget))

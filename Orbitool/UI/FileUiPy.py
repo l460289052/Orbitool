@@ -1,5 +1,5 @@
 from typing import Union, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import partial
 
 from . import FileUi, utils as UiUtils
@@ -103,17 +103,18 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         workspace = self.workspace
         file_list = workspace.file_list
         indexes = get_tablewidget_selected_row(self.tableWidget)
-        paths = file_list.files.get_column("path")[indexes]
+        paths = file_list.files.get_column(
+            "path")[indexes] if len(indexes) > 0 else []
         return self.processPaths(paths)
 
     @state_node
     def processAll(self):
         return self.processPaths(self.workspace.file_list.files.get_column("path"))
-    
+
     @processSelected.thread_node
     def processSelected_end(self, *args):
         pass
-    
+
     @processAll.thread_node
     def processAll_end(self, *args):
         pass
@@ -134,15 +135,19 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
             if self.nSpectraRadioButton.isChecked():
                 pass
             elif self.nMinutesRadioButton.isChecked():
-                interval = self.nMinutesDoubleSpinBox.value()
-                func = partial(file.SpectrumInfo.generate_infos_from_paths_by_time_interval, paths, rtol, interval, polarity, time_range)
+                interval = timedelta(
+                    minutes=self.nMinutesDoubleSpinBox.value())
+                func = partial(file.SpectrumInfo.generate_infos_from_paths_by_time_interval,
+                               paths, rtol, interval, polarity, time_range)
         elif self.averageNoRadioButton.isChecked():
-            func = partial(file.SpectrumInfo.generate_infos_from_paths, paths, rtol, polarity, time_range)
-        
+            func = partial(file.SpectrumInfo.generate_infos_from_paths,
+                           paths, rtol, polarity, time_range)
+
         info_list = self.workspace.spectrum_info_list
+
         def thread_func():
-             infos = func()
-             info_list.spectrumList.clear()
-             info_list.spectrumList.extend(infos)
+            infos = func()
+            info_list.spectrumList.clear()
+            info_list.spectrumList.extend(infos)
 
         return Thread(thread_func)

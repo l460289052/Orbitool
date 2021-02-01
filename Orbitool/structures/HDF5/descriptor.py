@@ -41,7 +41,7 @@ class Descriptor(metaclass=ABCMeta):
     def __get__(self, obj, objtype=None):
         pass
 
-    def copy_from_to(self, obj_src, obj_dst):
+    def copy_from_to(self, obj_src: 'Descriptor', obj_dst: 'Descriptor'):
         self.__set__(obj_dst, self.__get__(obj_src))
 
     def on_create(self, obj):

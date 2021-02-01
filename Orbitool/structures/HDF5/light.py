@@ -50,7 +50,7 @@ class List(group.Group):
         for index in self.sequence:
             yield attrs[index]
 
-    def copy_from(self, another):
+    def copy_from(self, another: 'List'):
         super().copy_from(another)
         attrs = self.location.attrs
         aattrs = another.location.attrs

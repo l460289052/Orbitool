@@ -124,7 +124,7 @@ class SpectrumInfo(datatable.DatatableItem):
                     if end > endTime:
                         end = endTime
                 r = f.timeRange2NumRange((start - f_create, end - f_create))
-                if not f.checkAverageEmpty((start, end)):
+                if not f.checkAverageEmpty((start - f_create, end - f_create)):
                     info_list.append(SpectrumInfo(
                         f.path, start, end, r[0], r[1], rtol, polarity))
                 if f_end == end:
@@ -151,8 +151,8 @@ class SpectrumInfo(datatable.DatatableItem):
                         if f_start < end:
                             paths.append(f.path)
                         break
-                info_list.append(SpectrumInfo('|'.join(paths)),
-                                 start, end, 0, 0, rtol, polarity)
+                info_list.append(SpectrumInfo(
+                    '|'.join(paths), start, end, 0, 0, rtol, polarity))
 
             start += interval
             end = start + interval

@@ -22,7 +22,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
 
-        self.fileUi = self.add_tab(FileUiPy.Widget(self), "File")
+        self.fileUi:FileUiPy.Widget = self.add_tab(FileUiPy.Widget(self), "File")
         self.noiseUi = NoiseUiPy.Widget()
         self.add_tab(self.noiseUi, "Noise")
         self.peakShapeUi = PeakShapeUiPy.Widget()
@@ -81,8 +81,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
             self.tabifyDockWidget(after, dw)
         return dw
 
-    def add_tab(self, title, widget):
-        self.tabWidget.addTab(title, widget)
+    def add_tab(self, widget, title):
+        self.tabWidget.addTab(widget, title)
         return widget
 
     def closeEvent(self, e: QtGui.QCloseEvent) -> None:
