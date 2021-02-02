@@ -1,7 +1,6 @@
 from typing import Dict, Tuple, Union, Iterable, List
 from datetime import datetime, timedelta
 
-from sortedcontainers import SortedDict
 import numpy as np
 import h5py
 
@@ -158,6 +157,7 @@ class SpectrumInfo(datatable.DatatableItem):
             end = start + interval
             if end > endTime:
                 end = endTime
+        return info_list
 
     @staticmethod
     def generate_infos_from_paths(paths, rtol, polarity, timeRange):

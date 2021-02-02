@@ -21,7 +21,7 @@ from Orbitool.structures import WorkSpace
 class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
-
+        
         self.fileUi:FileUiPy.Widget = self.add_tab(FileUiPy.Widget(self), "File")
         self.noiseUi = NoiseUiPy.Widget()
         self.add_tab(self.noiseUi, "Noise")
@@ -65,7 +65,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
         self.process_pool = Pool(config.multi_cores)
         self.busy.add_handler(self.set_busy)
         self.busy.set(False)
-        self.workspace = WorkSpace()
+        self.current_workspace = WorkSpace()
 
     def set_busy(self, value: bool = True):
         self.tabWidget.setDisabled(value)
@@ -86,5 +86,5 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
         return widget
 
     def closeEvent(self, e: QtGui.QCloseEvent) -> None:
-        self.workspace.close()
+        self.current_workspace.close()
         e.accept()

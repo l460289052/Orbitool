@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import OrbitoolBase
+# import OrbitoolBase
 from Orbitool import functions
 
 import os
@@ -103,7 +103,7 @@ class File:
         mz = np.array(list(segmentedScan.Positions), dtype=np.float)
         intensity = np.array(list(segmentedScan.Intensities), dtype=np.float)
         time = retentimeTime + self.creationDatetime
-        return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
+        # return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
 
     def timeRange2NumRange(self, timeRange: Tuple[timedelta, timedelta]):
         r: range = functions.binary_search.indexBetween(self, timeRange,
@@ -151,7 +151,7 @@ class File:
         timeRange = (sTime, eTime)
 
         numRange = (start, end)
-        return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, timeRange, numRange)
+        # return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, timeRange, numRange)
 
     def bothToNumRange(self, timeRange: Tuple[timedelta, timedelta], numRange: Tuple[int, int]) -> (int, int):
         if timeRange is not None and numRange is None:

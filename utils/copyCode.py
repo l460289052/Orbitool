@@ -3,51 +3,46 @@ import shutil
 
 from Orbitool.utils.files import FolderTraveler
 
-raise NotImplementedError()
+def copyTo(root):
+    root = os.path.abspath(root)
+    codeexport = os.path.join(os.path.split(root)[0], 'codeexport')
 
-root = os.path.abspath(__file__)
-while os.path.split(root)[1] != 'code':
-    root = os.path.split(root)[0]
+    dsts = [
+        "D:/Orbitool",
+        codeexport ]
 
-codeexport = os.path.join(os.path.split(root)[0], 'codeexport')
+    shutil.rmtree(codeexport)
+    os.mkdir(codeexport)
 
-dsts = [
-    "C:/CODE/Python/Orbitool",
-    codeexport ]
+    notRecurrent = root
+    recurrent = ['Orbitool', 'utils']
+    recurrent = [os.path.join(root, r) for r in recurrent]
 
-shutil.rmtree(codeexport)
-os.mkdir(codeexport)
+    exts = [".py", ".pyx", ".pxd", ".pyd", ".dll", ".md"]
 
-notRecurrent = root
-recurrent = ['utils', 'functions']
-recurrent = [os.path.join(root, r) for r in recurrent]
+    def iterator(*args):
+        for i in args:
+            for j in i:
+                yield j
 
-exts = [".py", ".pyx", ".pxd", ".pyd", ".dll", ".md"]
+    def checkBuildFolder(path):
+        folder = os.path.dirname(path)
+        if not os.path.isdir(folder):
+            checkBuildFolder(folder)
+            os.mkdir(folder)
 
-def iterator(*args):
-    for i in args:
-        for j in i:
-            yield j
+    def copyFileTo(file, dst):
+        checkBuildFolder(dst)
+        if not os.path.isfile(dst) or os.path.getmtime(file) > os.path.getmtime(dst):
+            shutil.copyfile(file,dst)
 
-def checkBuildFolder(path):
-    folder = os.path.dirname(path)
-    if not os.path.isdir(folder):
-        checkBuildFolder(folder)
-        os.mkdir(folder)
+    def copyTo(folder):
+        ftNot = FolderTraveler(notRecurrent, exts, False)
+        ftRec = FolderTraveler(recurrent, exts, True)
+        for file in iterator(ftNot, ftRec):
+            file = os.path.relpath(file, root)
+            copyFileTo(file, os.path.join(folder,file))
 
-def copyFileTo(file, dst):
-    checkBuildFolder(dst)
-    if not os.path.isfile(dst) or os.path.getmtime(file) > os.path.getmtime(dst):
-        shutil.copyfile(file,dst)
-
-def copyTo(folder):
-    ftNot = FolderTraveler(notRecurrent, exts, False)
-    ftRec = FolderTraveler(recurrent, exts, True)
-    for file in iterator(ftNot, ftRec):
-        file = os.path.relpath(file, root)
-        copyFileTo(file, os.path.join(folder,file))
-
-if __name__ == "__main__":
     for dst in dsts:
         copyTo(dst)
     

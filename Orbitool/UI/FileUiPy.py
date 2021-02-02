@@ -30,7 +30,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
     def addFile(self):
         files = UiUtils.openfiles(
             "Select one or more files", "RAW files(*.RAW)")
-        file_list = self.workspace.file_list
+        file_list = self.current_workspace.file_list
 
         def func():
             for f in files:
@@ -51,7 +51,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         ret, folder = UiUtils.openfolder("Select one folder")
         if not ret:
             return None
-        file_list = self.workspace.file_list
+        file_list = self.current_workspace.file_list
 
         def func():
             for path in utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.recursionCheckBox.isChecked()):
@@ -70,7 +70,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
     @state_node
     def removeFile(self):
         indexes = get_tablewidget_selected_row(self.tableWidget)
-        self.workspace.file_list.rmFile(indexes)
+        self.current_workspace.file_list.rmFile(indexes)
         self.showFiles()
 
     @removeFile.except_node
@@ -79,7 +79,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
 
     def showFiles(self):
         table = self.tableWidget
-        file_list = self.workspace.file_list
+        file_list = self.current_workspace.file_list
         table.setRowCount(0)
         table.setRowCount(len(file_list))
 
@@ -92,7 +92,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         table.show()
 
         if self.checkBox.isChecked():
-            time_start, time_end = self.workspace.file_list.timeRange()
+            time_start, time_end = self.current_workspace.file_list.timeRange()
             if time_start is None:
                 return
             self.startDateTimeEdit.setDateTime(time_start)
@@ -100,8 +100,8 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
 
     @state_node
     def processSelected(self):
-        workspace = self.workspace
-        file_list = workspace.file_list
+        current_workspace = self.current_workspace
+        file_list = current_workspace.file_list
         indexes = get_tablewidget_selected_row(self.tableWidget)
         paths = file_list.files.get_column(
             "path")[indexes] if len(indexes) > 0 else []
@@ -109,7 +109,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
 
     @state_node
     def processAll(self):
-        return self.processPaths(self.workspace.file_list.files.get_column("path"))
+        return self.processPaths(self.current_workspace.file_list.files.get_column("path"))
 
     @processSelected.thread_node
     def processSelected_end(self, *args):
@@ -143,7 +143,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
             func = partial(file.SpectrumInfo.generate_infos_from_paths,
                            paths, rtol, polarity, time_range)
 
-        info_list = self.workspace.spectrum_info_list
+        info_list = self.current_workspace.spectrum_info_list
 
         def thread_func():
             infos = func()

@@ -48,7 +48,7 @@ class BaseWidget:
     node_thread: QThread = Item()
     process_pool: Pool = ReadOnlyItem()
     busy: Event = ReadOnlyItem()
-    workspace: WorkSpace = Item()
+    current_workspace: WorkSpace = Item()
 
     def __init__(self, root=None) -> None:
         self.widget_root: BaseWidget = root

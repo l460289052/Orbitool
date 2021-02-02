@@ -65,3 +65,8 @@ def main(root):
             raise Exception("Loop", modelNodes.keys())
         for pro in processed:
             modelNodes.pop(pro)
+            
+def clear(root):
+    ft = FolderTraveler(root, '.pyd', True)
+    for path in ft:
+        os.remove(path)

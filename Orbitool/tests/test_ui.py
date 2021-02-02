@@ -2,7 +2,6 @@ import os
 from PyQt5 import QtCore
 from time import sleep
 
-from pytestqt import qtbot
 from Orbitool.UI import MainUiPy, FileUiPy
 from Orbitool.UI import utils as UiUtils
 from Orbitool.UI import manager
@@ -32,19 +31,24 @@ def wait_not_busy(widget: manager.BaseWidget, timeout_second=None):
                 break
 
 
-def test_precedure(qtbot: qtbot.QtBot):
+def test_precedure():
     window = MainUiPy.Window()
     window.show()
 
-    qtbot.addWidget(window)
-
-    fileui(qtbot, window.fileUi)
+    fileui(window.fileUi)
 
 
-def fileui(qtbot, fileui: FileUiPy.Widget):
+def fileui(fileui: FileUiPy.Widget):
     queue.put((True, os.path.join(os.path.dirname(config.rootPath), 'data')))
-    qtbot.mouseClick(fileui.addFolderPushButton, QtCore.Qt.LeftButton)
+    fileui.addFolder()
 
-    qtbot.waitSignal(fileui.node_thread.finished)
-    assert len(fileui.workspace.file_list) == 4
-    assert fileui.tableWidget.rowCount() == 4
+    fileui.node_thread.wait()
+    assert len(fileui.current_workspace.file_list) == 4
+    
+    fileui.tableWidget.selectRow(1)
+    fileui.tableWidget.selectRow(2)
+    fileui.tableWidget.selectRow(3)
+    fileui.show()
+    
+    sleep(1)
+
