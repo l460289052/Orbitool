@@ -1,15 +1,10 @@
 import os
 import shutil
+from itertools import chain
 
 from Orbitool.utils.files import FolderTraveler
 
 exts = ['.py', '.pyx', '.pxd']
-
-
-def iterator(*args):
-    for i in args:
-        for j in i:
-            yield j
 
 
 def count(recurrent_path, not_recurrent_path):
@@ -18,7 +13,7 @@ def count(recurrent_path, not_recurrent_path):
     fts = [FolderTraveler(not_recurrent_path, exts, False),
            FolderTraveler(recurrent_path, exts, True)]
 
-    for file in iterator(*fts):
+    for file in chain.from_iterable(fts):
         if not file.lower().endswith('ui.py'):
             with open(file, 'r', encoding='utf-8') as f:
                 lines = f.readlines()

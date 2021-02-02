@@ -1,8 +1,8 @@
-from numpy.lib.arraysetops import union1d
-from . import descriptor
 import h5py
 from typing import Union
-from abc import abstractmethod
+from __future__ import annotations
+
+from . import descriptor
 
 
 class _H5Obj:
@@ -54,7 +54,7 @@ class H5Obj(_H5Obj):
             f"You cannot set a H5Obj {str(type(self))} as a descriptor")
 
     @classmethod
-    def create_at(cls, location: h5py.Group, key) -> 'H5Obj':
+    def create_at(cls, location: h5py.Group, key) -> H5Obj:
         obj = cls(location.create_group(key), False)
         for name, desc in cls._export_value_names[obj.h5_type.type_name].items():
             desc.on_create(obj)
@@ -64,7 +64,7 @@ class H5Obj(_H5Obj):
         pass
 
     @classmethod
-    def openOrCreateInitialize(cls, location: h5py.Group, key) -> 'H5Obj':
+    def openOrCreateInitialize(cls, location: h5py.Group, key) -> H5Obj:
         if key in location:
             return cls(location)
         obj = cls.create_at(location, key)
@@ -72,10 +72,10 @@ class H5Obj(_H5Obj):
         return obj
 
     @classmethod
-    def descriptor(cls, name=None) -> 'H5Obj':
+    def descriptor(cls, name=None) -> H5Obj:
         return descriptor.H5ObjectDescriptor(cls, name)
 
-    def copy_from(self, another: 'H5Obj'):
+    def copy_from(self, another: H5Obj):
         for name, desc in self._export_value_names[self.h5_type.type_name].items():
             desc.copy_from_to(another, self)
 

@@ -92,7 +92,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         table.show()
 
         if self.checkBox.isChecked():
-            time_start, time_end = self.current_workspace.file_list.timeRange()
+            time_start, time_end = self.current_workspace.file_list.timeRange
             if time_start is None:
                 return
             self.startDateTimeEdit.setDateTime(time_start)

@@ -101,20 +101,11 @@ class Float(Attr):
 
 
 class Datetime(Str):
-    dateFormat = r"%Y-%m-%d %H:%M:%S"
-    @classmethod
-    def strftime(cls, datetime):
-        return datetime.strftime(Datetime.dateFormat)
-
-    @classmethod
-    def strptime(cls, s):
-        return datetime.strptime(s, Datetime.dateFormat)
-
     def __get__(self, *args):
-        return Datetime.strptime(super().__get__(*args))
+        return datetime.fromisoformat(super().__get__(*args))
 
     def __set__(self, obj, value: datetime):
-        super().__set__(obj, Datetime.strftime(value))
+        super().__set__(obj, value.isoformat())
 
 
 class TimeDelta(Float):

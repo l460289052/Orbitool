@@ -1,5 +1,6 @@
 import os
 import shutil
+from itertools import chain
 
 from Orbitool.utils.files import FolderTraveler
 
@@ -20,11 +21,6 @@ def copyTo(root):
 
     exts = [".py", ".pyx", ".pxd", ".pyd", ".dll", ".md"]
 
-    def iterator(*args):
-        for i in args:
-            for j in i:
-                yield j
-
     def checkBuildFolder(path):
         folder = os.path.dirname(path)
         if not os.path.isdir(folder):
@@ -39,7 +35,7 @@ def copyTo(root):
     def copyTo(folder):
         ftNot = FolderTraveler(notRecurrent, exts, False)
         ftRec = FolderTraveler(recurrent, exts, True)
-        for file in iterator(ftNot, ftRec):
+        for file in chain(ftNot, ftRec):
             file = os.path.relpath(file, root)
             copyFileTo(file, os.path.join(folder,file))
 

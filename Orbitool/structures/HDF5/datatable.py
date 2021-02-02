@@ -1,5 +1,6 @@
 from typing import Union, List
 from datetime import datetime, timedelta
+from functools import cached_property
 
 import h5py
 import numpy as np
@@ -58,7 +59,7 @@ class Datatable(H5Obj):
 
     def __init__(self, location, inited=True):
         super().__init__(location, inited)
-        self.dtype: list = get_type(self.item_type).dtype if inited else None
+        self.dtype: list = self.type_item_type.dtype if inited else None
 
     @classmethod
     def create_at(cls, location: h5py.Group, key, item_type: Union[str, type]) -> 'Datatable':
@@ -75,9 +76,13 @@ class Datatable(H5Obj):
 
         obj.item_type = item_type
         return obj
+    
+    @cached_property
+    def type_item_type(self):
+        return get_type(self.item_type)
 
     def __getitem__(self, s):
-        t = get_type(self.item_type)
+        t = self.type_item_type
         ds = self.location[s]
         for row in ds:
             yield t(row, from_hdf5=True)
@@ -99,8 +104,7 @@ class Datatable(H5Obj):
         return len(self.location)
 
     def get_column(self, dtype_name):
-        dataDescriptor: DataDescriptor = get_type(
-            self.item_type).__dict__[dtype_name]
+        dataDescriptor: DataDescriptor = self.type_item_type.__dict__[dtype_name]
         return dataDescriptor.multi_convert_from_h5(self.location[dataDescriptor.name])
 
     def copy_from(self, another):
@@ -122,7 +126,7 @@ class Datatable(H5Obj):
 
     def sort(self, rowIndex: Union[str, int]):
         if isinstance(rowIndex, int):
-            rowIndex = get_type(self.item_type).dtype[rowIndex][0]
+            rowIndex = self.type_item_type.dtype[rowIndex][0]
         args = self.get_column(rowIndex).argsort()
         items = self.location[:]
         items = items[args]

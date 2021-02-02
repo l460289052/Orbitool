@@ -1,10 +1,12 @@
-from . import descriptor, h5obj
-import h5py
-import numpy as np
 from abc import ABCMeta, abstractmethod
 from typing import Union
+from functools import cached_property
+
+import numpy as np
+import h5py
 import numpy as np
 
+from . import descriptor, h5obj
 
 class Group(h5obj.H5Obj):
     '''
@@ -27,7 +29,7 @@ class Dict(Group):
         obj.child_type = child_type
         return obj
 
-    @property
+    @cached_property
     def type_child_type(self) -> Group:
         return self._child_type_manager.get_type(self.child_type)
 
@@ -91,7 +93,7 @@ class List(Group):
         self.max_index = -1
         self.sequence = np.array(tuple(), dtype=List.index_dtype)
 
-    @property
+    @cached_property
     def type_child_type(self) -> Group:
         return self._child_type_manager.get_type(self.child_type)
 

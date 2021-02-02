@@ -1,8 +1,8 @@
 from typing import Dict, Tuple, Union, Iterable, List
 from datetime import datetime, timedelta
+from __future__ import annotations
 
 import numpy as np
-import h5py
 
 from Orbitool.structures import HDF5
 from Orbitool.structures.HDF5 import datatable
@@ -39,6 +39,7 @@ class FileList(HDF5.Group):
             return False, list(self.files[where])
         return True, None
 
+    @property
     def timeRange(self):
         if len(self.files) == 0:
             return None, None
@@ -49,8 +50,7 @@ class FileList(HDF5.Group):
     def addFile(self, filepath):
         f = fileReader(filepath)
 
-        crossed, crossedFiles = self._crossed(
-            f.startDatetime, f.endDatetime)
+        crossed, crossedFiles = self._crossed(f.startDatetime, f.endDatetime)
         if crossed:
             raise ValueError(
                 f'file "{f.path}" and "{[f.path for f in crossedFiles]}" have crossed scan time')
@@ -61,7 +61,7 @@ class FileList(HDF5.Group):
 
     def rmFile(self, indexes: Union[int, Iterable[int]]):
         if isinstance(indexes, int):
-            indexes = (indexes,)
+            indexes = (indexes, )
         del self.files[np.array(indexes)]
 
     def sort(self):
@@ -90,11 +90,11 @@ class SpectrumInfo(datatable.DatatableItem):
     polarity = datatable.Int32()
 
     @staticmethod
-    def generate_infos_from_paths_by_number(paths, rtol, N, polarity, timeRange):
+    def generate_infos_from_paths_by_number(paths, rtol, N, polarity, timeRange) -> List[SpectrumInfo]:
         pass
 
     @staticmethod
-    def generate_infos_from_paths_by_time_interval(paths, rtol, interval: timedelta, polarity, timeRange):
+    def generate_infos_from_paths_by_time_interval(paths, rtol, interval: timedelta, polarity, timeRange) -> List[SpectrumInfo]:
         info_list = []
         files = iterator(map(fileReader, paths))
 
@@ -160,7 +160,7 @@ class SpectrumInfo(datatable.DatatableItem):
         return info_list
 
     @staticmethod
-    def generate_infos_from_paths(paths, rtol, polarity, timeRange):
+    def generate_infos_from_paths(paths, rtol, polarity, timeRange) -> List[SpectrumInfo]:
         info_list = []
         for path in paths:
             f = fileReader(path)

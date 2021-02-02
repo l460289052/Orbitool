@@ -21,12 +21,13 @@ class node:
     @thread_node
     def func(self, result, args)
     """
-    def __init__(self, func=None, root=None, father = None, nodeType: NodeType = NodeType.Root, *, withArgs=False) -> None:
+
+    def __init__(self, func=None, root=None, father=None, nodeType: NodeType = NodeType.Root, *, withArgs=False) -> None:
         self._func = None
         self._nodeType = nodeType
         self._withArgs = withArgs
         self._root: node = self if root is None else root
-        self._father:node = father
+        self._father: node = father
 
         self.func: Callable = func
 
@@ -41,7 +42,7 @@ class node:
             if self._root == self:
                 if selfWidget.busy.get():
                     # if manager.process_pool.
-                        # showInfo("Wait for process or abort", 'busy')
+                    # showInfo("Wait for process or abort", 'busy')
                     # else:
                     showInfo("Wait for process", 'busy')
                     return
@@ -54,22 +55,21 @@ class node:
                         e = args[0]
                         showInfo(str(e))
                         logging.error(str(e), exc_info=e)
-                        tmpfunc = self._father.except_node.func
-                        if tmpfunc:
+                        if (tmpfunc := self._father.except_node.func):
                             tmpfunc(selfWidget)
                         else:
                             selfWidget.busy.set(False)
                         return
-                    thread = func(selfWidget, *args) 
+                    thread = func(selfWidget, *args)
                 else:
-                    thread = func(selfWidget, *args, **kwargs) if self._withArgs else func(selfWidget)
+                    thread = func(selfWidget, *args, **
+                                  kwargs) if self._withArgs else func(selfWidget)
 
-                tmpfunc = self.thread_node.func
-                if thread is not None and tmpfunc:
+                if thread is not None and (tmpfunc := self.thread_node.func):
                     selfWidget.node_thread = thread
                     # thread.sendStatus.connect()
-                    thread.finished.connect(functools.partial(
-                        tmpfunc, selfWidget))
+                    thread.finished.connect(
+                        functools.partial(tmpfunc, selfWidget))
                     if config.DEBUG:
                         thread.run()
                     else:
@@ -79,11 +79,11 @@ class node:
             except Exception as e:
                 showInfo(str(e))
                 logging.error(str(e), exc_info=e)
-                tmpfunc = self.except_node.func
-                if tmpfunc:
+                if (tmpfunc := self.except_node.func):
                     tmpfunc(selfWidget)
                 else:
                     selfWidget.busy.set(False)
+
         return decorator
 
     @func.setter
@@ -93,8 +93,8 @@ class node:
             return
         self._func = func
         self.except_node = node(None, self._root, self, NodeType.Except)
-        self.thread_node = node(
-            None, self._root, self, NodeType.ThreadEnd, withArgs=True)
+        self.thread_node = node(None, self._root, self,
+                                NodeType.ThreadEnd, withArgs=True)
 
     def __call__(self, func):
         self.func = func
