@@ -11,7 +11,8 @@ loop: QtCore.QEventLoop = None
 
 
 def wait_not_busy():
-    loop.exec_()
+    if not config.DEBUG:
+        loop.exec_()
 
 
 def sleep():
@@ -21,6 +22,9 @@ def sleep():
         timer.start(timeout * 1000)
         loop.exec_()
 
+def wait(thread:QtCore.QThread):
+    thread.finished.connect(loop.quit)
+    loop.exec_()
 
 def init(window: MainUiPy.Window):
     global loop

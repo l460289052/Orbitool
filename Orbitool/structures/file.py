@@ -6,7 +6,9 @@ import numpy as np
 
 from Orbitool.structures import HDF5
 from Orbitool.structures.HDF5 import datatable
-from Orbitool.utils import iterator
+from Orbitool.utils import iterator, readers
+
+from . import spectrum
 
 
 class File(datatable.DatatableItem):
@@ -18,7 +20,7 @@ class File(datatable.DatatableItem):
     endDatetime = datatable.Datetime64s()
 
 
-fileReader = None
+fileReader = readers.ThermoFile
 
 
 def setFileReader(fr):
@@ -173,4 +175,14 @@ class SpectrumInfo(datatable.DatatableItem):
                     info_list.append(info)
         return info_list
 
-
+    def get_spectrum(self, spectrum: spectrum.Spectrum):
+        if len(self.file_path.split('|')) > 1:
+            pass
+        else:
+            mz, intensity = fileReader(self.file_path).getAveragedSpectrum(
+                self.rtol, numRange=(self.startIndex, self.endIndex), polarity=self.polarity)
+            spectrum.startTime = self.startTime
+            spectrum.endTime = self.endTime
+            spectrum.file_path = self.file_path
+            spectrum.mz = mz
+            spectrum.intensity = intensity

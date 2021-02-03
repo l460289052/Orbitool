@@ -104,6 +104,7 @@ class Float(Attr):
 
 
 class Datetime(Str):
+    @lru_cache(16)
     def __get__(self, *args):
         return datetime.fromisoformat(super().__get__(*args))
 
@@ -112,6 +113,7 @@ class Datetime(Str):
 
 
 class TimeDelta(Float):
+    @lru_cache(16)
     def __get__(self, *args):
         ret = super().__get__(*args)
         return timedelta(seconds=ret)

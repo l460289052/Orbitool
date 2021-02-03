@@ -1,6 +1,7 @@
 from typing import Union, List
+from collections.abc import Iterable
 from datetime import datetime, timedelta
-from functools import cached_property
+from functools import cached_property, lru_cache, partial
 
 import h5py
 import numpy as np
@@ -76,16 +77,17 @@ class Datatable(H5Obj):
 
         obj.item_type = item_type
         return obj
-    
+
     @cached_property
     def type_item_type(self):
         return get_type(self.item_type)
 
     def __getitem__(self, s):
         t = self.type_item_type
-        ds = self.location[s]
-        for row in ds:
-            yield t(row, from_hdf5=True)
+        if isinstance(s, (slice, Iterable)):
+            ds = self.location[s]
+            return map(partial(t, from_hdf5=True), ds)
+        return t(self.location[s], from_hdf5=True)
 
     def __setitem__(self, s, value: List[DatatableItem]):
         self.location[s] = [tuple(r.row) for r in value]
@@ -98,13 +100,14 @@ class Datatable(H5Obj):
         self.location.resize((length,))
 
     def __iter__(self):
-        return self[:]  # self.__getitem__(slice(None,None,None))
+        return iter(self[:])  # self.__getitem__(slice(None,None,None))
 
     def __len__(self):
         return len(self.location)
 
     def get_column(self, dtype_name):
-        dataDescriptor: DataDescriptor = self.type_item_type.__dict__[dtype_name]
+        dataDescriptor: DataDescriptor = self.type_item_type.__dict__[
+            dtype_name]
         return dataDescriptor.multi_convert_from_h5(self.location[dataDescriptor.name])
 
     def copy_from(self, another):
@@ -158,7 +161,9 @@ class DataDescriptor:
 
     def __set__(self, obj: DatatableItem, value):
         obj.row[self.index] = self.single_convert_to_h5(value)
+        self.__get__.cache_clear()
 
+    @lru_cache(4)
     def __get__(self, obj: DatatableItem, objtype):
         return self.single_convert_from_h5(obj.row[self.index])
 

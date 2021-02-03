@@ -1,9 +1,25 @@
 from typing import Union, Optional
 from . import SpectrumUi
 from PyQt5 import QtWidgets, QtCore
+from .manager import state_node, BaseWidget
+
+from Orbitool.structures.spectrum import Spectrum
 
 
-class Widget(QtWidgets.QWidget, SpectrumUi.Ui_Form):
-    def __init__(self, parent: Optional['QWidget'] = None) -> None:
-        super().__init__(parent=parent)
+class Widget(QtWidgets.QWidget, SpectrumUi.Ui_Form, BaseWidget):
+    def __init__(self, widget_root, parent: Optional['QWidget'] = None) -> None:
+        super().__init__()
         self.setupUi(self)
+        self.widget_root = widget_root
+
+    def show_spectrum(self, spectrum: Spectrum):
+        tableWidget = self.tableWidget
+        tableWidget.setRowCount(0)
+        mz = spectrum.mz[:]
+        intensity = spectrum.intensity[:]
+        tableWidget.setRowCount(len(mz))
+        for i, (m_row, i_row) in enumerate(zip(mz, intensity)):
+            for j, v in enumerate((m_row, i_row)):
+                item = QtWidgets.QTableWidgetItem(format(v,'.6f'))
+                item.setTextAlignment(QtCore.Qt.AlignRight)
+                tableWidget.setItem(i, j, item)

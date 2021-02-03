@@ -151,7 +151,7 @@ class File:
         timeRange = (sTime, eTime)
 
         numRange = (start, end)
-        # return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, timeRange, numRange)
+        return mz, intensity
 
     def bothToNumRange(self, timeRange: Tuple[timedelta, timedelta], numRange: Tuple[int, int]) -> (int, int):
         if timeRange is not None and numRange is None:

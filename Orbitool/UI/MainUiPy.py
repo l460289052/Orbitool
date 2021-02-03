@@ -19,9 +19,9 @@ from . import CalibrationInfoUiPy, TimeseriesUiPy
 from . import PeakFitFloatUiPy
 
 
-
 class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
     busy_signal = QtCore.pyqtSignal(bool)
+
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
 
@@ -31,6 +31,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
 
         self.noiseUi: NoiseUiPy.Widget = self.add_tab(
             NoiseUiPy.Widget(self), "Noise")
+        self.noiseUi.selected_spectrum_average.connect(
+            self.noise_show_spectrum)
 
         self.peakShapeUi = PeakShapeUiPy.Widget()
         self.add_tab(self.peakShapeUi, "Peak Shape")
@@ -55,8 +57,9 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
             "Spectra List", self.spectraList, self.calibrationInfoDw)
         self.spectraListDw.hide()
 
+        self.spectrum = SpectrumUiPy.Widget(self)
         self.spectrumDw = self.add_dockerwidget(
-            "Spectrum", SpectrumUiPy.Widget(), self.spectraListDw)
+            "Spectrum", self.spectrum, self.spectraListDw)
         self.spectrumDw.hide()
 
         self.peakListDw = self.add_dockerwidget(
@@ -71,13 +74,13 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
         super().__init__()
         BaseWidget.__init__(self)
         self.setupUi(self)
-        
+
         self.tabWidget.setCurrentIndex(0)
 
         self.process_pool = Pool(config.multi_cores)
         self.busy = False
         self.current_workspace = WorkSpace.create_at(None)
-        
+
     @property
     def _busy(self):
         return self.__busy
@@ -115,3 +118,9 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
         self.spectraListDw.show()
         self.spectraListDw.raise_()
         self.tabWidget.setCurrentWidget(self.noiseUi)
+
+    @state_node(mode='x')
+    def noise_show_spectrum(self):
+        self.spectrum.show_spectrum(self.current_workspace.noise_tab.current_spectrum)
+        self.spectrumDw.show()
+        self.spectrumDw.raise_()

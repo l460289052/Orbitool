@@ -1,4 +1,5 @@
 from . import HDF5
+from . import file
 
 
 class Peak(HDF5.Group):
@@ -19,6 +20,7 @@ class FittedPeak(Peak):
 
 class Spectrum(HDF5.Group):
     h5_type = HDF5.RegisterType("Spectrum")
+
     file_path = HDF5.Str()
     mz = HDF5.BigNumpy()
     intensity = HDF5.BigNumpy()
@@ -28,6 +30,6 @@ class Spectrum(HDF5.Group):
 
 class SpectrumList(HDF5.Group):
     h5_type = HDF5.RegisterType("SpectrumList")
-    
+
 
 # class MassListItem

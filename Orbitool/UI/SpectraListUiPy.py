@@ -62,5 +62,5 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):
 
     def selection_changed(self):
         indexes = utils.get_tablewidget_selected_row(self.tableWidget)
-        self.current_workspace.selected_spectrum_index = None if len(
+        self.spectra_list.selected_spectrum_index = None if len(
             indexes) == 0 else indexes[0]
