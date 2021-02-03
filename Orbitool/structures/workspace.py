@@ -2,10 +2,11 @@ import os
 import tempfile
 from datetime import datetime
 import h5py
+from typing import Union
 
 
 from . import HDF5
-from .file import FileList, setFileReader, SpectrumInfoList, SpectrumInfo
+from .file import FileList, setFileReader, SpectrumInfo
 
 from Orbitool import config
 from Orbitool.utils import readers
@@ -13,22 +14,21 @@ from Orbitool.utils import readers
 setFileReader(readers.ThermoFile)
 
 
-class WorkSpace:
-    def __init__(self, path=None) -> None:
-        if path is None:
-            self.tempDir = tempfile.TemporaryDirectory(
-                prefix=datetime.now().strftime(config.TempFile.prefixTimeFormat), dir=config.TempFile.tempPath)
-            self.h5 = h5py.File(os.path.join(
-                self.tempDir.name, 'tmp.hdf5'), 'a')
-        else:
-            self.tempDir = None
-            self.h5 = h5py.File(path, 'a')
+class SpectraList(HDF5.Group):
+    h5_type = HDF5.RegisterType("SpectraList")
 
-        self.file_list: FileList = FileList.openOrCreateInitialize(
-            self.h5, 'file_list')
+    file_spectrum_info_list = HDF5.datatable.Datatable.descriptor(SpectrumInfo)
 
-        self.spectrum_info_list: SpectrumInfoList = SpectrumInfoList.openOrCreateInitialize(
-            self.h5, 'spectrum_info_list')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.selected_spectrum_index = None
+
+
+class WorkSpace(HDF5.File):
+    h5_type = HDF5.RegisterType("Orbitool_Workspace")
+
+    file_list: FileList = FileList.descriptor()
+    spectra_list: SpectraList = SpectraList.descriptor()
 
     def close(self):
-        self.h5.close()
+        self.location.close()

@@ -5,4 +5,5 @@ from .descriptor import Attr, SimpleDataset, Int, Str, Float, \
     ChildType, H5ObjectDescriptor, Ref_Attr
 from .group import Group, Dict, List
 from .light import List as LightList
+from .file import File
 from . import datatable_ as datatable

@@ -3,10 +3,13 @@ from PyQt5 import QtWidgets
 from functools import wraps
 from typing import Tuple, List
 
+from . import test
+
 openfile_dir = '../.'
 openfolder_dir = './..'
 
 
+@test.override_input
 def openfile(caption, filter) -> Tuple[bool, str]:
     global openfile_dir
     f, typ = QtWidgets.QFileDialog.getOpenFileName(
@@ -20,6 +23,7 @@ def openfile(caption, filter) -> Tuple[bool, str]:
     return True, f
 
 
+@test.override_input
 def openfiles(caption, filter) -> List[str]:
     global openfile_dir
     f, typ = QtWidgets.QFileDialog.getOpenFileNames(
@@ -30,6 +34,7 @@ def openfiles(caption, filter) -> List[str]:
     return f
 
 
+@test.override_input
 def openfolder(caption) -> Tuple[bool, str]:
     global openfolder_dir
     folder = QtWidgets.QFileDialog.getExistingDirectory(

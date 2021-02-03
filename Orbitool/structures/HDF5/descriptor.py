@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from datetime import datetime, timedelta
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, overload
+from functools import lru_cache, cached_property
 
 import numpy as np
 
@@ -53,11 +54,13 @@ class Attr(Descriptor):
     属性也可以考虑加入缓存机制，就是如果obj和name一样的话
     '''
 
+    @lru_cache(maxsize=16)
     def __get__(self, obj, objtype=None):
         return obj.location.attrs.get(self.name, None)
 
     def __set__(self, obj, value):
         obj.location.attrs[self.name] = value
+        self.__get__.cache_clear()
 
 
 class SimpleDataset(Descriptor):
@@ -134,6 +137,7 @@ class RegisterType(Str):
     def __set__(self, obj, value):
         raise NotImplementedError()
 
+    @lru_cache(4)
     def __get__(self, obj, objtype):
         return RegisterType(self.type_name, obj)
 
@@ -143,7 +147,7 @@ class RegisterType(Str):
     def on_create(self, obj):
         obj.location.attrs[self.name] = self.type_name
 
-    @property
+    @cached_property
     def attr_type_name(self):
         return self.obj.location.attrs.get(self.name, None)
 
@@ -164,11 +168,16 @@ class H5ObjectDescriptor(Descriptor):
             h5obj_type, str)else get_name(h5obj_type)
         self.create_args = create_args
 
+    @lru_cache(16)
     def __get__(self, obj, objtype=None):
-        return get_type(self.h5obj_type)(obj.location[self.name])
+        return self.type_h5obj_type(obj.location[self.name])
 
     def __set__(self, obj, value: BaseHDF5Obj):
         raise NotImplementedError("Will be implement in some days")
+    
+    @cached_property
+    def type_h5obj_type(self):
+        return get_type(self.h5obj_type)
 
     def copy_from_to(self, obj_src, obj_dst):
         self.__get__(obj_dst).copy_from(self.__get__(obj_src))
@@ -184,12 +193,16 @@ class Ref_Attr(Attr):
         super().__init__(*args, **kwargs)
         self.h5obj_type = h5obj_type if isinstance(
             h5obj_type, str) else get_name(h5obj_type)
+        
+    @cached_property
+    def type_h5obj_type(self):
+        return get_type(self.h5obj_type)
 
     def __set__(self, obj, value: BaseHDF5Obj):
         obj.location.attrs[self.name] = value.location.ref
 
     def __get__(self, obj, objtype):
-        return get_type(self.h5obj_type)(obj.location[obj.location.attrs[self.name]])
+        return self.type_h5obj_type(obj.location[obj.location.attrs[self.name]])
 
     def copy_from_to(self, obj_src, obj_dst):
         pass

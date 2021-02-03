@@ -1,6 +1,6 @@
+from __future__ import annotations
 import h5py
 from typing import Union
-from __future__ import annotations
 
 from . import descriptor
 
@@ -64,16 +64,16 @@ class H5Obj(_H5Obj):
         pass
 
     @classmethod
-    def openOrCreateInitialize(cls, location: h5py.Group, key) -> H5Obj:
+    def openOrCreateInitialize(cls, location: h5py.Group, *args, **kwargs) -> H5Obj:
         if key in location:
             return cls(location)
-        obj = cls.create_at(location, key)
+        obj = cls.create_at(location, *args, **kwargs)
         obj.initialize()
         return obj
 
     @classmethod
     def descriptor(cls, name=None) -> H5Obj:
-        return descriptor.H5ObjectDescriptor(cls, name)
+        return descriptor.H5ObjectDescriptor(cls, name=name)
 
     def copy_from(self, another: H5Obj):
         for name, desc in self._export_value_names[self.h5_type.type_name].items():

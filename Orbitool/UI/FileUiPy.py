@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from functools import partial
 
 from . import FileUi, utils as UiUtils
-from .utils import showInfo, set_header_sizes, get_tablewidget_selected_row
+from .utils import showInfo, set_header_sizes
 from .manager import BaseWidget, state_node, Thread
 from PyQt5 import QtWidgets, QtCore
 import os
@@ -13,6 +13,8 @@ from Orbitool import utils
 
 
 class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
+    callback = QtCore.pyqtSignal()
+
     def __init__(self, widget_root: BaseWidget, parent: Optional['QWidget'] = None) -> None:
         super().__init__(parent=parent)
         self.widget_root = widget_root
@@ -26,11 +28,15 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         self.selectedPushButton.clicked.connect(self.processSelected)
         self.allPushButton.clicked.connect(self.processAll)
 
+    @property
+    def file_list(self) -> file.FileList:
+        return self.current_workspace.file_list
+
     @state_node
     def addFile(self):
         files = UiUtils.openfiles(
             "Select one or more files", "RAW files(*.RAW)")
-        file_list = self.current_workspace.file_list
+        file_list = self.file_list
 
         def func():
             for f in files:
@@ -51,7 +57,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         ret, folder = UiUtils.openfolder("Select one folder")
         if not ret:
             return None
-        file_list = self.current_workspace.file_list
+        file_list = self.file_list
 
         def func():
             for path in utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.recursionCheckBox.isChecked()):
@@ -69,8 +75,8 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
 
     @state_node
     def removeFile(self):
-        indexes = get_tablewidget_selected_row(self.tableWidget)
-        self.current_workspace.file_list.rmFile(indexes)
+        indexes = UiUtils.get_tablewidget_selected_row(self.tableWidget)
+        self.file_list.rmFile(indexes)
         self.showFiles()
 
     @removeFile.except_node
@@ -79,7 +85,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
 
     def showFiles(self):
         table = self.tableWidget
-        file_list = self.current_workspace.file_list
+        file_list = self.file_list
         table.setRowCount(0)
         table.setRowCount(len(file_list))
 
@@ -92,7 +98,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         table.show()
 
         if self.checkBox.isChecked():
-            time_start, time_end = self.current_workspace.file_list.timeRange
+            time_start, time_end = self.file_list.timeRange
             if time_start is None:
                 return
             self.startDateTimeEdit.setDateTime(time_start)
@@ -100,24 +106,22 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
 
     @state_node
     def processSelected(self):
-        current_workspace = self.current_workspace
-        file_list = current_workspace.file_list
-        indexes = get_tablewidget_selected_row(self.tableWidget)
-        paths = file_list.files.get_column(
+        indexes = UiUtils.get_tablewidget_selected_row(self.tableWidget)
+        paths = self.file_list.files.get_column(
             "path")[indexes] if len(indexes) > 0 else []
         return self.processPaths(paths)
 
     @state_node
     def processAll(self):
-        return self.processPaths(self.current_workspace.file_list.files.get_column("path"))
+        return self.processPaths(self.file_list.files.get_column("path"))
 
     @processSelected.thread_node
     def processSelected_end(self, *args):
-        pass
+        self.callback.emit()
 
     @processAll.thread_node
     def processAll_end(self, *args):
-        pass
+        self.callback.emit()
 
     def processPaths(self, paths):
         time_range = (self.startDateTimeEdit.dateTime().toPyDateTime(),
@@ -143,11 +147,11 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
             func = partial(file.SpectrumInfo.generate_infos_from_paths,
                            paths, rtol, polarity, time_range)
 
-        info_list = self.current_workspace.spectrum_info_list
+        info_list = self.current_workspace.spectra_list.file_spectrum_info_list
 
         def thread_func():
             infos = func()
-            info_list.spectrumList.clear()
-            info_list.spectrumList.extend(infos)
+            info_list.clear()
+            info_list.extend(infos)
 
         return Thread(thread_func)

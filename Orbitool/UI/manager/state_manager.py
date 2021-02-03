@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, Callable, overload
 import functools
 import logging
 from enum import Enum
@@ -21,15 +21,33 @@ class node:
     @thread_node
     def func(self, result, args)
     """
+    @overload
+    def __init__(self, func):
+        pass
 
-    def __init__(self, func=None, root=None, father=None, nodeType: NodeType = NodeType.Root, *, withArgs=False) -> None:
+    @overload
+    def __init__(self, *, withArgs=False, mode='w'):
+        """
+
+        mode: 'w': check and set busy; 'x': set busy without check; 'a': not check busy;
+        """
+        pass
+
+    @overload
+    def __init__(self, root=None, father=None, nodeType: NodeType = NodeType.Root, *, withArgs=False, mode='w'):
+        pass
+
+    def __init__(self, root=None, father=None, nodeType: NodeType = NodeType.Root, *, withArgs=False, mode='w') -> None:
         self._func = None
-        self._nodeType = nodeType
         self._withArgs = withArgs
-        self._root: node = self if root is None else root
+        self._mode = mode
+        self._nodeType = nodeType
         self._father: node = father
-
-        self.func: Callable = func
+        if isinstance(root, node) or root is None:
+            self._root: node = self if root is None else root
+        else:
+            self._root: node = self
+            self.func: Callable = root
 
     @property
     def func(self):
@@ -39,26 +57,26 @@ class node:
 
         @functools.wraps(func)
         def decorator(selfWidget: BaseWidget, *args, **kwargs):
-            if self._root == self:
-                if selfWidget.busy.get():
-                    # if manager.process_pool.
-                    # showInfo("Wait for process or abort", 'busy')
-                    # else:
-                    showInfo("Wait for process", 'busy')
-                    return
-                else:
-                    selfWidget.busy.set(True)
+            if not selfWidget.busy:
+                if self._mode != 'a':
+                    selfWidget.busy = True
+            elif self._mode == 'w':
+                # if manager.process_pool.
+                # showInfo("Wait for process or abort", 'busy')
+                # else:
+                showInfo("Wait for process", 'busy')
+                return
             try:
                 if self._nodeType == NodeType.ThreadEnd:
                     args = args[0]
                     if isinstance(args[0], Exception):
                         e = args[0]
-                        showInfo(str(e))
                         logging.error(str(e), exc_info=e)
+                        showInfo(str(e))
                         if (tmpfunc := self._father.except_node.func):
                             tmpfunc(selfWidget)
                         else:
-                            selfWidget.busy.set(False)
+                            selfWidget.busy = False
                         return
                     thread = func(selfWidget, *args)
                 else:
@@ -75,14 +93,14 @@ class node:
                     else:
                         thread.start()
                 else:
-                    selfWidget.busy.set(False)
+                    selfWidget.busy = False
             except Exception as e:
-                showInfo(str(e))
                 logging.error(str(e), exc_info=e)
+                showInfo(str(e))
                 if (tmpfunc := self.except_node.func):
                     tmpfunc(selfWidget)
                 else:
-                    selfWidget.busy.set(False)
+                    selfWidget.busy = False
 
         return decorator
 
@@ -92,9 +110,9 @@ class node:
         if func is None:
             return
         self._func = func
-        self.except_node = node(None, self._root, self, NodeType.Except)
-        self.thread_node = node(None, self._root, self,
-                                NodeType.ThreadEnd, withArgs=True)
+        self.except_node = node(self._root, self, NodeType.Except, mode='a')
+        self.thread_node = node(
+            self._root, self, NodeType.ThreadEnd, withArgs=True, mode='a')
 
     def __call__(self, func):
         self.func = func

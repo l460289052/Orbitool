@@ -14,6 +14,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--to_step")
 
     from Orbitool import config
     args = parser.parse_args()
@@ -26,5 +27,17 @@ if __name__ == "__main__":
     from Orbitool.UI import MainUiPy
 
     MainWin = MainUiPy.Window()
-    MainWin.show()
+    if args.to_step:
+        steps = {
+            "file": 0,
+            "noise": 1
+        }
+        step = steps[args.to_step]
+        from Orbitool.tests.UI import routine
+        routine.init(MainWin)
+        if step > 0:
+            routine.fileui(MainWin)
+            routine.file_spectra(MainWin)
+    else:
+        MainWin.show()
     sys.exit(app.exec_())

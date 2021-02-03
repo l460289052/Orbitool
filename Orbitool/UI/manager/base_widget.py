@@ -1,6 +1,8 @@
+from typing import Callable
 from functools import wraps
 from multiprocessing.pool import Pool
-from PyQt5.QtCore import QThread
+
+from PyQt5.QtCore import QThread, pyqtSignal
 
 from Orbitool.structures import WorkSpace
 from Orbitool.UI.utils import showInfo
@@ -15,7 +17,8 @@ class Item:
         return getattr(obj if obj.widget_root is None else obj.widget_root, self._name)
 
     def __set__(self, obj, value):
-        setattr(obj if obj.widget_root is None else obj.widget_root, self._name, value)
+        setattr(obj if obj.widget_root is None else obj.widget_root,
+                self._name, value)
 
 
 class ReadOnlyItem(Item):
@@ -25,32 +28,11 @@ class ReadOnlyItem(Item):
         return super().__set__(obj, value)
 
 
-class Event:
-    def __init__(self) -> None:
-        self.value = None
-        self.handlers = []
-
-    def get(self):
-        return self.value
-
-    def set(self, value):
-        if value != self.value:
-            for handler in self.handlers:
-                handler(value)
-            self.value = value
-
-    def add_handler(self, handler):
-        assert callable(handler)
-        self.handlers.append(handler)
-
-
 class BaseWidget:
     node_thread: QThread = Item()
     process_pool: Pool = ReadOnlyItem()
-    busy: Event = ReadOnlyItem()
     current_workspace: WorkSpace = Item()
+    busy = Item()
 
     def __init__(self, root=None) -> None:
         self.widget_root: BaseWidget = root
-        if root is None:
-            self.busy = Event()

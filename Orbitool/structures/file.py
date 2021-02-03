@@ -1,6 +1,6 @@
+from __future__ import annotations
 from typing import Dict, Tuple, Union, Iterable, List
 from datetime import datetime, timedelta
-from __future__ import annotations
 
 import numpy as np
 
@@ -174,7 +174,3 @@ class SpectrumInfo(datatable.DatatableItem):
         return info_list
 
 
-class SpectrumInfoList(HDF5.Group):
-    h5_type = HDF5.RegisterType("SpectrumInfoList")
-    spectrumList: datatable.Datatable = datatable.Datatable.descriptor(
-        SpectrumInfo)

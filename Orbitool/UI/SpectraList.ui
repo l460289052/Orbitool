@@ -30,6 +30,9 @@
    </item>
    <item>
     <widget class="QTableWidget" name="tableWidget">
+     <property name="horizontalScrollMode">
+      <enum>QAbstractItemView::ScrollPerPixel</enum>
+     </property>
      <attribute name="horizontalHeaderStretchLastSection">
       <bool>true</bool>
      </attribute>
