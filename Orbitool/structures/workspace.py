@@ -27,14 +27,15 @@ class SpectraList(HDF5.Group):
 class NoiseTab(HDF5.Group):
     h5_type = HDF5.RegisterType("NoiseTab")
 
-    current_spectrum = spectrum.Spectrum.descriptor()
+    current_spectrum: spectrum.Spectrum = spectrum.Spectrum.descriptor()
+
 
 class WorkSpace(HDF5.File):
     h5_type = HDF5.RegisterType("Orbitool_Workspace")
 
     file_list: FileList = FileList.descriptor()
     spectra_list: SpectraList = SpectraList.descriptor()
-    noise_tab:NoiseTab = NoiseTab.descriptor()
+    noise_tab: NoiseTab = NoiseTab.descriptor()
 
     def close(self):
         self.location.close()

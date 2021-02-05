@@ -24,7 +24,10 @@
        <item>
         <widget class="QPushButton" name="showAveragePushButton">
          <property name="text">
-          <string>show selected spectrum in spectra list</string>
+          <string>show selected r&amp;aw spectrum in spectra list</string>
+         </property>
+         <property name="shortcut">
+          <string>Alt+A</string>
          </property>
         </widget>
        </item>
@@ -56,8 +59,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>285</width>
-            <height>258</height>
+            <width>338</width>
+            <height>295</height>
            </rect>
           </property>
           <attribute name="label">
@@ -184,7 +187,10 @@
            <item>
             <widget class="QPushButton" name="calculateNoisePushButton">
              <property name="text">
-              <string>Calc noise level for selected spectrum</string>
+              <string>&amp;Calc noise level for selected spectrum</string>
+             </property>
+             <property name="shortcut">
+              <string>Alt+C</string>
              </property>
             </widget>
            </item>
@@ -195,8 +201,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>285</width>
-            <height>258</height>
+            <width>338</width>
+            <height>295</height>
            </rect>
           </property>
           <attribute name="label">
@@ -265,6 +271,9 @@
              <property name="text">
               <string>Recalulate noise</string>
              </property>
+             <property name="shortcut">
+              <string>Alt+R</string>
+             </property>
             </widget>
            </item>
            <item>
@@ -291,12 +300,18 @@
                 <property name="text">
                  <string>Denoised spectrum</string>
                 </property>
+                <property name="shortcut">
+                 <string>Ctrl+Alt+D</string>
+                </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="exportNoisePeaksPushButton">
                 <property name="text">
                  <string>Noise peaks</string>
+                </property>
+                <property name="shortcut">
+                 <string>Ctrl+Alt+N</string>
                 </property>
                </widget>
               </item>

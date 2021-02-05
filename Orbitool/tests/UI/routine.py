@@ -22,9 +22,11 @@ def sleep():
         timer.start(timeout * 1000)
         loop.exec_()
 
-def wait(thread:QtCore.QThread):
+
+def wait(thread: QtCore.QThread):
     thread.finished.connect(loop.quit)
     loop.exec_()
+
 
 def init(window: MainUiPy.Window):
     global loop
@@ -55,3 +57,14 @@ def file_spectra(window: MainUiPy.Window):
     spectra = window.spectraList
     assert spectra.comboBox.currentIndex() == 0
     assert spectra.tableWidget.rowCount() > 0
+
+
+def noise(window: MainUiPy.Window):
+    window.tabWidget.setCurrentWidget(window.noiseUi)
+
+    noiseui = window.noiseUi
+    window.current_workspace.spectra_list.selected_spectrum_index = 0
+    noiseui.showSelectedSpectrum()
+    
+    wait_not_busy()
+    sleep()

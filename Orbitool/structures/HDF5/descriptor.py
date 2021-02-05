@@ -64,17 +64,10 @@ class Attr(Descriptor):
 
 
 class SimpleDataset(Descriptor):
-    """
-    numpy.ndarray in hdf5, please read to memory before frequent access.
-    for i in ins.simpleDataset:
-        pass        (x)
-    for i in ins.simpleDataset[:]:
-        pass        (v)
-    """
     kwargs = dict(compression='gzip', compression_opts=1)
 
     def __get__(self, obj, objtype=None):
-        return obj.location.get(self.name, None)
+        return obj.location.get(self.name, None)[:]
 
     def __set__(self, obj, value):
         if self.name in obj.location:

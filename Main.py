@@ -30,7 +30,8 @@ if __name__ == "__main__":
     if args.to_step:
         steps = {
             "file": 0,
-            "noise": 1
+            "noise": 1,
+            "peak-fit": 2
         }
         step = steps[args.to_step]
         from Orbitool.tests.UI import routine
@@ -38,6 +39,8 @@ if __name__ == "__main__":
         if step > 0:
             routine.fileui(MainWin)
             routine.file_spectra(MainWin)
+        if step > 1:
+            routine.noise(MainWin)
     else:
         MainWin.show()
     sys.exit(app.exec_())

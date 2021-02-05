@@ -1,5 +1,5 @@
 from typing import Tuple
-from ._func import indexNearest as indexNearest_np, indexBetween as indexBetween_np
+from ._binary_search import indexNearest as indexNearest_np, indexBetween as indexBetween_np
 
 def defaultMethod(array, index):
     return array[index]
@@ -39,7 +39,7 @@ def indexNearest(array, value, indexRange: Tuple[int, int] = None, method=defaul
     l, r = (0, len(array)) if indexRange is None else indexRange
     i = indexFirstBiggerThan(array, value, indexRange, method)
 
-    if i == r or i > 0 and abs(method(array, i-1)-value) < abs(method(array, i)-value):
+    if i == r or i > l and abs(method(array, i-1)-value) < abs(method(array, i)-value):
         return i-1
     else:
         return i
@@ -60,4 +60,4 @@ def indexBetween(array, valueRange, indexRange: Tuple[int, int] = None, method=d
     else:
         return range(l, l)
 
-__all__ = [s for s in locals() if s.find('index')==0]
+__all__ = [s for s in locals() if s.startswith('index')]
