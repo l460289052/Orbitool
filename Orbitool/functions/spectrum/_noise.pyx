@@ -104,7 +104,7 @@ def getNoiseParams(DoubleArray mass, DoubleArray intensity, double quantile,
     cdef DoubleArray masked_mass, masked_intensity, poly_coef
     cdef double mass_point, std
     other_mask = global_mask.copy()
-
+    # generate mask
     cdef int i
     for i, mass_point in enumerate(mass_points):
         mass_masks[i] = getMassPointMask(mass, mass_point, mass_point_delta)
@@ -115,12 +115,12 @@ def getNoiseParams(DoubleArray mass, DoubleArray intensity, double quantile,
     quantile_mask = masked_intensity < np.quantile(masked_intensity, quantile)
     masked_mass = mass[other_mask][quantile_mask]
     masked_intensity = masked_intensity[quantile_mask]
-   
-    std = masked_intensity.std()
+    # poly
     poly_coef = polynomial.polyfit(mass[other_mask][quantile_mask],
         masked_intensity, 1 if mass_dependent else 0)
     
-
+    # norm
+    std = masked_intensity.std()
     cdef list ret = []
     for i, mass_point in enumerate(mass_points):
         masked_mass = mass[mass_masks[i]]

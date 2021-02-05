@@ -56,6 +56,13 @@ class Attr(Descriptor):
 
     @lru_cache(maxsize=16)
     def __get__(self, obj, objtype=None):
+        """
+        if it's overrided, don't call super().__get__ and super().__set__ because of lru_cache
+        please override like this:
+            @lru_cache(16)
+            def __get__(self, *args):
+                return super().__get__.__wrapped__(self, *args)
+        """
         return obj.location.attrs.get(self.name, None)
 
     def __set__(self, obj, value):
@@ -99,7 +106,7 @@ class Float(Attr):
 class Datetime(Str):
     @lru_cache(16)
     def __get__(self, *args):
-        return datetime.fromisoformat(super().__get__(*args))
+        return datetime.fromisoformat(super().__get__.__wrapped__(self, *args))
 
     def __set__(self, obj, value: datetime):
         super().__set__(obj, value.isoformat())
