@@ -90,6 +90,8 @@ class SpectrumInfo(datatable.DatatableItem):
     endIndex = datatable.Int32()
     rtol = datatable.Float32()
     polarity = datatable.Int32()
+    
+    average_index = datatable.Int32()
 
     @staticmethod
     def generate_infos_from_paths_by_number(paths, rtol, N, polarity, timeRange) -> List[SpectrumInfo]:
@@ -127,7 +129,7 @@ class SpectrumInfo(datatable.DatatableItem):
                 r = f.timeRange2NumRange((start - f_create, end - f_create))
                 if not f.checkAverageEmpty((start - f_create, end - f_create)):
                     info_list.append(SpectrumInfo(
-                        f.path, start, end, r[0], r[1], rtol, polarity))
+                        f.path, start, end, r[0], r[1], rtol, polarity, 0))
                 if f_end == end:
                     files.next()
                     f = files.value
@@ -135,25 +137,19 @@ class SpectrumInfo(datatable.DatatableItem):
                     f_start = f.startDatetime
                     f_end = f.endDatetime
             else:
-                tmp_start = start
-                paths = []
+                average_index = 0
                 while True:
-                    if f_end < end:
-                        paths.append(f.path)
-                        tmp_start = f_end
-                        files.next()
-                        if files.end:
-                            break
-                        f = files.value
-                        f_create = f.creationDatetime
-                        f_start = f.startDatetime
-                        f_end = f.endDatetime
-                    else:
-                        if f_start < end:
-                            paths.append(f.path)
+                    if f_start > end:
                         break
-                info_list.append(SpectrumInfo(
-                    '|'.join(paths), start, end, 0, 0, rtol, polarity))
+                    r = f.timeRange2NumpyRange((start-f_create, end-f_create))
+                    info_list.append(SpectrumInfo(f.path, start, end, r[0], r[1], rtol, polarity, average_index))
+                    files.next()
+                    if files.end:
+                        break
+                    f = files.value
+                    f_create = f.creationDatetime
+                    f_start = f.startDatetime
+                    f_end = f.endDatetime
 
             start += interval
             end = start + interval
@@ -171,7 +167,7 @@ class SpectrumInfo(datatable.DatatableItem):
                 if f.getSpectrumPolarity(i) == polarity:
                     time = creationTime + f.getSpectrumRetentionTime(i)
                     info = SpectrumInfo(path, time, time, i,
-                                        i + 1, rtol, polarity)
+                                        i + 1, rtol, polarity, 0)
                     info_list.append(info)
         return info_list
 

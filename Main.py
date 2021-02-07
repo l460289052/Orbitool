@@ -34,7 +34,7 @@ if __name__ == "__main__":
             "peak-fit": 2
         }
         step = steps[args.to_step]
-        from Orbitool.tests.UI import routine
+        from Orbitool.UI.tests import routine
         routine.init(MainWin)
         if step > 0:
             routine.fileui(MainWin)
