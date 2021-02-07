@@ -1,5 +1,4 @@
 from . import HDF5
-from . import file
 
 
 class Peak(HDF5.Group):
@@ -22,10 +21,10 @@ class Spectrum(HDF5.Group):
     h5_type = HDF5.RegisterType("Spectrum")
 
     file_path = HDF5.Str()
-    mz = HDF5.BigNumpy()
+    mass = HDF5.BigNumpy()
     intensity = HDF5.BigNumpy()
-    startTime = HDF5.Datetime()
-    endTime = HDF5.Datetime()
+    start_tTime = HDF5.Datetime()
+    end_time = HDF5.Datetime()
 
 
 class SpectrumList(HDF5.Group):

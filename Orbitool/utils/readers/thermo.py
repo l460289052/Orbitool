@@ -83,10 +83,17 @@ class File:
         return False
 
     def getFilter(self, start, stop, polarity):
-        for i in range(start, stop):
-            scanfilter = self.rawfile.GetFilterForScanNumber(i)
-            if convertPolarity[scanfilter.Polarity] == polarity:
-                return scanfilter
+        scanfilters = self.rawfile.GetFiltersForScanRange(start, stop - 1)
+        # if convertPolarity[scanfilter.Polarity] == polarity:
+        #     return scanfilter
+        return None
+
+    def getFilterInTimeRange(self, start: float, end: float, polarity):
+        scanfilters = Extensions.GetFiltersForTimeRange(
+            self.rawfile, start, end)
+        for filter in scanfilters:
+            if convertPolarity[filter.Polarity] == polarity:
+                return filter
         return None
 
     def getSpectrumPolarity(self, scanNum):
@@ -128,6 +135,18 @@ class File:
             if self.getSpectrumPolarity(i) == polarity:
                 return False
         return True
+
+    def getAveragedSpectrumInTimeRange(self, start: datetime, end: datetime, rtol, polarity):
+        start = (start - self.creationDatetime).total_seconds() / 60
+        end = (end - self.creationDatetime).total_seconds() / 60
+        if (scanfilter := self.getFilterInTimeRange(start, end, polarity)) is None:
+            return
+        if (averaged := Extensions.AverageScansInTimeRange(self.rawfile, start, end, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))) is None:
+            return
+        averaged = averaged.SegmentedScan
+        mass = np.fromiter(averaged.Positions, np.float64)
+        intensity = np.fromiter(averaged.Intensities, np.float64)
+        return mass, intensity
 
     def getAveragedSpectrum(self, ppm, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
         start, end = self.bothToNumRange(timeRange, numRange)

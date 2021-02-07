@@ -5,7 +5,7 @@ import h5py
 from typing import Union
 
 
-from . import HDF5, file, spectrum
+from . import HDF5, spectrum
 from .file import FileList, setFileReader, SpectrumInfo
 
 from Orbitool import config
@@ -21,7 +21,7 @@ class SpectraList(HDF5.Group):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.selected_spectrum_index = None
+        self.selected_start_time :datetime= None
 
 
 class NoiseTab(HDF5.Group):

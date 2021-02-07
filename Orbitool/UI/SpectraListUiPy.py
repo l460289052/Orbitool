@@ -1,4 +1,5 @@
-from typing import Union, Optional
+from typing import Union, Optional, List
+from datetime import datetime
 from PyQt5 import QtWidgets, QtCore
 
 from . import SpectraListUi
@@ -7,6 +8,8 @@ from . import utils
 from .manager import BaseWidget, state_node
 
 from Orbitool import config
+
+from Orbitool.structures.file import SpectrumInfo
 
 
 class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):
@@ -43,12 +46,13 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):
     def show_file_infos(self):
         tableWidget = self.tableWidget
         tableWidget.setRowCount(0)
-        spectrum_infos = self.spectra_list.file_spectrum_info_list
+        spectrum_infos:List[SpectrumInfo] = self.spectra_list.file_spectrum_info_list
+        spectrum_infos = [info for info in spectrum_infos if info.average_index == 0]
         tableWidget.setRowCount(len(spectrum_infos))
 
         for i, info in enumerate(spectrum_infos):
-            time_range = (info.startTime.strftime(config.timeFormat),
-                          info.endTime.strftime(config.timeFormat))
+            time_range = (info.start_time.strftime(config.timeFormat),
+                          info.end_time.strftime(config.timeFormat))
             for j, v in enumerate(time_range):
                 tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(v))
 
@@ -60,7 +64,12 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):
                 self.comboBox_position.append(0)
                 comboBox.addItem("File tab")
 
+    @state_node(mode='e')
     def selection_changed(self):
         indexes = utils.get_tablewidget_selected_row(self.tableWidget)
-        self.spectra_list.selected_spectrum_index = None if len(
-            indexes) == 0 else indexes[0]
+        index = (0 if config.default_select else None) if len(indexes) == 0 else indexes[0]
+        if index is None:
+            self.spectra_list.selected_start_time = None
+        else:
+            item = self.tableWidget.item(index, 0)
+            self.spectra_list.selected_start_time = datetime.strptime(item.text(), config.timeFormat)

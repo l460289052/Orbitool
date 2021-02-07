@@ -9,7 +9,9 @@ import numpy as np
 import cython
 
 from ._spectrum cimport (DoubleArray, DoubleArray2D, DoubleArray3D, 
-    DoubleOrArray, npdouble)
+    DoubleOrArray)
+
+npdouble = np.float64
 
 cpdef tuple mergeSpectra(DoubleArray mass1, DoubleArray intensity1, 
         DoubleArray mass2, DoubleArray intensity2, double weight1,

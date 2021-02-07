@@ -1,4 +1,5 @@
-from typing import Union, Optional
+from typing import Union, Optional, List
+from collections import deque
 
 from PyQt5 import QtWidgets, QtCore
 import numpy as np
@@ -8,7 +9,11 @@ from .utils import showInfo
 from .manager import BaseWidget, state_node, Thread
 from . import component
 
+from Orbitool.structures import file
 from Orbitool.structures.file import SpectrumInfo
+from Orbitool.structures.spectrum import Spectrum
+from Orbitool import functions
+from Orbitool.functions import binary_search
 
 
 class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
@@ -34,18 +39,44 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
     @state_node
     def showSelectedSpectrum(self):
         workspace = self.current_workspace
-        index = workspace.spectra_list.selected_spectrum_index
-        if index is None:
+        time = workspace.spectra_list.selected_start_time
+        if time is None:
             showInfo("Please select a spectrum in spectra list")
             return None
-        spectrum_info: SpectrumInfo = workspace.spectra_list.file_spectrum_info_list[index]
-        return Thread(spectrum_info.get_spectrum, (workspace.noise_tab.current_spectrum, ))
+
+        info_list = workspace.spectra_list.file_spectrum_info_list
+        index = binary_search.indexNearest_np(
+            info_list.get_column("start_time"), np.datetime64(time, 's'))
+        left = index
+        while info_list[left].average_index != 0:
+            index -= 1
+        right = index + 1
+        while info_list[right].average_index != 0:
+            right += 1
+
+        infos: List[SpectrumInfo] = list(info_list[left:right])
+
+        def func(infos: List[SpectrumInfo], target_spectrum: Spectrum):
+
+            if len(spectrums := [spectrum for info in infos if (spectrum := info.get_spectrum_from_info(with_minutes=True)) is not None]) > 0:
+                mass, intensity = functions.spectrum.averageSpectra(
+                    spectrums, infos[0].rtol, False)
+                target_spectrum.file_path = ''
+                target_spectrum.mass = mass
+                target_spectrum.intensity = intensity
+                target_spectrum.start_tTime = infos[0].start_time
+                target_spectrum.end_time = infos[-1].end_time
+                return True
+            else:
+                return False
+
+        return Thread(func, (infos, self.noise.current_spectrum))
 
     @showSelectedSpectrum.thread_node
     def showSelectedSpectrum(self, result, args):
         self.selected_spectrum_average.emit()
         spectrum = self.noise.current_spectrum
-        self.plot.ax.plot(spectrum.mz, spectrum.intensity)
+        self.plot.ax.plot(spectrum.mass, spectrum.intensity)
         self.plot.canvas.draw()
         self.show()
 
@@ -65,7 +96,6 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
         monomer = self.monomerNoiseCheckBox.isChecked()
         dimer = self.dimerNoiseCheckBox.isChecked()
         flags = (mass_dependent, monomer, dimer)
-        
 
         def func():
             spectrum_info.get_spectrum(spectrum)

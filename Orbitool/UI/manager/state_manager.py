@@ -15,7 +15,8 @@ class NodeType(Enum):
     Except = 1
     ThreadEnd = 2
 
-
+_busy_set = {'w', 'x'}
+_busy_reset = {'w', 'x', 'a'}
 class node:
     """
     @thread_node
@@ -29,7 +30,7 @@ class node:
     def __init__(self, *, withArgs=False, mode='w'):
         """
 
-        mode: 'w': check and set busy; 'x': set busy without check; 'a': not check busy;
+        mode: 'w': check and set busy; 'x': set busy without check; 'a': not check busy; 'e': only catch exception
         """
         pass
 
@@ -58,7 +59,7 @@ class node:
         @functools.wraps(func)
         def decorator(selfWidget: BaseWidget, *args, **kwargs):
             if not selfWidget.busy:
-                if self._mode != 'a':
+                if self._mode in _busy_set:
                     selfWidget.busy = True
             elif self._mode == 'w':
                 # if manager.process_pool.
@@ -92,14 +93,14 @@ class node:
                         thread.run()
                     else:
                         thread.start()
-                else:
+                elif self._mode in _busy_reset:
                     selfWidget.busy = False
             except Exception as e:
                 logging.error(str(e), exc_info=e)
                 showInfo(str(e))
                 if (tmpfunc := self.except_node.func):
                     tmpfunc(selfWidget)
-                else:
+                elif self._mode in _busy_reset:
                     selfWidget.busy = False
 
         return decorator
@@ -110,9 +111,9 @@ class node:
         if func is None:
             return
         self._func = func
-        self.except_node = node(self._root, self, NodeType.Except, mode='a')
+        self.except_node = node(self._root, self, NodeType.Except, mode='a' if self._mode!='e' else 'e')
         self.thread_node = node(
-            self._root, self, NodeType.ThreadEnd, withArgs=True, mode='a')
+            self._root, self, NodeType.ThreadEnd, withArgs=True, mode='a' if self._mode!='e' else 'e')
 
     def __call__(self, func):
         self.func = func

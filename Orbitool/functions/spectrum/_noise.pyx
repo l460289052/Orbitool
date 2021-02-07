@@ -1,7 +1,7 @@
 # distutils: language = c++
 # cython: language_level = 3
 
-from libc import math
+from libc cimport math
 from libcpp cimport bool
 import cython
 from cython.operator cimport preincrement as preinc, predecrement as predec

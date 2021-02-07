@@ -1,8 +1,10 @@
 from typing import Tuple
-from ._binary_search import indexNearest as indexNearest_np, indexBetween as indexBetween_np
+from ._binary_search import indexNearest as _indexNearest_np, indexBetween as _indexBetween_np
+
 
 def defaultMethod(array, index):
     return array[index]
+
 
 def indexFirstNotSmallerThan(array, value, indexRange: Tuple[int, int] = None, method=defaultMethod):
     '''
@@ -19,6 +21,7 @@ def indexFirstNotSmallerThan(array, value, indexRange: Tuple[int, int] = None, m
             r = t
     return l
 
+
 def indexFirstBiggerThan(array, value, indexRange: Tuple[int, int] = None, method=defaultMethod):
     '''
     np.searchsorted(array,value,'right')
@@ -32,6 +35,7 @@ def indexFirstBiggerThan(array, value, indexRange: Tuple[int, int] = None, metho
             r = t
     return l
 
+
 def indexNearest(array, value, indexRange: Tuple[int, int] = None, method=defaultMethod) -> int:
     '''
     `indexRange`: default=(0,len(array))
@@ -39,10 +43,15 @@ def indexNearest(array, value, indexRange: Tuple[int, int] = None, method=defaul
     l, r = (0, len(array)) if indexRange is None else indexRange
     i = indexFirstBiggerThan(array, value, indexRange, method)
 
-    if i == r or i > l and abs(method(array, i-1)-value) < abs(method(array, i)-value):
-        return i-1
+    if i == r or i > l and abs(method(array, i - 1) - value) < abs(method(array, i) - value):
+        return i - 1
     else:
         return i
+
+
+def indexNearest_np(array, value, indexRange=None):
+    return _indexNearest_np(array, value, indexRange)
+
 
 def indexBetween(array, valueRange, indexRange: Tuple[int, int] = None, method=defaultMethod) -> range:
     """
@@ -59,5 +68,10 @@ def indexBetween(array, valueRange, indexRange: Tuple[int, int] = None, method=d
         return range(l, r)
     else:
         return range(l, l)
+
+
+def indexBetween_np(array, valueRange, indexRange):
+    return _indexBetween_np(array, valueRange, indexRange)
+
 
 __all__ = [s for s in locals() if s.startswith('index')]

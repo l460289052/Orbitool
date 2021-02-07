@@ -8,6 +8,7 @@ if __name__ == "__main__":
     pyuic_parser = subparsers.add_parser('pyuic')
     pyuic_parser.add_argument("--clear", action="store_true")
     count_parser = subparsers.add_parser('count')
+    count_parser.add_argument("--count-blank", action="store_true", dest="count_blank")
     setup_parser = subparsers.add_parser('setup')
     setup_parser.add_argument("--clear", action="store_true")
     copy_parser = subparsers.add_parser('copy')
@@ -26,7 +27,7 @@ if __name__ == "__main__":
             pyuic(os.path.join(root, "Orbitool", "UI"))
     elif args.subparser_name == "count":
         from utils.countCode import count
-        count([os.path.join(root,"Orbitool"), os.path.join(root, "utils")], root)
+        count([os.path.join(root,"Orbitool"), os.path.join(root, "utils")], root, args.count_blank)
     elif args.subparser_name == "setup":
         from utils.setup import main as setup, clear
         if args.clear:

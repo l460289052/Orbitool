@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Union, List
 from collections.abc import Iterable
 from datetime import datetime, timedelta
@@ -116,7 +117,7 @@ class Datatable(H5Obj):
         super().copy_from(another)
 
     @classmethod
-    def descriptor(cls, child_type: Union[str, type], name=None):
+    def descriptor(cls, child_type: Union[str, type], name=None) -> Datatable:
         return _descriptor.H5ObjectDescriptor(cls, (child_type,), name=name)
 
     def extend(self, rows: List[DatatableItem]):

@@ -7,7 +7,7 @@ from Orbitool.utils.files import FolderTraveler
 exts = ['.py', '.pyx', '.pxd']
 
 
-def count(recurrent_path, not_recurrent_path):
+def count(recurrent_path, not_recurrent_path, count_blank_line = False):
     cnt = 0
     size = .0
     fts = [FolderTraveler(not_recurrent_path, exts, False),
@@ -17,7 +17,8 @@ def count(recurrent_path, not_recurrent_path):
         if not file.lower().endswith('ui.py'):
             with open(file, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
-                lines = [line for line in lines if len(line) > 5]
+                if not count_blank_line:
+                    lines = [line for line in lines if len(line) > 5]
 
                 fsize = os.path.getsize(file) / 1024
                 size += fsize

@@ -1,6 +1,7 @@
 import os
 import logging
 from multiprocessing import cpu_count
+from datetime import timedelta
 
 DEBUG = False
 
@@ -32,3 +33,7 @@ if multi_cores <= 0:
     multi_cores = 1
 
 test_timeout = 0.1 # second
+
+time_delta = timedelta(seconds=1)
+
+default_select = True # if True, will select first row
