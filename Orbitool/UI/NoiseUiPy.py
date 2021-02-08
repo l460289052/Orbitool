@@ -59,8 +59,10 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
         def func(infos: List[SpectrumInfo], target_spectrum: Spectrum):
 
             if len(spectrums := [spectrum for info in infos if (spectrum := info.get_spectrum_from_info(with_minutes=True)) is not None]) > 0:
+                spectrums = [(*functions.spectrum.removeZeroPositions(
+                    spectrum[0], spectrum[1]), spectrum[2]) for spectrum in spectrums]
                 mass, intensity = functions.spectrum.averageSpectra(
-                    spectrums, infos[0].rtol, False)
+                    spectrums, infos[0].rtol, True)
                 target_spectrum.file_path = ''
                 target_spectrum.mass = mass
                 target_spectrum.intensity = intensity

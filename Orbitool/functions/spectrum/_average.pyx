@@ -39,7 +39,7 @@ cpdef tuple mergeSpectra(DoubleArray mass1, DoubleArray intensity1,
         while i1<length1 and i2<length2:
             if math.fabs(m1[i1] - m2[i2]) <= atol[i1]:
                 mass[i] = m1[i1]*weight1+m2[i2]*weight2
-                intensity[i] = int1[i1]+m2[i2]
+                intensity[i] = int1[i1]+int2[i2]
                 preinc(i)
                 preinc(i1)
                 preinc(i2)
@@ -63,4 +63,4 @@ cpdef tuple mergeSpectra(DoubleArray mass1, DoubleArray intensity1,
             intensity[i]=int2[i2]
             preinc(i)
             preinc(i2)
-    return mass[:i].base, intensity[:i].base
+    return mass.base[:i], intensity.base[:i]

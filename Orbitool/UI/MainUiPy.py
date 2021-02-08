@@ -114,6 +114,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
     @state_node(mode='x')
     def file_tab_finish(self):
         self.spectraList.show_combobox_selection()
+        self.spectraList.comboBox.setCurrentIndex(-1)
         self.spectraList.comboBox.setCurrentIndex(0)
         self.spectraListDw.show()
         self.spectraListDw.raise_()

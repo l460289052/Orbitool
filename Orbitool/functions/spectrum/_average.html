@@ -1569,11 +1569,11 @@ struct __pyx_fuse_0__pyx_opt_args_8Orbitool_9functions_8spectrum_8_average_merge
       __pyx_t_15 = __pyx_v_i2;
       __pyx_t_14 = __pyx_v_i;
       *((double *) ( /* dim=0 */ (__pyx_v_mass.data + __pyx_t_14 * __pyx_v_mass.strides[0]) )) = (((*((double *) ( /* dim=0 */ (__pyx_v_m1.data + __pyx_t_16 * __pyx_v_m1.strides[0]) ))) * __pyx_v_weight1) + ((*((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_15 * __pyx_v_m2.strides[0]) ))) * __pyx_v_weight2));
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">42</span>:                 <span class="n">intensity</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">int1</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span><span class="o">+</span><span class="n">m2</span><span class="p">[</span><span class="n">i2</span><span class="p">]</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">42</span>:                 <span class="n">intensity</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">int1</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span><span class="o">+</span><span class="n">int2</span><span class="p">[</span><span class="n">i2</span><span class="p">]</span></pre>
 <pre class='cython code score-0 '>      __pyx_t_15 = __pyx_v_i1;
       __pyx_t_16 = __pyx_v_i2;
       __pyx_t_14 = __pyx_v_i;
-      *((double *) ( /* dim=0 */ (__pyx_v_intensity.data + __pyx_t_14 * __pyx_v_intensity.strides[0]) )) = ((*((double *) ( /* dim=0 */ (__pyx_v_int1.data + __pyx_t_15 * __pyx_v_int1.strides[0]) ))) + (*((double *) ( /* dim=0 */ (__pyx_v_m2.data + __pyx_t_16 * __pyx_v_m2.strides[0]) ))));
+      *((double *) ( /* dim=0 */ (__pyx_v_intensity.data + __pyx_t_14 * __pyx_v_intensity.strides[0]) )) = ((*((double *) ( /* dim=0 */ (__pyx_v_int1.data + __pyx_t_15 * __pyx_v_int1.strides[0]) ))) + (*((double *) ( /* dim=0 */ (__pyx_v_int2.data + __pyx_t_16 * __pyx_v_int2.strides[0]) ))));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">43</span>:                 <span class="n">preinc</span><span class="p">(</span><span class="n">i</span><span class="p">)</span></pre>
 <pre class='cython code score-0 '>      (void)((++__pyx_v_i));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">44</span>:                 <span class="n">preinc</span><span class="p">(</span><span class="n">i1</span><span class="p">)</span></pre>
@@ -1651,75 +1651,33 @@ struct __pyx_fuse_0__pyx_opt_args_8Orbitool_9functions_8spectrum_8_average_merge
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">65</span>:             <span class="n">preinc</span><span class="p">(</span><span class="n">i2</span><span class="p">)</span></pre>
 <pre class='cython code score-0 '>    (void)((++__pyx_v_i2));
   }
-</pre><pre class="cython line score-14" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">66</span>:     <span class="k">return</span> <span class="n">mass</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="n">intensity</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">base</span></pre>
-<pre class='cython code score-14 '>  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
-  __pyx_t_12.data = __pyx_v_mass.data;
-  __pyx_t_12.memview = __pyx_v_mass.memview;
-  __PYX_INC_MEMVIEW(&amp;__pyx_t_12, 0);
-  __pyx_t_5 = -1;
-  if (unlikely(__pyx_memoryview_slice_memviewslice(
-    &amp;__pyx_t_12,
-    __pyx_v_mass.shape[0], __pyx_v_mass.strides[0], __pyx_v_mass.suboffsets[0],
-    0,
-    0,
-    &amp;__pyx_t_5,
-    0,
-    __pyx_v_i,
-    0,
-    0,
-    1,
-    0,
-    1) &lt; 0))
-{
-    <span class='error_goto'>__PYX_ERR(0, 66, __pyx_L1_error)</span>
-}
-
-__pyx_t_10 = __pyx_memoryview_fromslice(__pyx_t_12, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);;<span class='error_goto'> if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 66, __pyx_L1_error)</span>
+</pre><pre class="cython line score-20" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">66</span>:     <span class="k">return</span> <span class="n">mass</span><span class="o">.</span><span class="n">base</span><span class="p">[:</span><span class="n">i</span><span class="p">],</span> <span class="n">intensity</span><span class="o">.</span><span class="n">base</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span></pre>
+<pre class='cython code score-20 '>  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
+  __pyx_t_10 = __pyx_memoryview_fromslice(__pyx_v_mass, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);;<span class='error_goto'> if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 66, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_10);
-  __PYX_XDEC_MEMVIEW(&amp;__pyx_t_12, 1);
-  __pyx_t_12.memview = NULL;
-  __pyx_t_12.data = NULL;
   __pyx_t_9 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(__pyx_t_10, __pyx_n_s_base);<span class='error_goto'> if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 66, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_9);
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_10); __pyx_t_10 = 0;
-  __pyx_t_12.data = __pyx_v_intensity.data;
-  __pyx_t_12.memview = __pyx_v_intensity.memview;
-  __PYX_INC_MEMVIEW(&amp;__pyx_t_12, 0);
-  __pyx_t_5 = -1;
-  if (unlikely(__pyx_memoryview_slice_memviewslice(
-    &amp;__pyx_t_12,
-    __pyx_v_intensity.shape[0], __pyx_v_intensity.strides[0], __pyx_v_intensity.suboffsets[0],
-    0,
-    0,
-    &amp;__pyx_t_5,
-    0,
-    __pyx_v_i,
-    0,
-    0,
-    1,
-    0,
-    1) &lt; 0))
-{
-    <span class='error_goto'>__PYX_ERR(0, 66, __pyx_L1_error)</span>
-}
-
-__pyx_t_10 = __pyx_memoryview_fromslice(__pyx_t_12, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);;<span class='error_goto'> if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 66, __pyx_L1_error)</span>
+  __pyx_t_10 = <span class='pyx_c_api'>__Pyx_PyObject_GetSlice</span>(__pyx_t_9, 0, __pyx_v_i, NULL, NULL, NULL, 0, 1, 1);<span class='error_goto'> if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 66, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_10);
-  __PYX_XDEC_MEMVIEW(&amp;__pyx_t_12, 1);
-  __pyx_t_12.memview = NULL;
-  __pyx_t_12.data = NULL;
-  __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(__pyx_t_10, __pyx_n_s_base);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)</span>
+  <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_9); __pyx_t_9 = 0;
+  __pyx_t_9 = __pyx_memoryview_fromslice(__pyx_v_intensity, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);;<span class='error_goto'> if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 66, __pyx_L1_error)</span>
+  <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_9);
+  __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(__pyx_t_9, __pyx_n_s_base);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
-  <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_10); __pyx_t_10 = 0;
-  __pyx_t_10 = <span class='py_c_api'>PyTuple_New</span>(2);<span class='error_goto'> if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 66, __pyx_L1_error)</span>
-  <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_10);
+  <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_9); __pyx_t_9 = 0;
+  __pyx_t_9 = <span class='pyx_c_api'>__Pyx_PyObject_GetSlice</span>(__pyx_t_2, 0, __pyx_v_i, NULL, NULL, NULL, 0, 1, 1);<span class='error_goto'> if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 66, __pyx_L1_error)</span>
+  <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_9);
+  <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = <span class='py_c_api'>PyTuple_New</span>(2);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)</span>
+  <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
+  <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_10);
+  <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_2, 0, __pyx_t_10);
   <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_9);
-  <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_10, 0, __pyx_t_9);
-  <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_2);
-  <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_10, 1, __pyx_t_2);
-  __pyx_t_9 = 0;
-  __pyx_t_2 = 0;
-  __pyx_r = ((PyObject*)__pyx_t_10);
+  <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_2, 1, __pyx_t_9);
   __pyx_t_10 = 0;
+  __pyx_t_9 = 0;
+  __pyx_r = ((PyObject*)__pyx_t_2);
+  __pyx_t_2 = 0;
   goto __pyx_L0;
 </pre></div></body></html>
