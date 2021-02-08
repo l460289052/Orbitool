@@ -107,8 +107,9 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
     @state_node
     def processSelected(self):
         indexes = UiUtils.get_tablewidget_selected_row(self.tableWidget)
-        paths = self.file_list.files.get_column(
-            "path")[indexes] if len(indexes) > 0 else []
+        if len(indexes) == 0:
+            return None
+        paths = self.file_list.files.get_column("path")[indexes]
         return self.processPaths(paths)
 
     @state_node
@@ -127,7 +128,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         time_range = (self.startDateTimeEdit.dateTime().toPyDateTime(),
                       self.endDateTimeEdit.dateTime().toPyDateTime())
 
-        rtol = self.rtolDoubleSpinBox.value()
+        rtol = self.rtolDoubleSpinBox.value() * 1e-6
         if self.positiveRadioButton.isChecked():
             polarity = 1
         elif self.negativeRadioButton.isChecked():
