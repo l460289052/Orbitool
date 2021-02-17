@@ -1,9 +1,12 @@
-from Orbitool.utils.formula import Formula, FormulaHint
+from Orbitool.utils.formula import Formula
 import threading
+from pyteomics import mass as pyteomass
+from copy import copy
+
 
 def test_formula1():
     s = "N[15]O3-"
-    f: FormulaHint = Formula(s)
+    f = Formula(s)
     assert f['O'] == 3
     assert f['N[15]'] == 1
     assert f['N'] == 1
@@ -12,12 +15,13 @@ def test_formula1():
 
 def formula2():
     'O[18]3O0C7H[2]0H2'
-    f: FormulaHint = Formula()
-    f.addElement('O',18,3)
-    f.addElement('O',0,0)
-    f.addElement('C',0,7)
-    f.addElement('H',2,0)
-    f.addElement('H',0,2)
+    f = Formula()
+    f.addElement('O', 18, 3)
+    f.addElement('O', 0, 0)
+    f.addElement('C', 0, 7)
+    f.addElement('H', 2, 0)
+    f.addElement('H', 0, 2)
+
 
 def test_formula2():
     '''
@@ -30,3 +34,32 @@ def test_formula2():
     thread._stop()
     del thread
 
+
+def test_mass():
+    f = Formula("CH4-")
+    e = Formula(charge=-1)
+    assert (
+        f.mass() - pyteomass.calculate_mass(f.toStr(withCharge=False)) - e.mass()) < 1e-6
+
+
+def test_isotopes():
+    f = Formula("C[14]2")
+    assert str(f) == "C[14]2"
+
+    c = Formula("C")
+    c14 = Formula("C[14]")
+    g = copy(f)
+    f["C[14]"] = 1
+    assert f["C[14]"] == 1
+    assert f["C"] == 2
+    assert f["C[12]"] == 1
+    assert str(f) == "CC[14]"
+    h = g - c14 + c
+    assert h["C[14]"] == 1
+    assert h["C"] == 2
+    assert h["C[12]"] == 1
+    assert h.mass() == f.mass()
+    assert (h.to_numpy() == f.to_numpy()).all()
+    assert h == f
+    
+    assert g.findOrigin() == f.findOrigin()

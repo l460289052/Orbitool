@@ -41,7 +41,7 @@ def main(root):
         modelNodes[getModelName(path)] = node
 
     for model1, node1 in modelNodes.items():
-        with open(node1.path, 'r') as f:
+        with open(node1.path, 'r', encoding='utf-8') as f:
             text = f.read()
             for model2, node2 in modelNodes.items():
                 if variableIn(model2, text):
