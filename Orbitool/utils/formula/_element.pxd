@@ -1,32 +1,26 @@
 # distutils: language = c++
 # cython: language_level = 3
 
+from libc.stdint cimport int32_t
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.unordered_map cimport unordered_map
 from libcpp.pair cimport pair
 
-cdef:
-    int _factor
-    int _andfactor
+ctypedef pair[double, double] dou_pair
+ctypedef pair[int32_t, int32_t] int_pair
 
+cdef:
+    # int -> element str
     list elements
+    # element str -> int
     dict elementsMap
     # elementMass[elementsMap['C']] -> mass
     vector[double] elementMass
-    vector[int] elementMassNum
-    # elementMassDist[elementsMap['C']] -> {mass -> (accurate mass, relative abundance)}
-    vector[unordered_map[int, pair[double, double]]] elementMassDist
-    # min, max
-    unordered_map[int, vector[int]] elementNumMap
-    # dbe2, hmin, hmax, omin, omax
-    unordered_map[int, vector[double]] elementParasMap
-    vector[int] CHmin
+    # int -> mass num
+    vector[int32_t] elementMassNum
+    # int -> {mass num -> (accurate mass, relative abundance)}
+    vector[unordered_map[int32_t, pair[double, double]]] elementMassDist
 
-    # unordered_map[int, int] isotopeNumMap
-    int encodeIsotope(int index, int m)
-    void decodeIsotope(int code, int*index, int*m)
-    void str2element(str key, int*index, int*m) except *
-    str element2str(int index, int m)
-    int str2code(str key) except *
-    str code2str(int code)
+    pair[int32_t, int32_t] str2element(str key) except *
+    str element2str(pair[int32_t, int32_t])
