@@ -13,6 +13,10 @@ from libcpp.pair cimport pair
 from libcpp cimport bool
 import pyteomics.mass 
 
+ctypedef map[int32_t, int32_t] int_map
+ctypedef pair[pair[int32_t, int32_t], int32_t] ints_pair
+ctypedef map[pair[int32_t, int32_t], int32_t] ints_map
+     
 
 cdef:
     double _elements_mass(map[int32_t, int32_t]& elements)

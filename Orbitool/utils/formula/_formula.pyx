@@ -24,10 +24,6 @@ from ._element cimport elements, elementsMap, elementMass,\
 
 from ._element cimport dou_pair, int_pair
 
-ctypedef map[int32_t, int32_t] int_map
-ctypedef pair[pair[int32_t, int32_t], int32_t] ints_pair
-ctypedef map[pair[int32_t, int32_t], int32_t] ints_map
-     
 cdef int32_t hash_factor = 10
 
 cdef list _elementsOrder = ['C', 'H', 'O', 'N', 'S']
@@ -47,7 +43,8 @@ cdef double _elements_mass(int_map & elements):
 cdef bool _elements_eq(int_map&_f1, int_map&_f2):
     if _f1.size()!=_f2.size():
         return False
-    cdef map[int32_t, int32_t].iterator i1 = _f1.begin(), i2 = _f2.begin()
+    i1 = _f1.begin()
+    i2 = _f2.begin()
     while i1 != _f1.end():
         if deref(i1) != deref(i2):
             return False
@@ -179,8 +176,6 @@ cdef class Formula:
     cpdef toStr(self, bool showProton = False, bool withCharge = True):
         cdef list rets=[]
 
-        cdef map[int32_t, int32_t].iterator it
-        cdef map[pair[int32_t, int32_t], int32_t].iterator isoit, isoend
         cdef int_pair p, e
         cdef int32_t i, index, num
         for i in elementsOrder:
@@ -238,7 +233,7 @@ cdef class Formula:
         if index != 0 and num<self.getI(index,0):
             raise ValueError(f"the number of {index} '{elements[index]}' shouldn't be lesser than {self.getI(index,0)}")
         
-        cdef map[int32_t, int32_t].iterator it = self.elements.find(index)
+        it = self.elements.find(index)
         
         if it == self.elements.end():
             if num != 0:
@@ -253,7 +248,7 @@ cdef class Formula:
         '''
         contains isotopes
         '''
-        cdef map[int32_t, int32_t].iterator it = self.elements.find(index)
+        it = self.elements.find(index)
         if it == self.elements.end():
             return 0
         return deref(it).second
@@ -267,7 +262,6 @@ cdef class Formula:
         if num<0:
             raise ValueError(f"the number of {index} '{elements[index]}[{m}]' shouldn't be lesser than 0")
         cdef int_pair p = int_pair(index, m)
-        cdef map[pair[int32_t, int32_t], int32_t].iterator it, end
         if num==0:
             if m==0:
                 it = self.isotopes.upper_bound(p)
@@ -294,7 +288,6 @@ cdef class Formula:
         CC[13]C[14] -> getI(6,m = 0) -> 2
         '''
         cdef int_pair p = int_pair(index, m)
-        cdef map[pair[int32_t, int32_t], int32_t].iterator i, end
         cdef int32_t ret = 0
         if m != 0:
             i = self.isotopes.find(p)
@@ -341,8 +334,8 @@ cdef class Formula:
                 return
             raise ValueError("times should be in 0,1,...")
 
-        cdef map[int32_t, int32_t].iterator i = self.elements.begin()
-        cdef map[pair[int32_t, int32_t], int32_t].iterator it = self.isotopes.begin()
+        i = self.elements.begin()
+        it = self.isotopes.begin()
         while i!=self.elements.end():
             # cython bug
             # deref(i).second*=times
@@ -357,7 +350,8 @@ cdef class Formula:
             return False
         if self.isotopes.size()!=f.isotopes.size():
             return False
-        cdef map[pair[int32_t, int32_t], int32_t].iterator i1 = self.isotopes.begin(), i2 = f.isotopes.begin()
+        i1 = self.isotopes.begin()
+        i2 = f.isotopes.begin()
         while i1!=self.isotopes.end():
             if deref(i1)!=deref(i2):
                 return False
