@@ -484,5 +484,5 @@ cdef class Formula:
         for i in self.elements:
             ret^=hash((i.first<<hash_factor)+i.second)
         for it in self.isotopes:
-            ret^=hash((((i.first.first<<hash_factor)+i.first.second)<<hash_factor)+i.second)
+            ret^=hash((((it.first.first<<hash_factor)+it.first.second)<<hash_factor)+it.second)
         return ret
