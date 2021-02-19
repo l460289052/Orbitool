@@ -74,7 +74,7 @@ cdef int_pair str2element(str key) except *:
         m = int(mm[1:-1])
     return int_pair(index, m)
 
-cdef str element2str(int_pair element):
+cdef str element2str(int_pair& element):
     return f"{elements[element.first]}[{element.second}]" if element.second>0 else f"{elements[element.first]}"
 
 def py_str2element(str key):
@@ -83,3 +83,6 @@ def py_str2element(str key):
     
 def py_element2str(int32_t index, int32_t m):
     return element2str(int_pair(index, m))
+
+cdef double getMass(int_pair& p):
+    return elementMassDist[p.first][p.second].first

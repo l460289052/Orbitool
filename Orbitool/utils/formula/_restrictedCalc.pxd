@@ -61,12 +61,10 @@ cdef:
         cdef void cover(self, double l, double r)
         
         cdef int32_t checkParameters(self)
-        cpdef void setParameter(self, str e, dict v)except*
-        cpdef dict getParameter(self, str e)
         
         cdef setStateForFormula(self, State&state, int_map&elements)
 
-        cpdef void calc(self, double MMin=*, double MMax=*)
+        cpdef void calc(self, double MMin=*, double MMax=*)except*
         cpdef clear(self)
         cdef pair[bool, map[double, map[int32_t, int32_t]].iterator] getFormula(self, double&mass)
         cdef void insertElements(self, int_map&elements, double mass=*)

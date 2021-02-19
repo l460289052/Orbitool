@@ -22,5 +22,7 @@ cdef:
     # int -> {mass num -> (accurate mass, relative abundance)}
     vector[unordered_map[int32_t, pair[double, double]]] elementMassDist
 
-    pair[int32_t, int32_t] str2element(str key) except *
-    str element2str(pair[int32_t, int32_t])
+    int_pair str2element(str key) except *
+    str element2str(int_pair&)
+    
+    double getMass(int_pair&)

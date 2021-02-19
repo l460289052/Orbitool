@@ -1213,8 +1213,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   __pyx_r = __pyx_t_9;
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">76</span>: </pre>
-<pre class="cython line score-6" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">77</span>: <span class="k">cdef</span> <span class="kt">str</span> <span class="nf">element2str</span><span class="p">(</span><span class="n">int_pair</span> <span class="n">element</span><span class="p">):</span></pre>
-<pre class='cython code score-6 '>static PyObject *__pyx_f_8Orbitool_5utils_7formula_8_element_element2str(__pyx_t_8Orbitool_5utils_7formula_8_element_int_pair __pyx_v_element) {
+<pre class="cython line score-6" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">77</span>: <span class="k">cdef</span> <span class="kt">str</span> <span class="nf">element2str</span><span class="p">(</span><span class="n">int_pair</span><span class="o">&amp;</span> <span class="n">element</span><span class="p">):</span></pre>
+<pre class='cython code score-6 '>static PyObject *__pyx_f_8Orbitool_5utils_7formula_8_element_element2str(__pyx_t_8Orbitool_5utils_7formula_8_element_int_pair &amp;__pyx_v_element) {
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("element2str", 0);
@@ -1467,5 +1467,20 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_8_element_2py_element2str(CY
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
+  goto __pyx_L0;
+</pre><pre class="cython line score-0">&#xA0;<span class="">86</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">87</span>: <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">getMass</span><span class="p">(</span><span class="n">int_pair</span><span class="o">&amp;</span> <span class="n">p</span><span class="p">):</span></pre>
+<pre class='cython code score-0 '>static double __pyx_f_8Orbitool_5utils_7formula_8_element_getMass(__pyx_t_8Orbitool_5utils_7formula_8_element_int_pair &amp;__pyx_v_p) {
+  double __pyx_r;
+  <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
+  <span class='refnanny'>__Pyx_RefNannySetupContext</span>("getMass", 0);
+/* … */
+  /* function exit code */
+  __pyx_L0:;
+  <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
+  return __pyx_r;
+}
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">88</span>:     <span class="k">return</span> <span class="n">elementMassDist</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">first</span><span class="p">][</span><span class="n">p</span><span class="o">.</span><span class="n">second</span><span class="p">]</span><span class="o">.</span><span class="n">first</span></pre>
+<pre class='cython code score-0 '>  __pyx_r = ((__pyx_v_8Orbitool_5utils_7formula_8_element_elementMassDist[__pyx_v_p.first])[__pyx_v_p.second]).first;
   goto __pyx_L0;
 </pre></div></body></html>

@@ -19,7 +19,7 @@ def copyTo(root):
     recurrent = ['Orbitool', 'utils']
     recurrent = [os.path.join(root, r) for r in recurrent]
 
-    exts = [".py", ".pyx", ".pxd", ".pyd", ".dll", ".md"]
+    exts = [".py", ".pyx", ".pxd", ".pyd", ".dll", ".md", ".yaml"]
 
     def checkBuildFolder(path):
         folder = os.path.dirname(path)

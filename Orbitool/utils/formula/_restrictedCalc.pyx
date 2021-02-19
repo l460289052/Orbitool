@@ -9,7 +9,7 @@ from libc.math cimport fabs, remainder, ceil, floor
 from libcpp.stack cimport stack
 
 from ._element cimport(
-    elements, elementMass, elementMassDist, elementMassNum,
+    elements as e_elements, elementMass, elementMassDist, elementMassNum,
     str2element, element2str, int_pair, dou_pair) 
 from ._formula cimport (
     Formula, int_map, ints_pair, ints_map, _elements_mass,
@@ -111,7 +111,7 @@ cdef class Calculator:
                 
     def getElements(self):
         cdef int32_t i
-        return [elements[i] for i in self.calcedElements]
+        return [e_elements[i] for i in self.calcedElements]
 
     def getIsotopes(self):
         cdef int_pair p
@@ -149,7 +149,7 @@ cdef class Calculator:
                 return -e
         return 1
     
-    cpdef void setParameter(self, str e, dict v) except*:
+    def __setitem__(self, str e, dict v):
         cdef int_pair p = str2element(e)
         assert p.second == 0
         cdef State state = State(DBE2 = v["DBE2"], OMin = v["OMin"], OMax = v["OMax"], HMin = v["HMin"], HMax = v["HMax"])
@@ -164,7 +164,7 @@ cdef class Calculator:
         self.ElementOMax[p.first] = v["OMax"]
         self.ElementInited[p.first] = True
 
-    cpdef dict getParameter(self, str e):
+    def __getitem__(self, str e):
         cdef int32_t p = str2element(e).first
         cdef State state = self.ElementState[p]
         cdef dict d = {"Min":self.ElementNumMin[p],"Max":self.ElementNumMax[p],
@@ -180,7 +180,9 @@ cdef class Calculator:
         state.HMax = self.HMax(elements)
 
     
-    cpdef void calc(self, double MMin = -1, double MMax = -1):
+    cpdef void calc(self, double MMin = -1, double MMax = -1) except*:
+        if self.checkParameters() < 0:
+            raise ValueError(f"Please check element {e_elements[int(-self.checkParameters())]}")
         cdef double ML = self.MMin
         cdef double MR = self.MMax
         if MMin>0 and MMax>0:

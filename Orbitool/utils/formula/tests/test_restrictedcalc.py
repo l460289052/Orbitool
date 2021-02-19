@@ -13,14 +13,14 @@ def init_calc():
         header = next(csvreader)[1:]
         header = list(map(lambda x: x.strip(), header))
         for row in csvreader:
-            ret.setParameter(row[0], dict(zip(header, map(float, row[1:]))))
+            ret[row[0]] = dict(zip(header, map(float, row[1:])))
     return ret
 
 calc = pytest.fixture(init_calc)
 
 
 def test_param(calc: RestrictedCalc):
-    hp = calc.getParameter('H')
+    hp = calc['H']
     assert hp["Min"] == 0
     assert hp["Max"] == 40
     assert hp["DBE2"] == -1
