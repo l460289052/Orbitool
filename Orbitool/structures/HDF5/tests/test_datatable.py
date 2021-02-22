@@ -24,7 +24,8 @@ class file(datatable.DatatableItem):
     append = datatable.str_ascii_limit(length=10)
 
 
-def init_dt(dt):
+def init_dt(dt: datatable.Datatable):
+    dt.initialize()
     dtn = datetime(2000, 1, 1, 2, 3, 4)
     dtt = dtn + timedelta(1)
     f = file('123', dtn, append="123321", endDatetime=dtt)
@@ -35,6 +36,9 @@ def init_dt(dt):
     dt[::2] = f
 
     del dt[:2]
+    f = dt[-1]
+    f.startDatetime = datetime(2000, 1, 1)
+    dt[-1] = f
 
 
 def check_dt(dt: datatable.Datatable):
@@ -59,6 +63,9 @@ def check_dt(dt: datatable.Datatable):
     assert f.endDatetime == dtt
     assert f.append == "123321"
     str(f)
+
+    f = dt[-1]
+    assert f.startDatetime == datetime(2000, 1, 1)
 
 
 def check_sort(dt: datatable.Datatable):

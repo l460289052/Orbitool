@@ -115,7 +115,7 @@ class Datetime(Str):
 class TimeDelta(Float):
     @lru_cache(16)
     def __get__(self, *args):
-        ret = super().__get__(*args)
+        ret = super().__get__.__wrapped__(self, *args)
         return timedelta(seconds=ret)
 
     def __set__(self, obj, value: timedelta):

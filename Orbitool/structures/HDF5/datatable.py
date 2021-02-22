@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, List
+from typing import Union, List, cast, Any
 from collections.abc import Iterable
 from datetime import datetime, timedelta
 from functools import cached_property, lru_cache, partial
@@ -59,12 +59,11 @@ class Datatable(H5Obj):
     h5_type = _descriptor.RegisterType('Datatable')
     item_type = _descriptor.ChildType()
 
-    def __init__(self, location, inited=True):
-        super().__init__(location, inited)
-        self.dtype: list = self.type_item_type.dtype if inited else None
+    def initialize(self):
+        self.dtype: list = self.type_item_type.dtype
 
     @classmethod
-    def create_at(cls, location: h5py.Group, key, item_type: Union[str, type]) -> 'Datatable':
+    def create_at(cls, location: h5py.Group, key, item_type: Union[str, type]) -> Datatable:
         if isinstance(item_type, type):
             item_type = get_name(item_type)
         dtype = get_type(item_type).dtype
@@ -83,14 +82,16 @@ class Datatable(H5Obj):
     def type_item_type(self):
         return get_type(self.item_type)
 
-    def __getitem__(self, s):
+    def __getitem__(self, s) -> Union[DatatableItem, List[DatatableItem]]:
         t = self.type_item_type
+        ds = self.location[s]
         if isinstance(s, (slice, Iterable)):
-            ds = self.location[s]
             return map(partial(t, from_hdf5=True), ds)
-        return t(self.location[s], from_hdf5=True)
+        return t(ds, from_hdf5=True)
 
-    def __setitem__(self, s, value: List[DatatableItem]):
+    def __setitem__(self, s, value: Union[DatatableItem, List[DatatableItem]]):
+        if issubclass(type(value), DatatableItem):
+            value = (value, )
         self.location[s] = [tuple(r.row) for r in value]
 
     def __delitem__(self, s):
@@ -123,7 +124,7 @@ class Datatable(H5Obj):
     def extend(self, rows: List[DatatableItem]):
         length = len(rows)
         self.location.resize((self.location.shape[0] + length,))
-        self.location[-length:] = [tuple(r.row) for r in rows]
+        self[-length:] = rows
 
     def clear(self):
         self.location.resize((0,))
@@ -132,13 +133,62 @@ class Datatable(H5Obj):
         if isinstance(rowIndex, int):
             rowIndex = self.type_item_type.dtype[rowIndex][0]
         args = self.get_column(rowIndex).argsort()
-        items = self.location[:]
-        items = items[args]
-        self.location[:] = items
+        self.location[:] = self.location[:][args]
+
+
+class SingleDatatable(Datatable):
+    h5_type = _descriptor.RegisterType('SingleDatatable')
+
+    def initialize(self):
+        self.type_handler = cast(
+            DataDescriptor, descriptor_get_type(self.item_type)())
+
+    @classmethod
+    def create_at(cls, location: h5py.Group, key, item_type: Union[str, type]) -> Datatable:
+        if isinstance(item_type, type):
+            item_type = descriptor_get_name(item_type)
+        type_handler = cast(
+            DataDescriptor, descriptor_get_type(item_type)())
+        obj_loc = location.create_dataset(key, (0,), type_handler.dtype, maxshape=(
+            None,), **_descriptor.SimpleDataset.kwargs)
+        obj = cls(obj_loc, False)
+        obj.type_handler = type_handler
+
+        for name, desc in cls._export_value_names[obj.h5_type.type_name].items():
+            desc.on_create(obj)
+        obj.item_type = item_type
+        return obj
+
+    def __getitem__(self, s):
+        h = self.type_handler
+        ds = self.location[s]
+        if isinstance(s, (slice, Iterable)):
+            return map(h.single_convert_from_h5, ds)
+        return h.single_convert_from_h5(ds)
+
+    def __setitem__(self, s, value: Union[list, Any]):
+        if not isinstance(s, (slice, Iterable)):
+            value = (value,)
+        self.location[s] = [
+            self.type_handler.single_convert_to_h5(v) for v in value]
+
+    def get_column(self):
+        return self.type_handler.multi_convert_from_h5(self.location[:])
+
+    @classmethod
+    def descriptor(cls, descriptor_type: type, name=None) -> SingleDatatable:
+        assert issubclass(descriptor_type, DataDescriptor)
+        return _descriptor.H5ObjectDescriptor(cls, (descriptor_type, ), name=name)
+
+    def sort(self):
+        args = self.get_column().argsort()
+        self.location[:] = self.location[:][args]
 
 
 class DataDescriptor:
     dtype: np.dtype = None
+    type_name = "Descriptor"
+    _child_type_manager = ChildTypeManager()
 
     def __init__(self) -> None:
         self.name = None
@@ -160,6 +210,10 @@ class DataDescriptor:
         else:
             dtype.append((self.name, self.dtype, self.shape))
 
+    def __init_subclass__(cls):
+        assert issubclass(cls, DataDescriptor)
+        DataDescriptor._child_type_manager.add_type(cls.type_name, cls)
+
     def __set__(self, obj: DatatableItem, value):
         obj.row[self.index] = self.single_convert_to_h5(value)
         self.__get__.cache_clear()
@@ -178,35 +232,50 @@ class DataDescriptor:
         return value
 
 
+DataDescriptor.__init_subclass__()
+
+descriptor_get_type = DataDescriptor._child_type_manager.get_type
+descriptor_get_name = DataDescriptor._child_type_manager.get_name
+
+
 class Bool(DataDescriptor):
     dtype = np.dtype(bool)
+    type_name = "Bool"
 
 
 class Int32(DataDescriptor):
     dtype = np.dtype(np.int32)
+    type_name = "Int32"
 
 
 class Int64(DataDescriptor):
     dtype = np.dtype(np.int64)
+    type_name = "Int64"
 
 
 class Float32(DataDescriptor):
     dtype = np.dtype(np.float32)
+    type_name = "Float32"
 
 
 class Float64(DataDescriptor):
     dtype = np.dtype(np.float64)
+    type_name = "Float64"
 
 
 class str_utf8(DataDescriptor):
     dtype = h5py.string_dtype('utf-8')
+    type_name = "Str-Utf8"
 
 
 class str_ascii(DataDescriptor):
     dtype = h5py.string_dtype()
+    type_name = "Str-ASCII"
 
 
 class str_ascii_limit(DataDescriptor):
+    type_name = "Str-ASCII-Limit"
+
     def __init__(self, length, *args, **kwargs) -> None:
         self.dtype = np.dtype(f"S{length}")
         super().__init__(*args, **kwargs)
@@ -222,6 +291,8 @@ class str_ascii_limit(DataDescriptor):
 
 
 class Datetime64s(Int64):
+    type_name = "Datetime"
+
     def multi_convert_from_h5(self, column):
         return column.astype('M8[s]')
 
@@ -233,6 +304,8 @@ class Datetime64s(Int64):
 
 
 class Timedelta64s(Int64):
+    type_name = "Timedelta"
+
     def multi_convert_from_h5(self, column):
         return column.astype('m8[s]')
 
@@ -244,6 +317,8 @@ class Timedelta64s(Int64):
 
 
 class Ndarray(DataDescriptor):
+    type_name = "Ndarray"
+
     def __init__(self, dtype, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.dtype = h5py.vlen_dtype(dtype)
