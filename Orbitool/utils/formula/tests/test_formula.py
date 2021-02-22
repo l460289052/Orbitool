@@ -62,4 +62,6 @@ def test_isotopes():
     assert (h.to_numpy() == f.to_numpy()).all()
     assert h == f
     
+    assert Formula.from_numpy(f.to_numpy()) == f
+    
     assert g.findOrigin() == f.findOrigin()
