@@ -29,10 +29,16 @@ class NoiseTab(HDF5.Group):
     h5_type = HDF5.RegisterType("NoiseTab")
 
     current_spectrum: spectrum.Spectrum = spectrum.Spectrum.descriptor()
-    noise_formulas = HDF5.datatable.SingleDatatable.descriptor(FormulaDatatableDescriptor)
+    noise_formulas = HDF5.datatable.SingleDatatable.descriptor(
+        FormulaDatatableDescriptor)
 
     def initialize(self):
-        pass
+        self.noise_formulas.initialize()
+
+        self.noise_formulas.extend(
+            list(map(formula.Formula, config.noise_formulas)))
+
+
 class WorkSpace(HDF5.File):
     h5_type = HDF5.RegisterType("Orbitool_Workspace")
 

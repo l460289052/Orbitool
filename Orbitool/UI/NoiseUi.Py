@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(786, 465)
+        Form.resize(784, 461)
         self.verticalLayout_4 = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.splitter = QtWidgets.QSplitter(Form)
@@ -31,7 +31,7 @@ class Ui_Form(object):
         self.toolBox.setBaseSize(QtCore.QSize(285, 0))
         self.toolBox.setObjectName("toolBox")
         self.page = QtWidgets.QWidget()
-        self.page.setGeometry(QtCore.QRect(0, 0, 319, 311))
+        self.page.setGeometry(QtCore.QRect(0, 0, 355, 325))
         self.page.setObjectName("page")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.page)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -117,7 +117,7 @@ class Ui_Form(object):
         self.verticalLayout_2.addWidget(self.calculateNoisePushButton)
         self.toolBox.addItem(self.page, "")
         self.page_2 = QtWidgets.QWidget()
-        self.page_2.setGeometry(QtCore.QRect(0, 0, 319, 311))
+        self.page_2.setGeometry(QtCore.QRect(0, 0, 355, 325))
         self.page_2.setObjectName("page_2")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.page_2)
         self.verticalLayout_3.setObjectName("verticalLayout_3")

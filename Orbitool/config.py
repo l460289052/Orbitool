@@ -11,6 +11,7 @@ if DEBUG:
 
 timeFormat = r"%Y-%m-%d %H:%M:%S"
 
+
 class TempFile:
     prefixTimeFormat = r"orbitool_%Y%m%d%H%M%S_"
     tempPath = None
@@ -32,8 +33,10 @@ multi_cores = cpu_count() - 1
 if multi_cores <= 0:
     multi_cores = 1
 
-test_timeout = 0.1 # second
+test_timeout = 0.1  # second
 
 time_delta = timedelta(seconds=1)
 
-default_select = True # if True, will select first row
+default_select = True  # if True, will select first row
+
+noise_formulas = ["NO3-", "HN2O6-"]

@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets, QtCore
 import numpy as np
 
 from . import NoiseUi
-from .utils import showInfo
+from .utils import showInfo, get_tablewidget_selected_row
 from .manager import BaseWidget, state_node, Thread
 from . import component
 
@@ -14,27 +14,41 @@ from Orbitool.structures.file import SpectrumInfo
 from Orbitool.structures.spectrum import Spectrum
 from Orbitool import functions
 from Orbitool.functions import binary_search
+from Orbitool.utils.formula import Formula
 
 
 class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
     selected_spectrum_average = QtCore.pyqtSignal()
 
     def __init__(self, widget_root, parent: Optional['QWidget'] = None) -> None:
-        super().__init__()
+        super().__init__(parent=parent)
         self.setupUi(self)
         self.widget_root = widget_root
 
+
+    def setupUi(self, Form):
+        super().setupUi(Form)
+
+        self.plot = component.Plot(self.widget)
         self.toolBox.setCurrentIndex(0)
         self.showAveragePushButton.clicked.connect(self.showSelectedSpectrum)
         self.calculateNoisePushButton.clicked.connect(self.calcNoise)
 
-    def setupUi(self, Form):
-        super().setupUi(Form)
-        self.plot = component.Plot(self.widget)
+        self.addPushButton.clicked.connect(self.addFormula)
+        self.delPushButton.clicked.connect(self.delFormula)
 
     @property
     def noise(self):
         return self.current_workspace.noise_tab
+
+    def showNoiseFormula(self):
+        widget = self.tableWidget
+        widget.setRowCount(0)
+        formulas:List[Formula] = self.noise.noise_formulas
+        widget.setRowCount(len(formulas))
+        for i, formula in enumerate(formulas):
+            for j, v in enumerate((formula, formula.mass())):
+                widget.setItem(i,j,QtWidgets.QTableWidgetItem(str(v)))
 
     @state_node
     def showSelectedSpectrum(self):
@@ -104,3 +118,23 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
             # params, ret_flags = Orbitool.
             # 需要和润龙商量一下参数，因为这样的话，先设置了一个之后进行校准的参数就会影响到之后相同质谱的参数，不太符合常理
         return Thread(func)
+
+    @state_node
+    def addFormula(self):
+        formula = Formula(self.lineEdit.text())
+        self.noise.noise_formulas.extend([formula])
+        self.showNoiseFormula()
+
+    @addFormula.except_node
+    def addFormula(self):
+        self.showNoiseFormula()
+
+    @state_node
+    def delFormula(self):
+        index = get_tablewidget_selected_row(self.tableWidget)
+        del self.noise.noise_formulas[index]
+        self.showNoiseFormula()
+
+    @delFormula.except_node
+    def delFormula(self):
+        self.showNoiseFormula()

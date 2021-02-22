@@ -63,7 +63,7 @@ def noise(window: MainUiPy.Window):
     window.tabWidget.setCurrentWidget(window.noiseUi)
 
     noiseui = window.noiseUi
-    window.current_workspace.spectra_list.selected_spectrum_index = 0
+    window.current_workspace.spectra_list.selected_start_time = window.current_workspace.spectra_list.file_spectrum_info_list[0].start_time
     noiseui.showSelectedSpectrum()
     
     wait_not_busy()

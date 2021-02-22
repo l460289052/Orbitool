@@ -79,11 +79,12 @@ cdef class Formula:
             if isinstance(formula, str):
                 if not re.fullmatch(r"([A-Z][a-z]{0,2}(\[\d+\])?\d*)*[-+]?", formula):
                     raise ValueError(str(formula))
-                charge = formula[-1]
-                if charge == '+':
-                    self.setE(0,-1)
-                elif charge == '-':
-                    self.setE(0,1)
+                if len(formula) > 0:
+                    charge = formula[-1]
+                    if charge == '+':
+                        self.setE(0,-1)
+                    elif charge == '-':
+                        self.setE(0,1)
                 for match in re.finditer(r"([A-Z][a-z]{0,2})(\[\d+\])?(\d*)", formula):
                     e = match.group(1)
                     m_str = match.group(2)

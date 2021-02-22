@@ -98,6 +98,8 @@ class Datatable(H5Obj):
         slt = np.ones(len(self.location), dtype=np.bool)
         slt[s] = False
         length = slt.sum()
+        if length == 1:
+            self.location[:length] = (tuple(self.location[slt][0]),)
         self.location[:length] = self.location[slt]
         self.location.resize((length,))
 
@@ -138,21 +140,21 @@ class Datatable(H5Obj):
 
 class SingleDatatable(Datatable):
     h5_type = _descriptor.RegisterType('SingleDatatable')
-
+    
     def initialize(self):
-        self.type_handler = cast(
-            DataDescriptor, descriptor_get_type(self.item_type)())
+        pass
+    
+    @cached_property
+    def type_item_type(self) -> DataDescriptor:
+        return descriptor_get_type(self.item_type)()
 
     @classmethod
     def create_at(cls, location: h5py.Group, key, item_type: Union[str, type]) -> Datatable:
         if isinstance(item_type, type):
             item_type = descriptor_get_name(item_type)
-        type_handler = cast(
-            DataDescriptor, descriptor_get_type(item_type)())
-        obj_loc = location.create_dataset(key, (0,), type_handler.dtype, maxshape=(
+        obj_loc = location.create_dataset(key, (0,), descriptor_get_type(item_type)(), maxshape=(
             None,), **_descriptor.SimpleDataset.kwargs)
         obj = cls(obj_loc, False)
-        obj.type_handler = type_handler
 
         for name, desc in cls._export_value_names[obj.h5_type.type_name].items():
             desc.on_create(obj)
@@ -160,7 +162,7 @@ class SingleDatatable(Datatable):
         return obj
 
     def __getitem__(self, s):
-        h = self.type_handler
+        h = self.type_item_type
         ds = self.location[s]
         if isinstance(s, (slice, Iterable)):
             return map(h.single_convert_from_h5, ds)
@@ -170,10 +172,10 @@ class SingleDatatable(Datatable):
         if not isinstance(s, (slice, Iterable)):
             value = (value,)
         self.location[s] = [
-            self.type_handler.single_convert_to_h5(v) for v in value]
+            self.type_item_type.single_convert_to_h5(v) for v in value]
 
     def get_column(self):
-        return self.type_handler.multi_convert_from_h5(self.location[:])
+        return self.type_item_type.multi_convert_from_h5(self.location[:])
 
     @classmethod
     def descriptor(cls, descriptor_type: type, name=None) -> SingleDatatable:

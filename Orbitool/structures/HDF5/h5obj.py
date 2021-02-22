@@ -64,7 +64,7 @@ class H5Obj(_H5Obj):
         pass
 
     @classmethod
-    def openOrCreateInitialize(cls, location: h5py.Group, *args, **kwargs) -> H5Obj:
+    def openOrCreateInitialize(cls, location: h5py.Group, key, *args, **kwargs) -> H5Obj:
         if key in location:
             return cls(location)
         obj = cls.create_at(location, *args, **kwargs)
