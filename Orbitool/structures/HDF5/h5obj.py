@@ -22,7 +22,7 @@ class ChildTypeManager:
 
     def add_type(self, name: str, typ: type):
         assert isinstance(name, str) and issubclass(typ, self.base_type)
-        assert name not in self.types, f"type name `{name}` repeated, `{str(typ)}` and `{str(self.types[name])}`"
+        assert name not in self.types or self.types[name] == typ, f"type name `{name}` repeated, `{str(typ)}` and `{str(self.types[name])}`"
         self.types[name] = typ
         self.names[typ] = name
 

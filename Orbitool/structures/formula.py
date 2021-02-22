@@ -1,11 +1,11 @@
-from Orbitool.structures import HDF5
+from . import HDF5
 from functools import lru_cache
-from ._formula import Formula
 from h5py import vlen_dtype
 import numpy as np
 
+from Orbitool.utils.formula import Formula
 
-class FormulaDescriptor(HDF5.Attr):
+class Descriptor(HDF5.Attr):
     @lru_cache(16)
     def __get__(self, obj, objtype=None) -> Formula:
         return Formula.from_numpy(super().__get__.__wrapped__(self, obj, objtype))
@@ -14,7 +14,7 @@ class FormulaDescriptor(HDF5.Attr):
         return super().__set__(obj, value.to_numpy())
 
 
-class FormulaDatatableDescriptor(HDF5.datatable.DataDescriptor):
+class DatatableDescriptor(HDF5.datatable.DataDescriptor):
     type_name = "Formula"
     dtype = vlen_dtype(np.int32)
 

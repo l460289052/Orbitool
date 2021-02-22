@@ -6,7 +6,8 @@ from numpy import testing as nptest
 from Orbitool.structures import HDF5
 from Orbitool.structures.HDF5 import datatable
 
-from Orbitool.utils.formula import Formula, HDF5FormulaDatatableDescriptor
+from Orbitool.utils.formula import Formula
+from Orbitool.structures import FormulaDatatableDescriptor
 
 
 @pytest.fixture
@@ -33,7 +34,7 @@ def check_dt(dt: datatable.Datatable):
 
 def test(h5file: h5py.File):
     dt = datatable.SingleDatatable.create_at(
-        h5file, "f", HDF5FormulaDatatableDescriptor)
+        h5file, "f", FormulaDatatableDescriptor)
 
     init_dt(dt)
     check_dt(dt)

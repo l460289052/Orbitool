@@ -6,10 +6,11 @@ from typing import Union
 
 
 from . import HDF5, spectrum
+from .formula import DatatableDescriptor as FormulaDatatableDescriptor
 from .file import FileList, setFileReader, SpectrumInfo
 
 from Orbitool import config
-from Orbitool.utils import readers
+from Orbitool.utils import readers, formula
 
 setFileReader(readers.ThermoFile)
 
@@ -21,15 +22,17 @@ class SpectraList(HDF5.Group):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.selected_start_time :datetime= None
+        self.selected_start_time: datetime = None
 
 
 class NoiseTab(HDF5.Group):
     h5_type = HDF5.RegisterType("NoiseTab")
 
     current_spectrum: spectrum.Spectrum = spectrum.Spectrum.descriptor()
+    noise_formulas = HDF5.datatable.SingleDatatable.descriptor(FormulaDatatableDescriptor)
 
-
+    def initialize(self):
+        pass
 class WorkSpace(HDF5.File):
     h5_type = HDF5.RegisterType("Orbitool_Workspace")
 
