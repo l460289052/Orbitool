@@ -59,8 +59,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>355</width>
-            <height>325</height>
+            <width>376</width>
+            <height>344</height>
            </rect>
           </property>
           <attribute name="label">
@@ -138,12 +138,20 @@
              <layout class="QVBoxLayout" name="verticalLayout_6">
               <item>
                <widget class="QTableWidget" name="tableWidget">
+                <property name="horizontalScrollMode">
+                 <enum>QAbstractItemView::ScrollPerPixel</enum>
+                </property>
                 <attribute name="horizontalHeaderStretchLastSection">
                  <bool>true</bool>
                 </attribute>
                 <column>
                  <property name="text">
                   <string>formula</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>delta</string>
                  </property>
                 </column>
                 <column>
@@ -213,8 +221,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>355</width>
-            <height>325</height>
+            <width>169</width>
+            <height>135</height>
            </rect>
           </property>
           <attribute name="label">

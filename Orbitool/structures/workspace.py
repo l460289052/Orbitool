@@ -10,7 +10,8 @@ from .formula import DatatableDescriptor as FormulaDatatableDescriptor
 from .file import FileList, setFileReader, SpectrumInfo
 
 from Orbitool import config
-from Orbitool.utils import readers, formula
+from Orbitool.utils import readers
+from Orbitool.utils.formula import Formula
 
 setFileReader(readers.ThermoFile)
 
@@ -25,18 +26,23 @@ class SpectraList(HDF5.Group):
         self.selected_start_time: datetime = None
 
 
+class NoiseFormulaParameter(HDF5.datatable.DatatableItem):
+    item_name = "NoiseFormulaParameter"
+    formula: Formula = FormulaDatatableDescriptor()
+    delta: float = HDF5.datatable.Float64()
+
+
 class NoiseTab(HDF5.Group):
     h5_type = HDF5.RegisterType("NoiseTab")
 
     current_spectrum: spectrum.Spectrum = spectrum.Spectrum.descriptor()
-    noise_formulas = HDF5.datatable.SingleDatatable.descriptor(
-        FormulaDatatableDescriptor)
+    noise_formulas = HDF5.datatable.Datatable.descriptor(NoiseFormulaParameter)
 
     def initialize(self):
         self.noise_formulas.initialize()
 
-        self.noise_formulas.extend(
-            list(map(formula.Formula, config.noise_formulas)))
+        self.noise_formulas.extend([NoiseFormulaParameter(
+            Formula(f), 5) for f in config.noise_formulas])
 
 
 class WorkSpace(HDF5.File):

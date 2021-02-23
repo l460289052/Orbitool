@@ -9,11 +9,11 @@ from .utils import showInfo, get_tablewidget_selected_row
 from .manager import BaseWidget, state_node, Thread
 from . import component
 
-from Orbitool.structures import file
+from Orbitool.structures import file, workspace
 from Orbitool.structures.file import SpectrumInfo
 from Orbitool.structures.spectrum import Spectrum
 from Orbitool import functions
-from Orbitool.functions import binary_search
+from Orbitool.functions import binary_search, spectrum as spectrum_func
 from Orbitool.utils.formula import Formula
 
 
@@ -24,7 +24,6 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
         super().__init__(parent=parent)
         self.setupUi(self)
         self.widget_root = widget_root
-
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -43,12 +42,18 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
 
     def showNoiseFormula(self):
         widget = self.tableWidget
+        widget.clearContents()
         widget.setRowCount(0)
-        formulas:List[Formula] = self.noise.noise_formulas
+        formulas: List[workspace.NoiseFormulaParameter] = self.noise.noise_formulas
         widget.setRowCount(len(formulas))
         for i, formula in enumerate(formulas):
-            for j, v in enumerate((formula, formula.mass())):
-                widget.setItem(i,j,QtWidgets.QTableWidgetItem(str(v)))
+            widget.setItem(i, 0, QtWidgets.QTableWidgetItem(
+                str(formula.formula)))
+            dsb = QtWidgets.QDoubleSpinBox()
+            dsb.setValue(formula.delta)
+            widget.setCellWidget(i, 1, dsb)
+            widget.setItem(i, 2, QtWidgets.QTableWidgetItem(
+                str(formula.formula.mass())))
 
     @state_node
     def showSelectedSpectrum(self):
@@ -109,20 +114,20 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
         subtrace = self.substractCheckBox.isChecked()
 
         mass_dependent = self.sizeDependentCheckBox.isChecked()
-        monomer = self.monomerNoiseCheckBox.isChecked()
-        dimer = self.dimerNoiseCheckBox.isChecked()
-        flags = (mass_dependent, monomer, dimer)
 
-        def func():
-            spectrum_info.get_spectrum(spectrum)
-            # params, ret_flags = Orbitool.
-            # 需要和润龙商量一下参数，因为这样的话，先设置了一个之后进行校准的参数就会影响到之后相同质谱的参数，不太符合常理
-        return Thread(func)
+        mass_points = [f.formula.mass() for f in self.noise.noise_formulas]
+        # need to pass delta
+
+        def func(spectrum: Spectrum):
+            spectrum_func.getNoiseParams(
+                spectrum.mass, spectrum.intensity, quantile, mass_dependent, mass_points, )
+        return Thread(func, (self.noise.current_spectrum))
 
     @state_node
     def addFormula(self):
         formula = Formula(self.lineEdit.text())
-        self.noise.noise_formulas.extend([formula])
+        self.noise.noise_formulas.extend(
+            [workspace.NoiseFormulaParameter(formula, 5)])
         self.showNoiseFormula()
 
     @addFormula.except_node

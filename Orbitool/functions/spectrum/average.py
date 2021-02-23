@@ -1,15 +1,7 @@
 from typing import Tuple, List, Iterable
 import numpy as np
 
-from ._average import mergeSpectra as _mergeSpectra
-
-
-def mergeSpectra(mass1: np.ndarray, intensity1: np.ndarray, mass2: np.ndarray,
-                 intensity2: np.ndarray, weight1: float, weight2: float,
-                 rtol: float = 1e-6, drop_input: bool = False) -> Tuple[np.ndarray, np.ndarray]:
-    mass, intensity = _mergeSpectra(mass1, intensity1, mass2, intensity2,
-                                    weight1, weight2, rtol, drop_input)
-    return mass, intensity
+from ._average import mergeSpectra
 
 
 def averageSpectra(mass_intensity_weight_list: Iterable[Tuple[np.ndarray, np.ndarray, float]],
