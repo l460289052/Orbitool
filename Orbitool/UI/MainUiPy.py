@@ -21,6 +21,7 @@ from . import PeakFitFloatUiPy
 
 class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
     busy_signal = QtCore.pyqtSignal(bool)
+    _inited = QtCore.pyqtSignal()
 
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
@@ -80,6 +81,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
         self.process_pool = Pool(config.multi_cores)
         self.busy = False
         self.current_workspace = WorkSpace.create_at(None)
+        
+        self.inited.emit()
 
     @property
     def _busy(self):

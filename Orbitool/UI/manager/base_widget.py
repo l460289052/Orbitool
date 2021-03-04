@@ -32,7 +32,8 @@ class BaseWidget:
     node_thread: QThread = Item()
     process_pool: Pool = ReadOnlyItem()
     current_workspace: WorkSpace = Item()
-    busy = Item()
+    busy: bool = Item()
+    inited: pyqtSignal = Item()
 
     def __init__(self, root=None) -> None:
         self.widget_root: BaseWidget = root
