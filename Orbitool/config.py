@@ -5,10 +5,6 @@ from datetime import timedelta
 
 DEBUG = False
 
-if DEBUG:
-    from PyQt5 import QtWidgets
-    QtWidgets.QMessageBox.information(None, 'info', 'DEBUG')
-
 timeFormat = r"%Y-%m-%d %H:%M:%S"
 
 
@@ -26,7 +22,9 @@ logLevel = "DEBUG" if DEBUG else "WARNING"
 log_file_handler = logging.FileHandler(logPath, encoding='utf-8')
 logging.root.handlers.clear()
 logging.basicConfig(format="\n%(asctime)s - %(filename)s - %(levelname)s \n %(message)s",
-                    level=logLevel, handlers=[log_file_handler])
+                    handlers=[log_file_handler])
+logger = logging.getLogger("Orbitool")
+logger.setLevel(logLevel)
 
 
 multi_cores = cpu_count() - 1

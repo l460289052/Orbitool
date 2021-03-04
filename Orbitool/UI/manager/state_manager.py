@@ -72,7 +72,8 @@ class node:
                     args = args[0]
                     if isinstance(args[0], Exception):
                         e = args[0]
-                        logging.error(str(e), exc_info=e)
+                        logger = logging.getLogger("Orbitool")
+                        logger.error(str(e), exc_info=e)
                         showInfo(str(e))
                         if (tmpfunc := self._father.except_node.func):
                             tmpfunc(selfWidget)
@@ -96,7 +97,8 @@ class node:
                 elif self._mode in _busy_reset:
                     selfWidget.busy = False
             except Exception as e:
-                logging.error(str(e), exc_info=e)
+                logger = logging.getLogger("Orbitool")
+                logger.error(str(e), exc_info=e)
                 showInfo(str(e))
                 if (tmpfunc := self.except_node.func):
                     tmpfunc(selfWidget)
