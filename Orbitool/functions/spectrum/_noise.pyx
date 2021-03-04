@@ -9,10 +9,12 @@ from cython.operator cimport preincrement as preinc, predecrement as predec
 import numpy as np
 cimport numpy as np
 from numpy.polynomial import polynomial
-import scipy
+from scipy.optimize import curve_fit
 
 from ._spectrum cimport (getPeaksPositions, getNotZeroPositions,
-    DoubleArray, DoubleArray2D, DoubleArray3D, DoubleOrArray, npdouble)
+    DoubleArray, DoubleArray2D, DoubleArray3D, DoubleOrArray)
+
+npdouble = np.float64
     
 cdef double bin_l = 0.5, bin_r = 0.8
 cdef double bin_mid = (bin_l+bin_r)/2.0, bin_wid = (bin_r-bin_l)/2.0
@@ -61,14 +63,14 @@ cdef tuple getMassPointParams(DoubleArray mass, DoubleArray intensity,
     cdef tuple p0 = (100.0, mass_point, 1.0), \
         bounds = ([0, mass_point-0.1, 0], [np.inf, mass_point+0.1, np.inf])
     try:
-        params[0] = scipy.curve_fit(normFunc, mass, intensity, p0=p0, bounds=bounds)[0]
+        params[0] = curve_fit(normFunc, mass, intensity, p0=p0, bounds=bounds)[0]
     except RuntimeError:
         return False, None
     
     cdef bool flag = True
     if len(mass_bin)>3:
         try:
-            params[1] = scipy.curve_fit(normFunc, mass_bin, std_bin, p0=p0, bounds=bounds)[0]
+            params[1] = curve_fit(normFunc, mass_bin, std_bin, p0=p0, bounds=bounds)[0]
         except RuntimeError:
             flag = False
     else:
@@ -81,6 +83,10 @@ cdef tuple getMassPointParams(DoubleArray mass, DoubleArray intensity,
         params[1, 0] *= global_std / global_peak_noise
     return True, params
 
+def getShownNoiseLODFromParam(DoubleArray2D params, double n_sigma):
+    cdef double noise = params[0,0] / (math.sqrt(2*math.pi)*params[0,2])
+    cdef double lod = noise + n_sigma*params[1,0]/(math.sqrt(2*math.pi)*params[1,2])
+    return noise, lod
 
 cdef DoubleArray noiseFunc(DoubleArray mass, DoubleArray poly_coef, DoubleArray2D norm_params, double[:] mass_points, int[:] mass_point_deltas):
     cdef np.ndarray[double, ndim=1] noise, tmp_noise
@@ -129,7 +135,7 @@ def getNoiseParams(DoubleArray mass, DoubleArray intensity, double quantile,
         masked_intensity = intensity[mass_masks[i]]
         ret.append(getMassPointParams(masked_mass, masked_intensity, poly_coef,
             std, mass_point, mass_point_deltas[i]))
-    return poly_coef, ret
+    return poly_coef, std, ret
 
 cpdef tuple noiseLODFunc(DoubleArray mass, DoubleArray poly_coef,
         DoubleArray3D norm_params, double[:] mass_points, int[:] mass_point_deltas, double n_sigma):

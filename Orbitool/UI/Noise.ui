@@ -52,9 +52,9 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
-         <widget class="QWidget" name="page">
+         <widget class="QWidget" name="noiseTool">
           <property name="geometry">
            <rect>
             <x>0</x>
@@ -133,11 +133,14 @@
            <item>
             <widget class="QGroupBox" name="groupBox_2">
              <property name="title">
-              <string>GroupBox</string>
+              <string>independent noise points</string>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_6">
               <item>
                <widget class="QTableWidget" name="tableWidget">
+                <property name="editTriggers">
+                 <set>QAbstractItemView::NoEditTriggers</set>
+                </property>
                 <property name="horizontalScrollMode">
                  <enum>QAbstractItemView::ScrollPerPixel</enum>
                 </property>
@@ -151,7 +154,7 @@
                 </column>
                 <column>
                  <property name="text">
-                  <string>delta</string>
+                  <string>delta(integer)</string>
                  </property>
                 </column>
                 <column>
@@ -216,13 +219,13 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="page_2">
+         <widget class="QWidget" name="paramTool">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>169</width>
-            <height>135</height>
+            <width>376</width>
+            <height>344</height>
            </rect>
           </property>
           <attribute name="label">
@@ -230,13 +233,21 @@
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <widget class="QTableWidget" name="tableWidget_2">
+            <widget class="QTableWidget" name="paramTableWidget">
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
              <property name="horizontalScrollMode">
               <enum>QAbstractItemView::ScrollPerPixel</enum>
              </property>
              <attribute name="horizontalHeaderStretchLastSection">
               <bool>true</bool>
              </attribute>
+             <column>
+              <property name="text">
+               <string>enabled</string>
+              </property>
+             </column>
              <column>
               <property name="text">
                <string>type</string>

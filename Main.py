@@ -25,6 +25,9 @@ if __name__ == "__main__":
     app.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
 
     from Orbitool.UI import MainUiPy
+    
+    if config.DEBUG:
+        QtWidgets.QMessageBox.information(None, 'info', 'DEBUG')
 
     MainWin = MainUiPy.Window()
     if args.to_step:

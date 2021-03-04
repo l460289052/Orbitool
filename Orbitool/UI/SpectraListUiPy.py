@@ -15,16 +15,19 @@ from Orbitool.structures.file import SpectrumInfo
 class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):
     def __init__(self, widget_root: BaseWidget, parent: Optional['QWidget'] = None) -> None:
         super().__init__(parent=parent)
-        self.widget_root = widget_root
         self.setupUi(self)
-
-        set_header_sizes(self.tableWidget.horizontalHeader(), [130, 130])
 
         self.comboBox.currentIndexChanged.connect(self.comboBox_changed)
         self.comboBox_position = []
         self.former_index = -1
 
+        self.widget_root = widget_root
         self.tableWidget.itemSelectionChanged.connect(self.selection_changed)
+
+    def setupUi(self, Form):
+        super().setupUi(Form)
+
+        set_header_sizes(self.tableWidget.horizontalHeader(), [210, 210])
 
     @state_node(withArgs=True, mode='x')
     def comboBox_changed(self, index):
@@ -46,8 +49,9 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):
     def show_file_infos(self):
         tableWidget = self.tableWidget
         tableWidget.setRowCount(0)
-        spectrum_infos:List[SpectrumInfo] = self.spectra_list.file_spectrum_info_list
-        spectrum_infos = [info for info in spectrum_infos if info.average_index == 0]
+        spectrum_infos: List[SpectrumInfo] = self.spectra_list.file_spectrum_info_list
+        spectrum_infos = [
+            info for info in spectrum_infos if info.average_index == 0]
         tableWidget.setRowCount(len(spectrum_infos))
 
         for i, info in enumerate(spectrum_infos):
@@ -67,9 +71,11 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):
     @state_node(mode='e')
     def selection_changed(self):
         indexes = utils.get_tablewidget_selected_row(self.tableWidget)
-        index = (0 if config.default_select else None) if len(indexes) == 0 else indexes[0]
+        index = (0 if config.default_select else None) if len(
+            indexes) == 0 else indexes[0]
         if index is None:
             self.spectra_list.selected_start_time = None
         else:
             item = self.tableWidget.item(index, 0)
-            self.spectra_list.selected_start_time = datetime.strptime(item.text(), config.timeFormat)
+            self.spectra_list.selected_start_time = datetime.strptime(
+                item.text(), config.timeFormat)

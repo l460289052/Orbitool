@@ -4,6 +4,7 @@ from datetime import datetime
 import h5py
 from typing import Union
 
+import numpy as np
 
 from . import HDF5, spectrum
 from .formula import DatatableDescriptor as FormulaDatatableDescriptor
@@ -31,6 +32,9 @@ class NoiseFormulaParameter(HDF5.datatable.DatatableItem):
     formula: Formula = FormulaDatatableDescriptor()
     delta: float = HDF5.datatable.Float64()
 
+    selected: bool = HDF5.datatable.Bool()
+    param = HDF5.datatable.Ndarray2D(float, 3)
+
 
 class NoiseTab(HDF5.Group):
     h5_type = HDF5.RegisterType("NoiseTab")
@@ -38,11 +42,16 @@ class NoiseTab(HDF5.Group):
     current_spectrum: spectrum.Spectrum = spectrum.Spectrum.descriptor()
     noise_formulas = HDF5.datatable.Datatable.descriptor(NoiseFormulaParameter)
 
+    poly_coef = HDF5.SimpleDataset()
+    global_noise_std = HDF5.Float()
+    noise = HDF5.SimpleDataset()
+    LOD = HDF5.SimpleDataset()
+
     def initialize(self):
         self.noise_formulas.initialize()
 
         self.noise_formulas.extend([NoiseFormulaParameter(
-            Formula(f), 5) for f in config.noise_formulas])
+            Formula(f), 5, False, np.zeros((2, 3))) for f in config.noise_formulas])
 
 
 class WorkSpace(HDF5.File):

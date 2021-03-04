@@ -32,7 +32,7 @@ class DatatableItem:
                 cnt += 1
             assert cnt == len(self.dtype), "some dtype haven't been provided " + \
                 str([self.dtype[ind][0]
-                     for ind, r in enumerate(self.row) if r == None])
+                     for ind, r in enumerate(self.row) if r is None])
 
     def __init_subclass__(cls):
         assert cls.__base__ == DatatableItem or cls == DatatableItem, "forbid multi inherit"
@@ -140,10 +140,10 @@ class Datatable(H5Obj):
 
 class SingleDatatable(Datatable):
     h5_type = _descriptor.RegisterType('SingleDatatable')
-    
+
     def initialize(self):
         pass
-    
+
     @cached_property
     def type_item_type(self) -> DataDescriptor:
         return descriptor_get_type(self.item_type)()
@@ -328,3 +328,18 @@ class Ndarray(DataDescriptor):
     def single_convert_to_h5(self, value):
         assert len(value.shape) == 1
         return super().single_convert_to_h5(value)
+
+
+class Ndarray2D(DataDescriptor):
+    type_name = "Ndarray2D"
+
+    def __init__(self, dtype, columns, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.dtype = h5py.vlen_dtype(dtype)
+        self.columns = columns
+
+    def single_convert_to_h5(self, value):
+        return super().single_convert_to_h5(value.reshape(-1))
+
+    def single_convert_from_h5(self, value):
+        return super().single_convert_from_h5(value).reshape(-1, self.columns)

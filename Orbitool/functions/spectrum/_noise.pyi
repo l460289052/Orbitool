@@ -13,6 +13,14 @@ def getNoisePeaks(mass: np.ndarray, intensity: np.ndarray, poly_coef: np.ndarray
     pass
 
 
+def getShownNoiseLODFromParam(params: np.ndarray, n_sigma: float) -> Tuple[np.ndarray, np.ndarray]
+
+"""
+    return noise, lod
+    """
+pass
+
+
 def noiseLODFunc(mass: np.ndarray, poly_coef: np.ndarray,
                  mass_point_params: np.ndarray, mass_points: np.ndarray,
                  mass_point_deltas: np.ndarray, n_sigma: float) -> Tuple[np.ndarray, np.ndarray]:
