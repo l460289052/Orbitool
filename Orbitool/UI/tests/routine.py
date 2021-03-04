@@ -68,3 +68,5 @@ def noise(window: MainUiPy.Window):
     
     wait_not_busy()
     sleep()
+    
+    noiseui.calcNoise()

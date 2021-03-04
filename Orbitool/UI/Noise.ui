@@ -59,8 +59,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>376</width>
-            <height>344</height>
+            <width>344</width>
+            <height>325</height>
            </rect>
           </property>
           <attribute name="label">
@@ -224,8 +224,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>376</width>
-            <height>344</height>
+            <width>344</width>
+            <height>325</height>
            </rect>
           </property>
           <attribute name="label">
@@ -375,7 +375,7 @@
          <item>
           <widget class="QLabel" name="label_10">
            <property name="text">
-            <string>autoscale</string>
+            <string>Autoscale</string>
            </property>
           </widget>
          </item>

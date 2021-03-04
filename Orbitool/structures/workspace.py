@@ -42,6 +42,7 @@ class NoiseTab(HDF5.Group):
     current_spectrum: spectrum.Spectrum = spectrum.Spectrum.descriptor()
     noise_formulas = HDF5.datatable.Datatable.descriptor(NoiseFormulaParameter)
 
+    n_sigma = HDF5.Float()
     poly_coef = HDF5.SimpleDataset()
     global_noise_std = HDF5.Float()
     noise = HDF5.SimpleDataset()

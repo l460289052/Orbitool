@@ -1,1 +1,1 @@
-noise plot
+noise plot actions

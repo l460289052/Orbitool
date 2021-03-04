@@ -3,6 +3,7 @@ from collections import deque
 
 from PyQt5 import QtWidgets, QtCore
 import numpy as np
+import matplotlib.ticker
 
 from . import NoiseUi
 from .utils import showInfo, get_tablewidget_selected_row, set_header_sizes
@@ -160,6 +161,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
         self.noise.global_noise_std = std
         self.noise.noise = noise
         self.noise.LOD = LOD
+        self.noise.n_sigma = self.nSigmaDoubleSpinBox.value()
 
         ind: np.ndarray = slt.cumsum() - 1
         formula_params: List[workspace.NoiseFormulaParameter] = list(
@@ -226,3 +228,45 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
 
         self.toolBox.setCurrentWidget(self.paramTool)
         table.show()
+        self.plotNoise()
+
+    def plotNoise(self):
+        noise_tab = self.noise
+        spectrum = noise_tab.current_spectrum
+
+        is_log = self.yLogCheckBox.isChecked()
+        plot = self.plot
+        ax = plot.ax
+        ax.clear()
+
+        ax.set_yscale('log' if is_log else 'linear')
+
+        ax.axhline(color='k', linewidth=0.5)
+        ax.yaxis.set_tick_params(rotation=45)
+
+        if not is_log:
+            ax.yaxis.set_major_formatter(
+                matplotlib.ticker.FormatStrFormatter(r"%.1e"))
+
+        ax.plot(spectrum.mass, spectrum.intensity,
+                linewidth=1, color="#BF2138", label="Spectrum")
+        ax.plot(spectrum.mass, noise_tab.LOD,
+                linewidth=1, color='k', label='LOD')
+        ax.plot(spectrum.mass, noise_tab.noise,
+                linewidth=1, color='b', label='noise')
+        ax.legend(loc='upper right')
+
+        x_min = spectrum.mass[0]
+        x_max = spectrum.mass[-1]
+        ymax = np.polynomial.polynomial.polyval(
+            x_max, noise_tab.poly_coef) + noise_tab.n_sigma * noise_tab.global_noise_std
+        if is_log:
+            ymin = np.polynomial.polynomial.polyval(
+                [x_min, x_max], noise_tab.poly_coef).min()
+            ymin *= 0.5
+            ymax *= 10
+        else:
+            ymin = 0
+            ymax *= 5
+        ax.set_ylim(ymin, ymax)
+        plot.canvas.draw()
