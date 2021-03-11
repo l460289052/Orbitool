@@ -38,3 +38,5 @@ time_delta = timedelta(seconds=1)
 default_select = True  # if True, will select first row
 
 noise_formulas = ["NO3-", "HN2O6-"]
+
+plot_refresh_interval = timedelta(seconds=1)
