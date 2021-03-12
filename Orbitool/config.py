@@ -27,7 +27,7 @@ logger = logging.getLogger("Orbitool")
 logger.setLevel(logLevel)
 
 
-multi_cores = cpu_count() - 1
+multi_cores = cpu_count() + 1
 if multi_cores <= 0:
     multi_cores = 1
 

@@ -20,7 +20,8 @@ from Orbitool.utils.formula import Formula
 
 class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
     selected_spectrum_average = QtCore.pyqtSignal()
-
+    callback = QtCore.pyqtSignal()
+    
     def __init__(self, widget_root, parent: Optional['QWidget'] = None) -> None:
         super().__init__(parent=parent)
         self.setupUi(self)
@@ -39,6 +40,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
         self.toolBox.setCurrentIndex(0)
         self.showAveragePushButton.clicked.connect(self.showSelectedSpectrum)
         self.calculateNoisePushButton.clicked.connect(self.calcNoise)
+        self.denoisePushButton.clicked.connect(self.denoise)
 
     @property
     def noise(self):
@@ -270,3 +272,14 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
             ymax *= 5
         ax.set_ylim(ymin, ymax)
         plot.canvas.draw()
+
+    @state_node
+    def denoise(self):
+        if self.dependentCheckBox.isChecked():
+            pass
+        else:
+            pass
+        
+    @denoise.thread_node
+    def denoise(self, ret, args):
+        pass

@@ -25,6 +25,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
 
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
+        self.abortPushButton.clicked.connect(self.abort_process_pool)
 
         self.fileUi: FileUiPy.Widget = self.add_tab(
             FileUiPy.Widget(self), "File")
@@ -34,11 +35,14 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
             NoiseUiPy.Widget(self), "Noise")
         self.noiseUi.selected_spectrum_average.connect(
             self.noise_show_spectrum)
+        self.noiseUi.callback.connect(self.noise_tab_finish)
 
-        self.peakShapeUi = PeakShapeUiPy.Widget()
-        self.add_tab(self.peakShapeUi, "Peak Shape")
+        self.peakShapeUi: PeakShapeUiPy.Widget = self.add_tab(
+            PeakShapeUiPy.Widget(self), "Peak Shape")
+
         self.calibrationUi = self.add_tab(
             CalibrationUiPy.Widget(), "Calibration")
+
         self.peakFitUi = self.add_tab(PeakFitUiPy.Widget(), "Peak Fit")
         self.tabWidget.addTab(MassDefectUiPy.Widget(), "Mass Defect")
         self.timeseriesesUi = TimeseriesesUiPy.Widget()
@@ -70,18 +74,17 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
         self.timeseries = TimeseriesUiPy.Widget()
         self.timeseriesDw = self.add_dockerwidget(
             "Timeseries", self.timeseries, self.peakListDw)
+        self.tabWidget.setCurrentIndex(0)
 
     def __init__(self) -> None:
         super().__init__()
         BaseWidget.__init__(self)
         self.setupUi(self)
 
-        self.tabWidget.setCurrentIndex(0)
-
         self.process_pool = Pool(config.multi_cores)
         self.busy = False
         self.current_workspace = WorkSpace.create_at(None)
-        
+
         self.inited.emit()
 
     @property
@@ -125,6 +128,16 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
 
     @state_node(mode='x')
     def noise_show_spectrum(self):
-        self.spectrum.show_spectrum(self.current_workspace.noise_tab.current_spectrum)
+        self.spectrum.show_spectrum(
+            self.current_workspace.noise_tab.current_spectrum)
         self.spectrumDw.show()
         self.spectrumDw.raise_()
+
+    @state_node(mode='x')
+    def noise_tab_finish(self):
+        self.tabWidget.setCurrentIndex(self.peakShapeUi)
+
+    def abort_process_pool(self):
+        self.process_pool.terminate()
+        self.process_pool = Pool(config.multi_cores)
+        self.busy = False
