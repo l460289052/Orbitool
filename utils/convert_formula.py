@@ -1,8 +1,8 @@
 import re
 from collections import defaultdict
 
-element = re.compile(r"([A-Z][a-z]{0,2})(\d)?")
-num_re = re.compile(r"(\d)?")
+element = re.compile(r"([A-Z][a-z]{0,2})(\d+)?")
+num_re = re.compile(r"(\d+)?")
 
 
 def convert_to_dict(formula) -> dict:
