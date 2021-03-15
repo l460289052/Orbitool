@@ -3,7 +3,7 @@ from . import SpectrumUi
 from PyQt5 import QtWidgets, QtCore
 from .manager import state_node, BaseWidget
 
-from Orbitool.structures.spectrum import Spectrum
+from ..structures.spectrum import Spectrum
 
 
 class Widget(QtWidgets.QWidget, SpectrumUi.Ui_Form, BaseWidget):

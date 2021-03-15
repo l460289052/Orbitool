@@ -1,4 +1,4 @@
-from Orbitool.structures import HDF5
+from ... import HDF5
 import h5py
 import io
 import numpy as np

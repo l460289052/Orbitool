@@ -4,8 +4,8 @@ from multiprocessing.pool import Pool
 
 from PyQt5.QtCore import QThread, pyqtSignal
 
-from Orbitool.structures import WorkSpace
-from Orbitool.UI.utils import showInfo
+from ...structures import WorkSpace
+from ..utils import showInfo
 
 
 class Item:

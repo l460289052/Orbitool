@@ -2,7 +2,7 @@ import pytest
 from h5py import File
 import io
 
-from Orbitool.structures import HDF5
+from ... import HDF5
 from . import some_descriptor_group
 
 def test_subclass_type():

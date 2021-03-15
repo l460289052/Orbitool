@@ -7,9 +7,9 @@ from .utils import showInfo, set_header_sizes
 from . import utils
 from .manager import BaseWidget, state_node
 
-from Orbitool import config
+from .. import config
 
-from Orbitool.structures.file import SpectrumInfo
+from ..structures.file import SpectrumInfo
 
 
 class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):

@@ -10,12 +10,12 @@ from .utils import showInfo, get_tablewidget_selected_row, set_header_sizes
 from .manager import BaseWidget, state_node, Thread
 from . import component
 
-from Orbitool.structures import file, workspace
-from Orbitool.structures.file import SpectrumInfo
-from Orbitool.structures.spectrum import Spectrum
-from Orbitool import functions
-from Orbitool.functions import binary_search, spectrum as spectrum_func
-from Orbitool.utils.formula import Formula
+from ..structures import file, workspace
+from ..structures.file import SpectrumInfo
+from ..structures.spectrum import Spectrum
+from .. import functions
+from ..functions import binary_search, spectrum as spectrum_func
+from ..utils.formula import Formula
 
 
 class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):

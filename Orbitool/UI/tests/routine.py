@@ -1,10 +1,10 @@
 import os
 
 from PyQt5 import QtWidgets, QtCore
-from Orbitool import config
-from Orbitool.UI import MainUiPy, FileUiPy
+from ... import config
+from .. import MainUiPy, FileUiPy
 
-from Orbitool.UI.utils import test
+from ..utils import test
 
 
 loop: QtCore.QEventLoop = None

@@ -10,9 +10,9 @@ from . import HDF5, spectrum
 from .formula import DatatableDescriptor as FormulaDatatableDescriptor
 from .file import FileList, setFileReader, SpectrumInfo
 
-from Orbitool import config
-from Orbitool.utils import readers
-from Orbitool.utils.formula import Formula
+from .. import config
+from ..utils import readers
+from ..utils.formula import Formula
 
 setFileReader(readers.ThermoFile)
 

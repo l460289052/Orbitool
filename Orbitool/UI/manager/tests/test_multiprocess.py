@@ -3,7 +3,7 @@ from multiprocessing import Pool, freeze_support
 from time import sleep
 
 from PyQt5 import QtWidgets, QtCore
-from Orbitool.UI.manager import MultiProcess
+from .. import MultiProcess
 
 
 class p(MultiProcess):

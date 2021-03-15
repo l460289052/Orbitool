@@ -3,8 +3,8 @@ import functools
 import logging
 from enum import Enum
 
-from Orbitool import config
-from Orbitool.UI.utils import showInfo
+from ... import config
+from ..utils import showInfo
 
 from .base_widget import BaseWidget
 from .thread import Thread, MultiProcess, threadtype

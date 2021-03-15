@@ -6,9 +6,9 @@ import pathlib
 import numpy as np
 from numpy import testing as nptest
 
-from Orbitool.utils.formula import Formula
+from ....utils.formula import Formula
 
-from Orbitool.functions.spectrum.noise import (
+from ..noise import (
     denoise, denoiseWithParams, noiseLODFunc,
     getNoiseParams, getNoisePeaks)
 

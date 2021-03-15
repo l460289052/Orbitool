@@ -3,11 +3,11 @@ import h5py
 import pytest
 from numpy import testing as nptest
 
-from Orbitool.structures import HDF5
-from Orbitool.structures.HDF5 import datatable
+from .. import HDF5
+from ..HDF5 import datatable
 
-from Orbitool.utils.formula import Formula
-from Orbitool.structures import FormulaDatatableDescriptor
+from ...utils.formula import Formula
+from .. import FormulaDatatableDescriptor
 
 
 @pytest.fixture

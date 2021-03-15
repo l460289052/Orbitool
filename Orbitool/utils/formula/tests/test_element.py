@@ -1,4 +1,4 @@
-from Orbitool.utils.formula import _element
+from .. import _element
 
 def test_():
     assert _element.py_str2element("C") == (6, 0)

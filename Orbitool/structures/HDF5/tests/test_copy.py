@@ -1,6 +1,6 @@
 import h5py
 import io
-from Orbitool.structures import HDF5
+from ... import HDF5
 import pytest
 import numpy as np
 from datetime import datetime

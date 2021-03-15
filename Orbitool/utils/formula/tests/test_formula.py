@@ -1,8 +1,8 @@
-from Orbitool.utils.formula import Formula
 import threading
 from pyteomics import mass as pyteomass
 from copy import copy
 
+from .. import Formula
 
 def test_formula1():
     s = "N[15]O3-"

@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List, Tuple
 
-from Orbitool.structures.spectrum import Spectrum
+from ...structures.spectrum import Spectrum
 
 from ._noise import (getNoiseParams as _getNoiseParams, getNoisePeaks,
                      noiseLODFunc, denoiseWithParams)

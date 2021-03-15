@@ -6,7 +6,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvas, NavigationToolbar2Q
 from matplotlib.figure import Figure
 from matplotlib import pyplot
 
-from Orbitool.config import plot_refresh_interval
+from ...config import plot_refresh_interval
 
 
 class Plot:

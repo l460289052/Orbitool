@@ -2,11 +2,10 @@ from enum import Enum
 from PyQt5 import QtCore
 from abc import ABC, abstractmethod
 from typing import List, Tuple
-from Orbitool.config import multi_cores
 from multiprocessing import Manager, Pool, Queue
 from typing import final
 
-from Orbitool.config import logger
+from ...config import multi_cores, logger
 
 
 class threadtype(Enum):

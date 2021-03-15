@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # import OrbitoolBase
-from Orbitool import functions
+from ... import functions
 
 import os
 import copy

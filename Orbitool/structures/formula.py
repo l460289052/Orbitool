@@ -3,7 +3,7 @@ from functools import lru_cache
 from h5py import vlen_dtype
 import numpy as np
 
-from Orbitool.utils.formula import Formula
+from ..utils.formula import Formula
 
 class Descriptor(HDF5.Attr):
     @lru_cache(16)

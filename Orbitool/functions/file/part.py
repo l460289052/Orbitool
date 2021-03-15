@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 from typing import overload, List, Tuple, Iterable
 from itertools import compress, chain
 
-from Orbitool.utils import iterator
+from ...utils import iterator
 
 
 def part_by_time_interval(ids: list, start_times: List[datetime], end_times: List[datetime],

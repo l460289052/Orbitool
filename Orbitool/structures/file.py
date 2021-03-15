@@ -4,10 +4,10 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from Orbitool.structures import HDF5
-from Orbitool.structures.HDF5 import datatable
-from Orbitool.utils import iterator, readers
-from Orbitool.functions.file import part_by_time_interval
+from . import HDF5
+from .HDF5 import datatable
+from ..utils import iterator, readers
+from ..functions.file import part_by_time_interval
 
 from . import spectrum
 

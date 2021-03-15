@@ -1,4 +1,4 @@
-from Orbitool.utils.formula import ForceCalc, Formula
+from .. import ForceCalc, Formula
 
 
 def test_forcecalc1():

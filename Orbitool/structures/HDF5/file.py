@@ -8,7 +8,7 @@ import h5py
 from . import h5obj
 from . import descriptor
 
-from Orbitool import config
+from ... import config
 
 
 class File(h5obj.H5Obj):

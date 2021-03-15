@@ -8,8 +8,8 @@ from .manager import BaseWidget, state_node, Thread
 from PyQt5 import QtWidgets, QtCore
 import os
 
-from Orbitool.structures import file
-from Orbitool import utils
+from ..structures import file
+from .. import utils
 
 
 class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):

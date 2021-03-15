@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtCore
-from Orbitool.UI import MainUiPy
+from .. import MainUiPy
 
 from .routine import init, fileui, file_spectra
 

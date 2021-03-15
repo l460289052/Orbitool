@@ -7,10 +7,8 @@ from typing import List
 import numpy as np
 from numpy import testing as nptest
 
-from Orbitool.functions.binary_search import indexNearest_np
-from Orbitool.functions.spectrum import removeZeroPositions
-
-from Orbitool.functions.spectrum import averageSpectra, getPeaksPositions
+from ...binary_search import indexNearest_np
+from .. import removeZeroPositions, averageSpectra, getPeaksPositions
 
 path = os.path.join(os.path.dirname(__file__), 'average_test.pickle')
 

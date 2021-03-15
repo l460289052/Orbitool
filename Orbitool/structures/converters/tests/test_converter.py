@@ -1,6 +1,6 @@
 import pytest
 import random
-from Orbitool.structures.converters import _converter as converter
+from .. import _converter as converter
 
 
 def test_two_chain():

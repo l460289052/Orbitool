@@ -5,8 +5,8 @@ from numpy import testing as nptest
 
 import pytest
 import h5py
-from Orbitool.structures import HDF5
-from Orbitool.structures.HDF5 import datatable
+from ... import HDF5
+from .. import datatable
 
 
 @pytest.fixture

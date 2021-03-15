@@ -3,8 +3,8 @@ from multiprocessing import Pool
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from Orbitool import config
-from Orbitool.structures import WorkSpace
+from .. import config
+from ..structures import WorkSpace
 
 from .manager import BaseWidget, state_node
 from . import utils as UiUtils

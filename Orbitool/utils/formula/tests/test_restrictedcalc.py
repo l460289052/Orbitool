@@ -3,7 +3,7 @@ import pytest
 import csv
 import pathlib
 
-from Orbitool.utils.formula import Formula, RestrictedCalc
+from .. import Formula, RestrictedCalc
 
 
 def init_calc():

@@ -1,3 +1,4 @@
++ use coroutines (and yield) to substitute for thread (avoid context changing)
 + complete data flow
   + ~~file~~
   + ~~noise~~

@@ -1,6 +1,6 @@
 import numpy as np
 from datetime import datetime, timedelta
-from Orbitool.functions.file import part_by_time_interval
+from .. import part_by_time_interval
 
 delta = np.timedelta64(timedelta(seconds=1))
 
