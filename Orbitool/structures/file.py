@@ -4,21 +4,20 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from . import HDF5
-from .HDF5 import datatable
+from .base import BaseStructure, BaseTableItem
 from ..utils import iterator, readers
 from ..functions.file import part_by_time_interval
 
 from . import spectrum
 
 
-class File(datatable.DatatableItem):
+class File(BaseTableItem):
     item_name = "File"
 
-    path = datatable.str_utf8()
-    createDatetime = datatable.Datetime64s()
-    startDatetime = datatable.Datetime64s()
-    endDatetime = datatable.Datetime64s()
+    path: str
+    createDatetime: datetime
+    startDatetime: datetime
+    endDatetime: datetime
 
 
 _fileReader = readers.ThermoFile
@@ -27,31 +26,35 @@ _fileReader = readers.ThermoFile
 def setFileReader(fr):
     global _fileReader
     _fileReader = fr
-    
+
+
 def getFileReader():
     return _fileReader
 
 
-class FileList(HDF5.Group):
-    h5_type = HDF5.RegisterType("FileList")
-    files: datatable.Datatable = datatable.Datatable.descriptor(File)
+class FileList(BaseStructure):
+    h5_type = "FileList"
+    files: List[File]
 
     def _crossed(self, start: datetime, end: datetime) -> Tuple[bool, str]:
-        startDatetimes = self.files.get_column("startDatetime")
-        endDatetimes = self.files.get_column("endDatetime")
-        slt = (start < startDatetimes) & (endDatetimes < end)
-        where = np.where(slt)
-        if len(where) > 0:
-            return False, list(self.files[where])
+        for file in self.files:
+            if start < file.startDatetime and file.endDatetime < end:
+                return False, file.path
         return True, None
 
     @property
     def timeRange(self):
-        if len(self.files) == 0:
+        if not self.files:
             return None, None
-        startDatetimes = self.files.get_column("startDatetime")
-        endDatetimes = self.files.get_column("endDatetime")
-        return startDatetimes.min().astype(datetime), endDatetimes.max().astype(datetime)
+        it = iter(self.files)
+        f = next(it)
+        start, end = f.startDatetime, f.endDatetime
+        for file in it:
+            if file.startDatetime < start:
+                start = f.startDatetime
+            if file.endDatetime > end:
+                end = f.endDatetime
+        return start, end
 
     def addFile(self, filepath):
         f = _fileReader(filepath)
@@ -61,21 +64,22 @@ class FileList(HDF5.Group):
             raise ValueError(
                 f'file "{f.path}" and "{[f.path for f in crossedFiles]}" have crossed scan time')
 
-        file = File(f.path, f.creationDatetime, f.creationDatetime +
-                    f.startTimedelta, f.creationDatetime + f.endTimedelta)
-        self.files.extend([file])
+        file = File(path=f.path, createDatetime=f.creationDatetime, startDatetime=f.creationDatetime +
+                    f.startTimedelta, endDatetime=f.creationDatetime + f.endTimedelta)
+        self.files.append(file)
 
     def rmFile(self, indexes: Union[int, Iterable[int]]):
         if isinstance(indexes, int):
             indexes = (indexes, )
-        del self.files[np.array(indexes)]
+        indexes = np.unique(indexes)[::-1]
+        for index in indexes:
+            del self.files[index]
 
     def sort(self):
-        self.files.sort("createDatetime")
+        self.files.sort(key=lambda f: f.createDatetime)
 
     def clear(self):
         self.files.clear()
-        self.initialize()
 
     def __iter__(self):
         return iter(self.files)
@@ -84,16 +88,16 @@ class FileList(HDF5.Group):
         return len(self.files)
 
 
-class SpectrumInfo(datatable.DatatableItem):
+class SpectrumInfo(BaseTableItem):
     item_name = "SpectrumInfo"
 
-    file_path = datatable.str_utf8()
-    start_time = datatable.Datetime64s()
-    end_time = datatable.Datetime64s()
-    rtol = datatable.Float32()
-    polarity = datatable.Int32()
+    file_path: str
+    start_time: datetime
+    end_time: datetime
+    rtol: int
+    polarity: int
 
-    average_index = datatable.Int32()
+    average_index: int
 
     @staticmethod
     def generate_infos_from_paths_by_number(paths, rtol, N, polarity, timeRange) -> List[SpectrumInfo]:
@@ -106,7 +110,10 @@ class SpectrumInfo(datatable.DatatableItem):
             *((f.startDatetime, f.endDatetime) for f in files))
         rets = part_by_time_interval(
             paths, start_times, end_times, timeRange[0], timeRange[1], interval)
-        return [SpectrumInfo(path, start, end, rtol, polarity, index) for path, start, end, index in rets]
+        ret = [SpectrumInfo(
+            file_path=path, start_time=start, end_time=end, rtol=rtol, polarity=polarity,
+            average_index=index) for path, start, end, index in rets]
+        return ret
 
     @staticmethod
     def generate_infos_from_paths(paths, rtol, polarity, timeRange) -> List[SpectrumInfo]:
@@ -117,19 +124,21 @@ class SpectrumInfo(datatable.DatatableItem):
             for i in range(*f.timeRange2NumRange((timeRange[0] - creationTime, timeRange[1] - creationTime))):
                 if f.getSpectrumPolarity(i) == polarity:
                     time = creationTime + f.getSpectrumRetentionTime(i)
-                    info = SpectrumInfo(path, time, time, i,
-                                        i + 1, rtol, polarity, 0)
+                    info = SpectrumInfo(file_path=path, start_time=time, end_time=time,
+                                        rtol=rtol, polarity=polarity, average_index=0)
                     info_list.append(info)
         return info_list
-        
-    def get_spectrum_from_info(self, reader:_fileReader = None, with_minutes = False):
+
+    def get_spectrum_from_info(self, reader: _fileReader = None, with_minutes=False):
         if reader is None:
             reader = _fileReader(self.file_path)
-        ret = reader.getAveragedSpectrumInTimeRange(self.start_time, self.end_time, self.rtol, self.polarity)
+        ret = reader.getAveragedSpectrumInTimeRange(
+            self.start_time, self.end_time, self.rtol, self.polarity)
         if ret is None:
             return None
         mz, intensity = ret
         if not with_minutes:
             return mz, intensity
-        minutes = min(self.end_time, reader.endDatetime) - max(self.start_time, reader.startDatetime)
-        return mz, intensity, minutes.total_seconds()/60
+        minutes = min(self.end_time, reader.endDatetime) - \
+            max(self.start_time, reader.startDatetime)
+        return mz, intensity, minutes.total_seconds() / 60

@@ -1,34 +1,35 @@
-from . import HDF5
+from .base import BaseStructure, Field
+from datetime import datetime
+import numpy as np
 
 
-class Peak(HDF5.Group):
-    h5_type = HDF5.RegisterType("Peak")
-    mz = HDF5.SmallNumpy()
-    intensity = HDF5.SmallNumpy()
-    splitNum = HDF5.Int()
+class Peak(BaseStructure):
+    h5_type = "Peak"
+    mz: np.ndarray
+    intensity: np.ndarray
+    splitNum: int
 
 
 class FittedPeak(Peak):
-    h5_type = HDF5.RegisterType("FittedPeak")
-
-    fitted_param = HDF5.SmallNumpy()
-    peak_position = HDF5.SmallNumpy()
-    peak_intensity = HDF5.SmallNumpy()
-    formula_list = HDF5.LightList.descriptor()
-
-
-class Spectrum(HDF5.Group):
-    h5_type = HDF5.RegisterType("Spectrum")
-
-    file_path = HDF5.Str()
-    mass = HDF5.BigNumpy()
-    intensity = HDF5.BigNumpy()
-    start_tTime = HDF5.Datetime()
-    end_time = HDF5.Datetime()
+    h5_type = "FittedPeak"
+    fitted_param: np.ndarray
+    peak_position: np.ndarray
+    peak_intensity: np.ndarray
+    formula_list: list
 
 
-class SpectrumList(HDF5.Group):
-    h5_type = HDF5.RegisterType("SpectrumList")
+class Spectrum(BaseStructure):
+    h5_type = "Spectrum"
+
+    file_path: str
+    mass: np.ndarray
+    intensity: np.ndarray
+    start_tTime: datetime
+    end_time: datetime
+
+
+class SpectrumList(BaseStructure):
+    h5_type = "SpectrumList"
 
 
 # class MassListItem

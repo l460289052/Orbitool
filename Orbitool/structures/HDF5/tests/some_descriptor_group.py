@@ -7,11 +7,18 @@ import pytest
 
 from .spectrum import Spectrum, type_name, Spectra
 
+@pytest.fixture
+def h5file():
+    f = HDF5.H5File()
 
 def test_group(location):
     mz = np.arange(10)
     intensity = np.arange(10) + 1
     time = datetime(2000, 1, 1, 1, 1, 1)
+
+    a = Spectrum(mz=mz, intensity=intensity, time=time)
+    
+    
 
     a = Spectrum.create_at(location, 'spec')
     a.initialize(mz, intensity, time)
