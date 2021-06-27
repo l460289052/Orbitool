@@ -17,7 +17,7 @@ def get_dtype(item_type: BaseTableItem) -> Tuple[list, Dict[str, Type[Dtype]]]:
     converter = {}
     for key, field in item_type.__fields__.items():
         if key != "item_name":
-            dtype = type_dtype[field.outer_type_]
+            dtype = type_dtype.get(field.outer_type_, field.outer_type_)
             dtypes.append((key, dtype.dtype))
             converter[key] = dtype
     return dtypes, converter
@@ -92,3 +92,35 @@ type_dtype: Dict[Type, Type[Dtype]] = {
     str: StrDtype,
     datetime: DatetimeDtype
 }
+
+
+class BaseDatatableType(Dtype):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v): ...
+
+
+class Int32(int, BaseDatatableType):
+    dtype = np.dtype(np.int32)
+
+    @classmethod
+    def validate(cls, v):
+        return int(v)
+
+
+class AsciiLimit(BaseDatatableType):
+    def __init__(self, length) -> None:
+        self.length = length
+        self.dtype = np.dtype(f"S{length}")
+
+    def __class_getitem__(cls, length):
+        return AsciiLimit(length)
+
+    @classmethod
+    def validate(cls, v):
+        if isinstance(v, bytes):
+            return v.decode()
+        return str(v)

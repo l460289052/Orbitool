@@ -69,6 +69,10 @@ base_types_converters: Dict[Type, BaseSingleConverter] = {
     np.ndarray: NumpyConverter}
 
 
+def register_converter(typ: Type, converter: Type[BaseSingleConverter]):
+    base_types_converters[typ] = converter
+
+
 class StructureConverter(BaseSingleConverter):
     @staticmethod
     def write_to_h5(h5group: Group, key: str, value: BaseStructure):

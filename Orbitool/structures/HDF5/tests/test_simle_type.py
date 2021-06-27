@@ -26,7 +26,6 @@ def test_group():
 
 
 def test_structure():
-
     class Child(BaseStructure):
         h5_type = "test_child"
         value: int

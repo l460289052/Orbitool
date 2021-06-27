@@ -3,7 +3,7 @@ from datetime import datetime
 
 from ...base import BaseTableItem
 from ...HDF5 import H5File
-from ..h5datatable import TableConverter
+from ..h5datatable import TableConverter, AsciiLimit, Int32
 
 
 class TableItem(BaseTableItem):
@@ -31,3 +31,25 @@ def test_dt():
     assert item.float_test == .1
     assert item.str_test == "1" * 1000
     assert item.dt_test == dt
+
+
+class AsciiItem(BaseTableItem):
+    item_name = "test_ascii_item"
+
+    int32: Int32
+    ascii: AsciiLimit[20]
+
+
+def test_ascii():
+    f = H5File()
+
+    item = AsciiItem(int32=12, ascii="123321")
+    f.write_table("table", AsciiItem, [item] * 10)
+
+    items = f.read_table("table", AsciiItem)
+
+    assert len(items) == 10
+    item = items[0]
+
+    assert item.int32 == 12
+    assert item.ascii == "123321"
