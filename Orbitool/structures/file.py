@@ -49,10 +49,10 @@ class FileList(BaseStructure):
         it = iter(self.files)
         f = next(it)
         start, end = f.startDatetime, f.endDatetime
-        for file in it:
-            if file.startDatetime < start:
+        for f in it:
+            if f.startDatetime < start:
                 start = f.startDatetime
-            if file.endDatetime > end:
+            if f.endDatetime > end:
                 end = f.endDatetime
         return start, end
 

@@ -3,7 +3,7 @@ from collections import deque
 from enum import Enum
 from multiprocessing.pool import Pool as PoolType, AsyncResult
 from queue import Queue
-from typing import List, Tuple, final, Deque, Iterable
+from typing import List, Tuple, final, Deque, Iterable, Generator
 
 from PyQt5 import QtCore
 
@@ -41,17 +41,15 @@ class MultiProcess(QtCore.QThread):
     sendStatus = QtCore.pyqtSignal(str, int, int)
 
     @final
-    def __init__(self, file, args: dict, num: int, pool: PoolType = None) -> None:
+    def __init__(self, file, args: dict, pool: PoolType = None) -> None:
         super().__init__()
         self.file = file
         self.args = args
-        self.num = num
         self.pool = pool
         self.aborted = False
 
     @final
     def run(self):
-        length = self.num
         results: Deque[AsyncResult] = deque()
         pool: PoolType = self.pool
         file = self.file
@@ -122,12 +120,18 @@ class MultiProcess(QtCore.QThread):
         raise NotImplementedError()
 
     @staticmethod
-    def read(file, args):
+    def read(file, args) -> Generator:
         raise NotImplementedError()
+        # example
+        for i in range(10):
+            yield i
 
     @staticmethod
     def write(file, args, rets: Iterable):
         raise NotImplementedError()
+        # example 
+        for ret in rets:
+            print(ret)
 
     @staticmethod
     def exception(file, args):

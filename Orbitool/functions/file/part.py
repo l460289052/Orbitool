@@ -8,7 +8,7 @@ from ...utils import iterator
 
 def part_by_time_interval(ids: list, start_times: List[datetime], end_times: List[datetime],
                           start_point: datetime, end_point: datetime, interval: timedelta
-                          ) -> Iterable[Tuple[str, np.datetime64, np.datetime64, int]]:
+                          ) -> Iterable[Tuple[str, datetime, datetime, int]]:
     assert len(ids) == len(start_times) == len(end_times)
     times = np.arange(start_point, end_point + interval, interval)
     times[-1] = end_point
@@ -17,7 +17,7 @@ def part_by_time_interval(ids: list, start_times: List[datetime], end_times: Lis
     zip_input = list(zip(ids, start_times, end_times))
     for index, (_, start, end) in enumerate(zip_input):
         select[:, index] = (start < times[1:]) & (end > times[:-1])
-    return chain.from_iterable((((value[0], time_s, time_e, i) for i, value in enumerate(values)) for slt, time_s, time_e in zip(select, times[:-1], times[1:]) if len(values := list(compress(zip_input, slt))) > 0))
+    return chain.from_iterable((((value[0], time_s.astype(datetime), time_e.astype(datetime), i) for i, value in enumerate(values)) for slt, time_s, time_e in zip(select, times[:-1], times[1:]) if len(values := list(compress(zip_input, slt))) > 0))
 
 
 def part_by_time_interval_fast(ids: list, start_times: List[datetime], end_times: List[datetime],

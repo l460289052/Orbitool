@@ -73,6 +73,40 @@ class node:
             try:
                 ret = func(
                     selfWidget, *args, **kwargs) if self._withArgs else func(selfWidget)
+                if isinstance(ret, Generator):
+                    generator = ret
+
+                    def run_send(result):
+                        try:
+                            if result:
+                                result = result[0]
+
+                                if isinstance(result, Exception):
+                                    raise result
+                            to_be_finished = generator.send(result)
+
+                            thread = Thread(to_be_finished)
+                            thread.finished.connect(run_send)
+                            selfWidget.node_thread = thread
+                            if config.DEBUG:
+                                thread.run()
+                            else:
+                                thread.start()
+                        except StopIteration:
+                            selfWidget.busy = False
+                        except Exception as e:
+                            logger = logging.getLogger("Orbitool")
+                            logger.error(str(e), exc_info=e)
+                            showInfo(str(e))
+                            if (tmpfunc := self.except_node.func):
+                                tmpfunc(selfWidget)
+                            elif self._mode in _busy_reset:
+                                selfWidget.busy = False
+
+                    run_send(None)
+
+                elif self._mode in _busy_reset:
+                    selfWidget.busy = False
             except Exception as e:
                 logger = logging.getLogger("Orbitool")
                 logger.error(str(e), exc_info=e)
@@ -81,42 +115,6 @@ class node:
                     tmpfunc(selfWidget)
                 elif self._mode in _busy_reset:
                     selfWidget.busy = False
-
-            if isinstance(ret, Generator):
-                generator = ret
-                def run_send(result):
-                    try:
-                        if result:
-                            result = result[0]
-
-                            if isinstance(result, Exception):
-                                raise result
-                        to_be_finished = generator.send(result)
-
-                        thread = Thread(to_be_finished)
-                        thread.finished.connect(run_send)
-                        selfWidget.node_thread = thread
-                        if config.DEBUG:
-                            thread.run()
-                        else:
-                            thread.start()
-                    except StopIteration:
-                        selfWidget.busy = False
-                    except Exception as e:
-                        logger = logging.getLogger("Orbitool")
-                        logger.error(str(e), exc_info=e)
-                        showInfo(str(e))
-
-                        if (tmpfunc := self._father.except_node.func):
-                            tmpfunc(selfWidget)
-                        else:
-                            selfWidget.busy = False
-                        return
-
-                run_send(None)
-
-            elif self._mode in _busy_reset:
-                selfWidget.busy = False
 
         return decorator
 

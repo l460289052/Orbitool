@@ -1,12 +1,14 @@
 from typing import Generic, List, Type, TypeVar, Union
 
 from pydantic import BaseModel, Field
+import numpy as np
 
 from ..utils import readers
 from ..utils.formula import Formula
-from .base import BaseStructure
+from .base import BaseStructure, BaseTableItem
 from .file import FileList, SpectrumInfo, setFileReader
 from .HDF5 import H5File, H5Obj
+from .spectrum import Spectrum
 
 setFileReader(readers.ThermoFile)
 
@@ -23,62 +25,60 @@ class Widget(H5Obj, Generic[T]):
         self["info"] = self.info
 
 
-# class SpectraList(H5Obj):
-#     h5_type = HDF5.RegisterType("SpectraList")
-
-#     file_spectrum_info_list = HDF5.datatable.Datatable.descriptor(SpectrumInfo)
-
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.selected_start_time: datetime = None
-
-
-# class NoiseFormulaParameter(HDF5.datatable.DatatableItem):
-#     item_name = "NoiseFormulaParameter"
-#     formula: Formula = FormulaDatatableDescriptor()
-#     delta: float = HDF5.datatable.Float64()
-
-#     selected: bool = HDF5.datatable.Bool()
-#     param = HDF5.datatable.Ndarray2D(float, 3)
-
-
-# class NoiseTab(HDF5.Group):
-#     h5_type = HDF5.RegisterType("NoiseTab")
-
-#     current_spectrum: spectrum.Spectrum = spectrum.Spectrum.descriptor()
-#     noise_formulas = HDF5.datatable.Datatable.descriptor(NoiseFormulaParameter)
-
-#     n_sigma = HDF5.Float()
-#     poly_coef = HDF5.SimpleDataset()
-#     global_noise_std = HDF5.Float()
-#     noise = HDF5.SimpleDataset()
-#     LOD = HDF5.SimpleDataset()
-
-#     def initialize(self):
-#         self.noise_formulas.initialize()
-
-#         self.noise_formulas.extend([NoiseFormulaParameter(
-#             Formula(f), 5, False, np.zeros((2, 3))) for f in config.noise_formulas])
-
 class WorkspaceInfo(BaseStructure):
     h5_type = "workspace info"
 
     filelist: FileList = Field(default_factory=FileList)
 
 
+class SpectraListInfo(BaseStructure):
+    h5_type = "spectra list info"
+
+    file_spectrum_info_list: List[SpectrumInfo] = Field(default_factory=list)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class NoiseFormulaParameter(BaseTableItem):
+    item_name = "noise formula parameter"
+    formula: Formula
+    delta: float
+
+    selected: bool
+    # param: np.ndarray
+
+
+class NoiseTabInfo(BaseStructure):
+    h5_type = "noise tab"
+
+    current_spectrum: Spectrum = None
+    noise_formulas: List[NoiseFormulaParameter] = []
+
+    n_sigma: float = 0
+    poly_coef: np.ndarray = np.empty(0)
+    global_noise_std: float = 0
+    noise: np.ndarray = np.empty(0)
+    LOD: np.ndarray = np.empty(0)
+
+    def initialize(self):
+        self.noise_formulas.initialize()
+
+        self.noise_formulas.extend([NoiseFormulaParameter(
+            Formula(f), 5, False, np.zeros((2, 3))) for f in config.noise_formulas])
+
+
 class WorkSpace(H5File):
     def __init__(self, path: str = None) -> None:
         super().__init__(path)
-        self.info: WorkspaceInfo = self["info"] if "info" in self else WorkspaceInfo()
+        self.info: WorkspaceInfo = self["info"] if "info" in self else WorkspaceInfo(
+        )
 
-        # self.spectra_list = self.visit_or_create("spectraList", )
-        # self.noise_formula_parameter = self.visit_or_create(
-        #     "noise_formula_parameter")
-        # self.noise_tab = self.visit_or_create("noise_tab")
+        self.spectra_list = self.visit_or_create_widget(
+            "spectraList", SpectraListInfo)
+        self.noise_tab = self.visit_or_create_widget("noise_tab", NoiseTabInfo)
 
-        # self.widgets = [self.spectra_list,
-        #                 self.noise_formula_parameter, self.noise_tab]
-        self.widgets: List[Widget] = []  # [self.spectra_list]
+        self.widgets: List[Widget] = [self.spectra_list]
 
     def save(self):
         self["info"] = self.info

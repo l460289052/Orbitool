@@ -47,6 +47,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
         return self.current_workspace.noise_tab
 
     def showNoiseFormula(self):
+        return
         widget = self.tableWidget
         widget.clearContents()
         widget.setRowCount(0)
@@ -82,29 +83,27 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
             right += 1
 
         infos: List[SpectrumInfo] = list(info_list[left:right])
+        spectrum = self.noise.currect_spectrum
 
-        def func(infos: List[SpectrumInfo], target_spectrum: Spectrum):
+        def func():
 
             if len(spectrums := [spectrum for info in infos if (spectrum := info.get_spectrum_from_info(with_minutes=True)) is not None]) > 0:
                 spectrums = [(*functions.spectrum.removeZeroPositions(
                     spectrum[0], spectrum[1]), spectrum[2]) for spectrum in spectrums]
                 mass, intensity = functions.spectrum.averageSpectra(
                     spectrums, infos[0].rtol, True)
-                target_spectrum.file_path = ''
-                target_spectrum.mass = mass
-                target_spectrum.intensity = intensity
-                target_spectrum.start_tTime = infos[0].start_time
-                target_spectrum.end_time = infos[-1].end_time
+                spectrum.file_path = ''
+                spectrum.mass = mass
+                spectrum.intensity = intensity
+                spectrum.start_tTime = infos[0].start_time
+                spectrum.end_time = infos[-1].end_time
                 return True
             else:
                 return False
+            
+        yield func
 
-        return Thread(func, (infos, self.noise.current_spectrum))
-
-    @showSelectedSpectrum.thread_node
-    def showSelectedSpectrum(self, result, args):
         self.selected_spectrum_average.emit()
-        spectrum = self.noise.current_spectrum
         self.plot.ax.plot(spectrum.mass, spectrum.intensity)
         self.plot.canvas.draw()
         self.show()
@@ -147,17 +146,16 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
         mass_point_deltas = np.array([self.tableWidget.cellWidget(
             i, 1).value() for i in range(self.tableWidget.rowCount())], dtype=np.int)
 
-        def func(spectrum: Spectrum):
+        def func():
             poly, std, slt, params = spectrum_func.getNoiseParams(
                 spectrum.mass, spectrum.intensity, quantile, mass_dependent, mass_points, mass_point_deltas)
             noise, LOD = spectrum_func.noiseLODFunc(
                 spectrum.mass, poly, params, mass_points, mass_point_deltas, n_sigma)
             return poly, std, slt, params, noise, LOD
-        return Thread(func, (self.noise.current_spectrum, ))
+        
+        
 
-    @calcNoise.thread_node
-    def calcNoise(self, ret, args):
-        poly, std, slt, params, noise, LOD = ret
+        poly, std, slt, params, noise, LOD = yield func
 
         self.noise.poly_coef = poly
         self.noise.global_noise_std = std
@@ -280,6 +278,3 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
         else:
             pass
         
-    @denoise.thread_node
-    def denoise(self, ret, args):
-        pass

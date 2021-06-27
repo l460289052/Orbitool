@@ -44,13 +44,13 @@ def fileui(window: MainUiPy.Window):
     wait_not_busy()
     sleep()
     assert not window.busy
-    assert len(workspace.file_list) == 4
+    assert len(workspace.info.filelist.files) == 4
 
     test.input([1, 2, 3])
     fileui.processSelected()
     wait_not_busy()
     sleep()
-    assert len(workspace.spectra_list.file_spectrum_info_list) > 0
+    assert len(workspace.spectra_list.info.file_spectrum_info_list) > 0
 
 
 def file_spectra(window: MainUiPy.Window):

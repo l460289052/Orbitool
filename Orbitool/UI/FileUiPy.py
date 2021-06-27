@@ -13,7 +13,7 @@ from .. import utils
 
 
 class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
-    callback = QtCore.pyqtSignal()
+    callback = QtCore.pyqtSignal(tuple)
 
     def __init__(self, widget_root: BaseWidget, parent: Optional['QWidget'] = None) -> None:
         super().__init__(parent=parent)
@@ -109,14 +109,16 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         indexes = UiUtils.get_tablewidget_selected_row(self.tableWidget)
         if len(indexes) == 0:
             return None
-        paths = self.file_list.files.get_column("path")[indexes]
-        yield self.processPaths(paths)
-        self.callback.emit()
+        paths = [self.file_list.files[index].path for index in indexes]
+        infos = yield self.processPaths(paths)
+
+        self.callback.emit((infos, ))
 
     @state_node
     def processAll(self):
-        yield self.processPaths(self.file_list.files.get_column("path"))
-        self.callback.emit()
+        infos = yield self.processPaths(file.path for file in self.file_list.files)
+
+        self.callback.emit((infos, ))
 
     def processPaths(self, paths):
         time_range = (self.startDateTimeEdit.dateTime().toPyDateTime(),
@@ -142,11 +144,4 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
             func = partial(file.SpectrumInfo.generate_infos_from_paths,
                            paths, rtol, polarity, time_range)
 
-        info_list = self.current_workspace.spectra_list.file_spectrum_info_list
-
-        def thread_func():
-            infos = func()
-            info_list.clear()
-            info_list.extend(infos)
-
-        return thread_func
+        return func

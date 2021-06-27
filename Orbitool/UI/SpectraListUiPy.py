@@ -49,7 +49,7 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):
     def show_file_infos(self):
         tableWidget = self.tableWidget
         tableWidget.setRowCount(0)
-        spectrum_infos: List[SpectrumInfo] = self.spectra_list.file_spectrum_info_list
+        spectrum_infos: List[SpectrumInfo] = self.spectra_list.info.file_spectrum_info_list
         spectrum_infos = [
             info for info in spectrum_infos if info.average_index == 0]
         tableWidget.setRowCount(len(spectrum_infos))
@@ -63,7 +63,7 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):
     def show_combobox_selection(self):
         spectra_list = self.spectra_list
         comboBox = self.comboBox
-        if len(spectra_list.file_spectrum_info_list) > 0:
+        if len(spectra_list.info.file_spectrum_info_list) > 0:
             if comboBox.count() == 0:
                 self.comboBox_position.append(0)
                 comboBox.addItem("File tab")
