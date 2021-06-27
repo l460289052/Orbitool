@@ -18,6 +18,13 @@ def get_dtype(item_type: BaseTableItem) -> Tuple[list, Dict[str, Type[Dtype]]]:
     for key, field in item_type.__fields__.items():
         if key != "item_name":
             dtype = type_dtype.get(field.outer_type_, field.outer_type_)
+
+            if not issubclass(dtype if isinstance(dtype, type) else type(dtype), Dtype):
+                raise TypeError(
+                    f'{items.get_name(item_type)} member "{key}" type "{dtype}" should be registered or as a subclass of Dtype')
+            if not hasattr(dtype, "dtype"):
+                raise TypeError(
+                    f"Maybe you should use {dtype}[some argument] instead of {dtype}")
             dtypes.append((key, dtype.dtype))
             converter[key] = dtype
     return dtypes, converter
@@ -124,3 +131,7 @@ class AsciiLimit(BaseDatatableType):
         if isinstance(v, bytes):
             return v.decode()
         return str(v)
+
+
+def register_datatable_converter(typ, converter: Type[Dtype]):
+    type_dtype[typ] = converter
