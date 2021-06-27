@@ -1,11 +1,13 @@
-from enum import Enum
-from PyQt5 import QtCore
 from abc import ABC, abstractmethod
-from typing import List, Tuple
-from multiprocessing import Manager, Pool, Queue
-from typing import final
+from collections import deque
+from enum import Enum
+from multiprocessing.pool import Pool as PoolType, AsyncResult
+from queue import Queue
+from typing import List, Tuple, final, Deque, Iterable
 
-from ...config import multi_cores, logger
+from PyQt5 import QtCore
+
+from ...config import logger, multi_cores
 
 
 class threadtype(Enum):
@@ -26,9 +28,9 @@ class Thread(QtCore.QThread):
     def run(self):
         try:
             result = self.func(*self.args, **self.kwargs)
-            self.finished.emit((result, (self.func, self.args, self.kwargs)))
+            self.finished.emit((result,))
         except Exception as e:
-            self.finished.emit((e, (self.func, self.args, self.kwargs)))
+            self.finished.emit((e, ))
 
     def sendStatusFunc(self, *args):
         self.sendStatus.emit(*args)
@@ -39,7 +41,7 @@ class MultiProcess(QtCore.QThread):
     sendStatus = QtCore.pyqtSignal(str, int, int)
 
     @final
-    def __init__(self, file, args: dict, num: int, pool: Pool = None) -> None:
+    def __init__(self, file, args: dict, num: int, pool: PoolType = None) -> None:
         super().__init__()
         self.file = file
         self.args = args
@@ -50,29 +52,52 @@ class MultiProcess(QtCore.QThread):
     @final
     def run(self):
         length = self.num
-        results = []
-        pool = self.pool
+        results: Deque[AsyncResult] = deque()
+        pool: PoolType = self.pool
         file = self.file
         args = self.args
-        self.initialize(file, args)
-        manager = Manager()
-        queue = manager.Queue()
-        for i in range(length + multi_cores):
-            if self.aborted:
-                return self.abort_finish(file, args)
-            if i < length:
-                results.append(pool.apply_async(
-                    self.process, (i, self.func, self.read(file, args, i), queue)))
-            if i >= multi_cores:
-                if (label := queue.get()) > 0:
-                    ret = results[label].get()
-                    self.write(file, args, label, ret)
-                else:
-                    self.abort(False)
-                    self.finished.emit((RuntimeError(
-                        "There are some wrongs in running, please check log.txt for more details"), (self.file, self.args)))
+        queue = Queue()
 
-        self.finish(file, args)
+        def iter_queue():
+            while True:
+                result = queue.get()
+                if result is None:
+                    break
+                yield result
+
+        write_thread = Thread(self.write, (file, args, iter_queue()))
+        write_thread.start()
+
+        for i, input_data in enumerate(self.read(file, args)):
+            if self.aborted:
+                queue.put(None)
+                return self.exception(file, args)
+            results.append(pool.apply_async(
+                self.process, (i, self.func, input_data)))
+            if i >= multi_cores:
+                ret = results.popleft().get()
+                if isinstance(ret, Exception):
+                    self.exception(file, args)
+                    self.finished.emit(
+                        (ret, (self.func, self.file, self.args)))
+                    queue.put(None)
+                    return
+                queue.put(ret)
+
+        while results:
+            ret = results.popleft().get()
+            if isinstance(ret, Exception):
+                self.exception(file, args)
+                self.finished.emit(
+                    (ret, (self.func, self.file, self.args)))
+                queue.put(None)
+                return
+            queue.put(ret)
+
+        queue.put(None)
+
+        write_thread.wait()
+
         self.finished.emit((True, (self.file, self.args)))
 
     @final
@@ -84,13 +109,12 @@ class MultiProcess(QtCore.QThread):
 
     @final
     @staticmethod
-    def process(label, func, args, queue: Queue):
+    def process(label, func, args):
         try:
             ret = func(args)
-            queue.put(label)
         except Exception as e:
             logger.error(str(e), exc_info=e)
-            queue.put(-label - 1)
+            return e
         return ret
 
     @staticmethod
@@ -98,21 +122,13 @@ class MultiProcess(QtCore.QThread):
         raise NotImplementedError()
 
     @staticmethod
-    def read(file, args, i):
+    def read(file, args):
         raise NotImplementedError()
 
     @staticmethod
-    def write(file, args, i, ret):
+    def write(file, args, rets: Iterable):
         raise NotImplementedError()
 
     @staticmethod
-    def abort_finish(file, args):
+    def exception(file, args):
         raise NotImplementedError()
-
-    @staticmethod
-    def finish(file, args):
-        raise NotImplementedError()
-
-    @staticmethod
-    def initialize(file, args):
-        pass

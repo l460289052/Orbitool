@@ -1,4 +1,4 @@
-from typing import Any, Callable, overload
+from typing import Any, Callable, overload, Generator
 import functools
 import logging
 from enum import Enum
@@ -15,8 +15,11 @@ class NodeType(Enum):
     Except = 1
     ThreadEnd = 2
 
+
 _busy_set = {'w', 'x'}
 _busy_reset = {'w', 'x', 'a'}
+
+
 class node:
     """
     @thread_node
@@ -68,34 +71,8 @@ class node:
                 showInfo("Wait for process", 'busy')
                 return
             try:
-                if self._nodeType == NodeType.ThreadEnd:
-                    args = args[0]
-                    if isinstance(args[0], Exception):
-                        e = args[0]
-                        logger = logging.getLogger("Orbitool")
-                        logger.error(str(e), exc_info=e)
-                        showInfo(str(e))
-                        if (tmpfunc := self._father.except_node.func):
-                            tmpfunc(selfWidget)
-                        else:
-                            selfWidget.busy = False
-                        return
-                    thread = func(selfWidget, *args)
-                else:
-                    thread = func(selfWidget, *args, **
-                                  kwargs) if self._withArgs else func(selfWidget)
-
-                if thread is not None and (tmpfunc := self.thread_node.func):
-                    selfWidget.node_thread = thread
-                    # thread.sendStatus.connect()
-                    thread.finished.connect(
-                        functools.partial(tmpfunc, selfWidget))
-                    if config.DEBUG:
-                        thread.run()
-                    else:
-                        thread.start()
-                elif self._mode in _busy_reset:
-                    selfWidget.busy = False
+                ret = func(
+                    selfWidget, *args, **kwargs) if self._withArgs else func(selfWidget)
             except Exception as e:
                 logger = logging.getLogger("Orbitool")
                 logger.error(str(e), exc_info=e)
@@ -105,6 +82,42 @@ class node:
                 elif self._mode in _busy_reset:
                     selfWidget.busy = False
 
+            if isinstance(ret, Generator):
+                generator = ret
+                def run_send(result):
+                    try:
+                        if result:
+                            result = result[0]
+
+                            if isinstance(result, Exception):
+                                raise result
+                        to_be_finished = generator.send(result)
+
+                        thread = Thread(to_be_finished)
+                        thread.finished.connect(run_send)
+                        selfWidget.node_thread = thread
+                        if config.DEBUG:
+                            thread.run()
+                        else:
+                            thread.start()
+                    except StopIteration:
+                        selfWidget.busy = False
+                    except Exception as e:
+                        logger = logging.getLogger("Orbitool")
+                        logger.error(str(e), exc_info=e)
+                        showInfo(str(e))
+
+                        if (tmpfunc := self._father.except_node.func):
+                            tmpfunc(selfWidget)
+                        else:
+                            selfWidget.busy = False
+                        return
+
+                run_send(None)
+
+            elif self._mode in _busy_reset:
+                selfWidget.busy = False
+
         return decorator
 
     @func.setter
@@ -113,9 +126,8 @@ class node:
         if func is None:
             return
         self._func = func
-        self.except_node = node(self._root, self, NodeType.Except, mode='a' if self._mode!='e' else 'e')
-        self.thread_node = node(
-            self._root, self, NodeType.ThreadEnd, withArgs=True, mode='a' if self._mode!='e' else 'e')
+        self.except_node = node(
+            self._root, self, NodeType.Except, mode='a' if self._mode != 'e' else 'e')
 
     def __call__(self, func):
         self.func = func

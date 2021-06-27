@@ -42,10 +42,11 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
             for f in files:
                 file_list.addFile(f)
             file_list.sort()
-        return Thread(func)
+            return len(file_list.files)
 
-    @addFile.thread_node
-    def addFile(self, result, args):
+        length = yield func
+
+        showInfo(str(length))
         self.showFiles()
 
     @addFile.except_node
@@ -63,10 +64,9 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
             for path in utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.recursionCheckBox.isChecked()):
                 file_list.addFile(path)
             file_list.sort()
-        return Thread(func)
 
-    @addFolder.thread_node
-    def addFolder(self, result, args):
+        yield func
+
         self.showFiles()
 
     @addFolder.except_node
@@ -110,18 +110,12 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
         if len(indexes) == 0:
             return None
         paths = self.file_list.files.get_column("path")[indexes]
-        return self.processPaths(paths)
+        yield self.processPaths(paths)
+        self.callback.emit()
 
     @state_node
     def processAll(self):
-        return self.processPaths(self.file_list.files.get_column("path"))
-
-    @processSelected.thread_node
-    def processSelected_end(self, *args):
-        self.callback.emit()
-
-    @processAll.thread_node
-    def processAll_end(self, *args):
+        yield self.processPaths(self.file_list.files.get_column("path"))
         self.callback.emit()
 
     def processPaths(self, paths):
@@ -155,4 +149,4 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
             info_list.clear()
             info_list.extend(infos)
 
-        return Thread(thread_func)
+        return thread_func
