@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from typing import Dict, List, Type
+from typing import Dict, List, Type, get_args
 from abc import ABCMeta
 
 import numpy as np
@@ -7,7 +7,8 @@ from h5py import Group
 from pydantic.fields import (SHAPE_DICT, SHAPE_LIST, SHAPE_SET,
                              SHAPE_SINGLETON, ModelField)
 
-from ..base import BaseStructure, structures
+from ..base import BaseStructure, structures, BaseTableItem
+from .h5datatable import TableConverter
 
 
 class BaseSingleConverter(metaclass=ABCMeta):
@@ -112,26 +113,70 @@ class SingleConverter(BaseShapeConverter):
 
 class ListConverter(BaseShapeConverter):
     @staticmethod
-    def write_to_h5(h5group: Group, key: str, field: ModelField, value):
-        pass
+    def write_to_h5(h5group: Group, key: str, field: ModelField, values: list):
+        inner_type = get_args(field.outer_type_)
+        if inner_type == np.ndarray:
+            group = h5group.create_group(key)
+            for i, value in enumerate(values):
+                NumpyConverter.write_to_h5(group, str(i), value)
+        elif issubclass(inner_type, BaseTableItem):
+            TableConverter.write_to_h5(h5group, key, inner_type, values)
+        elif issubclass(inner_type, BaseStructure):
+            group = h5group.create_group(key)
+            for i, value in enumerate(values):
+                StructureConverter.write_to_h5(group, str(i), value)
 
     @staticmethod
     def read_from_h5(h5group: Group, key: str, field: ModelField):
-        pass
+        inner_type = get_args(field.outer_type_)
+        if inner_type == np.ndarray:
+            rets = []
+            group: Group = h5group[key]
+            for i in len(group):
+                rets.append(NumpyConverter.read_from_h5(group, str(i)))
+            return rets
+        elif issubclass(inner_type, BaseTableItem):
+            return TableConverter.read_from_h5(h5group, key, inner_type)
+        elif issubclass(inner_type, BaseStructure):
+            rets = []
+            group: Group = h5group[key]
+            for i in len(group):
+                rets.append(StructureConverter.read_from_h5(group, str(i)))
 
 
 class DictConverter(BaseShapeConverter):
     @staticmethod
-    def write_to_h5(h5group: Group, key: str, field: ModelField, value):
-        pass
+    def write_to_h5(h5group: Group, key: str, field: ModelField, values: dict):
+        inner_type = get_args(field.outer_type_)[1]
+        if inner_type == np.ndarray:
+            group = h5group.create_group(key)
+            for key, value in values.items():
+                NumpyConverter.write_to_h5(group, str(key), value)
+        elif issubclass(inner_type, BaseStructure):
+            group = h5group.create_group(key)
+            for key, value in values.items():
+                StructureConverter.write_to_h5(group, str(key), value)
 
     @staticmethod
     def read_from_h5(h5group: Group, key: str, field: ModelField):
-        pass
+        key_type, inner_type = get_args(field.outer_type_)
+        if inner_type == np.ndarray:
+            rets = {}
+            group: Group = h5group[key]
+            for key in group.keys():
+                rets[key_type(key)] = NumpyConverter.read_from_h5(group, key)
+            return rets
+        elif issubclass(inner_type, BaseStructure):
+            rets = {}
+            group: Group = h5group[key]
+            for key in group.keys():
+                rets[key_type(key)] = StructureConverter.read_from_h5(
+                    group, key)
+            return rets
 
 
 shape_converters: Dict[int, Type[SingleConverter]] = {
-    1: SingleConverter,
-    2: ListConverter,
-    4: DictConverter
+    SHAPE_SINGLETON: SingleConverter,
+    SHAPE_LIST: ListConverter,
+    SHAPE_DICT: DictConverter
 }

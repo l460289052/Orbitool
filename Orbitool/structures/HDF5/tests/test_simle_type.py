@@ -1,4 +1,5 @@
 from ...HDF5 import H5File
+from ...base import BaseStructure
 import numpy as np
 from numpy import testing as nptest
 import io
@@ -16,9 +17,35 @@ def test_group():
     a = Spectrum(mz=mz, intensity=intensity, time=time)
     f["spectrum"] = a
 
-    b :Spectrum= f["spectrum"]
+    b: Spectrum = f["spectrum"]
 
     assert b.h5_type == a.h5_type
     nptest.assert_equal(mz, b.mz)
     nptest.assert_equal(intensity, b.intensity)
     assert time == b.time
+
+
+def test_structure():
+
+    class Child(BaseStructure):
+        h5_type = "test_child"
+        value: int
+
+    class Father(BaseStructure):
+        h5_type = "test_father"
+        value: int
+        c1: Child
+        c2: Child
+
+    f = H5File()
+
+    c1 = Child(value=1)
+    c2 = Child(value=2)
+    father = Father(value=3, c1=c1, c2=c2)
+    f["father"] = father
+
+    t: Father = f["father"]
+
+    assert t.value == 3
+    assert t.c1.value == 1
+    assert t.c2.value == 2
