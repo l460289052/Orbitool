@@ -30,11 +30,28 @@ class H5Obj:
     def __getitem__(self, path: str):
         return StructureConverter.read_from_h5(self._obj, path)
 
+    def __contains__(self, path: str) -> bool:
+        return path in self._obj
+
+    def visit_or_create(self, path: str):
+        if path in self:
+            return H5Obj(self._obj[path])
+        return H5Obj(self._obj.create_group(path))
+
 
 class H5File(H5Obj):
     def __init__(self, path: str = None) -> None:
         if path:
-            super().__init__(h5py.File(path))
+            self._obj: h5py.File = h5py.File(path)
         else:
             import io
-            super().__init__(h5py.File(io.BytesIO(), "w"))
+            self._obj: h5py.File = h5py.File(io.BytesIO(), "w")
+
+    def tmp_path(self):
+        pass
+
+    def close(self):
+        self._obj.close()
+        
+    def __del__(self):
+        self.close()

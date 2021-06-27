@@ -1,14 +1,14 @@
 from __future__ import annotations
-from typing import Dict, Tuple, Union, Iterable, List
+
 from datetime import datetime, timedelta
+from typing import Dict, Iterable, List, Tuple, Union
 
 import numpy as np
 
-from .base import BaseStructure, BaseTableItem
-from ..utils import iterator, readers
 from ..functions.file import part_by_time_interval
-
+from ..utils import iterator, readers
 from . import spectrum
+from .base import BaseStructure, BaseTableItem, Field
 
 
 class File(BaseTableItem):
@@ -34,13 +34,13 @@ def getFileReader():
 
 class FileList(BaseStructure):
     h5_type = "FileList"
-    files: List[File]
+    files: List[File] = Field(default_factory=list)
 
     def _crossed(self, start: datetime, end: datetime) -> Tuple[bool, str]:
         for file in self.files:
             if start < file.startDatetime and file.endDatetime < end:
-                return False, file.path
-        return True, None
+                return True, file.path
+        return False, None
 
     @property
     def timeRange(self):
@@ -59,14 +59,17 @@ class FileList(BaseStructure):
     def addFile(self, filepath):
         f = _fileReader(filepath)
 
-        crossed, crossedFiles = self._crossed(f.startDatetime, f.endDatetime)
+        crossed, crossed_file = self._crossed(f.startDatetime, f.endDatetime)
         if crossed:
             raise ValueError(
-                f'file "{f.path}" and "{[f.path for f in crossedFiles]}" have crossed scan time')
+                f'file "{f.path}" and "{crossed_file}" have crossed scan time')
 
         file = File(path=f.path, createDatetime=f.creationDatetime, startDatetime=f.creationDatetime +
                     f.startTimedelta, endDatetime=f.creationDatetime + f.endTimedelta)
         self.files.append(file)
+
+    def _addFile(self, f: File):
+        self.files.append(f)
 
     def rmFile(self, indexes: Union[int, Iterable[int]]):
         if isinstance(indexes, int):
@@ -74,6 +77,14 @@ class FileList(BaseStructure):
         indexes = np.unique(indexes)[::-1]
         for index in indexes:
             del self.files[index]
+
+    def subList(self, indexes: Union[int, Iterable[int]]):
+        if isinstance(indexes, int):
+            indexes = (indexes,)
+        indexes = np.unique(indexes)
+        subList = FileList()
+        for index in indexes:
+            subList._addFile(self.files[index])
 
     def sort(self):
         self.files.sort(key=lambda f: f.createDatetime)

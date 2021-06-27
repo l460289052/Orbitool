@@ -30,7 +30,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
 
     @property
     def file_list(self) -> file.FileList:
-        return self.current_workspace.file_list
+        return self.current_workspace.info.filelist
 
     @state_node
     def addFile(self):
