@@ -6,9 +6,10 @@ import numpy as np
 import matplotlib.ticker
 
 from . import NoiseUi
-from .utils import showInfo, get_tablewidget_selected_row, set_header_sizes, factory
-from .manager import BaseWidget, state_node, Thread
+from .utils import showInfo, get_tablewidget_selected_row, set_header_sizes
+from .manager import Manager, state_node, Thread
 from . import component
+from .component import factory
 
 from ..structures import file, workspace
 from ..structures.file import SpectrumInfo
@@ -18,18 +19,18 @@ from ..functions import binary_search, spectrum as spectrum_func
 from ..utils.formula import Formula
 
 
-class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
+class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     selected_spectrum_average = QtCore.pyqtSignal()
     callback = QtCore.pyqtSignal()
 
-    def __init__(self, widget_root, parent: Optional['QWidget'] = None) -> None:
+    def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
         super().__init__(parent=parent)
+        self.manager = manager
         self.setupUi(self)
         self.addPushButton.clicked.connect(self.addFormula)
         self.delPushButton.clicked.connect(self.delFormula)
-        self.widget_root = widget_root
 
-        self.inited.connect(self.showNoiseFormula)
+        manager.inited.connect(self.showNoiseFormula)
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -44,7 +45,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
 
     @property
     def noise(self):
-        return self.current_workspace.noise_tab
+        return self.manager.workspace.noise_tab
 
     def showNoiseFormula(self):
         widget = self.tableWidget
@@ -65,7 +66,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
 
     @state_node
     def showSelectedSpectrum(self):
-        workspace = self.current_workspace
+        workspace = self.manager.workspace
         time = workspace.spectra_list.info.selected_start_time
         if time is None:
             showInfo("Please select a spectrum in spectra list")

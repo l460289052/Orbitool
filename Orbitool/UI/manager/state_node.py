@@ -1,13 +1,12 @@
-from typing import Any, Callable, overload, Generator
 import functools
 import logging
 from enum import Enum
+from typing import Any, Callable, Generator, overload
 
 from ... import config
 from ..utils import showInfo
-
-from .base_widget import BaseWidget
-from .thread import Thread, MultiProcess, threadtype
+from .manager import Manager
+from .thread import MultiProcess, Thread, threadtype
 
 
 class NodeType(Enum):
@@ -60,10 +59,11 @@ class node:
             return None
 
         @functools.wraps(func)
-        def decorator(selfWidget: BaseWidget, *args, **kwargs):
-            if not selfWidget.busy:
+        def decorator(selfWidget, *args, **kwargs):
+            manager: Manager = selfWidget.manager
+            if not manager.busy:
                 if self._mode in _busy_set:
-                    selfWidget.busy = True
+                    manager.set_busy(True)
             elif self._mode == 'w':
                 # if manager.process_pool.
                 # showInfo("Wait for process or abort", 'busy')
@@ -93,7 +93,7 @@ class node:
                             else:
                                 thread.start()
                         except StopIteration:
-                            selfWidget.busy = False
+                            manager.set_busy(False)
                         except Exception as e:
                             logger = logging.getLogger("Orbitool")
                             logger.error(str(e), exc_info=e)
@@ -101,12 +101,12 @@ class node:
                             if (tmpfunc := self.except_node.func):
                                 tmpfunc(selfWidget)
                             elif self._mode in _busy_reset:
-                                selfWidget.busy = False
+                                manager.set_busy(False)
 
                     run_send(None)
 
                 elif self._mode in _busy_reset:
-                    selfWidget.busy = False
+                    manager.set_busy(False)
             except Exception as e:
                 logger = logging.getLogger("Orbitool")
                 logger.error(str(e), exc_info=e)
@@ -114,7 +114,7 @@ class node:
                 if (tmpfunc := self.except_node.func):
                     tmpfunc(selfWidget)
                 elif self._mode in _busy_reset:
-                    selfWidget.busy = False
+                    manager.set_busy(False)
 
         return decorator
 

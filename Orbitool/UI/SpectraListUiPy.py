@@ -5,23 +5,23 @@ from PyQt5 import QtWidgets, QtCore
 from . import SpectraListUi
 from .utils import showInfo, set_header_sizes
 from . import utils
-from .manager import BaseWidget, state_node
+from .manager import Manager, state_node
 
 from .. import config
 
 from ..structures.file import SpectrumInfo
 
 
-class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):
-    def __init__(self, widget_root: BaseWidget, parent: Optional['QWidget'] = None) -> None:
+class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
+    def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
         super().__init__(parent=parent)
+        self.manager = manager
         self.setupUi(self)
 
         self.comboBox.currentIndexChanged.connect(self.comboBox_changed)
         self.comboBox_position = []
         self.former_index = -1
 
-        self.widget_root = widget_root
         self.tableWidget.itemSelectionChanged.connect(self.selection_changed)
 
     def setupUi(self, Form):
@@ -44,7 +44,7 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):
 
     @property
     def spectra_list(self):
-        return self.current_workspace.spectra_list
+        return self.manager.workspace.spectra_list
 
     def show_file_infos(self):
         tableWidget = self.tableWidget

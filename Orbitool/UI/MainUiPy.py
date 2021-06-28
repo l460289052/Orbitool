@@ -6,7 +6,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from .. import config
 from ..structures import WorkSpace
 
-from .manager import BaseWidget, state_node
+from .manager import Manager, state_node
 from . import utils as UiUtils
 
 from . import MainUi
@@ -19,26 +19,25 @@ from . import CalibrationInfoUiPy, TimeseriesUiPy
 from . import PeakFitFloatUiPy
 
 
-class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
-    busy_signal = QtCore.pyqtSignal(bool)
-    _inited = QtCore.pyqtSignal()
+class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
-        # self.abortPushButton.clicked.connect(self.abort_process_pool)
+        manager = self.manager
+        self.abortPushButton.clicked.connect(self.abort_process_pool)
 
         self.fileUi: FileUiPy.Widget = self.add_tab(
-            FileUiPy.Widget(self), "File")
+            FileUiPy.Widget(manager), "File")
         self.fileUi.callback.connect(self.file_tab_finish)
 
         self.noiseUi: NoiseUiPy.Widget = self.add_tab(
-            NoiseUiPy.Widget(self), "Noise")
+            NoiseUiPy.Widget(manager), "Noise")
         self.noiseUi.selected_spectrum_average.connect(
             self.noise_show_spectrum)
         self.noiseUi.callback.connect(self.noise_tab_finish)
 
         self.peakShapeUi: PeakShapeUiPy.Widget = self.add_tab(
-            PeakShapeUiPy.Widget(self), "Peak Shape")
+            PeakShapeUiPy.Widget(manager), "Peak Shape")
 
         self.calibrationUi = self.add_tab(
             CalibrationUiPy.Widget(), "Calibration")
@@ -57,12 +56,12 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
             "Calibration Info", CalibrationInfoUiPy.Widget(), self.massListDw)
         self.calibrationInfoDw.hide()
 
-        self.spectraList = SpectraListUiPy.Widget(self)
+        self.spectraList = SpectraListUiPy.Widget(manager)
         self.spectraListDw = self.add_dockerwidget(
             "Spectra List", self.spectraList, self.calibrationInfoDw)
         self.spectraListDw.hide()
 
-        self.spectrum = SpectrumUiPy.Widget(self)
+        self.spectrum = SpectrumUiPy.Widget(manager)
         self.spectrumDw = self.add_dockerwidget(
             "Spectrum", self.spectrum, self.spectraListDw)
         self.spectrumDw.hide()
@@ -78,26 +77,22 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
 
     def __init__(self) -> None:
         super().__init__()
-        BaseWidget.__init__(self)
+        self.manager = Manager()
+        self.manager.workspace = WorkSpace()
+
         self.setupUi(self)
 
-        self.process_pool = Pool(config.multi_cores)
-        self.busy = False
-        self.current_workspace = WorkSpace()
+        self.manager.busy_signal.connect(self.set_busy)
 
-        self.inited.emit()
+        self.manager.pool = Pool(config.multi_cores)
 
-    @property
-    def _busy(self):
-        return self.__busy
+        self.manager.inited.emit()
+        self.manager.set_busy(False)
 
-    @_busy.setter
-    def _busy(self, value):
+    def set_busy(self, value):
         self.tabWidget.setDisabled(value)
         self.processWidget.setHidden(not value)
         self.show()
-        self.__busy = value
-        self.busy_signal.emit(value)
 
     def add_dockerwidget(self, title, widget, after=None):
         dw = QtWidgets.QDockWidget(title)
@@ -114,7 +109,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
         return widget
 
     def closeEvent(self, e: QtGui.QCloseEvent) -> None:
-        self.current_workspace.close()
+        self.manager.workspace.close()
         e.accept()
 
     @state_node(mode='x', withArgs=True)
@@ -140,6 +135,5 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow, BaseWidget):
         self.tabWidget.setCurrentIndex(self.peakShapeUi)
 
     def abort_process_pool(self):
-        self.process_pool.terminate()
-        self.process_pool = Pool(config.multi_cores)
-        self.busy = False
+        self.manager.pool.terminate()
+        self.manager.pool = Pool(config.multi_cores)

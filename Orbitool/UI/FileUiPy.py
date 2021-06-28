@@ -4,7 +4,7 @@ from functools import partial
 
 from . import FileUi, utils as UiUtils
 from .utils import showInfo, set_header_sizes
-from .manager import BaseWidget, state_node, Thread
+from .manager import Manager, state_node, Thread
 from PyQt5 import QtWidgets, QtCore
 import os
 
@@ -12,12 +12,12 @@ from ..structures import file
 from .. import utils
 
 
-class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
+class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
     callback = QtCore.pyqtSignal(tuple)
 
-    def __init__(self, widget_root: BaseWidget, parent: Optional['QWidget'] = None) -> None:
+    def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
         super().__init__(parent=parent)
-        self.widget_root = widget_root
+        self.manager = manager
         self.setupUi(self)
 
         set_header_sizes(self.tableWidget.horizontalHeader(), [150, 100, 100])
@@ -30,7 +30,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form, BaseWidget):
 
     @property
     def file_list(self) -> file.FileList:
-        return self.current_workspace.info.filelist
+        return self.manager.workspace.info.filelist
 
     @state_node
     def addFile(self):

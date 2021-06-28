@@ -6,7 +6,6 @@ delta = np.timedelta64(timedelta(seconds=1))
 
 
 def eval(rets, id_times, start_time, end_time, interval):
-    interval = np.timedelta64(interval)
     cnt = 0
     for id, start, end, index in rets:
         if index == 0:
@@ -27,9 +26,9 @@ def continuous_time_check(start, end, file_interval, interval):
     ids = range(len(starts))
     id_times = {id: (start, end) for id, start, end in zip(ids, starts, ends)}
     rets = part_by_time_interval(ids, starts, ends, start, end, interval)
-    now_time = np.datetime64(start)
+    now_time = start
 
-    cnt = eval(rets, id_times, now_time, ends[-1], interval)
+    cnt = eval(rets, id_times, now_time, ends[-1].astype(datetime), interval)
 
     tgt = (end - start) / interval
     if (tgt - int(tgt)) * timedelta(1) > delta:
@@ -65,7 +64,5 @@ def test_file_interval():
     interval = timedelta(hours=10)
     rets = part_by_time_interval(ids, starts, ends, datetime(
         2000, 1, 1), datetime(2000, 1, 11), interval)
-    
-    cnt = eval(rets, id_times, starts[0], ends[-1],interval)
 
-
+    cnt = eval(rets, id_times, starts[0].astype(datetime), ends[-1].astype(datetime), interval)
