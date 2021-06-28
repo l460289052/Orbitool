@@ -3,10 +3,11 @@ from PyQt5 import QtWidgets
 
 from . import test
 
+
 def set_header_sizes(header: QtWidgets.QHeaderView, sizes: list):
     list(map(header.resizeSection, range(len(sizes)), sizes))
 
 
 @test.override_input
-def get_tablewidget_selected_row(tableWidget: QtWidgets.QTableWidget):
+def get_tablewidget_selected_row(tableWidget: QtWidgets.QTableWidget) -> list:
     return np.unique([index.row() for index in tableWidget.selectedIndexes()])

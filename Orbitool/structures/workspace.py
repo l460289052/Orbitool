@@ -47,15 +47,16 @@ class SpectraListInfo(BaseStructure):
 class NoiseFormulaParameter(BaseTableItem):
     item_name = "noise formula parameter"
     formula: Formula
-    delta: float
+    delta: float = 5
 
-    selected: bool
-    param: Ndarray[float, (2, 3)]
+    selected: bool = False
+    param: Ndarray[float, (2, 3)] = Field(
+        default_factory=lambda: np.zeros((2, 3), float))
 
 
 def default_formula_parameter():
     return [NoiseFormulaParameter(
-            formula=Formula(f), delta=5, selected=False, param=np.zeros((2, 3))) for f in config.noise_formulas]
+            formula=Formula(f)) for f in config.noise_formulas]
 
 
 class NoiseTabInfo(BaseStructure):

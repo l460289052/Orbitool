@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.ticker
 
 from . import NoiseUi
-from .utils import showInfo, get_tablewidget_selected_row, set_header_sizes
+from .utils import showInfo, get_tablewidget_selected_row, set_header_sizes, factory
 from .manager import BaseWidget, state_node, Thread
 from . import component
 
@@ -109,28 +109,27 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
     @state_node
     def addFormula(self):
         formula = Formula(self.lineEdit.text())
-        self.noise.noise_formulas.extend(
-            [workspace.NoiseFormulaParameter(formula, 5)])
+        self.noise.info.noise_formulas.append(
+            workspace.NoiseFormulaParameter(formula=formula))
         self.showNoiseFormula()
 
-    @addFormula.except_node
-    def addFormula(self):
-        self.showNoiseFormula()
+    addFormula.except_node(showNoiseFormula)
 
     @state_node
     def delFormula(self):
-        index = get_tablewidget_selected_row(self.tableWidget)
-        del self.noise.noise_formulas[index]
+        indexes = get_tablewidget_selected_row(self.tableWidget)
+        indexes.reverse()
+        for index in indexes:
+            del self.noise.info.noise_formulas[index]
         self.showNoiseFormula()
 
-    @delFormula.except_node
-    def delFormula(self):
-        self.showNoiseFormula()
+    delFormula.except_node(showNoiseFormula)
 
     @state_node
     def calcNoise(self):
         workspace = self.current_workspace
-        spectrum = self.noise.current_spectrum
+        info = self.noise.info
+        spectrum = info.current_spectrum
 
         quantile = self.quantileDoubleSpinBox.value()
         n_sigma = self.nSigmaDoubleSpinBox.value()
@@ -153,39 +152,38 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
 
         poly, std, slt, params, noise, LOD = yield func
 
-        self.noise.poly_coef = poly
-        self.noise.global_noise_std = std
-        self.noise.noise = noise
-        self.noise.LOD = LOD
-        self.noise.n_sigma = self.nSigmaDoubleSpinBox.value()
+        info.poly_coef = poly
+        info.global_noise_std = std
+        info.noise = noise
+        info.LOD = LOD
+        info.n_sigma = self.nSigmaDoubleSpinBox.value()
 
         ind: np.ndarray = slt.cumsum() - 1
-        formula_params: List[workspace.NoiseFormulaParameter] = list(
-            self.noise.noise_formulas[:])
+        formula_params = info.noise_formulas
         for index, (i, s) in enumerate(zip(ind, slt)):
-            p: workspace.NoiseFormulaParameter = formula_params[index]
+            p = formula_params[index]
             p.selected = s
             if s:
                 p.param = params[i]
             formula_params[index] = p
-        self.noise.noise_formulas[:] = formula_params
 
         self.showNoise()
 
     def showNoise(self):
 
+        info = self.noise.info
         n_sigma = self.nSigmaDoubleSpinBox.value()
-        std = self.noise.global_noise_std
+        std = info.global_noise_std
 
         global_noise = np.polynomial.polynomial.polyval(
-            200, self.noise.poly_coef)
+            200, info.poly_coef)
         global_lod = global_noise + n_sigma * std
 
         checkeds = [True]
         names = ["global"]
         noises = [global_noise]
         lods = [global_lod]
-        for param in self.noise.noise_formulas:
+        for param in info.noise_formulas:
             checkeds.append(param.selected)
             names.append(str(param.formula))
             noise, lod = spectrum_func.getShownNoiseLODFromParam(
@@ -199,27 +197,16 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
         table.setRowCount(len(checkeds))
 
         for i, (checked, name, noise, lod) in enumerate(zip(checkeds, names, noises, lods)):
-            checkBox = QtWidgets.QCheckBox()
+            checkBox = factory.CheckBoxFactory(checked)
             checkBox.setDisabled(True)
-            checkBox.setChecked(checked)
             table.setCellWidget(i, 0, checkBox)
 
             table.setItem(i, 1, QtWidgets.QTableWidgetItem(name))
 
-            spinbox = QtWidgets.QDoubleSpinBox()
-            spinbox.setMinimum(0)
-            spinbox.setMaximum(1e11)
-            spinbox.setDecimals(1)
-            spinbox.setSingleStep(1)
-            spinbox.setValue(noise)
+            spinbox = factory.DoubleSpinBoxFactory(0, 1e11, 1, 1, noise)
             table.setCellWidget(i, 2, spinbox)
 
-            spinbox = QtWidgets.QDoubleSpinBox()
-            spinbox.setMinimum(0)
-            spinbox.setMaximum(1e11)
-            spinbox.setDecimals(1)
-            spinbox.setSingleStep(1)
-            spinbox.setValue(noise)
+            spinbox = factory.DoubleSpinBoxFactory(0, 1e11, 1, 1, noise)
             table.setCellWidget(i, 3, spinbox)
 
         self.toolBox.setCurrentWidget(self.paramTool)
