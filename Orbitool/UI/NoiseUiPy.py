@@ -1,4 +1,5 @@
 from typing import Union, Optional, List
+from .. import config
 from collections import deque
 
 from PyQt5 import QtWidgets, QtCore
@@ -68,13 +69,17 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     def showSelectedSpectrum(self):
         workspace = self.manager.workspace
         time = workspace.spectra_list.info.selected_start_time
-        if time is None:
-            showInfo("Please select a spectrum in spectra list")
-            return None
-
         info_list = workspace.spectra_list.info.file_spectrum_info_list
-        index = binary_search.indexNearest(
-            info_list, time, method=lambda x, i: x[i].start_time)
+        if time is None:
+            if config.default_select:
+                index = 0
+            else:
+                showInfo("Please select a spectrum in spectra list")
+                return None
+        else:
+            index = binary_search.indexNearest(
+                info_list, time, method=lambda x, i: x[i].start_time)
+
         left = index
         while info_list[left].average_index != 0:
             index -= 1
@@ -128,7 +133,6 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
     @state_node
     def calcNoise(self):
-        workspace = self.current_workspace
         info = self.noise.info
         spectrum = info.current_spectrum
 
@@ -151,12 +155,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
                 spectrum.mass, poly, params, mass_points, mass_point_deltas, n_sigma)
             return poly, std, slt, params, noise, LOD
 
-        poly, std, slt, params, noise, LOD = yield func
+        info.poly_coef, info.global_noise_std, slt, params, info.noise, info.LOD = yield func
 
-        info.poly_coef = poly
-        info.global_noise_std = std
-        info.noise = noise
-        info.LOD = LOD
         info.n_sigma = self.nSigmaDoubleSpinBox.value()
 
         ind: np.ndarray = slt.cumsum() - 1
@@ -171,7 +171,6 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         self.showNoise()
 
     def showNoise(self):
-
         info = self.noise.info
         n_sigma = self.nSigmaDoubleSpinBox.value()
         std = info.global_noise_std

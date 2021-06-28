@@ -1,5 +1,5 @@
 import numpy as np
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 from . import test
 
@@ -11,3 +11,12 @@ def set_header_sizes(header: QtWidgets.QHeaderView, sizes: list):
 @test.override_input
 def get_tablewidget_selected_row(tableWidget: QtWidgets.QTableWidget) -> list:
     return np.unique([index.row() for index in tableWidget.selectedIndexes()])
+
+
+def sleep(second):
+    if second > 0:
+        loop = QtCore.QEventLoop()
+        timer = QtCore.QTimer()
+        timer.timeout.connect(loop.quit)
+        timer.start(second * 1000)
+        loop.exec_()

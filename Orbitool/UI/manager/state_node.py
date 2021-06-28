@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Any, Callable, Generator, overload
 
 from ... import config
-from ..utils import showInfo
+from ..utils import showInfo, sleep
 from .manager import Manager
 from .thread import MultiProcess, Thread, threadtype
 
@@ -64,6 +64,7 @@ class node:
             if not manager.busy:
                 if self._mode in _busy_set:
                     manager.set_busy(True)
+                sleep(.05)
             elif self._mode == 'w':
                 # if manager.process_pool.
                 # showInfo("Wait for process or abort", 'busy')

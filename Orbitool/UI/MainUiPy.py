@@ -126,7 +126,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     @state_node(mode='x')
     def noise_show_spectrum(self):
         self.spectrum.show_spectrum(
-            self.current_workspace.noise_tab.info.current_spectrum)
+            self.manager.workspace.noise_tab.info.current_spectrum)
         self.spectrumDw.show()
         self.spectrumDw.raise_()
 

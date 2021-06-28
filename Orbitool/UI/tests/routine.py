@@ -15,8 +15,10 @@ def wait_not_busy():
         loop.exec_()
 
 
-def sleep():
-    if (timeout := config.test_timeout) > 0:
+def sleep(timeout=None):
+    if not timeout:
+        timeout = config.test_timeout
+    if timeout > 0:
         timer = QtCore.QTimer()
         timer.timeout.connect(loop.quit)
         timer.start(timeout * 1000)
@@ -31,19 +33,20 @@ def wait(thread: QtCore.QThread):
 def init(window: MainUiPy.Window):
     global loop
     loop = QtCore.QEventLoop()
-    window.busy_signal.connect(loop.quit)
+    window.manager.busy_signal.connect(loop.quit)
 
 
 def fileui(window: MainUiPy.Window):
     fileui = window.fileUi
-    workspace = fileui.current_workspace
+    manager = fileui.manager
+    workspace = manager.workspace
     test.input((True, os.path.join(os.path.dirname(config.rootPath), 'data')))
     sleep()
     fileui.addFolder()
 
     wait_not_busy()
     sleep()
-    assert not window.busy
+    assert not manager.busy
     assert len(workspace.info.filelist.files) == 4
 
     test.input([1, 2, 3])
@@ -63,10 +66,11 @@ def noise(window: MainUiPy.Window):
     window.tabWidget.setCurrentWidget(window.noiseUi)
 
     noiseui = window.noiseUi
-    window.current_workspace.spectra_list.selected_start_time = window.current_workspace.spectra_list.file_spectrum_info_list[0].start_time
+    window.current_workspace.spectra_list.selected_start_time = window.current_workspace.spectra_list.file_spectrum_info_list[
+        0].start_time
     noiseui.showSelectedSpectrum()
-    
+
     wait_not_busy()
     sleep()
-    
+
     noiseui.calcNoise()

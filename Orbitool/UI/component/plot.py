@@ -4,7 +4,7 @@ from PyQt5.QtCore import QTimer
 
 from matplotlib.backends.backend_qt5agg import FigureCanvas, NavigationToolbar2QT
 from matplotlib.figure import Figure
-from matplotlib import pyplot
+from matplotlib.axes import Axes
 
 from ...config import plot_refresh_interval
 
@@ -20,7 +20,7 @@ class Plot:
         parentWidget.layout().addWidget(self.toolBar)
         parentWidget.layout().addWidget(self.canvas)
         # right class is `matplotlib.axes._subplots.AxesSubplot`, just for type hint
-        self.ax: pyplot = self.canvas.figure.subplots()
+        self.ax: Axes = self.canvas.figure.subplots()
         self.ax.autoscale(True)
         self.canvas.figure.tight_layout()
         # self.canvas.figure.subplots_adjust(
