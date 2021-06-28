@@ -1,14 +1,16 @@
-from typing import Generic, List, Type, TypeVar, Union
+from datetime import datetime
+from typing import Generic, List, Type, TypeVar, Union, Optional
 
-from pydantic import BaseModel, Field
 import numpy as np
+from pydantic import BaseModel, Field
 
 from ..utils import readers
 from ..utils.formula import Formula
 from .base import BaseStructure, BaseTableItem
 from .file import FileList, SpectrumInfo, setFileReader
-from .HDF5 import H5File, H5Obj
+from .HDF5 import H5File, H5Obj, Ndarray
 from .spectrum import Spectrum
+from .. import config
 
 setFileReader(readers.ThermoFile)
 
@@ -36,6 +38,8 @@ class SpectraListInfo(BaseStructure):
 
     file_spectrum_info_list: List[SpectrumInfo] = Field(default_factory=list)
 
+    selected_start_time: Optional[datetime] = None
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -46,26 +50,26 @@ class NoiseFormulaParameter(BaseTableItem):
     delta: float
 
     selected: bool
-    # param: np.ndarray
+    param: Ndarray[float, (2, 3)]
+
+
+def default_formula_parameter():
+    return [NoiseFormulaParameter(
+            formula=Formula(f), delta=5, selected=False, param=np.zeros((2, 3))) for f in config.noise_formulas]
 
 
 class NoiseTabInfo(BaseStructure):
     h5_type = "noise tab"
 
-    current_spectrum: Spectrum = None
-    noise_formulas: List[NoiseFormulaParameter] = []
+    current_spectrum: Optional[Spectrum] = None
+    noise_formulas: List[NoiseFormulaParameter] = Field(
+        default_factory=default_formula_parameter)
 
     n_sigma: float = 0
     poly_coef: np.ndarray = np.empty(0)
     global_noise_std: float = 0
     noise: np.ndarray = np.empty(0)
     LOD: np.ndarray = np.empty(0)
-
-    def initialize(self):
-        self.noise_formulas.initialize()
-
-        self.noise_formulas.extend([NoiseFormulaParameter(
-            Formula(f), 5, False, np.zeros((2, 3))) for f in config.noise_formulas])
 
 
 class WorkSpace(H5File):

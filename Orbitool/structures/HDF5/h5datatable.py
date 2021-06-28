@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from datetime import datetime
 from functools import lru_cache
-from typing import Dict, List, Tuple, Type, TypeVar
+from typing import TYPE_CHECKING, Dict, List, Tuple, Type, TypeVar, Iterable
 
 import numpy as np
-from h5py import Group, string_dtype
+from h5py import Group, string_dtype, vlen_dtype
 from pydantic.fields import ModelField
 
 from ..base import BaseTableItem, items
@@ -25,7 +25,10 @@ def get_dtype(item_type: BaseTableItem) -> Tuple[list, Dict[str, Type[Dtype]]]:
             if not hasattr(dtype, "dtype"):
                 raise TypeError(
                     f"Maybe you should use {dtype}[some argument] instead of {dtype}")
-            dtypes.append((key, dtype.dtype))
+            if isinstance(dtype.dtype, tuple):
+                dtypes.append((key, *dtype.dtype))  # name, dtype, shape
+            else:
+                dtypes.append((key, dtype.dtype))  # name, dtype
             converter[key] = dtype
     return dtypes, converter
 
@@ -36,6 +39,8 @@ T = TypeVar('T')
 class TableConverter:
     @staticmethod
     def write_to_h5(h5group: Group, key: str, item_type: Type[T], values: List[T]):
+        if key in h5group:
+            del h5group[key]
         dtype, converter = get_dtype(item_type)
         dataset = h5group.create_dataset(
             key, (len(values),), dtype, compression="gzip", compression_opts=1)
@@ -118,19 +123,87 @@ class Int32(int, BaseDatatableType):
         return int(v)
 
 
-class AsciiLimit(BaseDatatableType):
-    def __init__(self, length) -> None:
-        self.length = length
-        self.dtype = np.dtype(f"S{length}")
+class ArgumentType(BaseDatatableType):
+    def __class_getitem__(cls, *args, **kwargs): ...
 
-    def __class_getitem__(cls, length):
-        return AsciiLimit(length)
+    def __get_validators__(self):
+        yield self.validate
 
-    @classmethod
-    def validate(cls, v):
-        if isinstance(v, bytes):
-            return v.decode()
-        return str(v)
+    def validate(self, v): ...
+
+    def convert_to_h5(self, value):
+        return value
+
+    def convert_from_h5(self, value):
+        return value
+
+
+if TYPE_CHECKING:
+    class AsciiLimit(str):
+        def __class_getitem__(cls, *args): ...
+else:
+    class AsciiLimit(ArgumentType):
+        def __init__(self, length) -> None:
+            self.length = length
+            self.dtype = np.dtype(f"S{length}")
+
+        def __class_getitem__(cls, length):
+            return AsciiLimit(length)
+
+        @classmethod
+        def validate(cls, v):
+            if isinstance(v, bytes):
+                return v.decode()
+            return str(v)
+
+if TYPE_CHECKING:
+    class Ndarray(np.ndarray):
+        """
+            Ndarray[int, 10]
+            Ndarray[np.float, 50]
+            Ndarray[bool, -1]
+            Ndarray[int, (5,5,5)]
+            Ndarray[int, (5,5,5,-1)]
+        """
+        def __class_getitem__(cls, dtype_shape): ...
+else:
+    class Ndarray(ArgumentType):
+        def __init__(self, dtype: np.dtype, shape: Tuple[int, ...]) -> None:
+            self.shape = shape
+            resizeable = False
+            product = 1
+            for dim in shape:
+                if dim == -1:
+                    if resizeable:
+                        raise TypeError("There should be one -1 dimension")
+                    else:
+                        resizeable = True
+                else:
+                    product *= dim
+            if resizeable:
+                self._dtype = dtype
+                self.dtype = vlen_dtype(dtype)
+            else:
+                self._dtype = dtype
+                self.dtype = (dtype, product)
+
+        def validate(self, v: np.ndarray):
+            if not isinstance(v, np.ndarray):
+                v = np.array(v, dtype=self._dtype)
+            return v
+
+        def __class_getitem__(cls, arg) -> Type[np.ndarray]:
+            dtype, shape = arg
+            dtype = np.dtype(dtype)
+            if isinstance(shape, int):
+                shape = (shape, )
+            return Ndarray(dtype, shape)
+
+        def convert_to_h5(self, value):
+            return value.reshape(-1)
+
+        def convert_from_h5(self, value):
+            return value.reshape(*self.shape)
 
 
 def register_datatable_converter(typ, converter: Type[Dtype]):

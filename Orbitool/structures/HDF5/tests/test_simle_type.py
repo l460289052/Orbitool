@@ -15,9 +15,9 @@ def test_group():
     time = datetime(2000, 1, 1, 1, 1, 1)
 
     a = Spectrum(mz=mz, intensity=intensity, time=time)
-    f["spectrum"] = a
+    f.write("spectrum", a)
 
-    b: Spectrum = f["spectrum"]
+    b: Spectrum = f.read("spectrum")
 
     assert b.h5_type == a.h5_type
     nptest.assert_equal(mz, b.mz)
@@ -41,9 +41,9 @@ def test_structure():
     c1 = Child(value=1)
     c2 = Child(value=2)
     father = Father(value=3, c1=c1, c2=c2)
-    f["father"] = father
+    f.write("father" , father)
 
-    t: Father = f["father"]
+    t: Father = f.read("father")
 
     assert t.value == 3
     assert t.c1.value == 1

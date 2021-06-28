@@ -21,7 +21,7 @@ from ..utils.formula import Formula
 class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
     selected_spectrum_average = QtCore.pyqtSignal()
     callback = QtCore.pyqtSignal()
-    
+
     def __init__(self, widget_root, parent: Optional['QWidget'] = None) -> None:
         super().__init__(parent=parent)
         self.setupUi(self)
@@ -47,11 +47,10 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
         return self.current_workspace.noise_tab
 
     def showNoiseFormula(self):
-        return
         widget = self.tableWidget
         widget.clearContents()
         widget.setRowCount(0)
-        formulas: List[workspace.NoiseFormulaParameter] = self.noise.noise_formulas
+        formulas = self.noise.info.noise_formulas
         widget.setRowCount(len(formulas))
         for i, formula in enumerate(formulas):
             widget.setItem(i, 0, QtWidgets.QTableWidgetItem(
@@ -67,14 +66,14 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
     @state_node
     def showSelectedSpectrum(self):
         workspace = self.current_workspace
-        time = workspace.spectra_list.selected_start_time
+        time = workspace.spectra_list.info.selected_start_time
         if time is None:
             showInfo("Please select a spectrum in spectra list")
             return None
 
-        info_list = workspace.spectra_list.file_spectrum_info_list
-        index = binary_search.indexNearest_np(
-            info_list.get_column("start_time"), np.datetime64(time, 's'))
+        info_list = workspace.spectra_list.info.file_spectrum_info_list
+        index = binary_search.indexNearest(
+            info_list, time, method=lambda x, i: x[i].start_time)
         left = index
         while info_list[left].average_index != 0:
             index -= 1
@@ -83,30 +82,29 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
             right += 1
 
         infos: List[SpectrumInfo] = list(info_list[left:right])
-        spectrum = self.noise.currect_spectrum
 
-        def func():
-
+        def read_and_average():
             if len(spectrums := [spectrum for info in infos if (spectrum := info.get_spectrum_from_info(with_minutes=True)) is not None]) > 0:
                 spectrums = [(*functions.spectrum.removeZeroPositions(
                     spectrum[0], spectrum[1]), spectrum[2]) for spectrum in spectrums]
                 mass, intensity = functions.spectrum.averageSpectra(
                     spectrums, infos[0].rtol, True)
-                spectrum.file_path = ''
-                spectrum.mass = mass
-                spectrum.intensity = intensity
-                spectrum.start_tTime = infos[0].start_time
-                spectrum.end_time = infos[-1].end_time
-                return True
+                spectrum = Spectrum(file_path='', mass=mass, intensity=intensity,
+                                    start_time=infos[0].start_time, end_time=infos[-1].end_time)
+                return True, spectrum
             else:
-                return False
-            
-        yield func
+                return False, None
 
-        self.selected_spectrum_average.emit()
-        self.plot.ax.plot(spectrum.mass, spectrum.intensity)
-        self.plot.canvas.draw()
-        self.show()
+        success, spectrum = yield read_and_average
+
+        if success:
+            self.noise.info.current_spectrum = spectrum
+            self.selected_spectrum_average.emit()
+            self.plot.ax.plot(spectrum.mass, spectrum.intensity)
+            self.plot.canvas.draw()
+            self.show()
+        else:
+            showInfo("failed")
 
     @state_node
     def addFormula(self):
@@ -152,8 +150,6 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
             noise, LOD = spectrum_func.noiseLODFunc(
                 spectrum.mass, poly, params, mass_points, mass_point_deltas, n_sigma)
             return poly, std, slt, params, noise, LOD
-        
-        
 
         poly, std, slt, params, noise, LOD = yield func
 
@@ -277,4 +273,3 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form, BaseWidget):
             pass
         else:
             pass
-        

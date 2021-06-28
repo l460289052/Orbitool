@@ -1,9 +1,12 @@
 from typing import List
 from datetime import datetime
 
+import numpy as np
+from numpy import testing as nptest
+
 from ...base import BaseTableItem
 from ...HDF5 import H5File
-from ..h5datatable import TableConverter, AsciiLimit, Int32
+from ..h5datatable import TableConverter, AsciiLimit, Int32, Ndarray
 
 
 class TableItem(BaseTableItem):
@@ -53,3 +56,96 @@ def test_ascii():
 
     assert item.int32 == 12
     assert item.ascii == "123321"
+
+
+class Ndarray1DItem(BaseTableItem):
+    item_name = "test_ndarray_1d"
+
+    value: Ndarray[int, 10]
+
+
+def test_ndarray_1d():
+    f = H5File()
+
+    item = Ndarray1DItem(value=range(10))
+    f.write_table("table", Ndarray1DItem, [item] * 10)
+
+    items = f.read_table("table", Ndarray1DItem)
+    assert len(items) == 10
+    item = items[0]
+
+    nptest.assert_array_equal(range(10), item.value)
+
+
+class Ndarray1DLongItem(BaseTableItem):
+    item_name = "test_ndarray_1d_long"
+
+    value: Ndarray[int, -1]
+
+
+def test_ndarray_long():
+    f = H5File()
+
+    item = Ndarray1DLongItem(value=range(10))
+    f.write_table("table", Ndarray1DLongItem, [item] * 10)
+
+    items = f.read_table("table", Ndarray1DLongItem)
+    assert len(items) == 10
+    item = items[0]
+
+    nptest.assert_array_equal(range(10), item.value)
+
+    item = Ndarray1DLongItem(value=range(10000))
+    f.write_table("table", Ndarray1DLongItem, [item] * 10)
+    items = f.read_table("table", Ndarray1DLongItem)
+    assert len(items) == 10
+    item = items[0]
+
+    nptest.assert_array_equal(range(10000), item.value)
+
+
+class NdarrayHDItem(BaseTableItem):
+    item_name = "test_ndarray_hd"
+
+    value: Ndarray[float, (50, 10, 2, 2, 1)]
+
+
+def test_ndarray_hd():
+    f = H5File()
+
+    item = NdarrayHDItem(value=np.empty((50, 10, 2, 2, 1)))
+    f.write_table("table", NdarrayHDItem, [item] * 10)
+
+    items = f.read_table("table", NdarrayHDItem)
+    assert len(items) == 10
+    item = items[0]
+
+    assert item.value.shape == (50, 10, 2, 2, 1)
+
+
+class NdarrayHDLongItem(BaseTableItem):
+    item_name = "test_ndarray_hd_long"
+
+    value: Ndarray[float, (5, 10, 2, 2, -1)]
+
+
+def test_ndarray_hd_long():
+    f = H5File()
+
+    item = NdarrayHDLongItem(value=np.empty((5, 10, 2, 2, 1)))
+    f.write_table("table", NdarrayHDLongItem, [item] * 10)
+
+    items = f.read_table("table", NdarrayHDLongItem)
+    assert len(items) == 10
+    item = items[0]
+
+    assert item.value.shape == (5, 10, 2, 2, 1)
+
+    item = NdarrayHDLongItem(value=np.empty((5, 10, 2, 2, 37)))
+    f.write_table("table", NdarrayHDLongItem, [item] * 10)
+
+    items = f.read_table("table", NdarrayHDLongItem)
+    assert len(items) == 10
+    item = items[0]
+
+    assert item.value.shape == (5, 10, 2, 2, 37)

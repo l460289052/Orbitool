@@ -24,10 +24,10 @@ class H5Obj:
     def read_table(self, path: str, item_type: Type[T]) -> List[T]:
         return TableConverter.read_from_h5(self._obj, path, item_type)
 
-    def __setitem__(self, path: str, value: BaseStructure):
+    def write(self, path: str, value: BaseStructure):
         StructureConverter.write_to_h5(self._obj, path, value)
 
-    def __getitem__(self, path: str):
+    def read(self, path: str):
         return StructureConverter.read_from_h5(self._obj, path)
 
     def __contains__(self, path: str) -> bool:

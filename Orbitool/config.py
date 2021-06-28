@@ -1,7 +1,9 @@
-import os
 import logging
-from multiprocessing import cpu_count
+import os
 from datetime import timedelta
+from multiprocessing import cpu_count
+
+from pydantic import BaseModel
 
 DEBUG = False
 

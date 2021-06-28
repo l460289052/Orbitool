@@ -24,7 +24,7 @@ class Spectrum(BaseStructure):
     file_path: str
     mass: np.ndarray
     intensity: np.ndarray
-    start_tTime: datetime
+    start_time: datetime
     end_time: datetime
 
 

@@ -74,8 +74,8 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form, BaseWidget):
         index = (0 if config.default_select else None) if len(
             indexes) == 0 else indexes[0]
         if index is None:
-            self.spectra_list.selected_start_time = None
+            self.spectra_list.info.selected_start_time = None
         else:
             item = self.tableWidget.item(index, 0)
-            self.spectra_list.selected_start_time = datetime.strptime(
+            self.spectra_list.info.selected_start_time = datetime.strptime(
                 item.text(), config.timeFormat)

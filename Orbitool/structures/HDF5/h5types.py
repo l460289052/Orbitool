@@ -51,6 +51,8 @@ class DateConverter(BaseSingleConverter):
 class NumpyConverter(BaseSingleConverter):
     @staticmethod
     def write_to_h5(h5group: Group, key: str, value):
+        if key in h5group:
+            del h5group[key]
         h5group.create_dataset(
             key, data=value, compression="gzip", compression_opts=1)
 
@@ -118,6 +120,8 @@ class SingleConverter(BaseShapeConverter):
 class ListConverter(BaseShapeConverter):
     @staticmethod
     def write_to_h5(h5group: Group, key: str, field: ModelField, values: list):
+        if key in h5group:
+            del h5group[key]
         inner_type = get_args(field.outer_type_)
         if inner_type == np.ndarray:
             group = h5group.create_group(key)
@@ -151,6 +155,8 @@ class ListConverter(BaseShapeConverter):
 class DictConverter(BaseShapeConverter):
     @staticmethod
     def write_to_h5(h5group: Group, key: str, field: ModelField, values: dict):
+        if key in h5group:
+            del h5group[key]
         inner_type = get_args(field.outer_type_)[1]
         if inner_type == np.ndarray:
             group = h5group.create_group(key)
