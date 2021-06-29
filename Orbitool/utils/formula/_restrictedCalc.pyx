@@ -109,6 +109,11 @@ cdef class Calculator:
             if use:
                 self.calcedIsotopes.push_back(p)
                 
+    def getInitedElements(self):
+        cdef int32_t i
+        cdef bool v
+        return [e_elements[i] for i, v in enumerate(self.ElementInited) if v]
+                
     def getElements(self):
         cdef int32_t i
         return [e_elements[i] for i in self.calcedElements]
@@ -171,6 +176,10 @@ cdef class Calculator:
             "DBE2":state.DBE2, "HMin":state.HMin, "HMax":state.HMax, "OMin":state.OMin,
             "OMax":state.OMax}
         return d
+    
+    def __delitem__(self, str e):
+        cdef int32_t p = str2element(e).first
+        self.ElementInited[p] = False
     
     cdef setStateForFormula(self, State&state, int_map&elements):
         state.DBE2 = _elements_sum(self.ElementDbe2, elements, 2.0)

@@ -83,10 +83,29 @@ cdef tuple getMassPointParams(DoubleArray mass, DoubleArray intensity,
         params[1, 0] *= global_std / global_peak_noise
     return True, params
 
+def getGlobalShownNoise(DoubleArray poly_coef, double n_sigma, double std):
+    cdef double noise, lod
+    noise = polynomial.polyval(200, poly_coef)
+    lod = noise + n_sigma * std
+    return noise, lod
+
+def updateGlobalParam(DoubleArray poly_coef, double n_sigma, double noise, double lod):
+    if len(poly_coef) == 2:
+        poly_coef[0] = noise - poly_coef[1] * 200
+    else:
+        poly_coef[0] = noise
+    cdef double std = (lod - noise) / n_sigma
+    return poly_coef, std
+
 def getShownNoiseLODFromParam(DoubleArray2D params, double n_sigma):
     cdef double noise = params[0,0] / (math.sqrt(2*math.pi)*params[0,2])
     cdef double lod = noise + n_sigma*params[1,0]/(math.sqrt(2*math.pi)*params[1,2])
     return noise, lod
+
+def updateNoiseLODParam(DoubleArray params, double n_sigma, double noise, double lod):
+    params[0, 0] = noise * (math.sqrt(2*math.pi)*params[0,2])
+    params[1, 0] = (lod-noise)*(math.sqrt(2*math.pi)*params[0,2]) / n_sigma
+    return params
 
 cdef DoubleArray noiseFunc(DoubleArray mass, DoubleArray poly_coef, DoubleArray2D norm_params, double[:] mass_points, int[:] mass_point_deltas):
     cdef np.ndarray[double, ndim=1] noise, tmp_noise

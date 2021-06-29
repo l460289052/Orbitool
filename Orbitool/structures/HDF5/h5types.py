@@ -61,7 +61,7 @@ class NumpyConverter(BaseSingleConverter):
         return h5group[key][:]
 
 
-base_types_converters: Dict[Type, BaseSingleConverter] = {
+single_types_converters: Dict[Type, BaseSingleConverter] = {
     bool: AttrConverter,
     int: AttrConverter,
     str: AttrConverter,
@@ -72,7 +72,7 @@ base_types_converters: Dict[Type, BaseSingleConverter] = {
 
 
 def register_converter(typ: Type, converter: Type[BaseSingleConverter]):
-    base_types_converters[typ] = converter
+    single_types_converters[typ] = converter
 
 
 class StructureConverter(BaseSingleConverter):
@@ -108,12 +108,14 @@ class BaseShapeConverter(metaclass=ABCMeta):
 class SingleConverter(BaseShapeConverter):
     @staticmethod
     def write_to_h5(h5group: Group, key: str, field: ModelField, value):
-        converter = base_types_converters.get(field.type_, StructureConverter)
+        converter = single_types_converters.get(
+            field.type_, StructureConverter)
         converter.write_to_h5(h5group, key, value)
 
     @staticmethod
     def read_from_h5(h5group: Group, key: str, field: ModelField):
-        converter = base_types_converters.get(field.type_, StructureConverter)
+        converter = single_types_converters.get(
+            field.type_, StructureConverter)
         return converter.read_from_h5(h5group, key)
 
 

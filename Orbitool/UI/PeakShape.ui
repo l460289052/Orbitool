@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>497</width>
     <height>300</height>
    </rect>
   </property>
@@ -16,13 +16,6 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>show the selected peaks</string>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
@@ -42,6 +35,13 @@
      </item>
      <item>
       <widget class="QComboBox" name="comboBox"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>show</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

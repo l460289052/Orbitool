@@ -3,8 +3,13 @@ from .converters import register, convert, _BaseConverter, ConvertVersionCheckEr
 from .workspace import WorkSpace
 from .file import FileList, setFileReader
 
-from . import formula
+from . import h5converters
 
-HDF5.register_converter(formula.Formula, formula.FormulaConverter)
+HDF5.register_converter(h5converters.Formula, h5converters.FormulaConverter)
 HDF5.register_datatable_converter(
-    formula.Formula, formula.FormulaDatatableConverter)
+    h5converters.Formula, h5converters.FormulaDatatableConverter)
+
+HDF5.register_converter(h5converters.RestrictedCalc,
+                        h5converters.RestrictedCalcConverter)
+HDF5.register_converter(h5converters.ForceCalc,
+                        h5converters.ForceCalcConverter)

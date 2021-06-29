@@ -47,7 +47,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.timeseriesesUi = TimeseriesesUiPy.Widget()
         self.tabWidget.addTab(self.timeseriesesUi, "Timeseries")
 
-        self.formulaDw = self.add_dockerwidget("Formula", FormulaUiPy.Widget())
+        self.formulaDw = self.add_dockerwidget("Formula", FormulaUiPy.Widget(manager))
 
         self.massListDw = self.add_dockerwidget(
             "Mass List", MassListUiPy.Widget(), self.formulaDw)

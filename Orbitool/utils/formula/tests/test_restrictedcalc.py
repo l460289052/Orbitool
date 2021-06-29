@@ -16,6 +16,7 @@ def init_calc():
             ret[row[0]] = dict(zip(header, map(float, row[1:])))
     return ret
 
+
 calc = pytest.fixture(init_calc)
 
 
@@ -30,6 +31,8 @@ def test_calc1(calc: RestrictedCalc):
     calc.setEI('N', True)
     calc.setEI('N[15]', True)
     calc.setEI('O[18]', True)
+    assert set(calc.getInitedElements()) == {
+        'e', 'C', 'H', 'O', 'N', 'S', 'Li', 'Na', 'K', 'F', 'Cl', 'Br', 'I', 'P', 'Si'}
     assert calc.getElements() == ['C', 'H', 'O', 'N']
     assert calc.getIsotopes() == ['N[15]', 'O[18]']
     s = ["C9H12O11N-", "C10H15O11N-", "C10H20O2N+"]
@@ -55,4 +58,3 @@ def test_calc2(calc: RestrictedCalc):
     f['H[2]'] = 2
     assert str(f) == 'CHH[2]2-'
     assert f in calc.get(f.mass())
-    

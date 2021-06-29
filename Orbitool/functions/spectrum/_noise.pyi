@@ -13,12 +13,32 @@ def getNoisePeaks(mass: np.ndarray, intensity: np.ndarray, poly_coef: np.ndarray
     pass
 
 
-def getShownNoiseLODFromParam(params: np.ndarray, n_sigma: float) -> Tuple[np.ndarray, np.ndarray]
-
-"""
+def getGlobalShownNoise(poly_coef: np.ndarray, n_sigma: float, std: float) -> Tuple[float, float]:
+    """
     return noise, lod
     """
-pass
+    pass
+
+
+def updateGlobalParam(poly_coef: np.ndarray, n_sigma: float, noise: float, lod: float) -> Tuple[np.ndarray, float]:
+    """
+    return poly_coef, std
+    """
+    pass
+
+
+def getShownNoiseLODFromParam(params: np.ndarray, n_sigma: float) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    return noise, lod
+    """
+    pass
+
+
+def updateNoiseLODParam(params: np.ndarray, n_sigma: float, noise: float, lod: float) -> np.ndarray:
+    """
+    return params
+    """
+    pass
 
 
 def noiseLODFunc(mass: np.ndarray, poly_coef: np.ndarray,
