@@ -4,7 +4,7 @@ from multiprocessing import Pool
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from .. import config
-from ..structures import WorkSpace
+from ..structures import WorkSpace, spectrum
 
 from .manager import Manager, state_node
 from . import utils as UiUtils
@@ -47,7 +47,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.timeseriesesUi = TimeseriesesUiPy.Widget()
         self.tabWidget.addTab(self.timeseriesesUi, "Timeseries")
 
-        self.formulaDw = self.add_dockerwidget("Formula", FormulaUiPy.Widget(manager))
+        self.formulaDw = self.add_dockerwidget(
+            "Formula", FormulaUiPy.Widget(manager))
 
         self.massListDw = self.add_dockerwidget(
             "Mass List", MassListUiPy.Widget(), self.formulaDw)
@@ -89,6 +90,10 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.manager.inited.emit()
         self.manager.set_busy(False)
 
+    @property
+    def workspace(self):
+        return self.manager.workspace
+
     def set_busy(self, value):
         self.tabWidget.setDisabled(value)
         self.processWidget.setHidden(not value)
@@ -109,7 +114,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         return widget
 
     def closeEvent(self, e: QtGui.QCloseEvent) -> None:
-        self.manager.workspace.close()
+        self.workspace.close()
         e.accept()
 
     @state_node(mode='x', withArgs=True)
@@ -126,13 +131,15 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     @state_node(mode='x')
     def noise_show_spectrum(self):
         self.spectrum.show_spectrum(
-            self.manager.workspace.noise_tab.info.current_spectrum)
+            self.workspace.noise_tab.info.current_spectrum)
         self.spectrumDw.show()
         self.spectrumDw.raise_()
 
-    @state_node(mode='x')
-    def noise_tab_finish(self):
-        self.tabWidget.setCurrentIndex(self.peakShapeUi)
+    @state_node(mode='x', withArgs=True)
+    def noise_tab_finish(self, result):
+        self.workspace.peak_shape_tab.info.spectrum = result[0]
+        self.tabWidget.setCurrentWidget(self.peakShapeUi)
+        return self.peakShapeUi.showPeak()
 
     def abort_process_pool(self):
         self.manager.pool.terminate()

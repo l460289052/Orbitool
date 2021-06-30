@@ -94,9 +94,9 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             if len(spectrums := [spectrum for info in infos if (spectrum := info.get_spectrum_from_info(with_minutes=True)) is not None]) > 0:
                 spectrums = [(*functions.spectrum.removeZeroPositions(
                     spectrum[0], spectrum[1]), spectrum[2]) for spectrum in spectrums]
-                mass, intensity = functions.spectrum.averageSpectra(
+                mz, intensity = functions.spectrum.averageSpectra(
                     spectrums, infos[0].rtol, True)
-                spectrum = Spectrum(file_path='', mass=mass, intensity=intensity,
+                spectrum = Spectrum(file_path='', mz=mz, intensity=intensity,
                                     start_time=infos[0].start_time, end_time=infos[-1].end_time)
                 return True, spectrum
             else:
@@ -107,9 +107,10 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         if success:
             self.noise.info.current_spectrum = spectrum
             self.selected_spectrum_average.emit()
-            self.plot.ax.plot(spectrum.mass, spectrum.intensity)
+            self.plot.ax.plot(spectrum.mz, spectrum.intensity)
             self.plot.canvas.draw()
             self.show()
+            self.denoisePushButton.setEnabled(False)
         else:
             showInfo("failed")
 
@@ -149,9 +150,9 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
         def func():
             poly, std, slt, params = spectrum_func.getNoiseParams(
-                spectrum.mass, spectrum.intensity, quantile, mass_dependent, mass_points, mass_point_deltas)
+                spectrum.mz, spectrum.intensity, quantile, mass_dependent, mass_points, mass_point_deltas)
             noise, LOD = spectrum_func.noiseLODFunc(
-                spectrum.mass, poly, params, mass_points, mass_point_deltas, n_sigma)
+                spectrum.mz, poly, params, mass_points, mass_point_deltas, n_sigma)
             return poly, std, slt, params, noise, LOD
 
         info.poly_coef, info.global_noise_std, slt, params, info.noise, info.LOD = yield func
@@ -242,6 +243,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         self.toolBox.setCurrentWidget(self.paramTool)
         table.show()
         self.plotNoise()
+        self.denoisePushButton.setEnabled(True)
 
     def plotNoise(self):
         info = self.noise.info
@@ -261,16 +263,16 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             ax.yaxis.set_major_formatter(
                 matplotlib.ticker.FormatStrFormatter(r"%.1e"))
 
-        ax.plot(spectrum.mass, spectrum.intensity,
+        ax.plot(spectrum.mz, spectrum.intensity,
                 linewidth=1, color="#BF2138", label="Spectrum")
-        ax.plot(spectrum.mass, info.LOD,
+        ax.plot(spectrum.mz, info.LOD,
                 linewidth=1, color='k', label='LOD')
-        ax.plot(spectrum.mass, info.noise,
+        ax.plot(spectrum.mz, info.noise,
                 linewidth=1, color='b', label='noise')
         ax.legend(loc='upper right')
 
-        x_min = spectrum.mass[0]
-        x_max = spectrum.mass[-1]
+        x_min = spectrum.mz[0]
+        x_max = spectrum.mz[-1]
         ymax = np.polynomial.polynomial.polyval(
             x_max, info.poly_coef) + info.n_sigma * info.global_noise_std
         if is_log:
@@ -290,6 +292,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         subtract = self.substractCheckBox.isChecked()
         spectrum = info.current_spectrum
 
+
         def func():
             params, points, deltas = [], [], []
             for param in info.noise_formulas:
@@ -299,11 +302,11 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
                     deltas.append(param.delta)
             params = np.array(params)
             points = np.array(points)
-            deltas = np.arange(deltas)
-            mass, intensity = spectrum_func.denoiseWithParams(
-                spectrum.mass, spectrum.intensity, info.poly_coef, params, points, deltas, info.n_sigma, subtract)
+            deltas = np.array(deltas)
+            mz, intensity = spectrum_func.denoiseWithParams(
+                spectrum.mz, spectrum.intensity, info.poly_coef, params, points, deltas, info.n_sigma, subtract)
 
-            s = Spectrum(file_path=spectrum.file_path, mass=mass, intensity=intensity,
+            s = Spectrum(file_path=spectrum.file_path, mz=mz, intensity=intensity,
                          start_time=spectrum.start_time, end_time=spectrum.end_time)
 
             return s

@@ -15,7 +15,7 @@ class Widget(QtWidgets.QWidget, SpectrumUi.Ui_Form):
     def show_spectrum(self, spectrum: Spectrum):
         tableWidget = self.tableWidget
         tableWidget.setRowCount(0)
-        mass = spectrum.mass
+        mass = spectrum.mz
         intensity = spectrum.intensity
         tableWidget.setRowCount(len(mass))
         for i, (m_row, i_row) in enumerate(zip(mass, intensity)):

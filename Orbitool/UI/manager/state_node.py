@@ -31,7 +31,6 @@ class node:
     @overload
     def __init__(self, *, withArgs=False, mode='w'):
         """
-
         mode: 'w': check and set busy; 'x': set busy without check; 'a': not check busy; 'e': only catch exception
         """
         pass

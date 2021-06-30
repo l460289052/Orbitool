@@ -1,9 +1,11 @@
 from pydantic import BaseModel, Field, BaseConfig
+from functools import cached_property
 
 
 class Base(BaseModel):
     class Config(BaseConfig):
         arbitrary_types_allowed = True
+        keep_untouched = (cached_property,)
 
 
 class ChildTypeManager:

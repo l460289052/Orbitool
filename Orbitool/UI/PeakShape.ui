@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>497</width>
-    <height>300</height>
+    <width>499</width>
+    <height>305</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="spinBox"/>
+      <widget class="QSpinBox" name="spinBox">
+       <property name="value">
+        <number>50</number>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_2">
@@ -37,7 +41,7 @@
       <widget class="QComboBox" name="comboBox"/>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="showPushButton">
        <property name="text">
         <string>show</string>
        </property>
@@ -58,7 +62,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="exportPushButton">
        <property name="text">
         <string>Export peak shape info</string>
        </property>
@@ -78,14 +82,14 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="cancelPushButton">
        <property name="text">
         <string>Cancel removal</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_4">
+      <widget class="QPushButton" name="finishPushButton">
        <property name="text">
         <string>Finish and continue</string>
        </property>

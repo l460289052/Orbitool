@@ -9,6 +9,7 @@ from ..utils.formula import Formula, ForceCalc, RestrictedCalc
 from . import HDF5
 from .HDF5 import BaseSingleConverter, TableConverter, StructureConverter, h5datatable
 from .base import BaseStructure, BaseTableItem
+from ..functions import peakfit
 
 
 class FormulaConverter(BaseSingleConverter):
