@@ -11,6 +11,7 @@ from .base import Widget
 from .spectra_list import SpectraListInfo
 from .noise_tab import NoiseTabInfo
 from .peak_shape import PeakShapeInfo
+from .calibration import CalibratorInfo
 
 setFileReader(readers.ThermoFile)
 
@@ -32,7 +33,8 @@ class WorkSpace(H5File):
         self.spectra_list = self.visit_or_create_widget(
             "spectra list", SpectraListInfo)
         self.noise_tab = self.visit_or_create_widget("noise tab", NoiseTabInfo)
-        self.peak_shape_tab = self.visit_or_create_widget("peak shape", PeakShapeInfo)
+        self.peak_shape_tab = self.visit_or_create_widget("peak shape tab", PeakShapeInfo)
+        self.calibration_tab = self.visit_or_create_widget("calibration tab", CalibratorInfo)
 
         self.widgets: List[Widget] = [self.spectra_list, self.noise_tab]
 

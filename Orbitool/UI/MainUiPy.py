@@ -24,6 +24,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
         manager = self.manager
+
+        # tab widgets
         self.abortPushButton.clicked.connect(self.abort_process_pool)
 
         self.fileUi: FileUiPy.Widget = self.add_tab(
@@ -38,14 +40,17 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
         self.peakShapeUi: PeakShapeUiPy.Widget = self.add_tab(
             PeakShapeUiPy.Widget(manager), "Peak Shape")
+        self.peakShapeUi.callback.connect(self.peak_shape_tab_finish)
 
         self.calibrationUi = self.add_tab(
-            CalibrationUiPy.Widget(), "Calibration")
+            CalibrationUiPy.Widget(manager), "Calibration")
 
         self.peakFitUi = self.add_tab(PeakFitUiPy.Widget(), "Peak Fit")
         self.tabWidget.addTab(MassDefectUiPy.Widget(), "Mass Defect")
         self.timeseriesesUi = TimeseriesesUiPy.Widget()
         self.tabWidget.addTab(self.timeseriesesUi, "Timeseries")
+
+        # docker widgets
 
         self.formulaDw = self.add_dockerwidget(
             "Formula", FormulaUiPy.Widget(manager))
@@ -140,6 +145,10 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.workspace.peak_shape_tab.info.spectrum = result[0]
         self.tabWidget.setCurrentWidget(self.peakShapeUi)
         return self.peakShapeUi.showPeak()
+
+    @state_node(mode='x')
+    def peak_shape_tab_finish(self):
+        self.tabWidget.setCurrentWidget(self.calibrationUi)
 
     def abort_process_pool(self):
         self.manager.pool.terminate()

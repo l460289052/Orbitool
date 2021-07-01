@@ -18,6 +18,7 @@ from .utils import showInfo
 
 class LineAnimation:
     __slots__ = ["start_point", "end_point", "norm_line", "line", "animation"]
+    callback = QtCore.pyqtSignal(tuple)
 
     def __init__(self) -> None:
         self.start_point: Tuple[float, float] = None
@@ -42,6 +43,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
 
         self.comboBox.addItem("Norm distribution", 1)
         self.showPushButton.clicked.connect(self.showButtonClicked)
+        self.finishPushButton.clicked.connect(self.finishPeakShape)
 
         self.plot = component.Plot(self.widget)
 
@@ -68,7 +70,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
                 info.spectrum.mz, info.spectrum.intensity)
             peaks = [peak for peak in peaks if peak.isPeak.sum() == 1]
             peaks.sort(key=lambda peak: peak.maxIntensity, reverse=True)
-            peaks = peaks[:max(0, min(peak_num, len(peaks)))]
+            peaks = peaks[:max(1, min(peak_num, len(peaks)))]
 
             peaks = list(
                 map(peakfit_func.normal_distribution.getNormalizedPeak, peaks))
@@ -169,3 +171,6 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
                 line.set_data(((start[0], end[0]), (start[1], end[1])))
             return line,
         return ()
+
+    def finishPeakShape(self):
+        self.callback.emit(())
