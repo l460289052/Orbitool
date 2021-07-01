@@ -8,6 +8,7 @@ from typing import List, Tuple, final, Deque, Iterable, Generator
 from PyQt5 import QtCore
 
 from ...config import logger, multi_cores
+from ..utils import sleep
 
 
 class threadtype(Enum):
@@ -41,10 +42,10 @@ class MultiProcess(QtCore.QThread):
     sendStatus = QtCore.pyqtSignal(str, int, int)
 
     @final
-    def __init__(self, file, args: dict, pool: PoolType = None) -> None:
+    def __init__(self, file, kwargs: dict, pool: PoolType) -> None:
         super().__init__()
         self.file = file
-        self.args = args
+        self.kwargs = kwargs
         self.pool = pool
         self.aborted = False
 
@@ -53,7 +54,7 @@ class MultiProcess(QtCore.QThread):
         results: Deque[AsyncResult] = deque()
         pool: PoolType = self.pool
         file = self.file
-        args = self.args
+        kwargs = self.kwargs
         queue = Queue()
 
         def iter_queue():
@@ -63,31 +64,37 @@ class MultiProcess(QtCore.QThread):
                     break
                 yield result
 
-        write_thread = Thread(self.write, (file, args, iter_queue()))
+        write_thread = Thread(self.write, (file, iter_queue()), kwargs)
         write_thread.start()
 
-        for i, input_data in enumerate(self.read(file, args)):
+        for i, input_data in enumerate(self.read(file, **kwargs)):
             if self.aborted:
                 queue.put(None)
-                return self.exception(file, args)
+                return self.exception(file, kwargs)
             results.append(pool.apply_async(
-                self.process, (i, self.func, input_data)))
+                self.process, (i, self.func, input_data, kwargs)))
             if i >= multi_cores:
-                ret = results.popleft().get()
+                ret = results.popleft()
+                while not ret.ready():
+                    sleep(0.01)
+                ret = ret.get()
                 if isinstance(ret, Exception):
-                    self.exception(file, args)
+                    self.exception(file, kwargs)
                     self.finished.emit(
-                        (ret, (self.func, self.file, self.args)))
+                        (ret, (self.func, self.file, self.kwargs)))
                     queue.put(None)
                     return
                 queue.put(ret)
 
         while results:
-            ret = results.popleft().get()
+            ret = results.popleft()
+            while not ret.ready():
+                sleep(0.01)
+            ret = ret.get()
             if isinstance(ret, Exception):
-                self.exception(file, args)
+                self.exception(file, **kwargs)
                 self.finished.emit(
-                    (ret, (self.func, self.file, self.args)))
+                    (ret, (self.func, self.file, kwargs)))
                 queue.put(None)
                 return
             queue.put(ret)
@@ -96,7 +103,7 @@ class MultiProcess(QtCore.QThread):
 
         write_thread.wait()
 
-        self.finished.emit((True, (self.file, self.args)))
+        self.finished.emit((True, (self.file, kwargs)))
 
     @final
     def abort(self, send=True):
@@ -107,32 +114,32 @@ class MultiProcess(QtCore.QThread):
 
     @final
     @staticmethod
-    def process(label, func, args):
+    def process(label, func, data, kwargs):
         try:
-            ret = func(args)
+            ret = func(data, **kwargs)
         except Exception as e:
             logger.error(str(e), exc_info=e)
             return e
         return ret
 
     @staticmethod
-    def func(*args, **kwargs):
+    def func(data, **kwargs):
         raise NotImplementedError()
 
     @staticmethod
-    def read(file, args) -> Generator:
+    def read(file, **kwargs) -> Generator:
         raise NotImplementedError()
         # example
         for i in range(10):
             yield i
 
     @staticmethod
-    def write(file, args, rets: Iterable):
+    def write(file, rets: Iterable, **kwargs):
         raise NotImplementedError()
-        # example 
+        # example
         for ret in rets:
             print(ret)
 
     @staticmethod
-    def exception(file, args):
+    def exception(file, **kwargs):
         raise NotImplementedError()

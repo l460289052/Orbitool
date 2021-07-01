@@ -8,12 +8,12 @@ from .. import MultiProcess
 
 class p(MultiProcess):
     @staticmethod
-    def func(input):
+    def func(input, *args, **kwargs):
         sleep(1)
         return input
 
     @staticmethod
-    def read(file, args):
+    def read(file, args, kwargs):
         for i in range(args[0]):
             yield i
 
@@ -36,19 +36,19 @@ def test_normal():
     app = QtWidgets.QApplication([])
     num = 20
     file = {}
-    pp = p(file, [20], Pool(10))
+    pp = p(file, [20], {}, Pool(10))
     pp.start()
     pp.wait()
     # pp.run()
 
-    assert file == {"ret":list(range(20))}
+    assert file == {"ret": list(range(20))}
 
 
 def test_abort():
     app = QtWidgets.QApplication([])
     num = 20
     file = {}
-    pp = p(file, [20], Pool(10))
+    pp = p(file, [20], {}, Pool(10))
 
     pp.start()
 

@@ -2,6 +2,7 @@ import functools
 import logging
 from enum import Enum
 from typing import Any, Callable, Generator, overload
+from PyQt5 import QtCore
 
 from ... import config
 from ..utils import showInfo, sleep
@@ -85,7 +86,10 @@ class node:
                                     raise result
                             to_be_finished = generator.send(result)
 
-                            thread = Thread(to_be_finished)
+                            if not issubclass(type(to_be_finished), QtCore.QThread):
+                                thread = Thread(to_be_finished)
+                            else:
+                                thread = to_be_finished
                             thread.finished.connect(run_send)
                             selfWidget.node_thread = thread
                             if config.DEBUG:

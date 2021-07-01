@@ -29,7 +29,7 @@ class LineAnimation:
 
 
 class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
-    callback = QtCore.pyqtSignal()
+    callback = QtCore.pyqtSignal(tuple)
 
     def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
         super().__init__(parent=parent)

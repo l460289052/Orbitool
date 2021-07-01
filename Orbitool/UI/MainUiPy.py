@@ -54,8 +54,9 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
         # docker widgets
 
+        self.formula = FormulaUiPy.Widget(manager)
         self.formulaDw = self.add_dockerwidget(
-            "Formula", FormulaUiPy.Widget(manager))
+            "Formula", self.formula)
 
         self.massListDw = self.add_dockerwidget(
             "Mass List", MassListUiPy.Widget(), self.formulaDw)
@@ -103,6 +104,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     def set_busy(self, value):
         self.tabWidget.setDisabled(value)
         self.processWidget.setHidden(not value)
+        self.formula.setEnabled(True)
         self.show()
 
     def add_dockerwidget(self, title, widget, after=None):
