@@ -28,27 +28,29 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         # tab widgets
         self.abortPushButton.clicked.connect(self.abort_process_pool)
 
-        self.fileUi: FileUiPy.Widget = self.add_tab(
+        self.fileTab: FileUiPy.Widget = self.add_tab(
             FileUiPy.Widget(manager), "File")
-        self.fileUi.callback.connect(self.file_tab_finish)
+        self.fileTab.callback.connect(self.file_tab_finish)
 
-        self.noiseUi: NoiseUiPy.Widget = self.add_tab(
+        self.noiseTab: NoiseUiPy.Widget = self.add_tab(
             NoiseUiPy.Widget(manager), "Noise")
-        self.noiseUi.selected_spectrum_average.connect(
+        self.noiseTab.selected_spectrum_average.connect(
             self.noise_show_spectrum)
-        self.noiseUi.callback.connect(self.noise_tab_finish)
+        self.noiseTab.callback.connect(self.noise_tab_finish)
 
-        self.peakShapeUi: PeakShapeUiPy.Widget = self.add_tab(
+        self.peakShapeTab: PeakShapeUiPy.Widget = self.add_tab(
             PeakShapeUiPy.Widget(manager), "Peak Shape")
-        self.peakShapeUi.callback.connect(self.peak_shape_tab_finish)
+        self.peakShapeTab.callback.connect(self.peak_shape_tab_finish)
 
-        self.calibrationUi = self.add_tab(
+        self.calibrationTab = self.add_tab(
             CalibrationUiPy.Widget(manager), "Calibration")
 
         self.peakFitUi = self.add_tab(PeakFitUiPy.Widget(), "Peak Fit")
-        self.tabWidget.addTab(MassDefectUiPy.Widget(), "Mass Defect")
-        self.timeseriesesUi = TimeseriesesUiPy.Widget()
-        self.tabWidget.addTab(self.timeseriesesUi, "Timeseries")
+
+        self.massDefectTab = self.add_tab(
+            MassDefectUiPy.Widget(), "Mass Defect")
+
+        self.timeseriesesTab = self.add_tab(TimeseriesesUiPy.Widget(), "Timeseries")
 
         # docker widgets
 
@@ -60,26 +62,25 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
         self.calibrationInfoDw = self.add_dockerwidget(
             "Calibration Info", CalibrationInfoUiPy.Widget(), self.massListDw)
-        self.calibrationInfoDw.hide()
 
         self.spectraList = SpectraListUiPy.Widget(manager)
         self.spectraListDw = self.add_dockerwidget(
             "Spectra List", self.spectraList, self.calibrationInfoDw)
-        self.spectraListDw.hide()
 
         self.spectrum = SpectrumUiPy.Widget(manager)
         self.spectrumDw = self.add_dockerwidget(
             "Spectrum", self.spectrum, self.spectraListDw)
-        self.spectrumDw.hide()
 
         self.peakListDw = self.add_dockerwidget(
             "Peak List", PeakListUiPy.Widget(), self.spectrumDw)
-        self.peakListDw.hide()
 
         self.timeseries = TimeseriesUiPy.Widget()
         self.timeseriesDw = self.add_dockerwidget(
             "Timeseries", self.timeseries, self.peakListDw)
+
         self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.currentChanged.connect(self.tab_changed)
+        self.tab_changed(0)
 
     def __init__(self) -> None:
         super().__init__()
@@ -131,7 +132,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.spectraList.comboBox.setCurrentIndex(0)
         self.spectraListDw.show()
         self.spectraListDw.raise_()
-        self.tabWidget.setCurrentWidget(self.noiseUi)
+        self.tabWidget.setCurrentWidget(self.noiseTab)
 
     @state_node(mode='x')
     def noise_show_spectrum(self):
@@ -143,13 +144,44 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     @state_node(mode='x', withArgs=True)
     def noise_tab_finish(self, result):
         self.workspace.peak_shape_tab.info.spectrum = result[0]
-        self.tabWidget.setCurrentWidget(self.peakShapeUi)
-        return self.peakShapeUi.showPeak()
+        self.tabWidget.setCurrentWidget(self.peakShapeTab)
+        return self.peakShapeTab.showPeak()
 
     @state_node(mode='x')
     def peak_shape_tab_finish(self):
-        self.tabWidget.setCurrentWidget(self.calibrationUi)
+        self.tabWidget.setCurrentWidget(self.calibrationTab)
 
     def abort_process_pool(self):
         self.manager.pool.terminate()
         self.manager.pool = Pool(config.multi_cores)
+
+    def tab_changed(self, index):
+        widget = self.tabWidget.currentWidget()
+
+        def hide(dockerwidget):
+            dockerwidget.hide()
+
+        def show(dockerwodget):
+            if dockerwodget.isHidden():
+                dockerwodget.show()
+        if widget == self.fileTab:
+            list(map(hide, [self.massListDw, self.calibrationInfoDw,
+                            self.spectraListDw, self.spectrumDw, self.peakListDw, self.timeseriesDw]))
+        elif widget == self.noiseTab:
+            list(map(hide, [self.massListDw, self.calibrationInfoDw, self.peakListDw, self.timeseriesDw]))
+            list(map(show, [self.spectraListDw, self.spectrumDw]))
+        elif widget == self.peakShapeTab:
+            list(map(hide, [self.massListDw, self.calibrationInfoDw,
+                            self.spectraListDw, self.spectrumDw, self.peakListDw, self.timeseriesDw]))
+        elif widget == self.calibrationTab:
+            list(map(hide, [self.massListDw, self.peakListDw, self.timeseriesDw]))
+            list(map(show,[self.calibrationInfoDw, self.spectraListDw, self.spectrumDw]))
+        elif widget == self.peakFitUi:
+            list(map(hide, [self.calibrationInfoDw, self.timeseriesDw]))
+            list(map(show, [self.massListDw, self.spectraListDw, self.spectrumDw, self.peakListDw]))
+        elif widget == self.massDefectTab:
+            list(map(hide, [self.calibrationInfoDw, self.timeseriesDw]))
+            list(map(show, [self.massListDw, self.spectraListDw, self.spectrumDw, self.peakListDw]))
+        elif widget == self.timeseriesesTab:
+            list(map(hide, [self.calibrationInfoDw]))
+            list(map(show, [self.massListDw, self.spectraListDw, self.spectrumDw, self.peakListDw, self.timeseriesDw]))
