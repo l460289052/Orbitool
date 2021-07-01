@@ -37,7 +37,7 @@ def init(window: MainUiPy.Window):
 
 
 def fileui(window: MainUiPy.Window):
-    fileui = window.fileUi
+    fileui = window.fileTab
     manager = fileui.manager
     workspace = manager.workspace
     test.input((True, os.path.join(os.path.dirname(config.rootPath), 'data')))
@@ -63,9 +63,9 @@ def file_spectra(window: MainUiPy.Window):
 
 
 def noise(window: MainUiPy.Window):
-    window.tabWidget.setCurrentWidget(window.noiseUi)
+    window.tabWidget.setCurrentWidget(window.noiseTab)
 
-    noiseui = window.noiseUi
+    noiseui = window.noiseTab
     noiseui.showSelectedSpectrum()
 
     wait_not_busy()
