@@ -1,5 +1,4 @@
 from typing import Union
-from multiprocessing import Pool
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -95,8 +94,6 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
         self.manager.busy_signal.connect(self.set_busy)
 
-        # self.manager.pool = Pool(config.multi_cores)
-
         self.manager.inited.emit()
         self.manager.set_busy(False)
 
@@ -161,8 +158,9 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.calibrationInfo.showAllInfo()
 
     def abort_process_pool(self):
-        self.manager.pool.terminate()
-        self.manager.pool = Pool(config.multi_cores)
+        # self.manager.pool.terminate()
+        # self.manager.pool = Pool(config.multi_cores)
+        pass
 
     def tab_changed(self, index):
         widget = self.tabWidget.currentWidget()

@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from collections import deque
 from enum import Enum
-from multiprocessing.pool import Pool as PoolType, AsyncResult
+from multiprocessing import Pool
+from multiprocessing.pool import AsyncResult
 from queue import Queue
-from typing import List, Tuple, final, Deque, Iterable, Generator
+from typing import List, Tuple, final, Deque, Iterable, Generator, TypeVar, Generic, Any
 
 from PyQt5 import QtCore
 
@@ -37,16 +38,19 @@ class Thread(QtCore.QThread):
         self.sendStatus.emit(*args)
 
 
-class MultiProcess(QtCore.QThread):
+Data = TypeVar("Data")
+Result = TypeVar("Result")
+
+
+class MultiProcess(QtCore.QThread, Generic[Data, Result]):
     finished = QtCore.pyqtSignal(tuple)
     sendStatus = QtCore.pyqtSignal(str, int, int)
 
     @final
-    def __init__(self, file, kwargs: dict, pool: PoolType) -> None:
+    def __init__(self, file, kwargs: dict) -> None:
         super().__init__()
         self.file = file
         self.kwargs = kwargs
-        # self.pool = pool
         self.aborted = False
 
     @final
@@ -66,8 +70,7 @@ class MultiProcess(QtCore.QThread):
         write_thread = Thread(self.write, (file, iter_queue()), kwargs)
         write_thread.finished.connect(self.finished.emit)
         write_thread.start()
-        # pool: PoolType = self.pool
-        with PoolType(multi_cores) as pool:
+        with Pool(multi_cores) as pool:
 
             for i, input_data in enumerate(self.read(file, **kwargs)):
                 if self.aborted:
@@ -123,18 +126,18 @@ class MultiProcess(QtCore.QThread):
         return ret
 
     @staticmethod
-    def func(data, **kwargs):
+    def func(data: Data, **kwargs) -> Result:
         raise NotImplementedError()
 
     @staticmethod
-    def read(file, **kwargs) -> Generator:
+    def read(file, **kwargs) -> Generator[Data, Any, Any]:
         raise NotImplementedError()
         # example
         for i in range(10):
             yield i
 
     @staticmethod
-    def write(file, rets: Iterable, **kwargs):
+    def write(file, rets: Iterable[Result], **kwargs):
         raise NotImplementedError()
         # example
         for ret in rets:

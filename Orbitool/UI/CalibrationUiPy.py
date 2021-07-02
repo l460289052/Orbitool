@@ -49,6 +49,31 @@ class ReadFromFile(MultiProcess):
             del file["tmp"]
 
 
+class SplitAndFitPeak(MultiProcess):
+    @staticmethod
+    def read(h5_spectra: h5py.Group, **kwargs) -> Generator:
+        for key in h5_spectra.keys():
+            yield StructureConverter.read_from_h5(h5_spectra, key)
+
+    @staticmethod
+    def func(data: Spectrum, fit_func: NormalDistributionFunc, ions: List[float], intensity_filter: float, **kwargs):
+        ions_peak: List[Tuple[float, float]] = []
+        for ion in ions:
+            peak = fit_func.fetchNearestPeak(
+                data, ion, intensity_filter)
+            ions_peak.append(
+                (peak.peak_position, peak.peak_intensity))
+
+        return data.path, ions_peak
+
+    @staticmethod
+    def write(file, rets, **kwargs):
+        path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = {}
+        for path, ions_peak in rets:
+            path_ions_peak.setdefault(path, []).append(ions_peak)
+        return path_ions_peak
+
+
 class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
     calcInfoFinished = QtCore.pyqtSignal()
 
@@ -119,7 +144,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             dest = '/'.join([workspace.calibration_tab._obj.name,
                              "raw_spectra"])
             read_from_file = ReadFromFile(
-                workspace, {"infos": workspace.spectra_list.info.file_spectrum_info_list, "dest": dest}, self.manager.pool)
+                workspace, {"infos": workspace.spectra_list.info.file_spectrum_info_list, "dest": dest})
 
             yield read_from_file
             workspace.info.hasRead = True
@@ -137,26 +162,15 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
                 need_to_split = False
 
         if need_to_split:  # read ions from spectrum
-            def split_and_get_calibrator():
-                path_time: Dict[str, datetime] = {}
-                for path in workspace.info.pathlist:
-                    path_time[path.path] = path.createDatetime
+            path_time = {
+                path.path: path.createDatetime for path in workspace.info.pathlist}
+            ions = [ion.formula.mass() for ion in info.ions]
+            split_and_fit = SplitAndFitPeak(h5_spectra, dict(
+                fit_func=fit_func, ions=ions, intensity_filter=intensity_filter))
 
-                path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = {}
-                ions = [ion.formula.mass() for ion in info.ions]
-                for key in h5_spectra.keys():  # need parallel
-                    spectrum: Spectrum = StructureConverter.read_from_h5(
-                        h5_spectra, key)
+            path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = yield split_and_fit
 
-                    ions_peak: List[Tuple[float, float]] = []
-                    for ion in ions:
-                        peak = fit_func.fetchNearestPeak(
-                            spectrum, ion, intensity_filter)
-                        ions_peak.append(
-                            (peak.peak_position, peak.peak_intensity))
-                    path_ions_peak.setdefault(
-                        spectrum.path, []).append(ions_peak)
-
+            def get_calibrator():
                 path_calibrators: Dict[str, Calibrator] = {}
 
                 for path, ions_peak in path_ions_peak.items():
@@ -168,7 +182,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
                 return path_calibrators
 
-            info.calibrators = yield split_and_get_calibrator
+            info.calibrators = yield get_calibrator
         else:  # get info directly
             def get_calibrator_from_calibrator():
                 return {path: calibrator.regeneratCalibrator(rtol=rtol, use_N_ions=use_N_ions) for path, calibrator in info.calibrators.items()}

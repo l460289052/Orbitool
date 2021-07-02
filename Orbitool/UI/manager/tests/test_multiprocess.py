@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from multiprocessing import Pool, freeze_support
+from multiprocessing import freeze_support
 from time import sleep
 
 from PyQt5 import QtWidgets, QtCore
@@ -36,7 +36,7 @@ def test_normal():
     app = QtWidgets.QApplication([])
     num = 20
     file = {}
-    pp = p(file, [20], {}, Pool(10))
+    pp = p(file, [20], {})
     pp.start()
     pp.wait()
     # pp.run()
@@ -48,7 +48,7 @@ def test_abort():
     app = QtWidgets.QApplication([])
     num = 20
     file = {}
-    pp = p(file, [20], {}, Pool(10))
+    pp = p(file, [20], {})
 
     pp.start()
 

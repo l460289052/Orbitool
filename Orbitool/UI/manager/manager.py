@@ -1,5 +1,4 @@
 from functools import wraps
-from multiprocessing.pool import Pool
 from typing import Callable
 
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
@@ -15,12 +14,10 @@ class Manager(QObject):
     """
     inited = pyqtSignal()
     busy_signal = pyqtSignal(bool)
-    __slots__ = ["node_thread", "pool", "workspace", "_busy"]
 
     def __init__(self) -> None:
         super().__init__()
         self.node_thread: QThread = None
-        self.pool: Pool = None
         self.workspace: WorkSpace = None
         self._busy: bool = True
 
