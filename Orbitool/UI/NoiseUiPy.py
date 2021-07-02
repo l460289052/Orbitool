@@ -27,7 +27,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         self.manager = manager
         self.setupUi(self)
 
-        manager.inited.connect(self.showNoiseFormula)
+        manager.inited.connect(self.init)
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -46,6 +46,11 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     @property
     def noise(self):
         return self.manager.workspace.noise_tab
+
+    def init(self):
+        self.showNoiseFormula()
+        self.plotSelectSpectrum()
+        # self.showNoise()
 
     def showNoiseFormula(self):
         widget = self.tableWidget
@@ -105,13 +110,18 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
         if success:
             self.noise.info.current_spectrum = spectrum
+            self.plotSelectSpectrum()
             self.selected_spectrum_average.emit()
-            self.plot.ax.plot(spectrum.mz, spectrum.intensity)
-            self.plot.canvas.draw()
-            self.show()
             self.denoisePushButton.setEnabled(False)
         else:
             showInfo("failed")
+
+    def plotSelectSpectrum(self):
+        spectrum = self.noise.info.current_spectrum
+        if spectrum is not None:
+            self.plot.ax.plot(spectrum.mz, spectrum.intensity)
+            self.plot.canvas.draw()
+            self.show()
 
     @state_node
     def addFormula(self):

@@ -71,6 +71,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
 
         write_thread = Thread(self.write, (file, iter_queue()), kwargs)
         write_thread.start()
+        limit_parallel = int(multi_cores * 1.3)
         with Pool(multi_cores) as pool:
 
             for i, input_data in enumerate(self.read(file, **kwargs)):
@@ -79,7 +80,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                     return self.exception(file, **kwargs)
                 results.append(pool.apply_async(
                     self.process, (i, self.func, input_data, kwargs)))
-                if i >= multi_cores:
+                if i >= limit_parallel:
                     ret = results.popleft()
                     while not ret.ready():
                         sleep(0.01)

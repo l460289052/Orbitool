@@ -37,6 +37,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
         self.setupUi(self)
 
         self.animation = LineAnimation()
+        self.manager.inited.connect(self.showNormPeaks)
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -86,6 +87,8 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
     def showNormPeaks(self):
         ax = self.plot.ax
         ax.clear()
+        if self.peak_shape.info.peaks_manager is None:
+            return
         self.animation = LineAnimation()
         ax.xaxis.set_major_formatter(
             matplotlib.ticker.FormatStrFormatter(r"%.1e"))

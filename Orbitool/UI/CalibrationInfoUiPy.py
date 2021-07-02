@@ -10,6 +10,7 @@ class Widget(QtWidgets.QWidget, CalibrationInfoUi.Ui_Form):
         super().__init__()
         self.manager = manager
         self.setupUi(self)
+        manager.inited.connect(self.showAllInfo)
 
     @property
     def calibration(self):
@@ -30,6 +31,8 @@ class Widget(QtWidgets.QWidget, CalibrationInfoUi.Ui_Form):
         table.setHorizontalHeaderLabels(hlables)
 
         table.setRowCount(len(info.calibrators))
+        if len(info.calibrators) == 0:
+            return
 
         calibrators = sorted(info.calibrators.values(),
                              key=lambda calibrator: calibrator.time)
