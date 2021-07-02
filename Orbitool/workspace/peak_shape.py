@@ -1,6 +1,6 @@
-from ..base import BaseStructure
-from ..spectrum import Spectrum, FittedPeak
-from ...functions import peakfit
+from ..structures.base import BaseStructure
+from ..structures.spectrum import Spectrum, FittedPeak
+from ..functions import peakfit
 
 
 class PeakShapeInfo(BaseStructure):

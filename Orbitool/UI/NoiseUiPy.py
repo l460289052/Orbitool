@@ -12,7 +12,7 @@ from .manager import Manager, state_node, Thread, MultiProcess
 from . import component
 from .component import factory
 
-from ..structures import file, workspace
+from .. import workspace
 from ..structures.file import SpectrumInfo
 from ..structures.spectrum import Spectrum
 from .. import functions
@@ -91,12 +91,12 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         infos: List[SpectrumInfo] = list(info_list[left:right])
 
         def read_and_average():
-            if len(spectrums := [spectrum for info in infos if (spectrum := info.get_spectrum_from_info(with_minutes=True)) is not None]) > 0:
-                spectrums = [(*functions.spectrum.removeZeroPositions(
-                    spectrum[0], spectrum[1]), spectrum[2]) for spectrum in spectrums]
+            if len(spectra := [spectrum for info in infos if (spectrum := info.get_spectrum_from_info(with_minutes=True)) is not None]) > 0:
+                spectra = [(*functions.spectrum.removeZeroPositions(
+                    spectrum[0], spectrum[1]), spectrum[2]) for spectrum in spectra]
                 mz, intensity = functions.spectrum.averageSpectra(
-                    spectrums, infos[0].rtol, True)
-                spectrum = Spectrum(file_path='', mz=mz, intensity=intensity,
+                    spectra, infos[0].rtol, True)
+                spectrum = Spectrum(path='none:', mz=mz, intensity=intensity,
                                     start_time=infos[0].start_time, end_time=infos[-1].end_time)
                 return True, spectrum
             else:
@@ -306,7 +306,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             mz, intensity = spectrum_func.denoiseWithParams(
                 spectrum.mz, spectrum.intensity, info.poly_coef, params, points, deltas, info.n_sigma, subtract)
 
-            s = Spectrum(file_path=spectrum.file_path, mz=mz, intensity=intensity,
+            s = Spectrum(path=spectrum.path, mz=mz, intensity=intensity,
                          start_time=spectrum.start_time, end_time=spectrum.end_time)
 
             return s

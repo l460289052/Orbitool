@@ -34,12 +34,15 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.processWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 23))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 20))
         self.menubar.setObjectName("menubar")
+        self.menuWorkspace = QtWidgets.QMenu(self.menubar)
+        self.menuWorkspace.setObjectName("menuWorkspace")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        self.menubar.addAction(self.menuWorkspace.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -48,4 +51,5 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.abortPushButton.setText(_translate("MainWindow", "Abort"))
+        self.menuWorkspace.setTitle(_translate("MainWindow", "Workspace"))
 

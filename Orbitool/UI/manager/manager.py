@@ -4,11 +4,15 @@ from typing import Callable
 
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
 
-from ...structures import WorkSpace
+from ...workspace import WorkSpace
 from ..utils import showInfo
+from ..component import Plot
 
 
 class Manager(QObject):
+    """
+    storage common resources
+    """
     inited = pyqtSignal()
     busy_signal = pyqtSignal(bool)
     __slots__ = ["node_thread", "pool", "workspace", "_busy"]
@@ -19,6 +23,8 @@ class Manager(QObject):
         self.pool: Pool = None
         self.workspace: WorkSpace = None
         self._busy: bool = True
+
+        self.calibrationPlot: Plot = None
 
     def set_busy(self, busy: bool):
         if busy ^ self._busy:

@@ -25,16 +25,18 @@ if __name__ == "__main__":
     app.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
 
     from Orbitool.UI import MainUiPy
-    
+
     if config.DEBUG:
         QtWidgets.QMessageBox.information(None, 'info', 'DEBUG')
 
     MainWin = MainUiPy.Window()
+    MainWin.show()
     if args.to_step:
         steps = {
             "file": 0,
             "noise": 1,
-            "peak-fit": 2
+            "peak-fit": 2,
+            "calibration": 3
         }
         step = steps[args.to_step]
         from Orbitool.UI.tests import routine
@@ -44,6 +46,6 @@ if __name__ == "__main__":
             routine.file_spectra(MainWin)
         if step > 1:
             routine.noise(MainWin)
-    else:
-        MainWin.show()
+        if step > 2:
+            routine.peak_shape(MainWin)
     sys.exit(app.exec_())

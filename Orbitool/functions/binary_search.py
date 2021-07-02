@@ -1,12 +1,16 @@
-from typing import Tuple
-from ._binary_search import indexNearest as _indexNearest_np, indexBetween as _indexBetween_np
+from typing import Tuple, TypeVar, List, Callable, Any
+from ._binary_search import indexNearest as indexNearest_np, indexBetween as indexBetween_np
 
 
 def defaultMethod(array, index):
     return array[index]
 
 
-def indexFirstNotSmallerThan(array, value, indexRange: Tuple[int, int] = None, method=defaultMethod):
+T = TypeVar("T")
+K = TypeVar("K")
+
+
+def indexFirstNotSmallerThan(array: List[T], value: K, indexRange: Tuple[int, int] = None, method: Callable[[List[T], int], K] = defaultMethod):
     '''
     np.searchsorted(array,value,'left')
     or
@@ -22,7 +26,7 @@ def indexFirstNotSmallerThan(array, value, indexRange: Tuple[int, int] = None, m
     return l
 
 
-def indexFirstBiggerThan(array, value, indexRange: Tuple[int, int] = None, method=defaultMethod):
+def indexFirstBiggerThan(array: List[T], value: K, indexRange: Tuple[int, int] = None, method: Callable[[List[T], int], K] = defaultMethod):
     '''
     np.searchsorted(array,value,'right')
     '''
@@ -36,7 +40,7 @@ def indexFirstBiggerThan(array, value, indexRange: Tuple[int, int] = None, metho
     return l
 
 
-def indexNearest(array, value, indexRange: Tuple[int, int] = None, method=defaultMethod) -> int:
+def indexNearest(array: List[T], value: K, indexRange: Tuple[int, int] = None, method: Callable[[List[T], int], K] = defaultMethod) -> int:
     '''
     `indexRange`: default=(0,len(array))
     '''
@@ -49,11 +53,7 @@ def indexNearest(array, value, indexRange: Tuple[int, int] = None, method=defaul
         return i
 
 
-def indexNearest_np(array, value, indexRange=None):
-    return _indexNearest_np(array, value, indexRange)
-
-
-def indexBetween(array, valueRange, indexRange: Tuple[int, int] = None, method=defaultMethod) -> range:
+def indexBetween(array: List[T], valueRange: Tuple[K, K], indexRange: Tuple[int, int] = None, method: Callable[[List[T], int], K] = defaultMethod) -> range:
     """
     get range from sorted array for value in (l,r)
     `indexRange`: (start,stop), contain array[start] to array[stop-1]
@@ -68,10 +68,6 @@ def indexBetween(array, valueRange, indexRange: Tuple[int, int] = None, method=d
         return range(l, r)
     else:
         return range(l, l)
-
-
-def indexBetween_np(array, valueRange, indexRange):
-    return _indexBetween_np(array, valueRange, indexRange)
 
 
 __all__ = [s for s in locals() if s.startswith('index')]

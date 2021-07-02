@@ -4,7 +4,7 @@ from multiprocessing import Pool
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from .. import config
-from ..structures import WorkSpace, spectrum
+from ..workspace import WorkSpace
 
 from .manager import Manager, state_node
 from . import utils as UiUtils
@@ -44,13 +44,15 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
         self.calibrationTab = self.add_tab(
             CalibrationUiPy.Widget(manager), "Calibration")
+        self.calibrationTab.calcInfoFinished.connect(self.calibration_info_finish)
 
         self.peakFitUi = self.add_tab(PeakFitUiPy.Widget(), "Peak Fit")
 
         self.massDefectTab = self.add_tab(
             MassDefectUiPy.Widget(), "Mass Defect")
 
-        self.timeseriesesTab = self.add_tab(TimeseriesesUiPy.Widget(), "Timeseries")
+        self.timeseriesesTab = self.add_tab(
+            TimeseriesesUiPy.Widget(), "Timeseries")
 
         # docker widgets
 
@@ -61,8 +63,9 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.massListDw = self.add_dockerwidget(
             "Mass List", MassListUiPy.Widget(), self.formulaDw)
 
+        self.calibrationInfo = CalibrationInfoUiPy.Widget(manager)
         self.calibrationInfoDw = self.add_dockerwidget(
-            "Calibration Info", CalibrationInfoUiPy.Widget(), self.massListDw)
+            "Calibration Info", self.calibrationInfo, self.massListDw)
 
         self.spectraList = SpectraListUiPy.Widget(manager)
         self.spectraListDw = self.add_dockerwidget(
@@ -92,7 +95,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
         self.manager.busy_signal.connect(self.set_busy)
 
-        self.manager.pool = Pool(config.multi_cores)
+        # self.manager.pool = Pool(config.multi_cores)
 
         self.manager.inited.emit()
         self.manager.set_busy(False)
@@ -153,6 +156,10 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     def peak_shape_tab_finish(self):
         self.tabWidget.setCurrentWidget(self.calibrationTab)
 
+    @state_node(mode='x')
+    def calibration_info_finish(self):
+        self.calibrationInfo.showAllInfo()
+
     def abort_process_pool(self):
         self.manager.pool.terminate()
         self.manager.pool = Pool(config.multi_cores)
@@ -170,20 +177,26 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             list(map(hide, [self.massListDw, self.calibrationInfoDw,
                             self.spectraListDw, self.spectrumDw, self.peakListDw, self.timeseriesDw]))
         elif widget == self.noiseTab:
-            list(map(hide, [self.massListDw, self.calibrationInfoDw, self.peakListDw, self.timeseriesDw]))
+            list(map(hide, [self.massListDw, self.calibrationInfoDw,
+                            self.peakListDw, self.timeseriesDw]))
             list(map(show, [self.spectraListDw, self.spectrumDw]))
         elif widget == self.peakShapeTab:
             list(map(hide, [self.massListDw, self.calibrationInfoDw,
                             self.spectraListDw, self.spectrumDw, self.peakListDw, self.timeseriesDw]))
         elif widget == self.calibrationTab:
-            list(map(hide, [self.massListDw, self.peakListDw, self.timeseriesDw]))
-            list(map(show,[self.calibrationInfoDw, self.spectraListDw, self.spectrumDw]))
+            list(
+                map(hide, [self.massListDw, self.peakListDw, self.timeseriesDw]))
+            list(map(show, [self.calibrationInfoDw,
+                            self.spectraListDw, self.spectrumDw]))
         elif widget == self.peakFitUi:
             list(map(hide, [self.calibrationInfoDw, self.timeseriesDw]))
-            list(map(show, [self.massListDw, self.spectraListDw, self.spectrumDw, self.peakListDw]))
+            list(map(show, [self.massListDw, self.spectraListDw,
+                            self.spectrumDw, self.peakListDw]))
         elif widget == self.massDefectTab:
             list(map(hide, [self.calibrationInfoDw, self.timeseriesDw]))
-            list(map(show, [self.massListDw, self.spectraListDw, self.spectrumDw, self.peakListDw]))
+            list(map(show, [self.massListDw, self.spectraListDw,
+                            self.spectrumDw, self.peakListDw]))
         elif widget == self.timeseriesesTab:
             list(map(hide, [self.calibrationInfoDw]))
-            list(map(show, [self.massListDw, self.spectraListDw, self.spectrumDw, self.peakListDw, self.timeseriesDw]))
+            list(map(show, [self.massListDw, self.spectraListDw,
+                            self.spectrumDw, self.peakListDw, self.timeseriesDw]))

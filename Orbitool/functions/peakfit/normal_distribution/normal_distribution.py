@@ -7,6 +7,7 @@ from scipy.optimize import curve_fit
 
 from ....structures.spectrum import FittedPeak, Peak
 from .nd import func, maxFitNum, mergePeaksParam
+from ..base import BaseFunc
 
 
 def getParam(peak: Peak, resolution=140000):
@@ -44,13 +45,13 @@ def getNormalizedPeak(peak: Peak, param=None) -> FittedPeak:
     return peak
 
 
-class NormalDistributionFunc:
+class NormalDistributionFunc(BaseFunc):
     def __init__(self, sigma: float, res: float):
         self.peak_fit_sigma = sigma
         self.peak_fit_res = res
 
     @classmethod
-    def generateDistributionFunc(cls, params: List[tuple]) -> NormalDistributionFunc:
+    def Factory_FromParams(cls, params: List[tuple]) -> NormalDistributionFunc:
         params = np.array(params, dtype=np.float)
         peak_position = params[:, 1]
         peak_sigma = params[:, 2]
@@ -97,7 +98,7 @@ class NormalDistributionFunc:
     def getIntensity(self, mz: np.ndarray, peak: FittedPeak):
         return self._funcFit(mz, *peak.fitted_param)
 
-    def splitPeak(self, peak: FittedPeak, split_num=None, force=False) -> List[FittedPeak]:
+    def splitPeak(self, peak: Peak, split_num=None, force=False) -> List[FittedPeak]:
         if split_num is None:
             split_num = peak.split_num
         id_peak = peak.idPeak
@@ -132,7 +133,7 @@ class NormalDistributionFunc:
                 if m.min() < mz_min or m.max() > mz_max:
                     raise RuntimeError()
 
-                peaks = []
+                peaks: List[FittedPeak] = []
                 for p in params:
                     peak_intensity = self._funcFit(p[1], *p)
                     if peak_intensity < 0:

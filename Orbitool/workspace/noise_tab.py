@@ -2,11 +2,11 @@ from typing import List, Optional
 
 import numpy as np
 
-from ... import config
-from ...utils.formula import Formula
-from ..base import BaseStructure, BaseTableItem, Field
-from ..HDF5 import Ndarray
-from ..spectrum import Spectrum
+from .. import config
+from ..utils.formula import Formula
+from ..structures.base import BaseStructure, BaseTableItem, Field
+from ..structures.HDF5 import Ndarray
+from ..structures.spectrum import Spectrum
 
 
 class NoiseFormulaParameter(BaseTableItem):

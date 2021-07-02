@@ -75,7 +75,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
             peaks = list(
                 map(peakfit_func.normal_distribution.getNormalizedPeak, peaks))
             manager = peakfit_func.PeaksManager(peaks)
-            func = peakfit_func.normal_distribution.NormalDistributionFunc.generateDistributionFunc(
+            func = peakfit_func.normal_distribution.NormalDistributionFunc.Factory_FromParams(
                 [peak.fitted_param for peak in peaks])
             return manager, func
 

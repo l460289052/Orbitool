@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import datetime
-from ..file import SpectrumInfo
-from ..base import Field, BaseStructure
+from ..structures.file import SpectrumInfo
+from ..structures.base import Field, BaseStructure
 
 
 class SpectraListInfo(BaseStructure):

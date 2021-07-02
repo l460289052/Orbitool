@@ -1,6 +1,6 @@
 from typing import Generic, Type, TypeVar
 
-from ..HDF5 import H5Obj
+from ..structures.HDF5 import H5Obj
 
 T = TypeVar("T")
 

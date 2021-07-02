@@ -1,16 +1,22 @@
-from typing import Union, Optional, Generator, Iterable, List, Tuple
+from typing import Generator, Iterable, List, Optional, Tuple, Union, Dict
+from datetime import datetime
 import numpy as np
-from . import CalibrationUi
-from .manager import Manager, state_node, MultiProcess
-from PyQt5 import QtWidgets, QtCore
-from ..utils.formula import Formula
-from ..structures.HDF5 import StructureConverter
-from ..structures.file import SpectrumInfo
-from ..structures.spectrum import Spectrum
-from ..structures.workspace import WorkSpace
-from ..structures.workspace.calibration import Ion
-from .utils import get_tablewidget_selected_row
+from PyQt5 import QtCore, QtWidgets
+import h5py
+
 from ..functions import spectrum as spectrum_func
+from ..functions.peakfit.normal_distribution import NormalDistributionFunc
+from ..functions.calibration import Calibrator, PolynomialRegressionFunc
+from ..structures.file import SpectrumInfo
+from ..structures.HDF5 import StructureConverter
+from ..structures.spectrum import Spectrum
+from ..workspace import WorkSpace
+from ..workspace.calibration import Ion
+from ..utils.formula import Formula
+from . import CalibrationUi
+from .manager import Manager, MultiProcess, state_node
+from .utils import get_tablewidget_selected_row
+from .component import Plot
 
 
 class ReadFromFile(MultiProcess):
@@ -18,7 +24,7 @@ class ReadFromFile(MultiProcess):
     def func(data: Tuple[SpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
         info, (mz, intensity, time) = data
         mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
-        spectrum = Spectrum(file_path=info.file_path, mz=mz, intensity=intensity,
+        spectrum = Spectrum(path=info.path, mz=mz, intensity=intensity,
                             start_time=info.start_time, end_time=info.end_time)
         return spectrum
 
@@ -44,15 +50,19 @@ class ReadFromFile(MultiProcess):
 
 
 class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
+    calcInfoFinished = QtCore.pyqtSignal()
+
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager: Manager = manager
         self.setupUi(self)
-
+        self.manager.calibrationPlot = self.plot
         manager.inited.connect(self.init)
 
     def setupUi(self, Form):
         super().setupUi(Form)
+
+        self.plot = Plot(self.widget)
 
         self.addIonToolButton.clicked.connect(self.addIon)
         self.delIonToolButton.clicked.connect(self.removeIon)
@@ -63,7 +73,8 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         return self.manager.workspace.calibration_tab
 
     def init(self):
-        ions = ['C5H6O9N-', 'C2HO4-', 'C3H4O7N-']
+        ions = ["HNO3NO3-", "C6H3O2NNO3-", "C6H5O3NNO3-",
+                "C6H4O5N2NO3-", "C8H12O10N2NO3-", "C10H17O10N3NO3-"]
         self.calibration.info.add_ions(ions)
         self.showIons()
 
@@ -95,14 +106,83 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
     @ state_node
     def calcInfo(self):
         workspace = self.manager.workspace
+        calibration_tab = self.calibration
+        info = calibration_tab.info
 
+        intensity_filter = 100
         rtol = self.rtolDoubleSpinBox.value() / 1e-6
         degree = self.degreeSpinBox.value()
-        useNIons = self.nIonsSpinBox.value()
+        use_N_ions = self.nIonsSpinBox.value()
 
-        dest = '/'.join([workspace.calibration_tab._obj.name, "raw_spectrums"])
-        read_from_file = ReadFromFile(
-            workspace, {"infos": workspace.spectra_list.info.file_spectrum_info_list, "dest": dest}, self.manager.pool)
-        yield read_from_file
+        # read file
+        if not workspace.info.hasRead:
+            dest = '/'.join([workspace.calibration_tab._obj.name,
+                             "raw_spectra"])
+            read_from_file = ReadFromFile(
+                workspace, {"infos": workspace.spectra_list.info.file_spectrum_info_list, "dest": dest}, self.manager.pool)
 
-        length = len(workspace.calibration_tab._obj["raw_spectrums"])
+            yield read_from_file
+            workspace.info.hasRead = True
+
+        h5_spectra = calibration_tab._obj["raw_spectra"]
+        fit_func = workspace.peak_shape_tab.info.func
+
+        # use ions to decide whether to split
+        need_to_split = True
+        if len(info.calibrators) > 0:
+            calculator = next(iter(info.calibrators.values()))
+            calculated_ions = {ion.formula for ion in calculator.ions}
+            now_ions = {ion.formula for ion in info.ions}
+            if now_ions == calculated_ions:
+                need_to_split = False
+
+        if need_to_split:  # read ions from spectrum
+            def split_and_get_calibrator():
+                path_time: Dict[str, datetime] = {}
+                for path in workspace.info.pathlist:
+                    path_time[path.path] = path.createDatetime
+
+                path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = {}
+                ions = [ion.formula.mass() for ion in info.ions]
+                for key in h5_spectra.keys():  # need parallel
+                    spectrum: Spectrum = StructureConverter.read_from_h5(
+                        h5_spectra, key)
+
+                    ions_peak: List[Tuple[float, float]] = []
+                    for ion in ions:
+                        peak = fit_func.fetchNearestPeak(
+                            spectrum, ion, intensity_filter)
+                        ions_peak.append(
+                            (peak.peak_position, peak.peak_intensity))
+                    path_ions_peak.setdefault(
+                        spectrum.path, []).append(ions_peak)
+
+                path_calibrators: Dict[str, Calibrator] = {}
+
+                for path, ions_peak in path_ions_peak.items():
+                    ions_peak = np.array(ions_peak, dtype=float)
+                    ions_position = ions_peak[:, :, 0]
+                    ions_intensity = ions_peak[:, :, 1]
+                    path_calibrators[path] = Calibrator.FactoryFromMzInt(
+                        path_time[path], info.ions, ions_position, ions_intensity, rtol, use_N_ions)
+
+                return path_calibrators
+
+            info.calibrators = yield split_and_get_calibrator
+        else:  # get info directly
+            def get_calibrator_from_calibrator():
+                return {path: calibrator.regeneratCalibrator(rtol=rtol, use_N_ions=use_N_ions) for path, calibrator in info.calibrators.items()}
+
+            info.calibrators = yield get_calibrator_from_calibrator
+
+        def generate_func_from_calibrator():
+            ret = {}
+            for path, calibrator in info.calibrators.items():
+                min_index = calibrator.min_indexes
+                func = PolynomialRegressionFunc.FactoryFit(
+                    calibrator.ions_position[min_index], calibrator.ions_rtol[min_index], degree)
+                ret[path] = func
+            return ret
+        info.poly_funcs = yield generate_func_from_calibrator
+
+        self.calcInfoFinished.emit()

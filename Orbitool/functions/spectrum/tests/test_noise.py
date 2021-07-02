@@ -27,7 +27,7 @@ mass_point_deltas = np.ones_like(mass_points, dtype=int) * 5
 
 def test_get_param(mass_int):
     mass, intensity = mass_int
-    poly, slt, params = getNoiseParams(
+    poly, std, slt, params = getNoiseParams(
         mass, intensity, 0.5, True, mass_points, mass_point_deltas)
     nptest.assert_almost_equal(mass_points, params[:, 0, 1], 0)
     nptest.assert_almost_equal(mass_points, params[:, 1, 1], 0)
@@ -35,7 +35,7 @@ def test_get_param(mass_int):
 
 def test_denoise(mass_int):
     mass, intensity = mass_int
-    poly, slt, param = getNoiseParams(
+    poly, std, slt, param = getNoiseParams(
         mass, intensity, 0.5, True, mass_points, mass_point_deltas)
     noise, LOD = noiseLODFunc(
         mass, poly, param, mass_points, mass_point_deltas, 3)

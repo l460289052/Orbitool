@@ -25,7 +25,7 @@ class Peak(BaseTableItem):
 
     @cached_property
     def idPeak(self):
-        return np.where(self.isPeak)
+        return np.where(self.isPeak)[0]
 
 
 class FittedPeak(Peak):
@@ -47,7 +47,7 @@ class FittedPeak(Peak):
 class Spectrum(BaseStructure):
     h5_type = "Spectrum"
 
-    file_path: str
+    path: str
     mz: np.ndarray
     intensity: np.ndarray
     start_time: datetime

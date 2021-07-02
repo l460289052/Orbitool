@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Union, Optional, List
 from datetime import datetime, timedelta
 from functools import partial
 
@@ -8,7 +8,7 @@ from .manager import Manager, state_node, Thread
 from PyQt5 import QtWidgets, QtCore
 import os
 
-from ..structures import file
+from ..structures.file import Path, PathList, SpectrumInfo
 from .. import utils
 
 
@@ -22,74 +22,74 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
 
         set_header_sizes(self.tableWidget.horizontalHeader(), [150, 100, 100])
 
-        self.addFilePushButton.clicked.connect(self.addFile)
+        self.addFilePushButton.clicked.connect(self.addThermoFile)
         self.addFolderPushButton.clicked.connect(self.addFolder)
-        self.removeFilePushButton.clicked.connect(self.removeFile)
+        self.removeFilePushButton.clicked.connect(self.removePath)
         self.selectedPushButton.clicked.connect(self.processSelected)
         self.allPushButton.clicked.connect(self.processAll)
 
     @property
-    def file_list(self) -> file.FileList:
-        return self.manager.workspace.info.filelist
+    def pathlist(self) -> PathList:
+        return self.manager.workspace.info.pathlist
 
     @state_node
-    def addFile(self):
+    def addThermoFile(self):
         files = UiUtils.openfiles(
             "Select one or more files", "RAW files(*.RAW)")
-        file_list = self.file_list
+        pathlist = self.pathlist
 
         def func():
             for f in files:
-                file_list.addFile(f)
-            file_list.sort()
-            return len(file_list.files)
+                pathlist.addThermoFile(f)
+            pathlist.sort()
+            return len(pathlist.paths)
 
         length = yield func
 
         showInfo(str(length))
-        self.showFiles()
+        self.showPaths()
 
-    @addFile.except_node
-    def addFile(self):
-        self.showFiles()
+    @addThermoFile.except_node
+    def addThermoFile(self):
+        self.showPaths()
 
     @state_node
     def addFolder(self):
         ret, folder = UiUtils.openfolder("Select one folder")
         if not ret:
             return None
-        file_list = self.file_list
+        pathlist = self.pathlist
 
         def func():
             for path in utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.recursionCheckBox.isChecked()):
-                file_list.addFile(path)
-            file_list.sort()
+                pathlist.addThermoFile(path)
+            pathlist.sort()
 
         yield func
 
-        self.showFiles()
+        self.showPaths()
 
     @addFolder.except_node
     def addFolder(self):
-        self.showFiles()
+        self.showPaths()
 
     @state_node
-    def removeFile(self):
+    def removePath(self):
         indexes = UiUtils.get_tablewidget_selected_row(self.tableWidget)
-        self.file_list.rmFile(indexes)
-        self.showFiles()
+        self.pathlist.rmPath(indexes)
+        self.showPaths()
 
-    @removeFile.except_node
-    def removeFile(self):
-        self.showFiles()
+    @removePath.except_node
+    def removePath(self):
+        self.showPaths()
 
-    def showFiles(self):
+    def showPaths(self):
         table = self.tableWidget
-        file_list = self.file_list
+        pathlist = self.pathlist
         table.setRowCount(0)
-        table.setRowCount(len(file_list))
+        table.setRowCount(len(pathlist))
 
-        for i, f in enumerate(file_list):
+        for i, f in enumerate(pathlist):
             v = [os.path.split(f.path)[1], f.startDatetime,
                  f.endDatetime, f.path]
             for j, vv in enumerate(v):
@@ -98,7 +98,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         table.show()
 
         if self.checkBox.isChecked():
-            time_start, time_end = self.file_list.timeRange
+            time_start, time_end = self.pathlist.timeRange
             if time_start is None:
                 return
             self.startDateTimeEdit.setDateTime(time_start)
@@ -109,18 +109,19 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         indexes = UiUtils.get_tablewidget_selected_row(self.tableWidget)
         if len(indexes) == 0:
             return None
-        paths = [self.file_list.files[index].path for index in indexes]
-        infos = yield self.processPaths(paths)
+
+        paths = self.pathlist.subList(indexes)
+        infos = yield self.processPaths(paths.paths)
 
         self.callback.emit((infos, ))
 
     @state_node
     def processAll(self):
-        infos = yield self.processPaths(file.path for file in self.file_list.files)
+        infos = yield self.processPaths(self.pathlist.paths)
 
         self.callback.emit((infos, ))
 
-    def processPaths(self, paths):
+    def processPaths(self, paths: List[Path]):
         time_range = (self.startDateTimeEdit.dateTime().toPyDateTime(),
                       self.endDateTimeEdit.dateTime().toPyDateTime())
 
@@ -138,10 +139,10 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             elif self.nMinutesRadioButton.isChecked():
                 interval = timedelta(
                     minutes=self.nMinutesDoubleSpinBox.value())
-                func = partial(file.SpectrumInfo.generate_infos_from_paths_by_time_interval,
+                func = partial(SpectrumInfo.generate_infos_from_paths_by_time_interval,
                                paths, rtol, interval, polarity, time_range)
         elif self.averageNoRadioButton.isChecked():
-            func = partial(file.SpectrumInfo.generate_infos_from_paths,
+            func = partial(SpectrumInfo.generate_infos_from_paths,
                            paths, rtol, polarity, time_range)
 
         return func

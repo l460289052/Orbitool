@@ -14,11 +14,11 @@ path = os.path.join(os.path.dirname(__file__), 'average_test.pickle')
 
 
 @pytest.fixture
-def raw_spectrums():
+def raw_spectra():
     return pickle.load(gzip.open(path, 'r'))
 
 
-class TestSpectrum:
+class TmpSpectrum:
     def __init__(self, mass, intensity, weight) -> None:
         self.mass = mass
         self.intensity = intensity
@@ -31,28 +31,28 @@ class TestSpectrum:
         return np.array([self.peak_int[indexNearest_np(self.peak_mass, peak)] for peak in peaks])
 
 
-def test_average(raw_spectrums):
-    spectrum1, spectrum2 = [TestSpectrum(*removeZeroPositions(s[0], s[1]), s[2])
-                            for s in raw_spectrums]
+def test_average(raw_spectra):
+    spectrum1, spectrum2 = [TmpSpectrum(*removeZeroPositions(s[0], s[1]), s[2])
+                            for s in raw_spectra]
     w_total = spectrum1.weight + spectrum2.weight
 
     spectrum1_only_peaks = [545.56, 545.58, 545.80]
     spectrum2_only_peaks = [545.92, 549.85]
-    both_peaks = [61.9884,255.0472]
+    both_peaks = [61.9884, 255.0472]
     both_none = [123.42, 190.68]
 
     delta = 0.1
 
     mass, intensity = averageSpectra(
         [(spectrum.mass, spectrum.intensity, spectrum.weight) for spectrum in [spectrum1, spectrum2]])
-    spectrum_sum = TestSpectrum(mass, intensity, 0)
+    spectrum_sum = TmpSpectrum(mass, intensity, 0)
 
     assert all(mass[1:] - mass[:-1] > 0)
 
     nptest.assert_array_less(spectrum_sum.find_intensities(
-        spectrum1_only_peaks), spectrum1.find_intensities(spectrum1_only_peaks)*(spectrum1.weight/w_total*1.01))
+        spectrum1_only_peaks), spectrum1.find_intensities(spectrum1_only_peaks) * (spectrum1.weight / w_total * 1.01))
     nptest.assert_array_less(spectrum_sum.find_intensities(
-        spectrum2_only_peaks), spectrum2.find_intensities(spectrum2_only_peaks)*(spectrum2.weight/w_total*1.01))
+        spectrum2_only_peaks), spectrum2.find_intensities(spectrum2_only_peaks) * (spectrum2.weight / w_total * 1.01))
 
     tmp_min = np.minimum(spectrum1.find_intensities(
         both_peaks), spectrum2.find_intensities(both_peaks))
