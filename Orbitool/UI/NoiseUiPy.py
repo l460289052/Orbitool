@@ -1,23 +1,21 @@
-from typing import Union, Optional, List
-from .. import config
 from collections import deque
+from datetime import datetime
+from typing import List, Optional, Union
 
-from PyQt5 import QtWidgets, QtCore
-import numpy as np
 import matplotlib.ticker
+import numpy as np
+from PyQt5 import QtCore, QtWidgets
 
-from . import NoiseUi
-from .utils import showInfo, get_tablewidget_selected_row, set_header_sizes
-from .manager import Manager, state_node, Thread, MultiProcess
-from . import component
-from .component import factory
-
-from .. import workspace
+from .. import config, workspace
+from ..functions import binary_search
+from ..functions import spectrum as spectrum_func
 from ..structures.file import SpectrumInfo
 from ..structures.spectrum import Spectrum
-from .. import functions
-from ..functions import binary_search, spectrum as spectrum_func
 from ..utils.formula import Formula
+from . import NoiseUi, component
+from .component import factory
+from .manager import Manager, state_node
+from .utils import get_tablewidget_selected_row, set_header_sizes, showInfo
 
 
 class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
@@ -71,13 +69,14 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         workspace = self.manager.workspace
         time = workspace.spectra_list.info.selected_start_time
         info_list = workspace.spectra_list.info.file_spectrum_info_list
-        if time is None:
+        if len(time) == 0:
             if config.default_select:
                 index = 0
             else:
                 showInfo("Please select a spectrum in spectra list")
                 return None
         else:
+            time = datetime.strptime(time, config.timeFormat)
             index = binary_search.indexNearest(
                 info_list, time, method=lambda x, i: x[i].start_time)
 
@@ -92,9 +91,9 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
         def read_and_average():
             if len(spectra := [spectrum for info in infos if (spectrum := info.get_spectrum_from_info(with_minutes=True)) is not None]) > 0:
-                spectra = [(*functions.spectrum.removeZeroPositions(
+                spectra = [(*spectrum_func.removeZeroPositions(
                     spectrum[0], spectrum[1]), spectrum[2]) for spectrum in spectra]
-                mz, intensity = functions.spectrum.averageSpectra(
+                mz, intensity = spectrum_func.averageSpectra(
                     spectra, infos[0].rtol, True)
                 spectrum = Spectrum(path='none:', mz=mz, intensity=intensity,
                                     start_time=infos[0].start_time, end_time=infos[-1].end_time)
@@ -292,7 +291,6 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         subtract = self.substractCheckBox.isChecked()
         spectrum = info.current_spectrum
 
-
         def func():
             params, points, deltas = [], [], []
             for param in info.noise_formulas:
@@ -302,7 +300,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
                     deltas.append(param.delta)
             params = np.array(params)
             points = np.array(points)
-            deltas = np.array(deltas)
+            deltas = np.array(deltas, dtype=int)
             mz, intensity = spectrum_func.denoiseWithParams(
                 spectrum.mz, spectrum.intensity, info.poly_coef, params, points, deltas, info.n_sigma, subtract)
 

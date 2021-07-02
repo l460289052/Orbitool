@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import TypeVar, List, Type
+import io
+from typing import List, Type, TypeVar
+
 import h5py
 
 from ..base import BaseStructure
-from .h5types import StructureConverter
 from .h5datatable import TableConverter
-
+from .h5types import StructureConverter
 
 T = TypeVar("T")
 
@@ -42,16 +43,17 @@ class H5Obj:
 class H5File(H5Obj):
     def __init__(self, path: str = None) -> None:
         if path:
-            self._obj: h5py.File = h5py.File(path)
+            self._io = path
         else:
-            import io
-            self._obj: h5py.File = h5py.File(io.BytesIO(), "w")
+            self._io = io.BytesIO()
+        self._file: bool = bool(path)
+        self._obj: h5py.File = h5py.File(self._io, "a")
 
     def tmp_path(self):
         pass
 
     def close(self):
         self._obj.close()
-        
+
     def __del__(self):
         self.close()

@@ -49,17 +49,38 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuWorkspace">
     <property name="title">
      <string>Workspace</string>
     </property>
+    <addaction name="loadAction"/>
+    <addaction name="saveAction"/>
+    <addaction name="saveAsAction"/>
    </widget>
    <addaction name="menuWorkspace"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="saveAction">
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="loadAction">
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </action>
+  <action name="saveAsAction">
+   <property name="text">
+    <string>Save as</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

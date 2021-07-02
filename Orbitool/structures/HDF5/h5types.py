@@ -53,12 +53,16 @@ class NumpyConverter(BaseSingleConverter):
     def write_to_h5(h5group: Group, key: str, value):
         if key in h5group:
             del h5group[key]
+        if value is None:
+            return
         h5group.create_dataset(
             key, data=value, compression="gzip", compression_opts=1)
 
     @staticmethod
     def read_from_h5(h5group: Group, key: str):
-        return h5group[key][:]
+        if key not in h5group:
+            return None
+        return h5group[key][()]
 
 
 single_types_converters: Dict[Type, BaseSingleConverter] = {
@@ -78,9 +82,15 @@ def register_converter(typ: Type, converter: Type[BaseSingleConverter]):
 class StructureConverter(BaseSingleConverter):
     @staticmethod
     def write_to_h5(h5group: Group, key: str, value: BaseStructure):
-        if key in h5group:
-            del h5group[key]
-        group = h5group.create_group(key)
+        if value is None:
+            if key in h5group:
+                del h5group[key]
+            return
+
+        if key not in h5group:
+            group = h5group.create_group(key)
+        else:
+            group = h5group[key]
 
         for key, field in value.__fields__.items():
             shape_converters[field.shape].write_to_h5(
@@ -88,6 +98,8 @@ class StructureConverter(BaseSingleConverter):
 
     @staticmethod
     def read_from_h5(h5group: Group, key: str):
+        if key not in h5group:
+            return None
         group = h5group[key]
         h5_type = structures.get_type(group.attrs["h5_type"])
         values = {}
@@ -124,7 +136,7 @@ class ListConverter(BaseShapeConverter):
     def write_to_h5(h5group: Group, key: str, field: ModelField, values: list):
         if key in h5group:
             del h5group[key]
-        inner_type = get_args(field.outer_type_)
+        inner_type = get_args(field.outer_type_)[0]
         if inner_type == np.ndarray:
             group = h5group.create_group(key)
             for i, value in enumerate(values):
@@ -138,7 +150,7 @@ class ListConverter(BaseShapeConverter):
 
     @staticmethod
     def read_from_h5(h5group: Group, key: str, field: ModelField):
-        inner_type = get_args(field.outer_type_)
+        inner_type = get_args(field.outer_type_)[0]
         if inner_type == np.ndarray:
             rets = []
             group: Group = h5group[key]

@@ -24,6 +24,10 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         super().setupUi(MainWindow)
         manager = self.manager
 
+        self.loadAction.triggered.connect(self.load)
+        self.saveAction.triggered.connect(self.save)
+        self.saveAsAction.triggered.connect(self.save_as)
+
         # tab widgets
         self.abortPushButton.clicked.connect(self.abort_process_pool)
 
@@ -43,7 +47,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
         self.calibrationTab = self.add_tab(
             CalibrationUiPy.Widget(manager), "Calibration")
-        self.calibrationTab.calcInfoFinished.connect(self.calibration_info_finish)
+        self.calibrationTab.calcInfoFinished.connect(
+            self.calibration_info_finish)
 
         self.peakFitUi = self.add_tab(PeakFitUiPy.Widget(), "Peak Fit")
 
@@ -124,6 +129,28 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     def closeEvent(self, e: QtGui.QCloseEvent) -> None:
         self.workspace.close()
         e.accept()
+
+    @state_node
+    def load(self):
+        ret, f = UiUtils.openfile(
+            "Load workspace", "Orbitool Workspace file(*.Orbitool)")
+        if not ret:
+            return
+        self.manager.workspace = WorkSpace(f)
+        self.manager.inited.emit()
+
+    @state_node
+    def save(self):
+        self.manager.workspace.save()
+
+    @state_node
+    def save_as(self):
+        ret, f = UiUtils.savefile(
+            "Save workspace", "Orbitool Workspace file(*.Orbitool)")
+        if not ret:
+            return
+        self.manager.workspace.close_as(f)
+        self.manager.workspace = WorkSpace(f)
 
     @state_node(mode='x', withArgs=True)
     def file_tab_finish(self, result):

@@ -9,7 +9,7 @@ class SpectraListInfo(BaseStructure):
 
     file_spectrum_info_list: List[SpectrumInfo] = Field(default_factory=list)
 
-    selected_start_time: Optional[datetime] = None
+    selected_start_time: str = ""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

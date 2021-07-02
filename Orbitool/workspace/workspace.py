@@ -1,4 +1,5 @@
 from typing import Generic, List, Optional, Type, TypeVar, Union
+import shutil
 
 from pydantic import BaseModel, Field
 
@@ -43,6 +44,19 @@ class WorkSpace(H5File):
         self.write("info", self.info)
         for widget in self.widgets:
             widget.save()
+
+    def in_memory(self):
+        return not self._file
+
+    def close_as(self, path: str):
+        self.save()
+        self.close()
+
+        if self._file:
+            shutil.copy(self._io, path)
+        else:
+            with open(path, 'wb') as f:
+                f.write(self._io.getbuffer())
 
     def visit_or_create_widget(self, path: str, info_class: Type[T]) -> Widget[T]:
         if path in self:

@@ -55,7 +55,7 @@ class TableConverter:
         dtype, converter = get_dtype(item_type)
         dataset = h5group[key]
 
-        rows = dataset[:]
+        rows = dataset[()]
         return [item_type(**{key: conv.convert_from_h5(value) for value, (key, conv) in zip(row, converter.items())}) for row in rows]
 
 

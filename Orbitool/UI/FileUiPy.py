@@ -20,6 +20,11 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         self.manager = manager
         self.setupUi(self)
 
+        manager.inited.connect(self.showPaths)
+
+    def setupUi(self, Form):
+        super().setupUi(self)
+
         set_header_sizes(self.tableWidget.horizontalHeader(), [150, 100, 100])
 
         self.addFilePushButton.clicked.connect(self.addThermoFile)
@@ -57,7 +62,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
     def addFolder(self):
         ret, folder = UiUtils.openfolder("Select one folder")
         if not ret:
-            return None
+            return
         pathlist = self.pathlist
 
         def func():
