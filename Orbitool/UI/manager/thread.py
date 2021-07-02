@@ -26,10 +26,12 @@ class Thread(QtCore.QThread):
         self.func = func
         self.args = args
         self.kwargs = kwargs
+        self.result = None
 
     def run(self):
         try:
             result = self.func(*self.args, **self.kwargs)
+            self.result = result
             self.finished.emit((result,))
         except Exception as e:
             self.finished.emit((e, ))
@@ -68,7 +70,6 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                 yield result
 
         write_thread = Thread(self.write, (file, iter_queue()), kwargs)
-        write_thread.finished.connect(self.finished.emit)
         write_thread.start()
         with Pool(multi_cores) as pool:
 
@@ -106,7 +107,8 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
 
             queue.put(None)
 
-            write_thread.wait()
+        write_thread.wait()
+        self.finished.emit((write_thread.result,))
 
     @final
     def abort(self, send=True):
