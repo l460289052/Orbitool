@@ -1,15 +1,17 @@
-from typing import Union, Optional, List
+import os
 from datetime import datetime, timedelta
 from functools import partial
+from typing import List, Optional, Union
 
-from . import FileUi, utils as UiUtils
-from .utils import showInfo, set_header_sizes
-from .manager import Manager, state_node, Thread
-from PyQt5 import QtWidgets, QtCore
-import os
+from PyQt5 import QtCore, QtWidgets
 
-from ..structures.file import Path, PathList, SpectrumInfo
 from .. import utils
+from ..structures.file import Path, PathList, SpectrumInfo
+from ..workspace import UiNameGetter, UiState
+from . import FileUi
+from . import utils as UiUtils
+from .manager import Manager, Thread, state_node
+from .utils import set_header_sizes, showInfo
 
 
 class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
@@ -20,7 +22,8 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         self.manager = manager
         self.setupUi(self)
 
-        manager.inited.connect(self.showPaths)
+        manager.inited_or_restored.connect(self.init_or_restore)
+        manager.save.connect(self.updateState)
 
     def setupUi(self, Form):
         super().setupUi(self)
@@ -35,7 +38,29 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
 
     @property
     def pathlist(self) -> PathList:
-        return self.manager.workspace.info.pathlist
+        return self.manager.workspace.file_tab.info.pathlist
+
+    def init_or_restore(self):
+        self.showPaths()
+        self.manager.workspace.file_tab.ui_state.set_state(self)
+
+    def updateState(self):
+        getter = UiNameGetter(self)
+        getter.register_components([
+            self.recursionCheckBox,
+            self.nSpectraRadioButton,
+            self.nMinutesRadioButton,
+            self.nSpectraSpinBox,
+            self.nMinutesDoubleSpinBox,
+            self.autoTimeCheckBox,
+            self.startDateTimeEdit,
+            self.endDateTimeEdit,
+            self.rtolDoubleSpinBox,
+            self.positiveRadioButton,
+            self.negativeRadioButton,
+            self.averageCheckBox])
+        self.manager.workspace.file_tab.ui_state = UiState.FactoryStateGetter(
+            self, getter.registered)
 
     @state_node
     def addThermoFile(self):
@@ -102,7 +127,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
 
         table.show()
 
-        if self.checkBox.isChecked():
+        if self.autoTimeCheckBox.isChecked():
             time_start, time_end = self.pathlist.timeRange
             if time_start is None:
                 return

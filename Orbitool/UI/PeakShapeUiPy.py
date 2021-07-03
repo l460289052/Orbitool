@@ -37,7 +37,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
         self.setupUi(self)
 
         self.animation = LineAnimation()
-        self.manager.inited.connect(self.showNormPeaks)
+        self.manager.inited_or_restored.connect(self.showNormPeaks)
 
     def setupUi(self, Form):
         super().setupUi(Form)

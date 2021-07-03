@@ -122,12 +122,27 @@ class SingleConverter(BaseShapeConverter):
     def write_to_h5(h5group: Group, key: str, field: ModelField, value):
         converter = single_types_converters.get(
             field.type_, StructureConverter)
+        if value is None:
+            if issubclass(converter, AttrConverter):
+                if key in h5group.attrs:
+                    del h5group.attrs[key]
+            else:
+                if key in h5group:
+                    del h5group[key]
+            return
+
         converter.write_to_h5(h5group, key, value)
 
     @staticmethod
     def read_from_h5(h5group: Group, key: str, field: ModelField):
         converter = single_types_converters.get(
             field.type_, StructureConverter)
+        if issubclass(converter, AttrConverter):
+            if key not in h5group.attrs:
+                return None
+        else:
+            if key not in h5group:
+                return None
         return converter.read_from_h5(h5group, key)
 
 

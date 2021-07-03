@@ -44,4 +44,4 @@ class Conveter(HDF5.BaseSingleConverter):
         return manager
 
 
-HDF5.register_converter(PeaksManager, PeaksManagerStructure)
+HDF5.register_converter(PeaksManager, Conveter)

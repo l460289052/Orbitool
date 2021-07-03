@@ -12,7 +12,8 @@ class Manager(QObject):
     """
     storage common resources
     """
-    inited = pyqtSignal()
+    inited_or_restored = pyqtSignal()
+    save = pyqtSignal()
     busy_signal = pyqtSignal(bool)
 
     def __init__(self) -> None:

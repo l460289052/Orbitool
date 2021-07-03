@@ -5,6 +5,7 @@ from multiprocessing import cpu_count
 
 from pydantic import BaseModel
 
+
 DEBUG = False
 
 timeFormat = r"%Y-%m-%d %H:%M:%S"

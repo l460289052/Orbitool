@@ -80,7 +80,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         self.manager: Manager = manager
         self.setupUi(self)
         self.manager.calibrationPlot = self.plot
-        manager.inited.connect(self.init)
+        manager.inited_or_restored.connect(self.init)
 
     def setupUi(self, Form):
         super().setupUi(Form)

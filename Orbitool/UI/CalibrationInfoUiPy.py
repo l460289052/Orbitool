@@ -10,7 +10,7 @@ class Widget(QtWidgets.QWidget, CalibrationInfoUi.Ui_Form):
         super().__init__()
         self.manager = manager
         self.setupUi(self)
-        manager.inited.connect(self.showAllInfo)
+        manager.inited_or_restored.connect(self.showAllInfo)
 
     @property
     def calibration(self):

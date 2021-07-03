@@ -4,10 +4,10 @@ import shutil
 from pydantic import BaseModel, Field
 
 from ..structures.base import BaseStructure, BaseTableItem
-from ..structures.file import PathList, SpectrumInfo
 from ..structures.HDF5 import H5File, H5Obj, Ndarray
 
 from .base import Widget
+from .file_tab import FileTabInfo
 from .spectra_list import SpectraListInfo
 from .noise_tab import NoiseTabInfo
 from .peak_shape import PeakShapeInfo
@@ -20,7 +20,7 @@ T = TypeVar("T")
 class WorkspaceInfo(BaseStructure):
     h5_type = "workspace info"
 
-    pathlist: PathList = Field(default_factory=PathList)
+    version: str = "2.0.0"
     hasRead: bool = False
 
 
@@ -29,7 +29,9 @@ class WorkSpace(H5File):
         super().__init__(path)
         self.info: WorkspaceInfo = self.read("info") if "info" in self else WorkspaceInfo(
         )
+        self.widgets = []
 
+        self.file_tab = self.visit_or_create_widget("file tab", FileTabInfo)
         self.spectra_list = self.visit_or_create_widget(
             "spectra list", SpectraListInfo)
         self.noise_tab = self.visit_or_create_widget("noise tab", NoiseTabInfo)
@@ -37,9 +39,6 @@ class WorkSpace(H5File):
             "peak shape tab", PeakShapeInfo)
         self.calibration_tab = self.visit_or_create_widget_specific(
             "calibration tab", CalibrationWidget)
-
-        self.widgets: List[Widget] = [
-            self.spectra_list, self.noise_tab, self.peak_shape_tab, self.calibration_tab]
 
     def save(self):
         self.write("info", self.info)
@@ -61,10 +60,16 @@ class WorkSpace(H5File):
 
     def visit_or_create_widget(self, path: str, info_type: Type[T]) -> Widget[T]:
         if path in self:
-            return Widget(self._obj[path], info_type)
-        return Widget(self._obj.create_group(path), info_type)
+            widget = Widget(self._obj[path], info_type)
+        else:
+            widget = Widget(self._obj.create_group(path), info_type)
+        self.widgets.append(widget)
+        return widget
 
     def visit_or_create_widget_specific(self, path: str, widget_type: Type[T]) -> T:
         if path in self:
-            return widget_type(self._obj[path])
-        return widget_type(self._obj.create_group(path))
+            widget = widget_type(self._obj[path])
+        else:
+            widget = widget_type(self._obj.create_group(path))
+        self.widgets.append(widget)
+        return widget

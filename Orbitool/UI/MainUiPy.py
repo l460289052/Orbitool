@@ -99,7 +99,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
         self.manager.busy_signal.connect(self.set_busy)
 
-        self.manager.inited.emit()
+        self.manager.inited_or_restored.emit()
         self.manager.set_busy(False)
 
     @property
@@ -137,10 +137,11 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         if not ret:
             return
         self.manager.workspace = WorkSpace(f)
-        self.manager.inited.emit()
+        self.manager.inited_or_restored.emit()
 
     @state_node
     def save(self):
+        self.manager.save.emit()
         self.manager.workspace.save()
 
     @state_node
@@ -149,6 +150,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             "Save workspace", "Orbitool Workspace file(*.Orbitool)")
         if not ret:
             return
+        self.manager.save.emit()
         self.manager.workspace.close_as(f)
         self.manager.workspace = WorkSpace(f)
 
