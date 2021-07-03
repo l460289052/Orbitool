@@ -174,7 +174,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     def noise_tab_finish(self, result):
         self.workspace.peak_shape_tab.info.spectrum = result[0]
         self.tabWidget.setCurrentWidget(self.peakShapeTab)
-        return self.peakShapeTab.showPeak() # yield
+        return self.peakShapeTab.showPeak()  # yield
 
     @state_node(mode='x')
     def peak_shape_tab_finish(self):

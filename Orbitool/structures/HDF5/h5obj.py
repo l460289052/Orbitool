@@ -16,9 +16,6 @@ class H5Obj:
     def __init__(self, obj) -> None:
         self._obj: h5py.Group = obj
 
-    def get_from_list(self, path: str, index: int):
-        pass
-
     def write_table(self, path: str, item_type: Type[T], values: List[T]):
         TableConverter.write_to_h5(self._obj, path, item_type, values)
 
