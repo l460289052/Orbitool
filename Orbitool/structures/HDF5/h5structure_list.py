@@ -7,11 +7,18 @@ T = TypeVar('T')
 
 
 class StructureListView(Generic[T]):
-    def __init__(self, h5group: h5py.Group, key: str) -> None:
+    def __init__(self, h5group: h5py.Group, key: str, new=False) -> None:
         if key in h5group:
-            self.obj = h5group[key]
-        else:
-            self.obj = h5group.create_group(key)
+            if new:
+                del self.obj[key]
+            else:
+                self.obj = h5group[key]
+                return
+        self.obj = h5group.create_group(key)
+
+    @property
+    def h5_path(self):
+        return self.obj.name
 
     def h5_append(self, value: T):
         index = len(self.obj)

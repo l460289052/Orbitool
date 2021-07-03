@@ -8,10 +8,10 @@ from ..functions import spectrum as spectrum_func
 from ..functions.peakfit.normal_distribution import NormalDistributionFunc
 from ..functions.calibration import Calibrator, PolynomialRegressionFunc
 from ..structures.file import SpectrumInfo
-from ..structures.HDF5 import StructureConverter
+from ..structures.HDF5 import StructureConverter, StructureListView
 from ..structures.spectrum import Spectrum
 from ..workspace import WorkSpace
-from ..workspace.calibration import Ion
+from ..workspace.calibration import Widget as CalibrationWidget
 from ..utils.formula import Formula
 from . import CalibrationUi
 from .manager import Manager, MultiProcess, state_node
@@ -35,13 +35,12 @@ class ReadFromFile(MultiProcess):
 
     @ staticmethod
     def write(file: WorkSpace, rets: Iterable[Spectrum], dest, **kwargs):
-        tmp = file._obj.create_group("tmp")
-        for index, spectrum in enumerate(rets):
-            StructureConverter.write_to_h5(tmp, str(index), spectrum)
+        tmp = StructureListView[Spectrum](file._obj, "tmp", True)
+        tmp.h5_extend(rets)
 
         if dest in file:
-            del file[dest]
-        file._obj.move(tmp.name, dest)
+            del file._obj[dest]
+        return file._obj.move(tmp.h5_path, dest)
 
     @ staticmethod
     def exception(file, **kwargs):
@@ -51,9 +50,8 @@ class ReadFromFile(MultiProcess):
 
 class SplitAndFitPeak(MultiProcess):
     @staticmethod
-    def read(h5_spectra: h5py.Group, **kwargs) -> Generator:
-        for key in h5_spectra.keys():
-            yield StructureConverter.read_from_h5(h5_spectra, key)
+    def read(h5_spectra: StructureListView[Spectrum], **kwargs) -> Generator:
+        return h5_spectra
 
     @staticmethod
     def func(data: Spectrum, fit_func: NormalDistributionFunc, ions: List[float], intensity_filter: float, **kwargs):
@@ -141,15 +139,15 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         # read file
         if not workspace.info.hasRead:
-            dest = '/'.join([workspace.calibration_tab._obj.name,
-                             "raw_spectra"])
             read_from_file = ReadFromFile(
-                workspace, {"infos": workspace.spectra_list.info.file_spectrum_info_list, "dest": dest})
+                workspace, {
+                    "infos": workspace.spectra_list.info.file_spectrum_info_list,
+                    "dest": calibration_tab.raw_spectra.h5_path})
 
             yield read_from_file
             workspace.info.hasRead = True
 
-        h5_spectra = calibration_tab._obj["raw_spectra"]
+        h5_spectra = calibration_tab.raw_spectra
         fit_func = workspace.peak_shape_tab.info.func
 
         # use ions to decide whether to split

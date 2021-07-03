@@ -3,6 +3,9 @@ from typing import List, Dict
 from ..functions.calibration import Ion, Calibrator, PolynomialRegressionFunc
 from ..utils.formula import Formula
 from ..structures.base import BaseStructure, BaseTableItem, Field
+from ..structures.spectrum import Spectrum
+from ..structures.HDF5 import StructureList
+from .base import Widget as BaseWidget
 
 
 class CalibratorInfo(BaseStructure):
@@ -20,3 +23,10 @@ class CalibratorInfo(BaseStructure):
             if f in s:
                 continue
             self.ions.append(Ion(shown_text=ion, formula=f))
+
+
+class Widget(BaseWidget[CalibratorInfo]):
+    raw_spectra = StructureList(Spectrum)
+
+    def __init__(self, obj) -> None:
+        super().__init__(obj, CalibratorInfo)

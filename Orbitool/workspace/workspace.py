@@ -11,7 +11,7 @@ from .base import Widget
 from .spectra_list import SpectraListInfo
 from .noise_tab import NoiseTabInfo
 from .peak_shape import PeakShapeInfo
-from .calibration import CalibratorInfo
+from .calibration import Widget as CalibrationWidget, CalibratorInfo
 
 
 T = TypeVar("T")
@@ -35,10 +35,11 @@ class WorkSpace(H5File):
         self.noise_tab = self.visit_or_create_widget("noise tab", NoiseTabInfo)
         self.peak_shape_tab = self.visit_or_create_widget(
             "peak shape tab", PeakShapeInfo)
-        self.calibration_tab = self.visit_or_create_widget(
-            "calibration tab", CalibratorInfo)
+        self.calibration_tab = self.visit_or_create_widget_specific(
+            "calibration tab", CalibrationWidget)
 
-        self.widgets: List[Widget] = [self.spectra_list, self.noise_tab]
+        self.widgets: List[Widget] = [
+            self.spectra_list, self.noise_tab, self.peak_shape_tab, self.calibration_tab]
 
     def save(self):
         self.write("info", self.info)
@@ -58,7 +59,12 @@ class WorkSpace(H5File):
             with open(path, 'wb') as f:
                 f.write(self._io.getbuffer())
 
-    def visit_or_create_widget(self, path: str, info_class: Type[T]) -> Widget[T]:
+    def visit_or_create_widget(self, path: str, info_type: Type[T]) -> Widget[T]:
         if path in self:
-            return Widget(self._obj[path], info_class)
-        return Widget(self._obj.create_group(path), info_class)
+            return Widget(self._obj[path], info_type)
+        return Widget(self._obj.create_group(path), info_type)
+
+    def visit_or_create_widget_specific(self, path: str, widget_type: Type[T]) -> T:
+        if path in self:
+            return widget_type(self._obj[path])
+        return widget_type(self._obj.create_group(path))
