@@ -17,7 +17,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="showSelectedPushButton">
        <property name="text">
         <string>show selected spectrum</string>
        </property>
@@ -30,28 +30,39 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QPushButton" name="pushButton_6">
-          <property name="text">
-           <string>selected</string>
-          </property>
-         </widget>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="1">
+           <widget class="QPushButton" name="filterUnselectedPushButton">
+            <property name="text">
+             <string>unselect</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="filterSelectedPushButton">
+            <property name="text">
+             <string>selected</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="filterFormulaWithPushButton">
+            <property name="text">
+             <string>with formula</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="filterFormulaWithoutPushButton">
+            <property name="text">
+             <string>without</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_7">
-          <property name="text">
-           <string>with formula</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_8">
-          <property name="text">
-           <string>without formula</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_9">
+         <widget class="QPushButton" name="filterClearPushButton">
           <property name="text">
            <string>clear filter</string>
           </property>
@@ -80,28 +91,28 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="actionRmPushButton">
           <property name="text">
            <string>remove</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="actionFit_FormulaPushButton">
           <property name="text">
            <string>fit use formula</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_10">
+         <widget class="QPushButton" name="actionFit_ForceFormulaPushButton">
           <property name="text">
            <string>fit with force formula</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_4">
+         <widget class="QPushButton" name="actionFit_MassListPushButton">
           <property name="text">
            <string>fit use mass list</string>
           </property>

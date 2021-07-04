@@ -15,7 +15,6 @@ from . import TimeseriesesUiPy
 
 from . import FormulaUiPy, MassListUiPy, SpectraListUiPy, PeakListUiPy, SpectrumUiPy
 from . import CalibrationInfoUiPy, TimeseriesUiPy
-from . import PeakFitFloatUiPy
 
 
 class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
@@ -52,7 +51,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.calibrationTab.callback.connect(
             self.calibration_finish)
 
-        self.peakFitTab = self.add_tab(PeakFitUiPy.Widget(), "Peak Fit")
+        self.peakFitTab = self.add_tab(PeakFitUiPy.Widget(manager), "Peak Fit")
 
         self.massDefectTab = self.add_tab(
             MassDefectUiPy.Widget(), "Mass Defect")
