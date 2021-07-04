@@ -96,7 +96,7 @@ class PathList(BaseStructure):
 
 
 class SpectrumInfo(BaseTableItem):
-    item_name = "SpectrumInfo"
+    item_name = "file spectrum info"
 
     path: str  # "type:path"
     start_time: datetime

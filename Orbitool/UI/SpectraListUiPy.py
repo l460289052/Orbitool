@@ -11,6 +11,9 @@ from .. import config
 
 from ..structures.file import SpectrumInfo
 
+FILE_TAB = 0
+CALIBRATE_TAB = 1
+
 
 class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
     def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
@@ -19,7 +22,7 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
         self.setupUi(self)
 
         self.comboBox.currentIndexChanged.connect(self.comboBox_changed)
-        self.comboBox_position = []
+        self.comboBox_position = {}
         self.former_index = -1
 
         self.tableWidget.itemSelectionChanged.connect(self.selection_changed)
@@ -28,19 +31,26 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
         super().setupUi(Form)
 
         set_header_sizes(self.tableWidget.horizontalHeader(), [210, 210])
+        self.show_combobox_selection()
 
-    @state_node(withArgs=True, mode='x')
-    def comboBox_changed(self, index):
-        if self.former_index == index:
+    @state_node(mode='x')
+    def comboBox_changed(self):
+        current = self.comboBox.currentData()
+        if self.former_index == current:
             return
         if self.former_index != -1:
             self.comboBox_position[self.former_index] = self.tableWidget.verticalScrollBar(
             ).sliderPosition()
-        if index == 0:
+        self.tableWidget.setRowCount(0)
+        if current == FILE_TAB:
             self.show_file_infos()
+        elif current == CALIBRATE_TAB:
+            self.show_calibration_infos()
 
         self.tableWidget.verticalScrollBar().setSliderPosition(
-            self.comboBox_position[index])
+            self.comboBox_position.get(current, 0))
+        self.former_index = current
+        self.tableWidget.show()
 
     @property
     def spectra_list(self):
@@ -48,7 +58,6 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
 
     def show_file_infos(self):
         tableWidget = self.tableWidget
-        tableWidget.setRowCount(0)
         spectrum_infos: List[SpectrumInfo] = self.spectra_list.info.file_spectrum_info_list
         spectrum_infos = [
             info for info in spectrum_infos if info.average_index == 0]
@@ -60,13 +69,21 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
             for j, v in enumerate(time_range):
                 tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(v))
 
+    def show_calibration_infos(self):
+        tableWidget = self.tableWidget
+        infos = self.manager.workspace.calibration_tab.info.calibrated_spectrum_infos
+        tableWidget.setRowCount(len(infos))
+        for i, info in enumerate(infos):
+            tableWidget.setItem(i, 0, QtWidgets.QTableWidgetItem(
+                info.start_time.strftime(config.timeFormat)))
+            tableWidget.setItem(i, 1, QtWidgets.QTableWidgetItem(
+                info.end_time.strftime(config.timeFormat)))
+
     def show_combobox_selection(self):
-        spectra_list = self.spectra_list
         comboBox = self.comboBox
-        if len(spectra_list.info.file_spectrum_info_list) > 0:
-            if comboBox.count() == 0:
-                self.comboBox_position.append(0)
-                comboBox.addItem("File tab")
+        comboBox.clear()
+        comboBox.addItem("File tab", FILE_TAB)
+        comboBox.addItem("Calibrate tab", CALIBRATE_TAB)
 
     @state_node(mode='e')
     def selection_changed(self):

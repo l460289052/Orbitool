@@ -54,8 +54,10 @@ class Spectrum(BaseStructure):
     end_time: datetime
 
 
-class SpectrumList(BaseStructure):
-    h5_type = "SpectrumList"
+class SpectrumInfo(BaseTableItem):
+    item_name = "spectrum info"
 
+    start_time: datetime
+    end_time: datetime
 
 # class MassListItem

@@ -1,27 +1,25 @@
-from typing import Generator, Iterable, List, Optional, Tuple, Union, Dict
 from datetime import datetime
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
+
 import numpy as np
 from PyQt5 import QtCore, QtWidgets
-import h5py
 
 from ..functions import spectrum as spectrum_func
-from ..functions.peakfit.normal_distribution import NormalDistributionFunc
 from ..functions.calibration import Calibrator, PolynomialRegressionFunc
-from ..structures.file import SpectrumInfo
+from ..functions.peakfit.normal_distribution import NormalDistributionFunc
+from ..structures.file import SpectrumInfo as FileSpectrumInfo
 from ..structures.HDF5 import StructureConverter, StructureListView
-from ..structures.spectrum import Spectrum
+from ..structures.spectrum import Spectrum, SpectrumInfo
 from ..workspace import WorkSpace
-from ..workspace.calibration import Widget as CalibrationWidget
-from ..utils.formula import Formula
 from . import CalibrationUi
+from .component import Plot
 from .manager import Manager, MultiProcess, state_node
 from .utils import get_tablewidget_selected_row
-from .component import Plot
 
 
 class ReadFromFile(MultiProcess):
     @staticmethod
-    def func(data: Tuple[SpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
+    def func(data: Tuple[FileSpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
         info, (mz, intensity, time) = data
         mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
         spectrum = Spectrum(path=info.path, mz=mz, intensity=intensity,
@@ -29,7 +27,7 @@ class ReadFromFile(MultiProcess):
         return spectrum
 
     @ staticmethod
-    def read(file, infos: List[SpectrumInfo], **kwargs) -> Generator:
+    def read(file, infos: List[FileSpectrumInfo], **kwargs) -> Generator:
         for info in infos:
             yield info, info.get_spectrum_from_info(with_minutes=True)
 
@@ -72,8 +70,61 @@ class SplitAndFitPeak(MultiProcess):
         return path_ions_peak
 
 
+class CalibrateMerge(MultiProcess):
+    @staticmethod
+    def read(file: WorkSpace, **kwargs) -> Generator[List[Tuple[Spectrum, PolynomialRegressionFunc]], Any, Any]:
+        batch = []
+        funcs = file.calibration_tab.info.poly_funcs
+        for info, spectrum in zip(file.spectra_list.info.file_spectrum_info_list, file.calibration_tab.raw_spectra):
+            if info.average_index > 0:
+                batch.append((spectrum, funcs[spectrum.path]))
+            else:
+                if batch:
+                    yield batch
+                batch = [(spectrum, funcs[spectrum.path])]
+        yield batch
+
+    @staticmethod
+    def func(data: List[Tuple[Spectrum, PolynomialRegressionFunc]]) -> Spectrum:
+        spectra = []
+        paths = set()
+        start_times = []
+        end_times = []
+        for spectrum, func in data:
+            spectrum.mz = func.predictMz(spectrum.mz)
+            spectra.append((spectrum.mz, spectrum.intensity,
+                            (spectrum.end_time - spectrum.start_time).total_seconds()))
+            paths.add(spectrum.path)
+            start_times.append(spectrum.start_time)
+            end_times.append(spectrum.end_time)
+
+        path = paths.pop() if len(paths) == 1 else ""
+        mz, intensity = spectrum_func.averageSpectra(spectra, drop_input=True)
+        start_time = min(start_times)
+        end_time = max(end_times)
+        spectrum = Spectrum(path=path, mz=mz, intensity=intensity,
+                            start_time=start_time, end_time=end_time)
+        return spectrum
+
+    @staticmethod
+    def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
+        tmp = StructureListView[Spectrum](file._obj, "tmp", True)
+        infos = file.calibration_tab.info.calibrated_spectrum_infos
+        infos.clear()
+        for ret in rets:
+            tmp.h5_append(ret)
+            infos.append(SpectrumInfo(
+                start_time=ret.start_time, end_time=ret.end_time))
+
+        target = file.calibration_tab.calibrated_spectra
+        if target.h5_path in file:
+            del file._obj[target.h5_path]
+        file._obj.move(tmp.h5_path, target.h5_path)
+
+
 class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
     calcInfoFinished = QtCore.pyqtSignal()
+    callback = QtCore.pyqtSignal()
 
     def __init__(self, manager: Manager) -> None:
         super().__init__()
@@ -90,6 +141,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         self.addIonToolButton.clicked.connect(self.addIon)
         self.delIonToolButton.clicked.connect(self.removeIon)
         self.calcInfoPushButton.clicked.connect(self.calcInfo)
+        self.finishPushButton.clicked.connect(self.calibrate)
 
     @ property
     def calibration(self):
@@ -202,3 +254,9 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         info.poly_funcs = yield generate_func_from_calibrator
 
         self.calcInfoFinished.emit()
+
+    @state_node
+    def calibrate(self):
+        calibrate_merge = CalibrateMerge(self.manager.workspace)
+        yield calibrate_merge
+        self.callback.emit()

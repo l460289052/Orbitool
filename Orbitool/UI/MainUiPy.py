@@ -49,8 +49,10 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             CalibrationUiPy.Widget(manager), "Calibration")
         self.calibrationTab.calcInfoFinished.connect(
             self.calibration_info_finish)
+        self.calibrationTab.callback.connect(
+            self.calibration_finish)
 
-        self.peakFitUi = self.add_tab(PeakFitUiPy.Widget(), "Peak Fit")
+        self.peakFitTab = self.add_tab(PeakFitUiPy.Widget(), "Peak Fit")
 
         self.massDefectTab = self.add_tab(
             MassDefectUiPy.Widget(), "Mass Defect")
@@ -158,7 +160,6 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     def file_tab_finish(self, result):
         infos = result[0]
         self.spectraList.spectra_list.info.file_spectrum_info_list = infos
-        self.spectraList.show_combobox_selection()
         self.spectraList.comboBox.setCurrentIndex(-1)
         self.spectraList.comboBox.setCurrentIndex(0)
         self.spectraListDw.show()
@@ -185,6 +186,11 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     @state_node(mode='x')
     def calibration_info_finish(self):
         self.calibrationInfo.showAllInfo()
+
+    @state_node(mode='x')
+    def calibration_finish(self):
+        self.tabWidget.setCurrentWidget(self.peakFitTab)
+        self.spectraList.comboBox.setCurrentIndex(1)
 
     def abort_process_pool(self):
         # self.manager.pool.terminate()
@@ -215,7 +221,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
                 map(hide, [self.massListDw, self.peakListDw, self.timeseriesDw]))
             list(map(show, [self.calibrationInfoDw,
                             self.spectraListDw, self.spectrumDw]))
-        elif widget == self.peakFitUi:
+        elif widget == self.peakFitTab:
             list(map(hide, [self.calibrationInfoDw, self.timeseriesDw]))
             list(map(show, [self.massListDw, self.spectraListDw,
                             self.spectrumDw, self.peakListDw]))
