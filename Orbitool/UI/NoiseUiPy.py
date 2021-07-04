@@ -72,18 +72,14 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     @state_node
     def showSelectedSpectrum(self):
         workspace = self.manager.workspace
-        time = workspace.spectra_list.info.selected_start_time
+        index = workspace.spectra_list.info.selected_index
         info_list = workspace.file_tab.info.spectrum_infos
-        if len(time) == 0:
+        if index is None:
             if config.default_select:
                 index = 0
             else:
                 showInfo("Please select a spectrum in spectra list")
                 return None
-        else:
-            time = datetime.strptime(time, config.timeFormat)
-            index = binary_search.indexNearest(
-                info_list, time, method=lambda x, i: x[i].start_time)
 
         left = index
         while info_list[left].average_index != 0:

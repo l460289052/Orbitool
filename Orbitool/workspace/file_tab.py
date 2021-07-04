@@ -1,9 +1,12 @@
-from ..structures.base import BaseStructure, Field
-from ..structures.file import PathList, FileSpectrumInfo
-from ..structures.spectrum import Spectrum
-from ..structures.HDF5 import StructureList
-from .base import Widget as BaseWidget
 from typing import List
+
+import numpy as np
+
+from ..structures.base import BaseStructure, Field
+from ..structures.file import FileSpectrumInfo, PathList
+from ..structures.HDF5 import StructureList
+from ..structures.spectrum import Spectrum
+from .base import Widget as BaseWidget
 
 
 class FileTabInfo(BaseStructure):

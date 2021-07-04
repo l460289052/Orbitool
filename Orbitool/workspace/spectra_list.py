@@ -1,13 +1,17 @@
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
+
+import numpy as np
+
+from ..structures.base import BaseStructure, Field
 from ..structures.file import FileSpectrumInfo
-from ..structures.base import Field, BaseStructure
 
 
 class SpectraListInfo(BaseStructure):
     h5_type = "spectra list info"
 
-    selected_start_time: str = ""
+    shown_indexes: np.ndarray = Field(default_factory=lambda: np.zeros(0))
+    selected_index: Optional[int] = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
