@@ -30,7 +30,7 @@ if __name__ == "__main__":
     if config.DEBUG:
         QtWidgets.QMessageBox.information(None, 'info', 'DEBUG')
 
-    MainWin = MainUiPy.Window(parser.workspacefile)
+    MainWin = MainUiPy.Window(args.workspacefile)
     MainWin.show()
     if args.to_step:
         steps = {
