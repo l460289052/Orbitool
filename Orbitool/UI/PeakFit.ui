@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>521</width>
+    <height>332</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,61 +17,43 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QGroupBox" name="groupBox_3">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>show selected spectrum</string>
        </property>
-       <property name="title">
-        <string>Select a peaks</string>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="QComboBox" name="comboBox"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>connect</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </widget>
      </item>
      <item>
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>Filters</string>
+        <string>Peaks Filter</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QCheckBox" name="checkBox">
+         <widget class="QPushButton" name="pushButton_6">
           <property name="text">
-           <string>Checked peaks</string>
+           <string>selected</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="checkBox_3">
+         <widget class="QPushButton" name="pushButton_7">
           <property name="text">
-           <string>peaks with formula</string>
+           <string>with formula</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="checkBox_2">
+         <widget class="QPushButton" name="pushButton_8">
           <property name="text">
-           <string>peaks without formula</string>
+           <string>without formula</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="checkBox_4">
+         <widget class="QPushButton" name="pushButton_9">
           <property name="text">
-           <string>all peaks</string>
+           <string>clear filter</string>
           </property>
          </widget>
         </item>
@@ -108,6 +90,13 @@
          <widget class="QPushButton" name="pushButton_3">
           <property name="text">
            <string>fit use formula</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_10">
+          <property name="text">
+           <string>fit with force formula</string>
           </property>
          </widget>
         </item>

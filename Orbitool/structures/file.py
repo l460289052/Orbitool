@@ -95,35 +95,33 @@ class PathList(BaseStructure):
         return len(self.paths)
 
 
-class SpectrumInfo(BaseTableItem):
+class FileSpectrumInfo(spectrum.SpectrumInfo):
     item_name = "file spectrum info"
 
     path: str  # "type:path"
-    start_time: datetime
-    end_time: datetime
     rtol: int
     polarity: int
 
     average_index: int
 
     @staticmethod
-    def generate_infos_from_paths_by_number(paths, rtol, N, polarity, timeRange) -> List[SpectrumInfo]:
+    def generate_infos_from_paths_by_number(paths, rtol, N, polarity, timeRange) -> List[FileSpectrumInfo]:
         pass
 
     @staticmethod
-    def generate_infos_from_paths_by_time_interval(paths: List[Path], rtol, interval: timedelta, polarity, timeRange) -> List[SpectrumInfo]:
+    def generate_infos_from_paths_by_time_interval(paths: List[Path], rtol, interval: timedelta, polarity, timeRange) -> List[FileSpectrumInfo]:
         start_times, end_times = zip(
             *((p.startDatetime, p.endDatetime) for p in paths))
         paths_str = [path.path for path in paths]
         rets = part_by_time_interval(
             paths_str, start_times, end_times, timeRange[0], timeRange[1], interval)
-        ret = [SpectrumInfo(
+        ret = [FileSpectrumInfo(
             path=path, start_time=start, end_time=end, rtol=rtol, polarity=polarity,
             average_index=index) for path, start, end, index in rets]
         return ret
 
     @staticmethod
-    def generate_infos_from_paths(paths: List[Path], rtol, polarity, timeRange) -> List[SpectrumInfo]:
+    def generate_infos_from_paths(paths: List[Path], rtol, polarity, timeRange) -> List[FileSpectrumInfo]:
         info_list = []
         for path in paths:
             origin, realpath = path.path.split(':', 1)
@@ -133,7 +131,7 @@ class SpectrumInfo(BaseTableItem):
                 for i in range(*f.timeRange2NumRange((timeRange[0] - creationTime, timeRange[1] - creationTime))):
                     if f.getSpectrumPolarity(i) == polarity:
                         time = creationTime + f.getSpectrumRetentionTime(i)
-                        info = SpectrumInfo(path=path.path, start_time=time, end_time=time,
+                        info = FileSpectrumInfo(path=path.path, start_time=time, end_time=time,
                                             rtol=rtol, polarity=polarity, average_index=0)
                         info_list.append(info)
         return info_list

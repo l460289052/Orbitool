@@ -9,7 +9,7 @@ from PyQt5 import QtCore, QtWidgets
 from .. import config, workspace
 from ..functions import binary_search
 from ..functions import spectrum as spectrum_func
-from ..structures.file import SpectrumInfo
+from ..structures.file import FileSpectrumInfo
 from ..structures.spectrum import Spectrum
 from ..utils.formula import Formula
 from . import NoiseUi, component
@@ -73,7 +73,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     def showSelectedSpectrum(self):
         workspace = self.manager.workspace
         time = workspace.spectra_list.info.selected_start_time
-        info_list = workspace.spectra_list.info.file_spectrum_info_list
+        info_list = workspace.file_tab.info.spectrum_infos
         if len(time) == 0:
             if config.default_select:
                 index = 0
@@ -92,7 +92,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         while info_list[right].average_index != 0:
             right += 1
 
-        infos: List[SpectrumInfo] = list(info_list[left:right])
+        infos: List[FileSpectrumInfo] = list(info_list[left:right])
 
         def read_and_average():
             if len(spectra := [spectrum for info in infos if (spectrum := info.get_spectrum_from_info(with_minutes=True)) is not None]) > 0:

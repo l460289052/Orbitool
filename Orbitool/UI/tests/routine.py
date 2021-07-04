@@ -53,7 +53,7 @@ def fileui(window: MainUiPy.Window):
     fileui.processSelected()
     wait_not_busy()
     sleep()
-    assert len(workspace.spectra_list.info.file_spectrum_info_list) > 0
+    assert len(workspace.file_tab.info.spectrum_infos) > 0
 
 
 def file_spectra(window: MainUiPy.Window):
@@ -64,6 +64,7 @@ def file_spectra(window: MainUiPy.Window):
 
 def noise(window: MainUiPy.Window):
     window.tabWidget.setCurrentWidget(window.noiseTab)
+    sleep()
 
     noiseui = window.noiseTab
     noiseui.showSelectedSpectrum()
@@ -72,9 +73,14 @@ def noise(window: MainUiPy.Window):
     sleep()
 
     noiseui.calcNoise()
+
+    sleep()
     noiseui.denoise()
 
-def peak_shape(window:MainUiPy.Window):
+    sleep()
+
+
+def peak_shape(window: MainUiPy.Window):
     window.peakShapeTab.finishPeakShape()
 
 # def calibration(window:MainUiPy.Window):

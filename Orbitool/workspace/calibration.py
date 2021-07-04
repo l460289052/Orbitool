@@ -27,7 +27,6 @@ class CalibratorInfo(BaseStructure):
 
 
 class Widget(BaseWidget[CalibratorInfo]):
-    raw_spectra = StructureList(Spectrum)  # should be move to file tab
     calibrated_spectra = StructureList(Spectrum)
 
     def __init__(self, obj) -> None:

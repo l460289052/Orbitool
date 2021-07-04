@@ -6,7 +6,7 @@ from typing import List, Optional, Union
 from PyQt5 import QtCore, QtWidgets
 
 from .. import utils
-from ..structures.file import Path, PathList, SpectrumInfo
+from ..structures.file import Path, PathList, FileSpectrumInfo
 from ..workspace import UiNameGetter, UiState
 from . import FileUi
 from . import utils as UiUtils
@@ -15,7 +15,7 @@ from .utils import set_header_sizes, showInfo
 
 
 class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
-    callback = QtCore.pyqtSignal(tuple)
+    callback = QtCore.pyqtSignal()
 
     def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
         super().__init__(parent=parent)
@@ -37,12 +37,16 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         self.allPushButton.clicked.connect(self.processAll)
 
     @property
+    def file(self):
+        return self.manager.workspace.file_tab
+
+    @property
     def pathlist(self) -> PathList:
         return self.manager.workspace.file_tab.info.pathlist
 
     def init_or_restore(self):
         self.showPaths()
-        self.manager.workspace.file_tab.ui_state.set_state(self)
+        self.file.ui_state.set_state(self)
 
     def updateState(self):
         getter = UiNameGetter(self)
@@ -59,7 +63,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             self.positiveRadioButton,
             self.negativeRadioButton,
             self.averageCheckBox])
-        self.manager.workspace.file_tab.ui_state = UiState.FactoryStateGetter(
+        self.file.ui_state = UiState.FactoryStateGetter(
             self, getter.registered)
 
     @state_node
@@ -141,15 +145,15 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             return None
 
         paths = self.pathlist.subList(indexes)
-        infos = yield self.processPaths(paths.paths)
+        self.file.info.spectrum_infos = yield self.processPaths(paths.paths)
 
-        self.callback.emit((infos, ))
+        self.callback.emit()
 
     @state_node
     def processAll(self):
-        infos = yield self.processPaths(self.pathlist.paths)
+        self.file.info.spectrum_infos = yield self.processPaths(self.pathlist.paths)
 
-        self.callback.emit((infos, ))
+        self.callback.emit()
 
     def processPaths(self, paths: List[Path]):
         time_range = (self.startDateTimeEdit.dateTime().toPyDateTime(),
@@ -169,10 +173,10 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             elif self.nMinutesRadioButton.isChecked():
                 interval = timedelta(
                     minutes=self.nMinutesDoubleSpinBox.value())
-                func = partial(SpectrumInfo.generate_infos_from_paths_by_time_interval,
+                func = partial(FileSpectrumInfo.generate_infos_from_paths_by_time_interval,
                                paths, rtol, interval, polarity, time_range)
         else:
-            func = partial(SpectrumInfo.generate_infos_from_paths,
+            func = partial(FileSpectrumInfo.generate_infos_from_paths,
                            paths, rtol, polarity, time_range)
 
         return func

@@ -31,6 +31,9 @@ class H5Obj:
     def __contains__(self, path: str) -> bool:
         return path in self._obj
 
+    def __delitem__(self, path: str):
+        del self._obj[path]
+
     def visit_or_create(self, path: str):
         if path in self:
             return H5Obj(self._obj[path])

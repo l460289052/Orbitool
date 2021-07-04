@@ -7,7 +7,7 @@ from ..structures.base import BaseStructure, BaseTableItem
 from ..structures.HDF5 import H5File, H5Obj, Ndarray
 
 from .base import Widget
-from .file_tab import FileTabInfo
+from .file_tab import Widget as FileWidget
 from .spectra_list import SpectraListInfo
 from .noise_tab import NoiseTabInfo
 from .peak_shape import PeakShapeInfo
@@ -31,7 +31,7 @@ class WorkSpace(H5File):
         )
         self.widgets = []
 
-        self.file_tab = self.visit_or_create_widget("file tab", FileTabInfo)
+        self.file_tab = self.visit_or_create_widget_specific("file tab", FileWidget)
         self.spectra_list = self.visit_or_create_widget(
             "spectra list", SpectraListInfo)
         self.noise_tab = self.visit_or_create_widget("noise tab", NoiseTabInfo)

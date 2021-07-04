@@ -156,10 +156,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.manager.workspace.close_as(f)
         self.manager.workspace = WorkSpace(f)
 
-    @state_node(mode='x', withArgs=True)
-    def file_tab_finish(self, result):
-        infos = result[0]
-        self.spectraList.spectra_list.info.file_spectrum_info_list = infos
+    @state_node(mode='x')
+    def file_tab_finish(self):
         self.spectraList.comboBox.setCurrentIndex(-1)
         self.spectraList.comboBox.setCurrentIndex(0)
         self.spectraListDw.show()

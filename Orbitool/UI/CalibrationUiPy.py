@@ -7,7 +7,7 @@ from PyQt5 import QtCore, QtWidgets
 from ..functions import spectrum as spectrum_func
 from ..functions.calibration import Calibrator, PolynomialRegressionFunc
 from ..functions.peakfit.normal_distribution import NormalDistributionFunc
-from ..structures.file import SpectrumInfo as FileSpectrumInfo
+from ..structures.file import FileSpectrumInfo
 from ..structures.HDF5 import StructureConverter, StructureListView
 from ..structures.spectrum import Spectrum, SpectrumInfo
 from ..workspace import WorkSpace
@@ -27,18 +27,19 @@ class ReadFromFile(MultiProcess):
         return spectrum
 
     @ staticmethod
-    def read(file, infos: List[FileSpectrumInfo], **kwargs) -> Generator:
-        for info in infos:
+    def read(file: WorkSpace, **kwargs) -> Generator:
+        for info in file.file_tab.info.spectrum_infos:
             yield info, info.get_spectrum_from_info(with_minutes=True)
 
     @ staticmethod
-    def write(file: WorkSpace, rets: Iterable[Spectrum], dest, **kwargs):
+    def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
         tmp = StructureListView[Spectrum](file._obj, "tmp", True)
         tmp.h5_extend(rets)
 
-        if dest in file:
-            del file._obj[dest]
-        return file._obj.move(tmp.h5_path, dest)
+        h5path = file.file_tab.raw_spectra.h5_path
+        if h5path in file:
+            del file[h5path]
+        file._obj.move(tmp.h5_path, h5path)
 
     @ staticmethod
     def exception(file, **kwargs):
@@ -74,8 +75,9 @@ class CalibrateMerge(MultiProcess):
     @staticmethod
     def read(file: WorkSpace, **kwargs) -> Generator[List[Tuple[Spectrum, PolynomialRegressionFunc]], Any, Any]:
         batch = []
+        file_tab = file.file_tab
         funcs = file.calibration_tab.info.poly_funcs
-        for info, spectrum in zip(file.spectra_list.info.file_spectrum_info_list, file.calibration_tab.raw_spectra):
+        for info, spectrum in zip(file_tab.info.spectrum_infos, file_tab.raw_spectra):
             if info.average_index > 0:
                 batch.append((spectrum, funcs[spectrum.path]))
             else:
@@ -191,17 +193,12 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         # read file
         if not workspace.info.hasRead:
-            read_from_file = ReadFromFile(
-                workspace,
-                read_kwargs={
-                    "infos": workspace.spectra_list.info.file_spectrum_info_list},
-                write_kwargs={
-                    "dest": calibration_tab.raw_spectra.h5_path})
+            read_from_file = ReadFromFile(workspace)
 
             yield read_from_file
             workspace.info.hasRead = True
 
-        h5_spectra = calibration_tab.raw_spectra
+        raw_spectra = workspace.file_tab.raw_spectra
         fit_func = workspace.peak_shape_tab.info.func
 
         # use ions to decide whether to split
@@ -218,7 +215,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
                 path.path: path.createDatetime for path in workspace.file_tab.info.pathlist}
             ions = [ion.formula.mass() for ion in info.ions]
             split_and_fit = SplitAndFitPeak(
-                h5_spectra,
+                raw_spectra,
                 func_kwargs=dict(
                     fit_func=fit_func, ions=ions, intensity_filter=intensity_filter))
 

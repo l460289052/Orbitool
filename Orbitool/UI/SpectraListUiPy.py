@@ -9,7 +9,7 @@ from .manager import Manager, state_node
 
 from .. import config
 
-from ..structures.file import SpectrumInfo
+from ..structures.file import FileSpectrumInfo
 
 FILE_TAB = 0
 CALIBRATE_TAB = 1
@@ -58,7 +58,7 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
 
     def show_file_infos(self):
         tableWidget = self.tableWidget
-        spectrum_infos: List[SpectrumInfo] = self.spectra_list.info.file_spectrum_info_list
+        spectrum_infos: List[FileSpectrumInfo] = self.manager.workspace.file_tab.info.spectrum_infos
         spectrum_infos = [
             info for info in spectrum_infos if info.average_index == 0]
         tableWidget.setRowCount(len(spectrum_infos))

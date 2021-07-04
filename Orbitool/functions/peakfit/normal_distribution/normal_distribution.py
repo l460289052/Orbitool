@@ -105,8 +105,8 @@ class NormalDistributionFunc(BaseFunc):
         if split_num < 0:
             split_num = len(id_peak)
 
-        if split_num > 20:
-            split_num = 20
+        if split_num > 15:
+            split_num = 15
         u: np.ndarray = np.stack(
             (peak.mz[1:-1][id_peak], peak.intensity[1:-1][id_peak]), axis=1)
         uu = [(u[-1, 0] + i + 1, 0) for i in range(split_num - u.shape[0])]
