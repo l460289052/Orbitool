@@ -13,6 +13,7 @@ from .noise_tab import NoiseTabInfo
 from .peak_shape import PeakShapeInfo
 from .calibration import Widget as CalibrationWidget, CalibratorInfo
 
+from .formula import FormulaInfo
 
 T = TypeVar("T")
 
@@ -31,7 +32,8 @@ class WorkSpace(H5File):
         )
         self.widgets = []
 
-        self.file_tab = self.visit_or_create_widget_specific("file tab", FileWidget)
+        self.file_tab = self.visit_or_create_widget_specific(
+            "file tab", FileWidget)
         self.spectra_list = self.visit_or_create_widget(
             "spectra list", SpectraListInfo)
         self.noise_tab = self.visit_or_create_widget("noise tab", NoiseTabInfo)
@@ -39,6 +41,9 @@ class WorkSpace(H5File):
             "peak shape tab", PeakShapeInfo)
         self.calibration_tab = self.visit_or_create_widget_specific(
             "calibration tab", CalibrationWidget)
+
+        self.formula_docker = self.visit_or_create_widget(
+            "formula docker", FormulaInfo)
 
     def save(self):
         self.write("info", self.info)

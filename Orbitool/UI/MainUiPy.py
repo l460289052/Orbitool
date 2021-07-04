@@ -81,7 +81,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             "Spectrum", self.spectrum, self.spectraListDw)
 
         self.peakListDw = self.add_dockerwidget(
-            "Peak List", PeakListUiPy.Widget(), self.spectrumDw)
+            "Peak List", PeakListUiPy.Widget(manager), self.spectrumDw)
 
         self.timeseries = TimeseriesUiPy.Widget()
         self.timeseriesDw = self.add_dockerwidget(

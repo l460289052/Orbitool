@@ -54,8 +54,8 @@ class RestrictedCalcStructure(BaseStructure):
     rtol: float
     charge: int
     params: List[RestrictedCalcElementNumItem]
-    elements: np.ndarray
-    isotopes: np.ndarray
+    elements: str
+    isotopes: str
 
 
 class RestrictedCalcConverter(BaseSingleConverter):
@@ -63,8 +63,8 @@ class RestrictedCalcConverter(BaseSingleConverter):
     def write_to_h5(h5group: Group, key: str, value: RestrictedCalc):
         parameters = [RestrictedCalcElementNumItem(element=e, **value[e])
                       for e in value.getInitedElements()]
-        elements = value.getElements()
-        isotopes = value.getIsotopes()
+        elements = ','.join(value.getElements())
+        isotopes = ','.join(value.getIsotopes())
         struct = RestrictedCalcStructure(
             rtol=value.rtol, charge=value.charge, params=parameters, elements=elements, isotopes=isotopes)
         StructureConverter.write_to_h5(h5group, key, struct)
@@ -79,13 +79,21 @@ class RestrictedCalcConverter(BaseSingleConverter):
         value.charge = struct.charge
         for p in value.getInitedElements():
             del value[p]
-        for e in chain(value.getElements(), value.getIsotopes()):
-            value.setEI(e, False)
+
+        disabled = set(chain(value.getElements(), value.getIsotopes()))
 
         for p in struct.params:
             value[p.element] = p.get_params()
-        for e in chain(struct.elements, struct.isotopes):
+        for e in chain(struct.elements.split(','), struct.isotopes.split(',')):
+            if not e:
+                continue
             value.setEI(e, True)
+            if e in disabled:
+                disabled.remove(e)
+        for e in disabled:
+            if not e:
+                continue
+            value.setEI(e, False)
 
 
 class ForceElementNumItem(BaseTableItem):
@@ -107,7 +115,7 @@ class ForceCalcConverter(BaseSingleConverter):
         ei_list = [ForceElementNumItem(ei_name=e, max_num=value[e])
                    for e in value.getEIList()]
         struct = ForceCalcStructure(
-            rtol=value.rtol, charge=value.charge, ei_lit=ei_list)
+            rtol=value.rtol, charge=value.charge, ei_list=ei_list)
         StructureConverter.write_to_h5(h5group, key, struct)
 
     @staticmethod

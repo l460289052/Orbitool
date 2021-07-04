@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>218</width>
-    <height>373</height>
+    <width>204</width>
+    <height>457</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,15 +17,15 @@
    <item>
     <widget class="QToolBox" name="toolBox">
      <property name="currentIndex">
-      <number>2</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page">
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-6</y>
-        <width>193</width>
-        <height>183</height>
+        <y>0</y>
+        <width>190</width>
+        <height>215</height>
        </rect>
       </property>
       <attribute name="label">
@@ -65,10 +65,10 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QDoubleSpinBox" name="mzRangeMinDoubleSpinBox"/>
+          <widget class="QDoubleSpinBox" name="mzMinDoubleSpinBox"/>
          </item>
          <item row="1" column="1">
-          <widget class="QDoubleSpinBox" name="mzRangeMaxDoubleSpinBox"/>
+          <widget class="QDoubleSpinBox" name="mzMaxDoubleSpinBox"/>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_3">
@@ -142,9 +142,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-327</y>
-        <width>193</width>
-        <height>594</height>
+        <y>0</y>
+        <width>175</width>
+        <height>405</height>
        </rect>
       </property>
       <attribute name="label">
@@ -169,7 +169,7 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>300</height>
+           <height>150</height>
           </size>
          </property>
          <property name="maximumSize">
@@ -327,7 +327,7 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>200</height>
+           <height>150</height>
           </size>
          </property>
          <property name="verticalScrollMode">
@@ -496,6 +496,14 @@
       </layout>
      </widget>
      <widget class="QWidget" name="page_3">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>190</width>
+        <height>215</height>
+       </rect>
+      </property>
       <attribute name="label">
        <string>unrestricted element</string>
       </attribute>
@@ -505,7 +513,7 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>200</height>
+           <height>150</height>
           </size>
          </property>
          <property name="editTriggers">
@@ -594,11 +602,28 @@
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="applyPushButton">
+     <property name="text">
+      <string>Apply</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Calculator</string>
      </property>
      <layout class="QFormLayout" name="formLayout_2">
+      <item row="0" column="0" colspan="2">
+       <widget class="QLineEdit" name="inputLineEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <widget class="QPushButton" name="pushButton">
         <property name="sizePolicy">
@@ -657,19 +682,9 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QCheckBox" name="checkBox">
+       <widget class="QPushButton" name="pushButton_2">
         <property name="text">
-         <string>unrestricted</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QLineEdit" name="inputLineEdit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+         <string>Unrestricted Calc</string>
         </property>
        </widget>
       </item>

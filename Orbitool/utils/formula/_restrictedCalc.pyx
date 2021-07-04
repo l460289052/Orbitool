@@ -68,6 +68,25 @@ cdef class Calculator:
         self.MMin = 50
         self.MMax = 750
         self.nitrogenRule = False
+
+        init_params = [ 
+            ('e', -1, 1, -1, -0.5, -0.5, 0, 0),
+            ('C', 0, 20, 2, 0, 2, 0, 3),
+            ('H', 0, 40, -1, -1, -1, 0, 0),
+            ('O', 0, 15, 0, 0, 0, -1, -1),
+            ('N', 0, 4, 1, -1, 1, 0, 3),
+            ('S', 0, 3, 0, 0, 0, 0, 4),
+            ('Li', 0, 3, -1, 0, 0, 0, 0),
+            ('Na', 0, 3, -1, 0, 0, 0, 0),
+            ('K', 0, 3, -1, 0, 0, 0, 0),
+            ('F', 0, 15, -1, -1, 0, 0, 0),
+            ('Cl', 0, 3, -1, -1, 0, 0, 3),
+            ('Br', 0, 3, -1, -1, 0, 0, 3),
+            ('I', 0, 3, -1, -1, 0, 0, 3),
+            ('P', 0, 4, 1, -1, 1, 0, 6),
+            ('Si', 0, 5, 2, 0, 2, 0, 3)]
+        for row in init_params:
+            self[row[0]] = {"Min":row[1], "Max":row[2], "DBE2":row[3], "HMin":row[4], "HMax":row[5], "OMin":row[6], "OMax":row[7]}
         
     cdef double OMin(self, int_map& elements):
         return _elements_sum(self.ElementOMin, elements, 0)

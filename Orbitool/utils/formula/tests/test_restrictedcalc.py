@@ -7,14 +7,7 @@ from .. import Formula, RestrictedCalc
 
 
 def init_calc():
-    ret = RestrictedCalc()
-    with pathlib.Path(__file__).parent.joinpath("element_parameters.csv").open("r") as reader:
-        csvreader = iter(csv.reader(reader))
-        header = next(csvreader)[1:]
-        header = list(map(lambda x: x.strip(), header))
-        for row in csvreader:
-            ret[row[0]] = dict(zip(header, map(float, row[1:])))
-    return ret
+    return RestrictedCalc()
 
 
 calc = pytest.fixture(init_calc)
