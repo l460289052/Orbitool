@@ -49,16 +49,17 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
     sendStatus = QtCore.pyqtSignal(str, int, int)
 
     @final
-    def __init__(self, file, kwargs: dict) -> None:
+    def __init__(self, file, read_kwargs: dict=None, func_kwargs:dict=None, write_kwargs:dict=None) -> None:
         super().__init__()
         self.file = file
-        self.kwargs = kwargs
+        self.read_kwargs = read_kwargs or {}
+        self.func_kwargs = func_kwargs or {}
+        self.write_kwargs = write_kwargs or {}
         self.aborted = False
 
     @final
     def run(self):
         file = self.file
-        kwargs = self.kwargs
         results: Deque[AsyncResult] = deque()
         queue = Queue()
 
@@ -69,24 +70,24 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                     break
                 yield result
 
-        write_thread = Thread(self.write, (file, iter_queue()), kwargs)
+        write_thread = Thread(self.write, (file, iter_queue()), self.write_kwargs)
         write_thread.start()
         limit_parallel = int(multi_cores * 1.3)
         with Pool(multi_cores) as pool:
 
-            for i, input_data in enumerate(self.read(file, **kwargs)):
+            for i, input_data in enumerate(self.read(file, **self.read_kwargs)):
                 if self.aborted:
                     queue.put(None)
-                    return self.exception(file, **kwargs)
+                    return self.exception(file)
                 results.append(pool.apply_async(
-                    self.process, (i, self.func, input_data, kwargs)))
+                    self.process, (i, self.func, input_data, self.func_kwargs)))
                 if i >= limit_parallel:
                     ret = results.popleft()
                     while not ret.ready():
                         sleep(0.01)
                     ret = ret.get()
                     if isinstance(ret, Exception):
-                        self.exception(file, **kwargs)
+                        self.exception(file)
                         self.finished.emit(
                             (ret, (self.func, self.file, self.kwargs)))
                         queue.put(None)
@@ -99,9 +100,9 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                     sleep(0.01)
                 ret = ret.get()
                 if isinstance(ret, Exception):
-                    self.exception(file, **kwargs)
+                    self.exception(file)
                     self.finished.emit(
-                        (ret, (self.func, self.file, kwargs)))
+                        (ret, (self.func, self.file)))
                     queue.put(None)
                     return
                 queue.put(ret)

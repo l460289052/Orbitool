@@ -41,7 +41,7 @@ def test_structure():
     c1 = Child(value=1)
     c2 = Child(value=2)
     father = Father(value=3, c1=c1, c2=c2)
-    f.write("father" , father)
+    f.write("father", father)
 
     t: Father = f.read("father")
 

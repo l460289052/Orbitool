@@ -47,7 +47,7 @@ def fileui(window: MainUiPy.Window):
     wait_not_busy()
     sleep()
     assert not manager.busy
-    assert len(workspace.info.pathlist.paths) == 4
+    assert len(workspace.file_tab.info.pathlist.paths) == 4
 
     test.input([1, 2, 3])
     fileui.processSelected()

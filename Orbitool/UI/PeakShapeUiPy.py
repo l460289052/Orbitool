@@ -65,6 +65,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
         peak_num = self.spinBox.value()
         if info.spectrum is None:
             showInfo("please denoise first")
+            return
 
         def generate_peak_manager():
             peaks = spectrum_func.splitPeaks(

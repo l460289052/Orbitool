@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# import OrbitoolBase
 from ... import functions
 
 import os
-import copy
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
@@ -113,10 +111,9 @@ class File:
         # return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
 
     def timeRange2NumRange(self, timeRange: Tuple[timedelta, timedelta]):
-        r: range = functions.binary_search.indexBetween(self, timeRange,
-                                                        (self.firstScanNumber,
-                                                         self.lastScanNumber + 1),
-                                                        method=(lambda f, i: f.getSpectrumRetentionTime(i)))
+        r: range = functions.binary_search.indexBetween(
+            self, timeRange, (self.firstScanNumber, self.lastScanNumber + 1),
+            method=(lambda f, i: f.getSpectrumRetentionTime(i)))
         return (r.start, r.stop)
 
     def numRange2TimeRange(self, numRange: Tuple[int, int]) -> Tuple[timedelta, timedelta]:

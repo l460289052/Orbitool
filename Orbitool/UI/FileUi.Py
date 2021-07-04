@@ -185,6 +185,7 @@ class Ui_Form(object):
         spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_6.addItem(spacerItem2)
         self.averageCheckBox = QtWidgets.QCheckBox(Form)
+        self.averageCheckBox.setChecked(True)
         self.averageCheckBox.setObjectName("averageCheckBox")
         self.verticalLayout_6.addWidget(self.averageCheckBox)
         self.label_2 = QtWidgets.QLabel(Form)

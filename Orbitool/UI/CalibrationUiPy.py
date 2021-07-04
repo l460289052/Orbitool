@@ -140,8 +140,10 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         # read file
         if not workspace.info.hasRead:
             read_from_file = ReadFromFile(
-                workspace, {
-                    "infos": workspace.spectra_list.info.file_spectrum_info_list,
+                workspace,
+                read_kwargs={
+                    "infos": workspace.spectra_list.info.file_spectrum_info_list},
+                write_kwargs={
                     "dest": calibration_tab.raw_spectra.h5_path})
 
             yield read_from_file
@@ -161,10 +163,12 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         if need_to_split:  # read ions from spectrum
             path_time = {
-                path.path: path.createDatetime for path in workspace.info.pathlist}
+                path.path: path.createDatetime for path in workspace.file_tab.info.pathlist}
             ions = [ion.formula.mass() for ion in info.ions]
-            split_and_fit = SplitAndFitPeak(h5_spectra, dict(
-                fit_func=fit_func, ions=ions, intensity_filter=intensity_filter))
+            split_and_fit = SplitAndFitPeak(
+                h5_spectra,
+                func_kwargs=dict(
+                    fit_func=fit_func, ions=ions, intensity_filter=intensity_filter))
 
             path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = yield split_and_fit
 

@@ -28,7 +28,7 @@ class AttrConverter(BaseSingleConverter):
         return h5group.attrs[key]
 
 
-class DatetimeConverter(BaseSingleConverter):
+class DatetimeConverter(AttrConverter):
     @staticmethod
     def write_to_h5(h5group: Group, key: str, value: datetime):
         h5group.attrs[key] = value.isoformat()
@@ -38,7 +38,7 @@ class DatetimeConverter(BaseSingleConverter):
         return datetime.fromisoformat(h5group.attrs[key])
 
 
-class DateConverter(BaseSingleConverter):
+class DateConverter(AttrConverter):
     @staticmethod
     def write_to_h5(h5group: Group, key: str, value: date):
         h5group.attrs[key] = value.isoformat()
@@ -189,29 +189,29 @@ class DictConverter(BaseShapeConverter):
         inner_type = get_args(field.outer_type_)[1]
         if inner_type == np.ndarray:
             group = h5group.create_group(key)
-            for key, value in values.items():
-                NumpyConverter.write_to_h5(group, str(key), value)
+            for index, value in enumerate(values.values()):
+                NumpyConverter.write_to_h5(group, str(index), value)
         elif issubclass(inner_type, BaseStructure):
             group = h5group.create_group(key)
-            for key, value in values.items():
-                StructureConverter.write_to_h5(group, str(key), value)
+            for index, value in enumerate(values.values()):
+                StructureConverter.write_to_h5(group, str(index), value)
+        group.attrs["indexes"] = list(values.keys())
 
     @staticmethod
     def read_from_h5(h5group: Group, key: str, field: ModelField):
         key_type, inner_type = get_args(field.outer_type_)
+        rets = {}
+        group: Group = h5group[key]
+        keys = group.attrs["indexes"]
         if inner_type == np.ndarray:
-            rets = {}
-            group: Group = h5group[key]
-            for key in group.keys():
-                rets[key_type(key)] = NumpyConverter.read_from_h5(group, key)
-            return rets
+            for index, key in enumerate(keys):
+                rets[key_type(key)] = NumpyConverter.read_from_h5(
+                    group, str(index))
         elif issubclass(inner_type, BaseStructure):
-            rets = {}
-            group: Group = h5group[key]
-            for key in group.keys():
+            for index, key in enumerate(keys):
                 rets[key_type(key)] = StructureConverter.read_from_h5(
-                    group, key)
-            return rets
+                    group, str(index))
+        return rets
 
 
 shape_converters: Dict[int, Type[SingleConverter]] = {

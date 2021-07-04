@@ -133,7 +133,7 @@ class SpectrumInfo(BaseTableItem):
                 for i in range(*f.timeRange2NumRange((timeRange[0] - creationTime, timeRange[1] - creationTime))):
                     if f.getSpectrumPolarity(i) == polarity:
                         time = creationTime + f.getSpectrumRetentionTime(i)
-                        info = SpectrumInfo(path=f"{PATH_THERMOFILE}:{path}", start_time=time, end_time=time,
+                        info = SpectrumInfo(path=path.path, start_time=time, end_time=time,
                                             rtol=rtol, polarity=polarity, average_index=0)
                         info_list.append(info)
         return info_list

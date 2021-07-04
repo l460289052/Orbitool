@@ -387,6 +387,9 @@
        <property name="text">
         <string>Average</string>
        </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>

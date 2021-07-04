@@ -163,7 +163,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         else:
             raise ValueError("Please select a polarity")
 
-        if self.averageYesRadioButton.isChecked():
+        if self.averageCheckBox.isChecked():
             if self.nSpectraRadioButton.isChecked():
                 pass
             elif self.nMinutesRadioButton.isChecked():
@@ -171,7 +171,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
                     minutes=self.nMinutesDoubleSpinBox.value())
                 func = partial(SpectrumInfo.generate_infos_from_paths_by_time_interval,
                                paths, rtol, interval, polarity, time_range)
-        elif self.averageNoRadioButton.isChecked():
+        else:
             func = partial(SpectrumInfo.generate_infos_from_paths,
                            paths, rtol, polarity, time_range)
 
