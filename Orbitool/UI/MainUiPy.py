@@ -90,10 +90,10 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.tabWidget.currentChanged.connect(self.tab_changed)
         self.tab_changed(0)
 
-    def __init__(self) -> None:
+    def __init__(self, workspacefile=None) -> None:
         super().__init__()
         self.manager = Manager()
-        self.manager.workspace = WorkSpace()
+        self.manager.workspace = WorkSpace(workspacefile)
 
         self.setupUi(self)
 

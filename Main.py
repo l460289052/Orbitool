@@ -13,6 +13,7 @@ if __name__ == "__main__":
     # pythoncom.CoInitialize()
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("workspacefile", nargs='?')
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--to_step")
 
@@ -29,7 +30,7 @@ if __name__ == "__main__":
     if config.DEBUG:
         QtWidgets.QMessageBox.information(None, 'info', 'DEBUG')
 
-    MainWin = MainUiPy.Window()
+    MainWin = MainUiPy.Window(parser.workspacefile)
     MainWin.show()
     if args.to_step:
         steps = {
