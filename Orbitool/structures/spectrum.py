@@ -1,6 +1,9 @@
-from typing import List
+from __future__ import annotations
+from typing import List, TYPE_CHECKING, Iterable
 from .base import BaseStructure, Field, BaseTableItem
 from .HDF5 import Ndarray
+from .HDF5.h5datatable import BaseDatatableType
+from h5py import string_dtype
 from ..utils.formula import Formula
 from ..functions import spectrum
 from datetime import datetime
@@ -28,6 +31,34 @@ class Peak(BaseTableItem):
         return np.where(self.isPeak)[0]
 
 
+if TYPE_CHECKING:
+    class FormulaList(List[Formula], BaseDatatableType):
+        dtype = string_dtype('utf-8')
+else:
+    class FormulaList(list, BaseDatatableType):
+        dtype = string_dtype('utf-8')
+
+        def __init__(self, value: Iterable = None):
+            if value is None:
+                super().__init__()
+            else:
+                value = [s if isinstance(s, Formula) else Formula(s)
+                         for s in value]
+                super().__init__(value)
+
+        @classmethod
+        def validate(cls, v):
+            return v
+
+        @staticmethod
+        def convert_to_h5(value: FormulaList):
+            return ','.join(str(f) for f in value)
+
+        @staticmethod
+        def convert_from_h5(value: str):
+            return [Formula(s) for s in value.split(',') if s]
+
+
 class FittedPeak(Peak):
     item_name = "FittedPeak"
     fitted_param: Ndarray[float, -1]
@@ -35,13 +66,7 @@ class FittedPeak(Peak):
     peak_intensity: float
     area: float
 
-    formulas: str = ""
-
-    def get_formula_list(self) -> List[Formula]:
-        return list(map(Formula, self.formulas.split(', ')))
-
-    def set_formula_list(self, formulas: List[Formula]):
-        self.formulas = ', '.join(map(str, formulas))
+    formulas: FormulaList = Field(default_factory=list)
 
 
 class Spectrum(BaseStructure):

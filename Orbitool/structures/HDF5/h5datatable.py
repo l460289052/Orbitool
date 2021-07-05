@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from functools import lru_cache
-from typing import TYPE_CHECKING, Dict, List, Tuple, Type, TypeVar, Iterable
+from typing import TYPE_CHECKING, Dict, List, Tuple, Type, TypeVar
 
 import numpy as np
 from h5py import Group, string_dtype, vlen_dtype
@@ -137,6 +137,9 @@ class ArgumentType(BaseDatatableType):
     def convert_from_h5(self, value):
         return value
 
+    def __call__(self):
+        pass
+
 
 if TYPE_CHECKING:
     class AsciiLimit(str):
@@ -155,6 +158,9 @@ else:
             if isinstance(v, bytes):
                 return v.decode()
             return str(v)
+
+        def __call__(self, value):
+            return np.array(value, dtype=self.dtype)
 
 if TYPE_CHECKING:
     class Ndarray(np.ndarray):
@@ -204,6 +210,9 @@ else:
 
         def convert_from_h5(self, value):
             return value.reshape(*self.shape)
+
+        def __call__(self, value):
+            np.array(value, dtype=self.dtype)
 
 
 def register_datatable_converter(typ, converter: Type[Dtype]):
