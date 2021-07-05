@@ -18,7 +18,7 @@ class Manager(QObject):
 
     def __init__(self) -> None:
         super().__init__()
-        self.node_thread: QThread = None
+        self.running_thread: QThread = None
         self.workspace: WorkSpace = None
         self._busy: bool = True
 

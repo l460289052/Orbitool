@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from .. import config
 from ..workspace import WorkSpace
 
-from .manager import Manager, state_node
+from .manager import Manager, state_node, MultiProcess
 from . import utils as UiUtils
 
 from . import MainUi
@@ -28,7 +28,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.saveAsAction.triggered.connect(self.save_as)
 
         # tab widgets
-        self.abortPushButton.clicked.connect(self.abort_process_pool)
+        self.abortPushButton.clicked.connect(self.abort_process)
 
         self.fileTab: FileUiPy.Widget = self.add_tab(
             FileUiPy.Widget(manager), "File")
@@ -189,10 +189,10 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.tabWidget.setCurrentWidget(self.peakFitTab)
         self.spectraList.comboBox.setCurrentIndex(1)
 
-    def abort_process_pool(self):
-        # self.manager.pool.terminate()
-        # self.manager.pool = Pool(config.multi_cores)
-        pass
+    def abort_process(self):
+        thread: MultiProcess = self.manager.running_thread
+        if issubclass(type(thread), MultiProcess):
+            thread.abort()
 
     def tab_changed(self, index):
         widget = self.tabWidget.currentWidget()

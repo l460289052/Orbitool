@@ -92,7 +92,7 @@ class node:
                             else:
                                 thread = to_be_finished
                             thread.finished.connect(run_send)
-                            selfWidget.node_thread = thread
+                            manager.running_thread = thread
                             if config.DEBUG:
                                 thread.run()
                             else:
