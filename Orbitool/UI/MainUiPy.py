@@ -56,7 +56,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.peakFitTab.show_peaklist.connect(self.peaklist_show)
 
         self.massDefectTab = self.add_tab(
-            MassDefectUiPy.Widget(), "Mass Defect")
+            MassDefectUiPy.Widget(manager), "Mass Defect")
 
         self.timeseriesesTab = self.add_tab(
             TimeseriesesUiPy.Widget(), "Timeseries")

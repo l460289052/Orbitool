@@ -19,7 +19,7 @@ cdef double eps = 1e-9
 
 cdef int HIndex = 1, CIndex = 6, OIndex = 8
 
-cdef _elements_sum(vector[double]& v, int_map& elements, double init):
+cdef double _elements_sum(vector[double]& v, int_map& elements, double init):
     cdef int_pair p
     for p in elements:
         init += p.second * v[p.first]
@@ -207,6 +207,10 @@ cdef class Calculator:
         state.OMax = self.OMax(elements)
         state.HMin = self.HMin(elements)
         state.HMax = self.HMax(elements)
+
+    
+    def getFormulaDBE(self, Formula formula):
+        return _elements_sum(self.ElementDbe2, formula.elements, 2.0)
 
     
     cpdef void calc(self, double MMin = -1, double MMax = -1) except*:

@@ -7,15 +7,18 @@
     + ~~process pool~~
   + ~~peak shape~~
   + ~~calibration~~
-  + fit
+  + ~~fit~~
+    + peak fit
+    + peak filter
+    + peak refit
+  + ~~mass defect~~
   + time series
   + ~~save/load~~
+  + formula
 + details
   + plot
   + shortcuts
   + export
-
-+ unify show and init
 
 
 
