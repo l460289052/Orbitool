@@ -202,7 +202,7 @@ class DictConverter(BaseShapeConverter):
     @staticmethod
     def read_from_h5(h5group: Group, key: str, field: ModelField):
         key_type, inner_type = get_args(field.outer_type_)
-        if key in h5group:
+        if key not in h5group:
             return field.get_default()
         rets = {}
         group: Group = h5group[key]
