@@ -88,6 +88,9 @@ class NormalDistributionFunc(BaseFunc):
         sigma = self.peak_fit_sigma * math.sqrt(abs(mu) / 200) * mu
         return func(mz, a, mu, sigma)
 
+    def func(self, mz:np.ndarray, params):
+        return self._funcFit(mz, *params)
+
     def getFittedParam(self, peak: FittedPeak):
         mz: np.ndarray = peak.mz
         intensity: np.ndarray = peak.intensity

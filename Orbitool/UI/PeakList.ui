@@ -22,7 +22,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="spectrum3AutoScrollCheckBox">
+    <widget class="QCheckBox" name="autoScrollCheckBox">
      <property name="text">
       <string>Scroll according to plot</string>
      </property>
@@ -32,7 +32,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTableWidget" name="spectrum3PeakListTableWidget">
+    <widget class="QTableWidget" name="tableWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -99,7 +99,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="spectrumPushButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -112,7 +112,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="spectrum3PeaksExportPushButton">
+      <widget class="QPushButton" name="exportPeaksPushButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -125,7 +125,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="spectrum3IsotopeExportPushButton">
+      <widget class="QPushButton" name="exportIsotopePushButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
          <horstretch>0</horstretch>

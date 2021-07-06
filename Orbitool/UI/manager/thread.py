@@ -34,6 +34,7 @@ class Thread(QtCore.QThread):
             self.result = result
             self.finished.emit((result,))
         except Exception as e:
+            self.result = e
             self.finished.emit((e, ))
 
     def sendStatusFunc(self, *args):

@@ -87,6 +87,7 @@ cdef class Calculator:
             ('Si', 0, 5, 2, 0, 2, 0, 3)]
         for row in init_params:
             self[row[0]] = {"Min":row[1], "Max":row[2], "DBE2":row[3], "HMin":row[4], "HMax":row[5], "OMin":row[6], "OMax":row[7]}
+        self.charge = -1
         
     cdef double OMin(self, int_map& elements):
         return _elements_sum(self.ElementOMin, elements, 0)

@@ -11,7 +11,8 @@ from .file_tab import Widget as FileWidget
 from .spectra_list import SpectraListInfo
 from .noise_tab import NoiseTabInfo
 from .peak_shape import PeakShapeInfo
-from .calibration import Widget as CalibrationWidget, CalibratorInfo
+from .calibration import Widget as CalibrationWidget
+from .peak_fit import PeakFitInfo
 
 from .formula import FormulaInfo
 
@@ -41,6 +42,8 @@ class WorkSpace(H5File):
             "peak shape tab", PeakShapeInfo)
         self.calibration_tab = self.visit_or_create_widget_specific(
             "calibration tab", CalibrationWidget)
+        self.peakfit_tab = self.visit_or_create_widget(
+            "peak fit tab", PeakFitInfo)
 
         self.formula_docker = self.visit_or_create_widget(
             "formula docker", FormulaInfo)

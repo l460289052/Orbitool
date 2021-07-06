@@ -1,13 +1,16 @@
+from itertools import chain
 from typing import List
+
+import numpy as np
 
 from ...structures.spectrum import FittedPeak, Peak, Spectrum
 from ..binary_search import indexBetween_np, indexNearest
 from ..spectrum import splitPeaks
 
-from itertools import chain
-
 
 class BaseFunc:
+    def func(self, mz:np.ndarray, params):
+        pass
     def splitPeak(self, peak: Peak, split_num=None, force=False) -> List[FittedPeak]:
         pass
 

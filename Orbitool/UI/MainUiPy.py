@@ -37,7 +37,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.noiseTab: NoiseUiPy.Widget = self.add_tab(
             NoiseUiPy.Widget(manager), "Noise")
         self.noiseTab.selected_spectrum_average.connect(
-            self.noise_show_spectrum)
+            self.show_spectrum)
         self.noiseTab.callback.connect(self.noise_tab_finish)
 
         self.peakShapeTab: PeakShapeUiPy.Widget = self.add_tab(
@@ -52,6 +52,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             self.calibration_finish)
 
         self.peakFitTab = self.add_tab(PeakFitUiPy.Widget(manager), "Peak Fit")
+        self.peakFitTab.show_spectrum.connect(self.show_spectrum)
+        self.peakFitTab.show_peaklist.connect(self.peaklist_show)
 
         self.massDefectTab = self.add_tab(
             MassDefectUiPy.Widget(), "Mass Defect")
@@ -80,8 +82,9 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.spectrumDw = self.add_dockerwidget(
             "Spectrum", self.spectrum, self.spectraListDw)
 
+        self.peakList = PeakListUiPy.Widget(manager)
         self.peakListDw = self.add_dockerwidget(
-            "Peak List", PeakListUiPy.Widget(manager), self.spectrumDw)
+            "Peak List", self.peakList, self.spectrumDw)
 
         self.timeseries = TimeseriesUiPy.Widget()
         self.timeseriesDw = self.add_dockerwidget(
@@ -163,10 +166,9 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.spectraListDw.raise_()
         self.tabWidget.setCurrentWidget(self.noiseTab)
 
-    @state_node(mode='x')
-    def noise_show_spectrum(self):
-        self.spectrum.show_spectrum(
-            self.workspace.noise_tab.info.current_spectrum)
+    @state_node(mode='x', withArgs=True)
+    def show_spectrum(self, spectrum):
+        self.spectrum.show_spectrum(spectrum)
         self.spectrumDw.show()
         self.spectrumDw.raise_()
 
@@ -188,6 +190,11 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     def calibration_finish(self):
         self.tabWidget.setCurrentWidget(self.peakFitTab)
         self.spectraList.comboBox.setCurrentIndex(1)
+        self.spectraListDw.raise_()
+
+    @state_node(mode='x')
+    def peaklist_show(self):
+        self.peakList.showPeaks()
 
     def abort_process(self):
         thread: MultiProcess = self.manager.running_thread
