@@ -50,7 +50,6 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
         self.tableWidget.verticalScrollBar().setSliderPosition(
             self.comboBox_position.get(current, 0))
         self.former_index = current
-        self.tableWidget.show()
 
     @property
     def spectra_list(self):
@@ -72,6 +71,7 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
     def show_calibration_infos(self):
         tableWidget = self.tableWidget
         infos = self.manager.workspace.calibration_tab.info.calibrated_spectrum_infos
+        self.spectra_list.info.shown_indexes = list(range(len(infos)))
         tableWidget.setRowCount(len(infos))
         for i, info in enumerate(infos):
             tableWidget.setItem(i, 0, QtWidgets.QTableWidgetItem(

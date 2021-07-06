@@ -73,27 +73,28 @@ class RestrictedCalcConverter(BaseSingleConverter):
     def read_from_h5(h5group: Group, key: str):
         struct: RestrictedCalcStructure = StructureConverter.read_from_h5(
             h5group, key)
-        value = RestrictedCalc()
+        calc = RestrictedCalc()
 
-        value.rtol = struct.rtol
-        value.charge = struct.charge
-        for p in value.getInitedElements():
-            del value[p]
+        calc.rtol = struct.rtol
+        calc.charge = struct.charge
+        for p in calc.getInitedElements():
+            del calc[p]
 
-        disabled = set(chain(value.getElements(), value.getIsotopes()))
+        disabled = set(chain(calc.getElements(), calc.getIsotopes()))
 
         for p in struct.params:
-            value[p.element] = p.get_params()
+            calc[p.element] = p.get_params()
         for e in chain(struct.elements.split(','), struct.isotopes.split(',')):
             if not e:
                 continue
-            value.setEI(e, True)
+            calc.setEI(e, True)
             if e in disabled:
                 disabled.remove(e)
         for e in disabled:
             if not e:
                 continue
-            value.setEI(e, False)
+            calc.setEI(e, False)
+        return calc
 
 
 class ForceElementNumItem(BaseTableItem):
