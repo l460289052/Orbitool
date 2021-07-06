@@ -25,15 +25,53 @@ def default_formula_parameter():
             formula=Formula(f)) for f in config.noise_formulas]
 
 
-class NoiseTabInfo(BaseStructure):
-    h5_type = "noise tab"
+class NoiseGeneralSetting(BaseStructure):
+    h5_type = "noise general setting"
 
-    current_spectrum: Optional[Spectrum] = None
+    quantile: float = 0
+    mass_dependent: bool = False
+    n_sigma: float = 0
+    subtract: float = True
+
     noise_formulas: List[NoiseFormulaParameter] = Field(
         default_factory=default_formula_parameter)
 
-    n_sigma: float = 0
+    spectrum_dependent: bool = True
+
+    def get_params(self, useable: bool = False):
+        """
+        useable params or all params
+        return params, points, deltas
+        """
+        params, points, deltas = [], [], []
+        for param in self.noise_formulas:
+            if not useable or param.selected:
+                params.append(param.param)
+                points.append(param.formula.mass())
+                deltas.append(param.delta)
+        params = np.array(params)
+        points = np.array(points)
+        deltas = np.array(deltas, dtype=int)
+
+        return params, points, deltas
+
+
+class NoiseGeneralResult(BaseStructure):
+    h5_type = "noise general result"
+
     poly_coef: np.ndarray = None
     global_noise_std: float = 0
     noise: np.ndarray = None
     LOD: np.ndarray = None
+
+
+class NoiseTabInfo(BaseStructure):
+    h5_type = "noise tab"
+
+    current_spectrum: Optional[Spectrum] = None
+
+    general_setting: NoiseGeneralSetting = Field(
+        default_factory=NoiseGeneralSetting)
+
+    general_result: NoiseGeneralResult = Field(
+        default_factory=NoiseGeneralResult)

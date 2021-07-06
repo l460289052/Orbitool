@@ -71,7 +71,7 @@ class SplitAndFitPeak(MultiProcess):
         return path_ions_peak
 
 
-class CalibrateMerge(MultiProcess):
+class CalibrateMergeDenoise(MultiProcess):
     @staticmethod
     def read(file: WorkSpace, **kwargs) -> Generator[List[Tuple[Spectrum, PolynomialRegressionFunc]], Any, Any]:
         batch = []
@@ -87,7 +87,10 @@ class CalibrateMerge(MultiProcess):
         yield batch
 
     @staticmethod
-    def func(data: List[Tuple[Spectrum, PolynomialRegressionFunc]]) -> Spectrum:
+    def func(data: List[Tuple[Spectrum, PolynomialRegressionFunc]],
+             quantile: float, mass_dependent: bool, n_sigma: bool,
+             dependent: bool, points: np.ndarray, deltas: np.ndarray,
+             params: np.ndarray, subtract: bool, poly_coef: np.ndarray) -> Spectrum:
         spectra = []
         paths = set()
         start_times = []
@@ -102,6 +105,16 @@ class CalibrateMerge(MultiProcess):
 
         path = paths.pop() if len(paths) == 1 else ""
         mz, intensity = spectrum_func.averageSpectra(spectra, drop_input=True)
+
+        if not dependent:
+            poly_coef, _, slt, params = spectrum_func.getNoiseParams(
+                mz, intensity, quantile, mass_dependent, points, deltas)
+            points = points[slt]
+            deltas = deltas[slt]
+
+        mz, intensity = spectrum_func.denoiseWithParams(
+            mz, intensity, poly_coef, params, points, deltas, n_sigma, subtract)
+
         start_time = min(start_times)
         end_time = max(end_times)
         spectrum = Spectrum(path=path, mz=mz, intensity=intensity,
@@ -258,6 +271,23 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
     @state_node
     def calibrate(self):
-        calibrate_merge = CalibrateMerge(self.manager.workspace)
+        workspace = self.manager.workspace
+        noise_info = workspace.noise_tab.info
+        setting = noise_info.general_setting
+        result = noise_info.general_result
+        dependent = setting.mass_dependent
+        params, points, deltas = setting.get_params(not dependent)
+        func_kwargs = {
+            "quantile": setting.quantile,
+            "mass_dependent": setting.mass_dependent,
+            "n_sigma": setting.n_sigma,
+            "dependent": dependent,
+            "points": points,
+            "deltas": deltas,
+            "params": params,
+            "subtract": setting.subtract,
+            "poly_coef": result.poly_coef}
+        calibrate_merge = CalibrateMergeDenoise(
+            self.manager.workspace, func_kwargs=func_kwargs)
         yield calibrate_merge
         self.callback.emit()

@@ -27,6 +27,15 @@ def updateGlobalParam(poly_coef: np.ndarray, n_sigma: float, noise: float, lod: 
     pass
 
 
+def getNoiseParams(mz: np.ndarray, intensity: np.ndarray, quantile: float,
+                   mass_dependent: float, mass_points: np.ndarray,
+                   mass_point_deltas: np.ndarray) -> Tuple[np.ndarray, float, List[Tuple[bool, np.ndarray]]]:
+    """
+    return  poly_coef:np.ndarray, std, List[(useable: bool, params: np.ndarray)]
+    """
+    pass
+
+
 def getShownNoiseLODFromParam(params: np.ndarray, n_sigma: float) -> Tuple[np.ndarray, np.ndarray]:
     """
     return noise, lod

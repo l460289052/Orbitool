@@ -56,7 +56,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         widget = self.tableWidget
         widget.clearContents()
         widget.setRowCount(0)
-        formulas = self.noise.info.noise_formulas
+        formulas = self.noise.info.general_setting.noise_formulas
         widget.setRowCount(len(formulas))
         for i, formula in enumerate(formulas):
             widget.setItem(i, 0, QtWidgets.QTableWidgetItem(
@@ -121,7 +121,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     @state_node
     def addFormula(self):
         formula = Formula(self.lineEdit.text())
-        self.noise.info.noise_formulas.append(
+        self.noise.info.general_setting.noise_formulas.append(
             workspace.noise_tab.NoiseFormulaParameter(formula=formula))
         self.showNoiseFormula()
 
@@ -132,7 +132,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         indexes = get_tablewidget_selected_row(self.tableWidget)
         indexes.reverse()
         for index in indexes:
-            del self.noise.info.noise_formulas[index]
+            del self.noise.info.general_setting.noise_formulas[index]
         self.showNoiseFormula()
 
     delFormula.except_node(showNoiseFormula)
@@ -147,8 +147,9 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
         mass_dependent = self.sizeDependentCheckBox.isChecked()
 
+        setting = info.general_setting
         mass_points = np.array([f.formula.mass()
-                                for f in info.noise_formulas])
+                                for f in setting.noise_formulas])
         mass_point_deltas = np.array([self.tableWidget.cellWidget(
             i, 1).value() for i in range(self.tableWidget.rowCount())], dtype=np.int)
 
@@ -159,18 +160,23 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
                 spectrum.mz, poly, params, mass_points, mass_point_deltas, n_sigma)
             return poly, std, slt, params, noise, LOD
 
-        info.poly_coef, info.global_noise_std, slt, params, info.noise, info.LOD = yield func
+        result = info.general_result
 
-        info.n_sigma = self.nSigmaDoubleSpinBox.value()
+        result.poly_coef, result.global_noise_std, slt, params, result.noise, result.LOD = yield func
+
+        setting = info.general_setting
+
+        setting.quantile, setting.mass_dependent, setting.n_sigma = quantile, mass_dependent, n_sigma
 
         ind: np.ndarray = slt.cumsum() - 1
-        formula_params = info.noise_formulas
-        for index, (i, s) in enumerate(zip(ind, slt)):
+        formula_params = setting.noise_formulas
+        for index, (i, s, d) in enumerate(zip(ind, slt, mass_point_deltas)):
             p = formula_params[index]
             p.selected = p.useable = s
             if s:
                 p.param = params[i]
             formula_params[index] = p
+            p.delta = d
 
         self.showNoise()
 
@@ -192,23 +198,26 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         info = self.noise.info
 
         checkeds.popleft()
-        info.poly_coef, info.global_noise_std = spectrum_func.updateGlobalParam(
-            info.poly_coef, info.n_sigma, noises.popleft(), lods.popleft())
+        result = info.general_result
+        result.poly_coef, result.global_noise_std = spectrum_func.updateGlobalParam(
+            result.poly_coef, info.general_setting.n_sigma, noises.popleft(), lods.popleft())
 
-        for param, checked, noise, lod in zip(info.noise_formulas, checkeds, noises, lods):
+        for param, checked, noise, lod in zip(info.general_setting.noise_formulas, checkeds, noises, lods):
             param.param = spectrum_func.updateNoiseLODParam(
-                param.param, info.n_sigma, noise, lod)
+                param.param, info.general_setting.n_sigma, noise, lod)
             param.selected = checked
 
         self.showNoise()
 
     def showNoise(self):
         info = self.noise.info
-        n_sigma = self.nSigmaDoubleSpinBox.value()
-        std = info.global_noise_std
+        setting = info.general_setting
+        result = info.general_result
+        n_sigma = setting.n_sigma
+        std = result.global_noise_std
 
         global_noise, global_lod = spectrum_func.getGlobalShownNoise(
-            info.poly_coef, n_sigma, std)
+            result.poly_coef, n_sigma, std)
 
         useables = [True]
         checkeds = [True]
@@ -216,7 +225,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
         noises = [global_noise]
         lods = [global_lod]
-        for param in info.noise_formulas:
+        for param in info.general_setting.noise_formulas:
             useables.append(param.useable)
             checkeds.append(param.selected)
             names.append(str(param.formula))
@@ -251,6 +260,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     def plotNoise(self):
         info = self.noise.info
         spectrum = info.current_spectrum
+        result = info.general_result
 
         is_log = self.yLogCheckBox.isChecked()
         plot = self.plot
@@ -268,19 +278,19 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
         ax.plot(spectrum.mz, spectrum.intensity,
                 linewidth=1, color="#BF2138", label="Spectrum")
-        ax.plot(spectrum.mz, info.LOD,
+        ax.plot(spectrum.mz, result.LOD,
                 linewidth=1, color='k', label='LOD')
-        ax.plot(spectrum.mz, info.noise,
+        ax.plot(spectrum.mz, result.noise,
                 linewidth=1, color='b', label='noise')
         ax.legend(loc='upper right')
 
         x_min = spectrum.mz[0]
         x_max = spectrum.mz[-1]
         ymax = np.polynomial.polynomial.polyval(
-            x_max, info.poly_coef) + info.n_sigma * info.global_noise_std
+            x_max, result.poly_coef) + info.general_setting.n_sigma * result.global_noise_std
         if is_log:
             ymin = np.polynomial.polynomial.polyval(
-                [x_min, x_max], info.poly_coef).min()
+                [x_min, x_max], result.poly_coef).min()
             ymin *= 0.5
             ymax *= 10
         else:
@@ -294,19 +304,13 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         info = self.noise.info
         subtract = self.substractCheckBox.isChecked()
         spectrum = info.current_spectrum
+        setting = info.general_setting
 
         def func():
-            params, points, deltas = [], [], []
-            for param in info.noise_formulas:
-                if param.selected:
-                    params.append(param.param)
-                    points.append(param.formula.mass())
-                    deltas.append(param.delta)
-            params = np.array(params)
-            points = np.array(points)
-            deltas = np.array(deltas, dtype=int)
+            params, points, deltas = setting.get_params(True)
             mz, intensity = spectrum_func.denoiseWithParams(
-                spectrum.mz, spectrum.intensity, info.poly_coef, params, points, deltas, info.n_sigma, subtract)
+                spectrum.mz, spectrum.intensity, info.general_result.poly_coef,
+                params, points, deltas, setting.n_sigma, subtract)
 
             s = Spectrum(path=spectrum.path, mz=mz, intensity=intensity,
                          start_time=spectrum.start_time, end_time=spectrum.end_time)
@@ -314,5 +318,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             return s
 
         s = yield func
+        setting.subtract = subtract
+        setting.spectrum_dependent = self.dependentCheckBox.isChecked()
 
         self.callback.emit((s,))
