@@ -119,9 +119,15 @@ class CalibrateMerge(MultiProcess):
                 start_time=ret.start_time, end_time=ret.end_time))
 
         target = file.calibration_tab.calibrated_spectra
-        if target.h5_path in file:
-            del file._obj[target.h5_path]
-        file._obj.move(tmp.h5_path, target.h5_path)
+        path = target.h5_path
+        if path in file:
+            del file._obj[path]
+        file._obj.move(tmp.h5_path, path)
+
+    @staticmethod
+    def exception(file, **kwargs):
+        if "tmp" in file:
+            del file["tmp"]
 
 
 class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
@@ -164,8 +170,6 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             table.setItem(index, 0, QtWidgets.QTableWidgetItem(ion.shown_text))
             table.setItem(
                 index, 1, QtWidgets.QTableWidgetItem(format(ion.formula.mass(), ".4f")))
-
-        table.show()
 
     @ state_node
     def addIon(self):

@@ -10,7 +10,7 @@ class StructureListView(Generic[T]):
     def __init__(self, h5group: h5py.Group, key: str, new=False) -> None:
         if key in h5group:
             if new:
-                del self.obj[key]
+                del h5group[key]
             else:
                 self.obj = h5group[key]
                 return
@@ -31,7 +31,7 @@ class StructureListView(Generic[T]):
     def __getitem__(self, index) -> T:
         if isinstance(index, Iterable):
             raise NotImplementedError()
-        StructureConverter.read_from_h5(self.obj, str(index))
+        return StructureConverter.read_from_h5(self.obj, str(index))
 
     def __setitem__(self, index, value: T):
         if isinstance(index, Iterable):

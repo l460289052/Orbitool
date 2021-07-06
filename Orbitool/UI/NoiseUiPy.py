@@ -19,7 +19,7 @@ from .utils import get_tablewidget_selected_row, set_header_sizes, showInfo
 
 
 class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
-    selected_spectrum_average = QtCore.pyqtSignal()
+    selected_spectrum_average = QtCore.pyqtSignal(Spectrum)
     callback = QtCore.pyqtSignal(tuple)
 
     def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
@@ -107,7 +107,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         if success:
             self.noise.info.current_spectrum = spectrum
             self.plotSelectSpectrum()
-            self.selected_spectrum_average.emit()
+            self.selected_spectrum_average.emit(spectrum)
             self.denoisePushButton.setEnabled(False)
         else:
             showInfo("failed")
@@ -117,7 +117,6 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         if spectrum is not None:
             self.plot.ax.plot(spectrum.mz, spectrum.intensity)
             self.plot.canvas.draw()
-            self.show()
 
     @state_node
     def addFormula(self):
@@ -246,7 +245,6 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             table.setCellWidget(i, 3, lodspinbox)
 
         self.toolBox.setCurrentWidget(self.paramTool)
-        table.show()
         self.plotNoise()
         self.denoisePushButton.setEnabled(True)
 

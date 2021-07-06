@@ -129,7 +129,6 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             for j, vv in enumerate(v):
                 table.setItem(i, j, QtWidgets.QTableWidgetItem(str(vv)))
 
-        table.show()
 
         if self.autoTimeCheckBox.isChecked():
             time_start, time_end = self.pathlist.timeRange
