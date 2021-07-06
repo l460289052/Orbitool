@@ -139,10 +139,10 @@ class SingleConverter(BaseShapeConverter):
             field.type_, StructureConverter)
         if issubclass(converter, AttrConverter):
             if key not in h5group.attrs:
-                return None
+                return field.get_default()
         else:
             if key not in h5group:
-                return None
+                return field.get_default()
         return converter.read_from_h5(h5group, key)
 
 
@@ -166,6 +166,8 @@ class ListConverter(BaseShapeConverter):
     @staticmethod
     def read_from_h5(h5group: Group, key: str, field: ModelField):
         inner_type = get_args(field.outer_type_)[0]
+        if key not in h5group:
+            return field.get_default()
         if inner_type == np.ndarray:
             rets = []
             group: Group = h5group[key]
@@ -200,6 +202,8 @@ class DictConverter(BaseShapeConverter):
     @staticmethod
     def read_from_h5(h5group: Group, key: str, field: ModelField):
         key_type, inner_type = get_args(field.outer_type_)
+        if key in h5group:
+            return field.get_default()
         rets = {}
         group: Group = h5group[key]
         keys = group.attrs["indexes"]
