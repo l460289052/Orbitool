@@ -85,6 +85,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.peakList = PeakListUiPy.Widget(manager)
         self.peakListDw = self.add_dockerwidget(
             "Peak List", self.peakList, self.spectrumDw)
+        self.peakFitTab.filter_selected.connect(self.peakList.filterSelected)
 
         self.timeseries = TimeseriesUiPy.Widget()
         self.timeseriesDw = self.add_dockerwidget(

@@ -1,10 +1,13 @@
-from ...HDF5 import H5File
-from ...base import BaseStructure
-import numpy as np
-from numpy import testing as nptest
 import io
 from datetime import datetime
+from typing import List
+
+import numpy as np
 import pytest
+from numpy import testing as nptest
+
+from ...base import BaseStructure
+from ...HDF5 import H5File
 from .spectrum import Spectrum
 
 
@@ -48,3 +51,23 @@ def test_structure():
     assert t.value == 3
     assert t.c1.value == 1
     assert t.c2.value == 2
+
+
+class SomeList(BaseStructure):
+    h5_type = "test some list"
+    value_a: List[int] = []
+    value_b: List[float] = []
+    value_c: List[Spectrum] = []
+
+
+def test_some_list_a():
+    f = H5File()
+
+    some_list = SomeList(value_a=list(range(1000)), value_b=[
+                         i / 10. for i in range(5)])
+
+    f.write("list", some_list)
+
+    some_list: SomeList = f.read("list")
+    assert some_list.value_a == list(range(1000))
+    assert some_list.value_b == [i / 10. for i in range(5)]

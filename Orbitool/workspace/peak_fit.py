@@ -12,3 +12,5 @@ class PeakFitInfo(BaseStructure):
     peaks: List[FittedPeak] = Field(default_factory=list)
     residual_mz: Optional[np.ndarray] = None
     residual_intensity: Optional[np.ndarray] = None
+
+    shown_indexes: List[int] = Field(default_factory=list)
