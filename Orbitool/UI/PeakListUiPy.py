@@ -6,6 +6,7 @@ from . import PeakListUi
 from .manager import Manager
 from ..structures.spectrum import FittedPeak
 from .utils import get_tablewidget_selected_row
+from .PeakFitFloatUiPy import Widget as PeakFloatWidget
 
 
 class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
@@ -13,6 +14,12 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         super().__init__()
         self.manager = manager
         self.setupUi(self)
+
+    def setupUi(self, Form):
+        super().setupUi(Form)
+
+        self.tableWidget.itemDoubleClicked.connect(self.openPeakFloatWin)
+        self.peak_float: PeakFloatWidget = None
 
     @property
     def peaks_info(self):
@@ -53,3 +60,12 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         else:
             for index in reversed(selectedindex):
                 indexes.pop(index)
+
+    def openPeakFloatWin(self, item: QtWidgets.QTableWidgetItem):
+        row = item.row()
+        if self.peak_float is not None and not self.peak_float.isHidden():
+            self.peak_float.close()
+        widget = PeakFloatWidget(
+            self.manager, self.peaks_info.shown_indexes[row])
+        self.peak_float = widget
+        widget.show()

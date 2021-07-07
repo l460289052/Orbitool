@@ -1,9 +1,14 @@
-from typing import Union, Optional
+from typing import Optional, Union
+
+from PyQt5 import QtCore, QtWidgets
+
 from . import PeakFitFloatUi
-from PyQt5 import QtWidgets, QtCore
 
 
 class Widget(QtWidgets.QWidget, PeakFitFloatUi.Ui_Form):
-    def __init__(self, parent: Optional['QWidget'] = None) -> None:
-        super().__init__(parent=parent)
+    callback = QtCore.pyqtSignal()
+
+    def __init__(self, manager, peak_index: int) -> None:
+        super().__init__()
+        self.manager = manager
         self.setupUi(self)

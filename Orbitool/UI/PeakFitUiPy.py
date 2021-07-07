@@ -21,10 +21,10 @@ class SplitPeaks(MultiProcess):
     @staticmethod
     def func(data: Tuple[int, Peak], func: peakfit_func.BaseFunc):
         index, peak = data
-        splited_peaks = func.splitPeak(peak)
-        for p in splited_peaks:
+        split_peaks = func.splitPeak(peak)
+        for p in split_peaks:
             p.original_index = index
-        return splited_peaks
+        return split_peaks
 
     @staticmethod
     def write(file, rets):
