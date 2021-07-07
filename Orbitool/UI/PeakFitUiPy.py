@@ -1,16 +1,34 @@
-from typing import Optional, List, Callable
 from itertools import chain
+from typing import Callable, List, Optional, Tuple
 
 from PyQt5 import QtCore, QtWidgets
 
-from ..functions import(
-    spectrum as spectrum_func,
-    formula as formula_func,
-    peakfit as peakfit_func)
-from ..structures.spectrum import FittedPeak, Spectrum
+from ..functions import formula as formula_func
+from ..functions import peakfit as peakfit_func
+from ..functions import spectrum as spectrum_func
+from ..structures.spectrum import FittedPeak, Peak, Spectrum
 from . import PeakFitUi
 from .component import Plot
-from .manager import Manager, state_node
+from .manager import Manager, MultiProcess, state_node
+
+
+class SplitPeaks(MultiProcess):
+    @staticmethod
+    def read(raw_peaks: List[Peak], **kwargs):
+        for index, peak in enumerate(raw_peaks):
+            yield index, peak
+
+    @staticmethod
+    def func(data: Tuple[int, Peak], func: peakfit_func.BaseFunc):
+        index, peak = data
+        splited_peaks = func.splitPeak(peak)
+        for p in splited_peaks:
+            p.original_index = index
+        return splited_peaks
+
+    @staticmethod
+    def write(file, rets):
+        return list(chain.from_iterable(rets))
 
 
 class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
@@ -50,18 +68,19 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         workspace = self.manager.workspace
         selected_index = workspace.spectra_list.info.selected_index or 0
 
-        def read_split_fit_calc():
+        def read():
             spectrum = workspace.calibration_tab.calibrated_spectra[
                 selected_index]
             raw_peaks = spectrum_func.splitPeaks(
                 spectrum.mz, spectrum.intensity)
-            peaks: List[FittedPeak] = []
-            func = workspace.peak_shape_tab.info.func
-            for index, peak in enumerate(raw_peaks):
-                splited_peaks = func.splitPeak(peak)
-                for p in splited_peaks:
-                    p.original_index = index
-                    peaks.append(p)
+            return spectrum, raw_peaks
+
+        spectrum, raw_peaks = yield read
+
+        peaks: List[FittedPeak] = yield SplitPeaks(raw_peaks, func_kwargs={
+            "func": workspace.peak_shape_tab.info.func})
+
+        def formula_and_residual():
             calc = workspace.formula_docker.info.restricted_calc
             for peak in peaks:
                 calc.get(peak.peak_position)
@@ -71,11 +90,16 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
                 peak.formulas = formula_func.correct(peak, peaks)
 
             mz, residual = peakfit_func.calculateResidual(
-                raw_peaks, peaks, func)
+                raw_peaks, peaks, workspace.peak_shape_tab.info.func)
 
-            return spectrum, raw_peaks, peaks, (mz, residual)
+            return mz, residual
+
+        mz, residual = yield formula_and_residual
+
         info = self.peakfit.info
-        info.spectrum, info.raw_peaks, info.peaks, (info.residual_mz, info.residual_intensity) = yield read_split_fit_calc
+        info.spectrum, info.raw_peaks = spectrum, raw_peaks
+        info.peaks = peaks
+        info.residual_mz, info.residual_intensity = mz, residual
         info.shown_indexes = list(range(len(info.peaks)))
 
         self.show_spectrum.emit(info.spectrum)
