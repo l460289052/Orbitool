@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>204</width>
-    <height>457</height>
+    <width>220</width>
+    <height>578</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,15 +17,15 @@
    <item>
     <widget class="QToolBox" name="toolBox">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>190</width>
-        <height>215</height>
+        <width>206</width>
+        <height>286</height>
        </rect>
       </property>
       <attribute name="label">
@@ -67,9 +67,6 @@
          <item row="0" column="1">
           <widget class="QDoubleSpinBox" name="mzMinDoubleSpinBox"/>
          </item>
-         <item row="1" column="1">
-          <widget class="QDoubleSpinBox" name="mzMaxDoubleSpinBox"/>
-         </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_3">
            <property name="text">
@@ -77,48 +74,21 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="mzMaxDoubleSpinBox">
+           <property name="maximum">
+            <double>999.990000000000009</double>
+           </property>
+          </widget>
+         </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>DBE min</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QDoubleSpinBox" name="dbeMinDoubleSpinBox"/>
-         </item>
-         <item row="3" column="1">
-          <widget class="QDoubleSpinBox" name="dbeMaxDoubleSpinBox"/>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>DBE max</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
           <widget class="QLabel" name="label_6">
            <property name="text">
             <string>rtol</string>
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="label_7">
-           <property name="text">
-            <string>nitrogen rule</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QCheckBox" name="nitrogenRuleCheckBox">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
+         <item row="2" column="1">
           <widget class="QDoubleSpinBox" name="rtolDoubleSpinBox"/>
          </item>
         </layout>
@@ -142,15 +112,53 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
-        <width>175</width>
-        <height>405</height>
+        <y>-22</y>
+        <width>191</width>
+        <height>526</height>
        </rect>
       </property>
       <attribute name="label">
        <string>standard element</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QFormLayout" name="formLayout_6">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_10">
+           <property name="text">
+            <string>DBE min</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QDoubleSpinBox" name="dbeMinDoubleSpinBox"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>DBE max</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="dbeMaxDoubleSpinBox"/>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>nitrogen rule</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QCheckBox" name="nitrogenRuleCheckBox">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
        <item>
         <widget class="QLabel" name="label_8">
          <property name="text">
@@ -169,13 +177,19 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>150</height>
+           <height>200</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
            <height>16777215</height>
+          </size>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>200</height>
           </size>
          </property>
          <property name="verticalScrollMode">
@@ -187,9 +201,17 @@
          <attribute name="horizontalHeaderDefaultSectionSize">
           <number>50</number>
          </attribute>
+         <attribute name="horizontalHeaderMinimumSectionSize">
+          <number>40</number>
+         </attribute>
          <attribute name="horizontalHeaderStretchLastSection">
           <bool>true</bool>
          </attribute>
+         <column>
+          <property name="text">
+           <string>element</string>
+          </property>
+         </column>
          <column>
           <property name="text">
            <string>use</string>
@@ -493,6 +515,19 @@
          </item>
         </layout>
        </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="page_3">
@@ -500,8 +535,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>190</width>
-        <height>215</height>
+        <width>206</width>
+        <height>286</height>
        </rect>
       </property>
       <attribute name="label">
@@ -525,6 +560,9 @@
          <property name="horizontalScrollMode">
           <enum>QAbstractItemView::ScrollPerPixel</enum>
          </property>
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>100</number>
+         </attribute>
          <attribute name="horizontalHeaderStretchLastSection">
           <bool>true</bool>
          </attribute>
@@ -622,10 +660,15 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="font">
+         <font>
+          <family>Consolas</family>
+         </font>
+        </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="calcPushButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -643,19 +686,10 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_12">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="forcePushButton">
         <property name="text">
-         <string>Result:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <string>Unrestricted Calc</string>
         </property>
        </widget>
       </item>
@@ -670,21 +704,21 @@
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>50</height>
+          <height>100</height>
          </size>
         </property>
         <property name="font">
          <font>
           <family>Consolas</family>
-          <pointsize>7</pointsize>
+          <pointsize>9</pointsize>
          </font>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="pushButton_2">
+      <item row="2" column="0">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>Unrestricted Calc</string>
+         <string>Result</string>
         </property>
        </widget>
       </item>

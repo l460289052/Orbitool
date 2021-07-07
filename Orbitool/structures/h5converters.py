@@ -51,8 +51,15 @@ class RestrictedCalcElementNumItem(BaseTableItem):
 
 class RestrictedCalcStructure(BaseStructure):
     h5_type = "restricted calc"
-    rtol: float
-    charge: int
+
+    rtol: float = 1e-6
+    charge: int = -1
+    DBEMin: float = 0
+    DBEMax: float = 8
+    MMin: float = 50
+    MMax: float = 750
+    nitrogenRule: bool = False
+
     params: List[RestrictedCalcElementNumItem]
     elements: str
     isotopes: str
@@ -66,7 +73,9 @@ class RestrictedCalcConverter(BaseSingleConverter):
         elements = ','.join(value.getElements())
         isotopes = ','.join(value.getIsotopes())
         struct = RestrictedCalcStructure(
-            rtol=value.rtol, charge=value.charge, params=parameters, elements=elements, isotopes=isotopes)
+            rtol=value.rtol, charge=value.charge, DBEMin=value.DBEMin, DBEMax=value.DBEMax,
+            MMin=value.MMin, MMax=value.MMax, nitrogenRule=value.nitrogenRule,
+            params=parameters, elements=elements, isotopes=isotopes)
         StructureConverter.write_to_h5(h5group, key, struct)
 
     @staticmethod
@@ -77,6 +86,12 @@ class RestrictedCalcConverter(BaseSingleConverter):
 
         calc.rtol = struct.rtol
         calc.charge = struct.charge
+        calc.DBEMin = struct.DBEMin
+        calc.DBEMax = struct.DBEMax
+        calc.MMin = struct.MMin
+        calc.MMax = struct.MMax
+        calc.nitrogenRule = struct.nitrogenRule
+
         for p in calc.getInitedElements():
             del calc[p]
 
