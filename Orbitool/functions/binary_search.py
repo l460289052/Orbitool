@@ -53,7 +53,7 @@ def indexNearest(array: List[T], value: K, indexRange: Tuple[int, int] = None, m
         return i
 
 
-def indexBetween(array: List[T], valueRange: Tuple[K, K], indexRange: Tuple[int, int] = None, method: Callable[[List[T], int], K] = defaultMethod) -> range:
+def indexBetween(array: List[T], valueRange: Tuple[K, K], indexRange: Tuple[int, int] = None, method: Callable[[List[T], int], K] = defaultMethod) -> slice:
     """
     get range from sorted array for value in (l,r)
     `indexRange`: (start,stop), contain array[start] to array[stop-1]
@@ -65,9 +65,9 @@ def indexBetween(array: List[T], valueRange: Tuple[K, K], indexRange: Tuple[int,
     l = indexFirstNotSmallerThan(array, lvalue, indexRange, method)
     r = indexFirstBiggerThan(array, rvalue, indexRange, method)
     if l < r:
-        return range(l, r)
+        return slice(l, r)
     else:
-        return range(l, l)
+        return slice(l, l)
 
 
 __all__ = [s for s in locals() if s.startswith('index')]

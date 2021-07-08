@@ -149,7 +149,7 @@ class NormalDistributionFunc(BaseFunc):
                     new_intensity[-1] = 0
                     new_intensity[0] = 0
                     new_peak = FittedPeak(
-                        mz=mz[select], intensity=new_intensity, splitNum=num, fitted_param=p,
+                        mz=mz[select], intensity=new_intensity, split_num=num, fitted_param=p,
                         peak_position=p[1], peak_intensity=peak_intensity, area=p[0])
                     peaks.append(new_peak)
                     if len(peaks) > 1:

@@ -17,10 +17,9 @@ def correct(peak: FittedPeak, peaks: List[FittedPeak], rtol=1e-6) -> List[Formul
         ratio = formula.relativeAbundance() * 1.5
         origin = formula.findOrigin()
         mz = origin.mass()
-        r = indexBetween(peaks, (mz - mz * rtol, mz + mz * rtol),
+        s = indexBetween(peaks, (mz - mz * rtol, mz + mz * rtol),
                          method=get_peak_position)
-        for i in r:
-            p = peaks[i]
+        for p in peaks[s]:
             for f in p.formulas:
                 if origin == f and p.peak_intensity * ratio > intensity:
                     formulas.append(formula)

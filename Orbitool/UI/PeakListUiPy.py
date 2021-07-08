@@ -2,11 +2,11 @@ from typing import Optional, Union
 
 from PyQt5 import QtCore, QtWidgets
 
-from . import PeakListUi
-from .manager import Manager
 from ..structures.spectrum import FittedPeak
+from . import PeakListUi
+from .manager import Manager, state_node
+from .PeakFitFloatUiPy import Window as PeakFloatWin
 from .utils import get_tablewidget_selected_row
-from .PeakFitFloatUiPy import Widget as PeakFloatWidget
 
 
 class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
@@ -19,7 +19,7 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         super().setupUi(Form)
 
         self.tableWidget.itemDoubleClicked.connect(self.openPeakFloatWin)
-        self.peak_float: PeakFloatWidget = None
+        self.peak_float: PeakFloatWin = None
 
     @property
     def peaks_info(self):
@@ -44,7 +44,7 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
             setItem(2, format(peak.peak_intensity, '.5e'))
             if len(peak.formulas) == 1:
                 setItem(3,
-                        format((peak.peak_position / peak.formulas[0].mass() - 1) * 1e6, '.3f'))
+                        format((peak.peak_position / peak.formulas[0].mass() - 1) * 1e6, '.5f'))
             setItem(4, format(peak.area, '.5e'))
             setItem(5, peak.split_num)
 
@@ -61,11 +61,12 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
             for index in reversed(selectedindex):
                 indexes.pop(index)
 
+    @state_node(withArgs=True)
     def openPeakFloatWin(self, item: QtWidgets.QTableWidgetItem):
         row = item.row()
         if self.peak_float is not None and not self.peak_float.isHidden():
             self.peak_float.close()
-        widget = PeakFloatWidget(
+        widget = PeakFloatWin(
             self.manager, self.peaks_info.shown_indexes[row])
         self.peak_float = widget
         widget.show()

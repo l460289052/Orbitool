@@ -111,10 +111,10 @@ class File:
         # return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
 
     def timeRange2NumRange(self, timeRange: Tuple[timedelta, timedelta]):
-        r: range = functions.binary_search.indexBetween(
+        s: slice = functions.binary_search.indexBetween(
             self, timeRange, (self.firstScanNumber, self.lastScanNumber + 1),
             method=(lambda f, i: f.getSpectrumRetentionTime(i)))
-        return (r.start, r.stop)
+        return (s.start, s.stop)
 
     def numRange2TimeRange(self, numRange: Tuple[int, int]) -> Tuple[timedelta, timedelta]:
         return self.getSpectrumRetentionTime(numRange[0]), self.getSpectrumRetentionTime(numRange[1] - 1)
