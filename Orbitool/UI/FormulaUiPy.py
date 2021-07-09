@@ -6,17 +6,25 @@ from itertools import chain
 from .manager import Manager, state_node
 from .component import factory
 from ..utils.formula import Formula
+from .utils import get_tablewidget_selected_row
 
 
 class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
-    def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
-        super().__init__(parent=parent)
+    def __init__(self, manager: Manager) -> None:
+        super().__init__()
         self.manager = manager
         self.setupUi(self)
         self.manager.inited_or_restored.connect(self.show_or_restore)
 
     def setupUi(self, Form):
         super().setupUi(Form)
+
+        self.elementAddToolButton.clicked.connect(self.restrictedAddElement)
+        self.isotopeAddToolButton.clicked.connect(self.restrictedAddIsotope)
+        self.isotopeDelToolButton.clicked.connect(self.restrictedDelIsotopes)
+
+        self.unrestrictedAddToolButton.clicked.connect(self.forceAdd)
+        self.unrestrictedDelToolButton.clicked.connect(self.forceDel)
 
         self.negativeRadioButton.setChecked(True)
         self.calcPushButton.clicked.connect(lambda: self.calc(False))
@@ -124,3 +132,69 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
             mass = Formula(text).mass()
             result = format(mass, '.6f')
         self.resultPlainTextEdit.setPlainText(result)
+
+    @state_node
+    def restrictedAddElement(self):
+        element = self.elementLineEdit.text().strip()
+        if element in self.formula.info.restricted_calc.getInitedElements():
+            return
+
+        element = Formula(element)
+
+        table = self.elementTableWidget
+        row = table.rowCount()
+        table.setRowCount(row + 1)
+
+        table.setItem(row, 0, QtWidgets.QTableWidgetItem(str(element)))
+        table.setCellWidget(row, 1, factory.CheckBoxFactory(False))
+        contents = [format(element.mass(), '.4f'),
+                    0, 0, 0, 0, 0, 0, 0]
+
+        for column, s in enumerate(contents, 2):
+            table.setItem(row, column, QtWidgets.QTableWidgetItem(str(s)))
+
+    @state_node
+    def restrictedAddIsotope(self):
+        isotope = self.isotopeLineEdit.text().strip()
+        if isotope in self.formula.info.restricted_calc.getIsotopes():
+            return
+
+        isotope = Formula(isotope)
+
+        table = self.isotopeTableWidget
+        row = table.rowCount()
+        table.setRowCount(row + 1)
+
+        table.setItem(row, 0, QtWidgets.QTableWidgetItem(str(isotope)))
+        table.setItem(row, 1, QtWidgets.QTableWidgetItem(
+            format(isotope.mass(), '.4f')))
+
+    @state_node
+    def restrictedDelIsotopes(self):
+        table = self.isotopeTableWidget
+        indexes = get_tablewidget_selected_row(table)
+        for index in reversed(indexes):
+            table.removeRow(index)
+
+    @state_node
+    def forceAdd(self):
+        element = self.unrestrictedLineEdit.text().strip()
+        if element in self.formula.info.force_calc.getEIList():
+            return
+
+        element = Formula(element)
+
+        table = self.unrestrictedTableWidget
+        row = table.rowCount()
+        table.setRowCount(row + 1)
+
+        table.setItem(row, 0, QtWidgets.QTableWidgetItem(str(element)))
+        table.setItem(row, 1, QtWidgets.QTableWidgetItem(
+            format(element.mass(), '.4f')))
+
+    @state_node
+    def forceDel(self):
+        table = self.unrestrictedTableWidget
+        indexes = get_tablewidget_selected_row(table)
+        for index in reversed(indexes):
+            table.removeRow(index)
