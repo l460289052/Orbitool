@@ -84,4 +84,8 @@ class SpectrumInfo(BaseTableItem):
     start_time: datetime
     end_time: datetime
 
-# class MassListItem
+
+class MassListItem(BaseTableItem):
+    item_name = "MassList"
+    position: float
+    formulas: FormulaList = Field(default_factory=FormulaList)
