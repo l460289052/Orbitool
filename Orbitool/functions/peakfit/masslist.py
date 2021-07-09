@@ -9,6 +9,9 @@ def get_position(l: List[MassListItem], index: int):
 
 
 def addMassTo(original_list: List[MassListItem], new_item: MassListItem, rtol: float):
+    if len(original_list) == 0:
+        original_list.append(new_item)
+        return
     insert_index = indexFirstBiggerThan(
         original_list, new_item.position, method=get_position)
     index = indexNearest(

@@ -13,7 +13,9 @@ def test_mergeinto():
 
 def test_formula():
     f = Formula('CH4')
-    masslist = [MassListItem(position=f.mass())]
+    masslist = []
+
+    addMassTo(masslist, MassListItem(position=f.mass()), 1e-6)
 
     addMassTo(masslist, MassListItem(position=f.mass(), formulas=[f]), 1e-6)
     addMassTo(masslist, MassListItem(position=1), 1e-6)

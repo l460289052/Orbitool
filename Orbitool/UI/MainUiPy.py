@@ -67,8 +67,9 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.formulaDw = self.add_dockerwidget(
             "Formula", self.formula)
 
+        self.masslist = MassListUiPy.Widget(manager)
         self.massListDw = self.add_dockerwidget(
-            "Mass List", MassListUiPy.Widget(), self.formulaDw)
+            "Mass List", self.masslist, self.formulaDw)
 
         self.calibrationInfo = CalibrationInfoUiPy.Widget(manager)
         self.calibrationInfoDw = self.add_dockerwidget(

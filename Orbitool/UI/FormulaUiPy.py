@@ -58,14 +58,17 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         element_table.setRowCount(0)
         inited_elements = calc.getInitedElements()
         element_table.setRowCount(len(inited_elements))
-        inited_elements = chain(usedElements, set(
-            inited_elements) - usedElements)
+        inited_elements = list(chain(usedElements, set(
+            inited_elements) - usedElements))
+        for index in range(len(inited_elements)):
+            if inited_elements[index].startswith('e'):
+                inited_elements.insert(0, inited_elements.pop(index))
         for index, e in enumerate(inited_elements):
             params = calc[e]
 
             element_table.setItem(index, 0, QtWidgets.QTableWidgetItem(e))
             element_table.setCellWidget(
-                index, 1, factory.CheckBoxFactory(e in usedElements))
+                index, 1, factory.CheckBoxFactory(e in usedElements or e.startswith('e')))
 
             for column, s in enumerate([
                     format(Formula(e if not e.startswith(

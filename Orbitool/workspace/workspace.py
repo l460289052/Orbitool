@@ -1,20 +1,19 @@
-from typing import Generic, List, Optional, Type, TypeVar, Union
 import shutil
+from typing import Generic, List, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
 from ..structures.base import BaseStructure, BaseTableItem
 from ..structures.HDF5 import H5File, H5Obj, Ndarray
-
 from .base import Widget
-from .file_tab import Widget as FileWidget
-from .spectra_list import SpectraListInfo
-from .noise_tab import NoiseTabInfo
-from .peak_shape import PeakShapeInfo
 from .calibration import Widget as CalibrationWidget
-from .peak_fit import PeakFitInfo
-
+from .file_tab import Widget as FileWidget
 from .formula import FormulaInfo
+from .masslist import MassListInfo
+from .noise_tab import NoiseTabInfo
+from .peak_fit import PeakFitInfo
+from .peak_shape import PeakShapeInfo
+from .spectra_list import SpectraListInfo
 
 T = TypeVar("T")
 
@@ -47,6 +46,8 @@ class WorkSpace(H5File):
 
         self.formula_docker = self.visit_or_create_widget(
             "formula docker", FormulaInfo)
+        self.masslist_docker = self.visit_or_create_widget(
+            "masslist docker", MassListInfo)
 
     def save(self):
         self.write("info", self.info)
