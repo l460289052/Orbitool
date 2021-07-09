@@ -117,6 +117,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.peaksTableWidget.sizePolicy().hasHeightForWidth())
         self.peaksTableWidget.setSizePolicy(sizePolicy)
         self.peaksTableWidget.setMinimumSize(QtCore.QSize(0, 280))
+        self.peaksTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.peaksTableWidget.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
         self.peaksTableWidget.setHorizontalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
         self.peaksTableWidget.setObjectName("peaksTableWidget")

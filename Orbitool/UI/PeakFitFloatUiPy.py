@@ -1,13 +1,16 @@
-from typing import Optional, Union
-import matplotlib.ticker
+from typing import List, Optional, Union
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+import matplotlib.ticker
+import numpy as np
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ..functions import binary_search
-from .component import Plot
-import numpy as np
-from .manager import Manager, state_node
+from ..functions import formula as formula_func
+from ..structures.spectrum import FittedPeak
+from ..utils.formula import Formula
 from . import PeakFitFloatUi
+from .component import Plot
+from .manager import Manager, state_node
 
 
 class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
@@ -18,29 +21,30 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
         self.manager = manager
         self.setupUi(self)
 
-        peaks = self.peakfit_info.peaks
-        peak = peaks[peak_index]
-        self.original_index = peak.original_index
+        info = self.peakfit_info
+        original_indexes = info.original_indexes
+        self.original_index = original_indexes[peak_index]
 
         start = peak_index - 1
-        while self.original_index == peaks[start]:
+        while self.original_index == original_indexes[start]:
             start -= 1
         start += 1
-        length = len(peaks)
+        length = len(original_indexes)
         end = start + 1
-        while end < length and self.original_index == peaks[end].original_index:
+        while end < length and self.original_index == original_indexes[end]:
             end += 1
-        self.peak_slice = slice(start, end)
+        self.original_slice = slice(start, end)
+        self.peaks: List[FittedPeak] = info.peaks[start:end]
 
         self.showPeak()
         self.plotPeak()
 
-    def showEvent(self, a0: QtGui.QShowEvent) -> None:
-        a0.accept()
-
     def setupUi(self, Form):
         super().setupUi(Form)
         self.plot = Plot(self.widget)
+        self.refitPushButton.clicked.connect(self.refit)
+        self.savePushButton.clicked.connect(self.save)
+        self.closePushButton.clicked.connect(self.close)
 
     @property
     def peakfit_info(self):
@@ -49,7 +53,9 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
     def showPeak(self):
         origin_peak = self.peakfit_info.raw_peaks[self.original_index]
         peaks = self.peakfit_info.peaks
-        show_peaks = self.peakfit_info.peaks[self.peak_slice]
+        show_peaks = self.peaks
+
+        self.spinBox.setValue(len(show_peaks))
 
         table = self.peaksTableWidget
         table.clearContents()
@@ -64,9 +70,10 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
                     index, column, QtWidgets.QTableWidgetItem(str(msg)))
 
             setItem(0, format(peak.peak_position, '.5f'))
-            setItem(1, ', '.join(str(f) for f in peak.formulas))
-            setItem(2, format(peak.peak_intensity, '.5e'))
-            setItem(4, format(peak.area, '.5e'))
+            table.setCellWidget(index, 1, QtWidgets.QLineEdit(
+                ', '.join(str(f) for f in peak.formulas)))
+            setItem(2, format(peak.peak_intensity, '.3e'))
+            setItem(4, format(peak.area, '.3e'))
             if len(peak.formulas) == 1:
                 setItem(3,
                         format((peak.peak_position / peak.formulas[0].mass() - 1) * 1e6, '.5f'))
@@ -107,7 +114,7 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
         show_legend = self.legendCheckBox.isChecked()
 
         origin_peak = self.peakfit_info.raw_peaks[self.original_index]
-        show_peaks = self.peakfit_info.peaks[self.peak_slice]
+        show_peaks = self.peaks
 
         func = self.manager.workspace.peak_shape_tab.info.func
 
@@ -149,7 +156,7 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
 
         if show_residual:
             ax.plot(origin_peak.mz, intensity_diff,
-                    label="peak residual", linewidth=1.5)
+                    label="peak residual", color='r', linewidth=1.5)
 
         ax.xaxis.set_tick_params(rotation=15)
         ax.yaxis.set_tick_params(rotation=60)
@@ -160,3 +167,61 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
 
         ax.set_xlim(origin_peak.mz.min(), origin_peak.mz.max())
         self.plot.canvas.draw()
+
+    @state_node
+    def refit(self):
+        num = self.spinBox.value()
+        func = self.manager.workspace.peak_shape_tab.info.func
+        info = self.peakfit_info
+        fittedpeaks = func.splitPeak(
+            info.raw_peaks[self.original_index], num, True)
+
+        calc = self.manager.workspace.formula_docker.info.restricted_calc
+        for peak in fittedpeaks:
+            peak.original_index = self.original_index
+            peak.formulas = calc.get(peak.peak_position)
+            peak.formulas = formula_func.correct(peak, info.peaks)
+
+        self.peaks = fittedpeaks
+
+        self.showPeak()
+        self.plotPeak()
+
+    @state_node
+    def save(self):
+        table = self.peaksTableWidget
+        new_peaks = self.peaks
+        for index, peak in zip(range(table.rowCount()), new_peaks):
+            formula_line_edit: QtWidgets.QLineEdit = table.cellWidget(index, 1)
+            peak.formulas = [Formula(striped) for s in formula_line_edit.text(
+            ).split(',') if len(striped := s.strip()) > 0]
+
+        self.peakfit_info.raw_split_num[self.original_index] = len(new_peaks)
+
+        peaks = self.peakfit_info.peaks
+        original_indexes = self.peakfit_info.original_indexes
+        shown_indexes = self.peakfit_info.shown_indexes
+
+        start = self.original_slice.start
+        stop = self.original_slice.stop
+        delta = len(new_peaks) - stop + start
+
+        del peaks[self.original_slice]
+        for peak in reversed(new_peaks):
+            peaks.insert(start, peak)
+
+        del original_indexes[self.original_slice]
+        for _ in range(len(new_peaks)):
+            original_indexes.insert(start, self.original_index)
+
+        i = binary_search.indexFirstNotSmallerThan(shown_indexes, start)
+        j = binary_search.indexFirstNotSmallerThan(shown_indexes, stop)
+        del shown_indexes[i:j]
+
+        for j in range(len(new_peaks)):
+            shown_indexes.insert(i + j, start + j)
+        for j in range(i + len(new_peaks), len(shown_indexes)):
+            shown_indexes[j] += delta
+
+        self.callback.emit()
+        self.close()

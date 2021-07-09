@@ -211,6 +211,9 @@
              <height>280</height>
             </size>
            </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
            <property name="verticalScrollMode">
             <enum>QAbstractItemView::ScrollPerPixel</enum>
            </property>

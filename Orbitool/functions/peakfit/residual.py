@@ -4,7 +4,7 @@ from .base import BaseFunc
 import numpy as np
 
 
-def calculateResidual(raw_peaks: List[Peak], fitted_indexed_peaks: List[FittedPeak], fit_func: BaseFunc):
+def calculateResidual(raw_peaks: List[Peak], original_indexes: List[int], fitted_indexed_peaks: List[FittedPeak], fit_func: BaseFunc):
     mz = []
     intensity = []
 
@@ -12,9 +12,9 @@ def calculateResidual(raw_peaks: List[Peak], fitted_indexed_peaks: List[FittedPe
     omz = None
     ointensity = None
 
-    for peak in fitted_indexed_peaks:
-        if oindex != peak.original_index:
-            oindex = peak.original_index
+    for peak_oindex, peak in zip(original_indexes, fitted_indexed_peaks):
+        if oindex != peak_oindex:
+            oindex = peak_oindex
             opeak = raw_peaks[oindex]
             omz = opeak.mz
             ointensity = opeak.intensity.copy()

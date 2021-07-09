@@ -88,7 +88,7 @@ class NormalDistributionFunc(BaseFunc):
         sigma = self.peak_fit_sigma * math.sqrt(abs(mu) / 200) * mu
         return func(mz, a, mu, sigma)
 
-    def func(self, mz:np.ndarray, params):
+    def func(self, mz: np.ndarray, params):
         return self._funcFit(mz, *params)
 
     def getFittedParam(self, peak: FittedPeak):
@@ -102,10 +102,8 @@ class NormalDistributionFunc(BaseFunc):
         return self._funcFit(mz, *peak.fitted_param)
 
     def splitPeak(self, peak: Peak, split_num=None, force=False) -> List[FittedPeak]:
-        if split_num is None:
-            split_num = peak.split_num
         id_peak = peak.idPeak
-        if split_num < 0:
+        if split_num is None:
             split_num = len(id_peak)
 
         if split_num > 15:
@@ -149,7 +147,7 @@ class NormalDistributionFunc(BaseFunc):
                     new_intensity[-1] = 0
                     new_intensity[0] = 0
                     new_peak = FittedPeak(
-                        mz=mz[select], intensity=new_intensity, split_num=num, fitted_param=p,
+                        mz=mz[select], intensity=new_intensity, fitted_param=p,
                         peak_position=p[1], peak_intensity=peak_intensity, area=p[0])
                     peaks.append(new_peak)
                     if len(peaks) > 1:

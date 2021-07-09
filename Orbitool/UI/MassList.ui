@@ -73,11 +73,6 @@
        <string>formula</string>
       </property>
      </column>
-     <column>
-      <property name="text">
-       <string>subpeak</string>
-      </property>
-     </column>
     </widget>
    </item>
    <item>

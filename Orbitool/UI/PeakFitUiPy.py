@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, cast
 
 from PyQt5 import QtCore, QtWidgets
 
@@ -15,20 +15,24 @@ from .manager import Manager, MultiProcess, state_node
 class SplitPeaks(MultiProcess):
     @staticmethod
     def read(raw_peaks: List[Peak], **kwargs):
-        for index, peak in enumerate(raw_peaks):
-            yield index, peak
+        for peak in raw_peaks:
+            yield peak
 
     @staticmethod
-    def func(data: Tuple[int, Peak], func: peakfit_func.BaseFunc):
-        index, peak = data
-        split_peaks = func.splitPeak(peak)
-        for p in split_peaks:
-            p.original_index = index
-        return split_peaks
+    def func(peak: Peak, func: peakfit_func.BaseFunc):
+        return func.splitPeak(peak)
 
     @staticmethod
     def write(file, rets):
-        return list(chain.from_iterable(rets))
+        peaks = []
+        original_indexes = []
+        split_num = []
+        for index, ret in enumerate(rets):
+            split_num.append(len(ret))
+            for peak in ret:
+                peaks.append(peak)
+                original_indexes.append(index)
+        return split_num, original_indexes, peaks
 
 
 class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
@@ -77,7 +81,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         spectrum, raw_peaks = yield read
 
-        peaks: List[FittedPeak] = yield SplitPeaks(raw_peaks, func_kwargs={
+        raw_split_num, original_indexes, peaks = yield SplitPeaks(raw_peaks, func_kwargs={
             "func": workspace.peak_shape_tab.info.func})
 
         def formula_and_residual():
@@ -90,7 +94,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
                 peak.formulas = formula_func.correct(peak, peaks)
 
             mz, residual = peakfit_func.calculateResidual(
-                raw_peaks, peaks, workspace.peak_shape_tab.info.func)
+                raw_peaks, original_indexes, peaks, workspace.peak_shape_tab.info.func)
 
             return mz, residual
 
@@ -98,11 +102,27 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         info = self.peakfit.info
         info.spectrum, info.raw_peaks = spectrum, raw_peaks
+        info.raw_split_num = raw_split_num
+        info.original_indexes = original_indexes
         info.peaks = peaks
         info.residual_mz, info.residual_intensity = mz, residual
         info.shown_indexes = list(range(len(info.peaks)))
 
         self.show_spectrum.emit(info.spectrum)
+        self.show_and_plot()
+
+    @state_node(mode='x')
+    def calc_residual(self):
+        info = self.peakfit.info
+        func = self.manager.workspace.peak_shape_tab.info.func
+
+        def calc():
+            mz, residual = peakfit_func.calculateResidual(
+                info.raw_peaks, info.original_indexes, info.peaks, func)
+            return mz, residual
+
+        info = self.peakfit.info
+        info.residual_mz, info.residual_intensity = yield calc
         self.show_and_plot()
 
     def plot_peaks(self):

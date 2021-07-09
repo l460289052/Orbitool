@@ -66,7 +66,7 @@
            </widget>
           </item>
           <item row="7" column="1">
-           <widget class="QDoubleSpinBox" name="mzRangeRDoubleSpinBox">
+           <widget class="QDoubleSpinBox" name="mzMaxDoubleSpinBox">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -82,7 +82,7 @@
            </widget>
           </item>
           <item row="6" column="1">
-           <widget class="QDoubleSpinBox" name="mzRangeLDoubleSpinBox">
+           <widget class="QDoubleSpinBox" name="mzMinDoubleSpinBox">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -335,7 +335,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_24">
          <item>
-          <widget class="QCheckBox" name="showLegendsCheckBox">
+          <widget class="QCheckBox" name="legendsCheckBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -343,7 +343,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>show legends</string>
+            <string>legends</string>
            </property>
           </widget>
          </item>

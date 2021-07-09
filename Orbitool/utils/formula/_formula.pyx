@@ -77,6 +77,7 @@ cdef class Formula:
         cdef dict dic
         try:
             if isinstance(formula, str):
+                formula = formula.strip()
                 if not re.fullmatch(r"([A-Z][a-z]{0,2}(\[\d+\])?\d*)*[-+]?", formula):
                     raise ValueError(str(formula))
                 if len(formula) > 0:

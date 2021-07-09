@@ -15,7 +15,6 @@ class Peak(BaseTableItem):
     item_name = "Peak"
     mz: Ndarray[float, -1]
     intensity: Ndarray[float, -1]
-    split_num: int = -1
     original_index: int = -1
 
     @cached_property
