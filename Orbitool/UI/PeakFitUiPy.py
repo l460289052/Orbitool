@@ -5,8 +5,9 @@ from PyQt5 import QtCore, QtWidgets
 
 from ..functions import formula as formula_func
 from ..functions import peakfit as peakfit_func
+from ..functions.peakfit import masslist as masslist_func
 from ..functions import spectrum as spectrum_func
-from ..structures.spectrum import FittedPeak, Peak, Spectrum
+from ..structures.spectrum import FittedPeak, Peak, Spectrum, MassListItem
 from . import PeakFitUi
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
@@ -38,6 +39,7 @@ class SplitPeaks(MultiProcess):
 class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     show_spectrum = QtCore.pyqtSignal(Spectrum)
     show_peaklist = QtCore.pyqtSignal()
+    show_masslist = QtCore.pyqtSignal()
     filter_selected = QtCore.pyqtSignal(bool)  # selected or unselected
 
     def __init__(self, manager: Manager) -> None:
@@ -56,6 +58,14 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.filterFormulaWithoutPushButton.clicked.connect(
             self.filterFormulaWithout)
         self.filterClearPushButton.clicked.connect(self.filterClear)
+
+        self.actionFit_FormulaPushButton.clicked.connect(self.fitFormula)
+        self.actionFit_ForceFormulaPushButton.clicked.connect(
+            self.fitForceFormula)
+        self.actionFit_MassListPushButton.clicked.connect(self.fitMassList)
+        self.actionAddToMassListPushButton.clicked.connect(self.addToMassList)
+        self.actionRmPushButton.clicked.connect(self.removeFromPeaks)
+
         self.plot = Plot(self.widget)
 
     def show_and_plot(self):
@@ -178,3 +188,95 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     def filterUnselected(self):
         self.filter_selected.emit(False)
         self.show_peaklist.emit()
+
+    @state_node
+    def fitFormula(self):
+        info = self.peakfit.info
+
+        calc = self.manager.workspace.formula_docker.info.restricted_calc
+        peaks = info.peaks
+        indexes = info.shown_indexes
+
+        def func():
+            for index in indexes:
+                peak = peaks[index]
+                peak.formulas = calc.get(peak.peak_position)
+                peak.formulas = formula_func.correct(peak, peaks)
+
+        yield func
+
+        self.show_peaklist.emit()
+
+    @state_node
+    def fitForceFormula(self):
+        info = self.peakfit.info
+
+        calc = self.manager.workspace.formula_docker.info.force_calc
+        peaks = info.peaks
+        indexes = info.shown_indexes
+
+        def func():
+            for index in indexes:
+                peak = peaks[index]
+                peak.formulas = calc.get(peak.peak_position)
+
+        yield func
+
+        self.show_peaklist.emit()
+
+    @state_node
+    def fitMassList(self):
+        info = self.peakfit.info
+
+        rtol = self.manager.workspace.masslist_docker.info.rtol
+        masslist = self.manager.workspace.masslist_docker.info.masslist
+        peaks = info.peaks
+        indexes = info.shown_indexes
+
+        def func():
+            for index in indexes:
+                peak = peaks[index]
+                peak.formulas = masslist_func.fitUseMassList(
+                    peak.peak_position, masslist, rtol)
+
+        yield func
+
+        self.show_peaklist.emit()
+
+    @state_node
+    def addToMassList(self):
+        info = self.peakfit.info
+
+        masslist = self.manager.workspace.masslist_docker.info.masslist
+        peaks = info.peaks
+        indexes = info.shown_indexes
+
+        def func():
+            for index in indexes:
+                peak = peaks[index]
+                masslist_func.addMassTo(
+                    masslist,
+                    MassListItem(position=peak.peak_position, formulas=peak.formulas))
+
+        yield func
+
+        self.show_masslist.emit()
+
+    @state_node
+    def removeFromPeaks(self):
+        info = self.peakfit.info
+
+        peaks = info.peaks
+        original_indexes = info.original_indexes
+        indexes = info.shown_indexes
+
+        def func():
+            indexes.reverse()
+            for index in indexes:
+                peaks.pop(index)
+                original_indexes.pop(index)
+            info.shown_indexes = list(range(len(peaks)))
+
+        yield func
+
+        self.show_peaklist

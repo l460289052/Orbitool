@@ -91,6 +91,48 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>fit use</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QPushButton" name="actionFit_FormulaPushButton">
+              <property name="text">
+               <string> formula</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="actionFit_ForceFormulaPushButton">
+              <property name="text">
+               <string>force formula</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="actionFit_MassListPushButton">
+              <property name="text">
+               <string>mass list</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
          <widget class="QPushButton" name="actionRmPushButton">
           <property name="text">
            <string>remove</string>
@@ -98,23 +140,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="actionFit_FormulaPushButton">
+         <widget class="QPushButton" name="actionAddToMassListPushButton">
           <property name="text">
-           <string>fit use formula</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="actionFit_ForceFormulaPushButton">
-          <property name="text">
-           <string>fit with force formula</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="actionFit_MassListPushButton">
-          <property name="text">
-           <string>fit use mass list</string>
+           <string>add to mass list</string>
           </property>
          </widget>
         </item>

@@ -70,6 +70,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.masslist = MassListUiPy.Widget(manager)
         self.massListDw = self.add_dockerwidget(
             "Mass List", self.masslist, self.formulaDw)
+        self.peakFitTab.show_masslist.connect(self.masslist.showMasslist)
 
         self.calibrationInfo = CalibrationInfoUiPy.Widget(manager)
         self.calibrationInfoDw = self.add_dockerwidget(
