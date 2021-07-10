@@ -25,8 +25,6 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
         self.comboBox_position = {}
         self.former_index = -1
 
-        self.tableWidget.itemSelectionChanged.connect(self.selection_changed)
-
     def setupUi(self, Form):
         super().setupUi(Form)
 
@@ -85,10 +83,10 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
         comboBox.addItem("File tab", FILE_TAB)
         comboBox.addItem("Calibrate tab", CALIBRATE_TAB)
 
-    @state_node(mode='e')
-    def selection_changed(self):
+    def get_selected_index(self):
         indexes = utils.get_tablewidget_selected_row(self.tableWidget)
-        index = (0 if config.default_select else None) if len(
-            indexes) == 0 else indexes[0]
-        self.spectra_list.info.selected_index = self.spectra_list.info.shown_indexes[
-            index]
+        if len(indexes) == 0:
+            if config.default_select:
+                return 0
+            raise ValueError("Please select a spectrum in spectra list")
+        return indexes[0]

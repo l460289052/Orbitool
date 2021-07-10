@@ -14,6 +14,7 @@ from .noise_tab import NoiseTabInfo
 from .peak_fit import PeakFitInfo
 from .peak_shape import PeakShapeInfo
 from .spectra_list import SpectraListInfo
+from .timeseries import TimeseriesInfo
 
 T = TypeVar("T")
 
@@ -43,6 +44,8 @@ class WorkSpace(H5File):
             "calibration tab", CalibrationWidget)
         self.peakfit_tab = self.visit_or_create_widget(
             "peak fit tab", PeakFitInfo)
+        self.timeseries_tab = self.visit_or_create_widget(
+            "time series tab", TimeseriesInfo)
 
         self.formula_docker = self.visit_or_create_widget(
             "formula docker", FormulaInfo)

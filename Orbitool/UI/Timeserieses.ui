@@ -24,7 +24,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -38,17 +38,8 @@
          <property name="title">
           <string>Show time series at</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_2">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item row="2" column="0">
+         <layout class="QFormLayout" name="formLayout">
+          <item row="0" column="0">
            <widget class="QRadioButton" name="mzRadioButton">
             <property name="text">
              <string>mz</string>
@@ -58,53 +49,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QRadioButton" name="formulaRadioButton">
-            <property name="text">
-             <string>formula</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="1">
-           <widget class="QDoubleSpinBox" name="mzMaxDoubleSpinBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="decimals">
-             <number>5</number>
-            </property>
-            <property name="maximum">
-             <double>999.990000000000009</double>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
-           <widget class="QDoubleSpinBox" name="mzMinDoubleSpinBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="decimals">
-             <number>5</number>
-            </property>
-            <property name="maximum">
-             <double>999.990000000000009</double>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QRadioButton" name="mzRangeRadioButton">
-            <property name="text">
-             <string>mz range</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
+          <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="mzDoubleSpinBox">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -120,7 +65,14 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
+          <item row="1" column="0">
+           <widget class="QRadioButton" name="formulaRadioButton">
+            <property name="text">
+             <string>formula</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
            <widget class="QLineEdit" name="formulaLineEdit">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -130,7 +82,59 @@
             </property>
            </widget>
           </item>
-          <item row="9" column="0" colspan="2">
+          <item row="2" column="0">
+           <widget class="QRadioButton" name="mzRangeRadioButton">
+            <property name="text">
+             <string>mz range</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="mzMinDoubleSpinBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
+            <property name="maximum">
+             <double>999.990000000000009</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="mzMaxDoubleSpinBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
+            <property name="maximum">
+             <double>999.990000000000009</double>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="2">
+           <widget class="QRadioButton" name="peakListRadioButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>peak list</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0" colspan="2">
            <widget class="QRadioButton" name="selectedMassListRadioButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -146,7 +150,7 @@
             </property>
            </widget>
           </item>
-          <item row="10" column="0" colspan="2">
+          <item row="6" column="0" colspan="2">
            <widget class="QRadioButton" name="massListRadioButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -159,19 +163,6 @@
             </property>
            </widget>
           </item>
-          <item row="8" column="0" colspan="2">
-           <widget class="QRadioButton" name="selectedPeaksRadioButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>selected peak(s) in peak list</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -180,7 +171,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label_22">
            <property name="text">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;rtol&lt;/p&gt;&lt;p&gt;when use mz,formula,peak&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;rtol&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
@@ -200,6 +191,19 @@
            </property>
            <property name="value">
             <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="QLabel" name="label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>when use mz,formula,peak</string>
            </property>
           </widget>
          </item>
@@ -245,12 +249,12 @@
          </column>
          <column>
           <property name="text">
-           <string>mz</string>
+           <string>mz-from</string>
           </property>
          </column>
          <column>
           <property name="text">
-           <string>ppm</string>
+           <string>mz-to</string>
           </property>
          </column>
         </widget>
@@ -259,6 +263,12 @@
         <layout class="QHBoxLayout" name="horizontalLayout_16">
          <item>
           <widget class="QLabel" name="label_23">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Remove</string>
            </property>
@@ -323,7 +333,7 @@
      <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_18">
        <item>
-        <widget class="QWidget" name="timeSeriesWidget" native="true">
+        <widget class="QWidget" name="widget" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>

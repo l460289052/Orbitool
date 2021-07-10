@@ -80,7 +80,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     @state_node
     def showSelect(self):
         workspace = self.manager.workspace
-        selected_index = workspace.spectra_list.info.selected_index or 0
+        selected_index = self.manager.fetch_func("spectra list select")()
 
         def read():
             spectrum = workspace.calibration_tab.calibrated_spectra[
@@ -248,6 +248,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         info = self.peakfit.info
 
         masslist = self.manager.workspace.masslist_docker.info.masslist
+        rtol = self.manager.workspace.masslist_docker.info.rtol
         peaks = info.peaks
         indexes = info.shown_indexes
 
@@ -256,7 +257,9 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
                 peak = peaks[index]
                 masslist_func.addMassTo(
                     masslist,
-                    MassListItem(position=peak.peak_position, formulas=peak.formulas))
+                    MassListItem(position=peak.peak_position,
+                                 formulas=peak.formulas),
+                    rtol=rtol)
 
         yield func
 

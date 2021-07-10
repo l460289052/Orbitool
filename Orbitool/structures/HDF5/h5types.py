@@ -175,17 +175,32 @@ class ListNdarrayConverter(BaseListConverter):
 class ListSimpleTypeConverter(BaseListConverter):
     @staticmethod
     def write_to_h5(h5group: Group, key: str, values):
-        h5group[key] = values
+        h5group.create_dataset(
+            key, data=values, compression='gzip', compression_opts=1)
 
     @staticmethod
     def read_from_h5(h5group: Group, key: str):
         return list(h5group[key][()])
 
 
+class ListDatetimeConverter(BaseListConverter):
+    @staticmethod
+    def write_to_h5(h5group: Group, key: str, values: List[datetime]):
+        values = np.array(values, dtype='M8[s]').astype(int)
+        h5group.create_dataset(
+            key, data=values, compression='gzip', compression_opts=1)
+
+    @staticmethod
+    def read_from_h5(h5group: Group, key: str):
+        values = h5group[key][()]
+        return list(values.astype('M8[s]').astype(datetime))
+
+
 list_converters = {
     np.ndarray: ListNdarrayConverter,
     int: ListSimpleTypeConverter,
-    float: ListSimpleTypeConverter}
+    float: ListSimpleTypeConverter,
+    datetime: ListDatetimeConverter}
 
 
 class ListConverter(BaseShapeConverter):

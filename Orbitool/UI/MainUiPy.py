@@ -59,7 +59,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             MassDefectUiPy.Widget(manager), "Mass Defect")
 
         self.timeseriesesTab = self.add_tab(
-            TimeseriesesUiPy.Widget(), "Timeseries")
+            TimeseriesesUiPy.Widget(manager), "Timeseries")
 
         # docker widgets
 
@@ -70,6 +70,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.masslist = MassListUiPy.Widget(manager)
         self.massListDw = self.add_dockerwidget(
             "Mass List", self.masslist, self.formulaDw)
+        manager.register_func("mass list select",
+                              self.masslist.get_selected_index)
         self.peakFitTab.show_masslist.connect(self.masslist.showMasslist)
 
         self.calibrationInfo = CalibrationInfoUiPy.Widget(manager)
@@ -77,6 +79,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             "Calibration Info", self.calibrationInfo, self.massListDw)
 
         self.spectraList = SpectraListUiPy.Widget(manager)
+        manager.register_func("spectra list select",
+                              self.spectraList.get_selected_index)
         self.spectraListDw = self.add_dockerwidget(
             "Spectra List", self.spectraList, self.calibrationInfoDw)
 
@@ -90,7 +94,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.peakList.peak_refit_finish.connect(self.peakFitTab.calc_residual)
         self.peakFitTab.filter_selected.connect(self.peakList.filterSelected)
 
-        self.timeseries = TimeseriesUiPy.Widget()
+        self.timeseries = TimeseriesUiPy.Widget(manager)
         self.timeseriesDw = self.add_dockerwidget(
             "Timeseries", self.timeseries, self.peakListDw)
 

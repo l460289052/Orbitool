@@ -72,14 +72,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     @state_node
     def showSelectedSpectrum(self):
         workspace = self.manager.workspace
-        index = workspace.spectra_list.info.selected_index
+        index = self.manager.fetch_func("spectra list select")()
         info_list = workspace.file_tab.info.spectrum_infos
-        if index is None:
-            if config.default_select:
-                index = 0
-            else:
-                showInfo("Please select a spectrum in spectra list")
-                return None
 
         left = index
         while info_list[left].average_index != 0:

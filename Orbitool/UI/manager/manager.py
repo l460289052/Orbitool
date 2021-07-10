@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable
+from typing import Callable, Dict
 
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
 
@@ -21,6 +21,7 @@ class Manager(QObject):
         self.running_thread: QThread = None
         self.workspace: WorkSpace = None
         self._busy: bool = True
+        self._func: Dict[str, Callable] = {}
 
         self.calibrationPlot: Plot = None
 
@@ -28,6 +29,12 @@ class Manager(QObject):
         if busy ^ self._busy:
             self._busy = busy
             self.busy_signal.emit(busy)
+
+    def register_func(self, key: str, func: Callable):
+        self._func[key] = func
+
+    def fetch_func(self, key: str):
+        return self._func.get(key, lambda x: x)
 
     @property
     def busy(self):

@@ -77,3 +77,6 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
         for index in reversed(indexes):
             masslist.pop(index)
         self.showMasslist()
+
+    def get_selected_index(self):
+        return get_tablewidget_selected_row(self.tableWidget)
