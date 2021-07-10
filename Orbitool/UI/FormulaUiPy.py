@@ -26,6 +26,8 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         self.unrestrictedAddToolButton.clicked.connect(self.forceAdd)
         self.unrestrictedDelToolButton.clicked.connect(self.forceDel)
 
+        self.applyPushButton.clicked.connect(self.applyChange)
+
         self.negativeRadioButton.setChecked(True)
         self.calcPushButton.clicked.connect(lambda: self.calc(False))
         self.forcePushButton.clicked.connect(lambda: self.calc(True))
@@ -113,8 +115,7 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         table.setRowCount(len(ei_list))
         for index, ei in enumerate(ei_list):
             table.setItem(index, 0, QtWidgets.QTableWidgetItem(ei))
-            table.setItem(index, 1, QtWidgets.QTableWidgetItem(
-                format(Formula(ei).mass(), '.4f')))
+            table.setItem(index, 1, QtWidgets.QTableWidgetItem(str(calc[ei])))
 
     @state_node(withArgs=True)
     def calc(self, force: bool):
@@ -128,7 +129,7 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
                 result = info.restricted_calc.get(mass)
             result.sort(key=lambda f: abs(f.mass() - mass))
             result = ", ".join(str(r) for r in result)
-        except:
+        except ValueError:
             mass = Formula(text).mass()
             result = format(mass, '.6f')
         self.resultPlainTextEdit.setPlainText(result)
@@ -189,8 +190,7 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         table.setRowCount(row + 1)
 
         table.setItem(row, 0, QtWidgets.QTableWidgetItem(str(element)))
-        table.setItem(row, 1, QtWidgets.QTableWidgetItem(
-            format(element.mass(), '.4f')))
+        table.setItem(row, 1, QtWidgets.QTableWidgetItem(str(999)))
 
     @state_node
     def forceDel(self):
@@ -198,3 +198,58 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         indexes = get_tablewidget_selected_row(table)
         for index in reversed(indexes):
             table.removeRow(index)
+
+    @state_node
+    def applyChange(self):
+        info = self.formula.info
+        calc = info.restricted_calc
+        force_calc = info.force_calc
+        if self.negativeRadioButton.isChecked():
+            force_calc.charge = calc.charge = info.polarity = -1
+        else:
+            force_calc.charge = calc.charge = info.polarity = 1
+
+        calc.MMin = info.mz_min = self.mzMinDoubleSpinBox.value()
+        calc.MMax = info.mz_max = self.mzMaxDoubleSpinBox.value()
+
+        force_calc.rtol = calc.rtol = info.rtol = self.rtolDoubleSpinBox.value() * 1e-6
+
+        # restricted
+        calc.DBEMin = self.dbeMinDoubleSpinBox.value()
+        calc.DBEMax = self.dbeMaxDoubleSpinBox.value()
+        calc.nitrogenRule = self.nitrogenRuleCheckBox.isChecked()
+
+        table = self.elementTableWidget
+
+        for row in range(table.rowCount()):
+            e = table.item(row, 0).text()
+            used = table.cellWidget(row, 1).isChecked()
+            if not e.startswith('e'):
+                calc.setEI(e, used)
+            params = {
+                "Min": int(table.item(row, 3).text()),
+                "Max": int(table.item(row, 4).text()),
+                "DBE2": float(table.item(row, 5).text()),
+                "HMin": float(table.item(row, 6).text()),
+                "HMax": float(table.item(row, 7).text()),
+                "OMin": float(table.item(row, 8).text()),
+                "OMax": float(table.item(row, 9).text())}
+            calc[e] = params
+
+        for isotope in calc.getIsotopes():
+            calc.setEI(isotope, False)
+
+        table = self.isotopeTableWidget
+        for row in range(table.rowCount()):
+            i = table.item(row, 0).text()
+            calc.setEI(i)
+
+        table = self.unrestrictedTableWidget
+        nums = {ei: -1 for ei in force_calc.getEIList()}
+        for row in range(table.rowCount()):
+            nums[table.item(row, 0).text()] = int(table.item(row, 1).text())
+
+        for ei, num in nums.items():
+            force_calc[ei] = num
+
+        self.show_or_restore()

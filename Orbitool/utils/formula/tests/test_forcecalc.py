@@ -44,3 +44,11 @@ def test_forcecalc3():
         assert len(ret) < 25
         for r in ret:
             assert abs(r.mass() / f.mass() - 1) < calc.rtol
+
+
+def test_forcecalc4():
+    calc = ForceCalc()  
+    calc.charge = 1
+    calc['N'] = 999
+    f = Formula('CH4+')  # +
+    assert f in calc.get(f.mass())

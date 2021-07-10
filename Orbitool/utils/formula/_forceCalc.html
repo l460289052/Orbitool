@@ -287,9 +287,9 @@ body.cython { font-family: courier; font-size: 12; }
 .cython.score-253 {background-color: #FFFF09;}
 .cython.score-254 {background-color: #FFFF09;}
 pre { line-height: 125%; }
-td.linenos pre { color: #000000; background-color: #f0f0f0; padding-left: 5px; padding-right: 5px; }
-span.linenos { color: #000000; background-color: #f0f0f0; padding-left: 5px; padding-right: 5px; }
-td.linenos pre.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 .cython .hll { background-color: #ffffcc }
 .cython { background: #f8f8f8; }
@@ -653,7 +653,7 @@ static int __pyx_pf_8Orbitool_5utils_7formula_10_forceCalc_10Calculator_2__setit
 /* … */
     goto __pyx_L7;
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">057</span>:             <span class="k">if</span> <span class="n">value</span><span class="o">&gt;</span><span class="mf">0</span><span class="p">:</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">057</span>:             <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mf">0</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>    __pyx_t_2 = ((__pyx_v_value &gt; 0) != 0);
     if (__pyx_t_2) {
 /* … */
@@ -663,9 +663,9 @@ static int __pyx_pf_8Orbitool_5utils_7formula_10_forceCalc_10Calculator_2__setit
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">059</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">isotopeMaximum</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></pre>
 <pre class='cython code score-0 '>      (__pyx_v_self-&gt;isotopeMaximum[__pyx_v_p]) = __pyx_v_value;
 </pre><pre class="cython line score-0">&#xA0;<span class="">060</span>:         <span class="k">else</span><span class="p">:</span></pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">061</span>:             <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mf">0</span><span class="p">:</span></pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">061</span>:             <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mf">0</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>  /*else*/ {
-    __pyx_t_2 = ((__pyx_v_value == 0) != 0);
+    __pyx_t_2 = ((__pyx_v_value &lt;= 0) != 0);
     if (__pyx_t_2) {
 /* … */
       goto __pyx_L9;

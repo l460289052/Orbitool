@@ -17,7 +17,7 @@ class Ui_Form(object):
         self.toolBox = QtWidgets.QToolBox(Form)
         self.toolBox.setObjectName("toolBox")
         self.page = QtWidgets.QWidget()
-        self.page.setGeometry(QtCore.QRect(0, 0, 206, 286))
+        self.page.setGeometry(QtCore.QRect(0, 0, 208, 311))
         self.page.setObjectName("page")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.page)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -58,7 +58,7 @@ class Ui_Form(object):
         self.verticalLayout_2.addItem(spacerItem)
         self.toolBox.addItem(self.page, "")
         self.page_2 = QtWidgets.QWidget()
-        self.page_2.setGeometry(QtCore.QRect(0, -22, 191, 526))
+        self.page_2.setGeometry(QtCore.QRect(0, 0, 126, 510))
         self.page_2.setObjectName("page_2")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.page_2)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
@@ -237,7 +237,7 @@ class Ui_Form(object):
         self.verticalLayout_3.addItem(spacerItem1)
         self.toolBox.addItem(self.page_2, "")
         self.page_3 = QtWidgets.QWidget()
-        self.page_3.setGeometry(QtCore.QRect(0, 0, 206, 286))
+        self.page_3.setGeometry(QtCore.QRect(0, 0, 208, 311))
         self.page_3.setObjectName("page_3")
         self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.page_3)
         self.verticalLayout_6.setObjectName("verticalLayout_6")
@@ -331,7 +331,7 @@ class Ui_Form(object):
         self.verticalLayout.addWidget(self.groupBox)
 
         self.retranslateUi(Form)
-        self.toolBox.setCurrentIndex(0)
+        self.toolBox.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):

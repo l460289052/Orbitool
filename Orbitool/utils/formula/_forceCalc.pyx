@@ -54,11 +54,11 @@ cdef class Calculator:
             preinc(it)
         
         if it == self.calcedIsotopes.end():
-            if value>0:
+            if value > 0:
                 self.calcedIsotopes[getMass(p)] = p
                 self.isotopeMaximum[p] = value
         else:
-            if value == 0:
+            if value <= 0:
                 self.calcedIsotopes.erase(it)
                 self.isotopeMaximum.erase(p)
             else:
