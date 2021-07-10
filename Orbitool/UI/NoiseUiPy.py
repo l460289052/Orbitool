@@ -1,29 +1,60 @@
 from collections import deque
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple, Generator, Iterable
 
 import matplotlib.ticker
 import numpy as np
 from PyQt5 import QtCore, QtWidgets
 
 from .. import config, workspace
-from ..functions import binary_search
 from ..functions import spectrum as spectrum_func
 from ..structures.file import FileSpectrumInfo
+from ..structures.HDF5 import StructureListView
 from ..structures.spectrum import Spectrum
+from ..workspace import WorkSpace
 from ..utils.formula import Formula
 from . import NoiseUi, component
 from .component import factory
-from .manager import Manager, state_node
+from .manager import Manager, state_node, MultiProcess
 from .utils import get_tablewidget_selected_row, set_header_sizes, showInfo
+
+
+class ReadFromFile(MultiProcess):
+    @staticmethod
+    def func(data: Tuple[FileSpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
+        info, (mz, intensity, time) = data
+        mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
+        spectrum = Spectrum(path=info.path, mz=mz, intensity=intensity,
+                            start_time=info.start_time, end_time=info.end_time)
+        return spectrum
+
+    @ staticmethod
+    def read(file: WorkSpace, **kwargs) -> Generator:
+        for info in file.file_tab.info.spectrum_infos:
+            yield info, info.get_spectrum_from_info(with_minutes=True)
+
+    @ staticmethod
+    def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
+        tmp = StructureListView[Spectrum](file._obj, "tmp", True)
+        tmp.h5_extend(rets)
+
+        h5path = file.file_tab.raw_spectra.h5_path
+        if h5path in file:
+            del file[h5path]
+        file._obj.move(tmp.h5_path, h5path)
+
+    @ staticmethod
+    def exception(file, **kwargs):
+        if "tmp" in file:
+            del file["tmp"]
 
 
 class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     selected_spectrum_average = QtCore.pyqtSignal(Spectrum)
     callback = QtCore.pyqtSignal(tuple)
 
-    def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
-        super().__init__(parent=parent)
+    def __init__(self, manager: Manager) -> None:
+        super().__init__()
         self.manager = manager
         self.setupUi(self)
 
@@ -312,6 +343,10 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             return s
 
         s = yield func
+
+        read_from_file = ReadFromFile(self.manager.workspace)
+        yield read_from_file
+
         setting.subtract = subtract
         setting.spectrum_dependent = self.dependentCheckBox.isChecked()
 

@@ -17,36 +17,6 @@ from .manager import Manager, MultiProcess, state_node
 from .utils import get_tablewidget_selected_row
 
 
-class ReadFromFile(MultiProcess):
-    @staticmethod
-    def func(data: Tuple[FileSpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
-        info, (mz, intensity, time) = data
-        mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
-        spectrum = Spectrum(path=info.path, mz=mz, intensity=intensity,
-                            start_time=info.start_time, end_time=info.end_time)
-        return spectrum
-
-    @ staticmethod
-    def read(file: WorkSpace, **kwargs) -> Generator:
-        for info in file.file_tab.info.spectrum_infos:
-            yield info, info.get_spectrum_from_info(with_minutes=True)
-
-    @ staticmethod
-    def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
-        tmp = StructureListView[Spectrum](file._obj, "tmp", True)
-        tmp.h5_extend(rets)
-
-        h5path = file.file_tab.raw_spectra.h5_path
-        if h5path in file:
-            del file[h5path]
-        file._obj.move(tmp.h5_path, h5path)
-
-    @ staticmethod
-    def exception(file, **kwargs):
-        if "tmp" in file:
-            del file["tmp"]
-
-
 class SplitAndFitPeak(MultiProcess):
     @staticmethod
     def read(h5_spectra: StructureListView[Spectrum], **kwargs) -> Generator:
@@ -207,13 +177,6 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         rtol = self.rtolDoubleSpinBox.value() / 1e-6
         degree = self.degreeSpinBox.value()
         use_N_ions = self.nIonsSpinBox.value()
-
-        # read file
-        if not workspace.info.hasRead:
-            read_from_file = ReadFromFile(workspace)
-
-            yield read_from_file
-            workspace.info.hasRead = True
 
         raw_spectra = workspace.file_tab.raw_spectra
         fit_func = workspace.peak_shape_tab.info.func
