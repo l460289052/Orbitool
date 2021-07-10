@@ -17,6 +17,10 @@ class Ion(BaseTableItem):
     shown_text: str
     formula: Formula
 
+    @classmethod
+    def FactoryFromText(cls, text):
+        return Ion(shown_text=text, formula=Formula(text))
+
 
 class Calibrator(BaseStructure):
     h5_type = "calibrator"

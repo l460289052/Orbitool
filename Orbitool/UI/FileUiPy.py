@@ -49,8 +49,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         self.file.ui_state.set_state(self)
 
     def updateState(self):
-        getter = UiNameGetter(self)
-        getter.register_components([
+        self.file.ui_state.fromComponents(self, [
             self.recursionCheckBox,
             self.nSpectraRadioButton,
             self.nMinutesRadioButton,
@@ -63,8 +62,6 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             self.positiveRadioButton,
             self.negativeRadioButton,
             self.averageCheckBox])
-        self.file.ui_state = UiState.FactoryStateGetter(
-            self, getter.registered)
 
     @state_node
     def addThermoFile(self):
@@ -128,7 +125,6 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
                  f.endDatetime, f.path]
             for j, vv in enumerate(v):
                 table.setItem(i, j, QtWidgets.QTableWidgetItem(str(vv)))
-
 
         if self.autoTimeCheckBox.isChecked():
             time_start, time_end = self.pathlist.timeRange

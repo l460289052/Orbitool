@@ -43,13 +43,29 @@ class UiState:
         self.states = states
 
     @classmethod
-    def FactoryStateGetter(cls, widget, keys: Iterable[str]) -> UiState:
+    def FactoryStateGetter(cls, widget, keys: Iterable[str]):
+        ins = cls()
+        ins.fromNames(widget, keys)
+        return ins
+
+    @classmethod
+    def FactoryFromComponents(cls, widget, components: Iterable):
+        ins = cls()
+        ins.fromComponents(widget, components)
+        return cls
+
+    def fromComponents(self, widget, components: Iterable):
+        getter = UiNameGetter(widget)
+        getter.register_components(components)
+        self.fromNames(widget, getter.registered)
+
+    def fromNames(self, widget, keys):
         states = {}
         for key in keys:
             if hasattr(widget, key):
                 o = getattr(widget, key)
                 states[key] = state_handlers[type(o)].get(o)
-        return cls(states)
+        self.states = states
 
     def set_state(self, widget):
         for key, state in self.states.items():
@@ -146,5 +162,6 @@ def init_handlers():
         def set(obj: QLineEdit, value: str):
             obj.setText(value)
     state_handlers[QLineEdit] = LineEditHandler
+
 
 init_handlers()

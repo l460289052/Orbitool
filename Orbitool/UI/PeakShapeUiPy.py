@@ -13,6 +13,7 @@ import numpy as np
 from ..functions import peakfit as peakfit_func, spectrum as spectrum_func
 from . import PeakShapeUi, component
 from .manager import Manager, Thread, state_node
+from ..workspace import UiNameGetter, UiState
 from .utils import showInfo
 
 
@@ -37,7 +38,8 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
         self.setupUi(self)
 
         self.animation = LineAnimation()
-        self.manager.inited_or_restored.connect(self.showNormPeaks)
+        self.manager.inited_or_restored.connect(self.restore)
+        self.manager.save.connect(self.updateState)
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -51,6 +53,13 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
         self.plot.canvas.mpl_connect('button_press_event', self.mouseToggle)
         self.plot.canvas.mpl_connect('button_release_event', self.mouseToggle)
         self.plot.canvas.mpl_connect('motion_notify_event', self.mouseMove)
+
+    def restore(self):
+        self.showNormPeaks()
+        self.peak_shape.ui_state.set_state(self)
+
+    def updateState(self):
+        self.peak_shape.ui_state.fromComponents(self, [self.spinBox])
 
     @property
     def peak_shape(self):

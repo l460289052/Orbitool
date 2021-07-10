@@ -44,7 +44,8 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         super().__init__()
         self.manager = manager
         self.setupUi(self)
-        manager.inited_or_restored.connect(self.showTimeseries)
+        manager.inited_or_restored.connect(self.restore)
+        manager.save.connect(self.updateState)
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -57,6 +58,27 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
     @property
     def timeseries(self):
         return self.manager.workspace.timeseries_tab
+
+    def restore(self):
+        self.showTimeseries()
+        self.timeseries.ui_state.set_state(self)
+
+    def updateState(self):
+        self.timeseries.ui_state.fromComponents(self, [
+            self.mzRadioButton,
+            self.mzDoubleSpinBox,
+            self.formulaRadioButton,
+            self.formulaLineEdit,
+            self.mzRadioButton,
+            self.mzMinDoubleSpinBox,
+            self.mzMaxDoubleSpinBox,
+            self.peakListRadioButton,
+            self.massListRadioButton,
+            self.selectedMassListRadioButton,
+            self.rtolDoubleSpinBox,
+            self.exportWithPpmCheckBox,
+            self.legendsCheckBox,
+            self.logScaleCheckBox])
 
     @state_node
     def calc(self):

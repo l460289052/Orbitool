@@ -122,7 +122,8 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         self.manager: Manager = manager
         self.setupUi(self)
         self.manager.calibrationPlot = self.plot
-        manager.inited_or_restored.connect(self.init)
+        manager.inited_or_restored.connect(self.restore)
+        manager.save.connect(self.updateState)
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -138,11 +139,15 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
     def calibration(self):
         return self.manager.workspace.calibration_tab
 
-    def init(self):
-        ions = ["HNO3NO3-", "C6H3O2NNO3-", "C6H5O3NNO3-",
-                "C6H4O5N2NO3-", "C8H12O10N2NO3-", "C10H17O10N3NO3-"]
-        self.calibration.info.add_ions(ions)
+    def restore(self):
         self.showIons()
+        self.calibration.ui_state.set_state(self)
+
+    def updateState(self):
+        self.calibration.ui_state.fromComponents(self, [
+            self.rtolDoubleSpinBox,
+            self.degreeSpinBox,
+            self.nIonsSpinBox])
 
     def showIons(self):
         info = self.calibration.info

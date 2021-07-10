@@ -46,7 +46,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         super().__init__()
         self.manager = manager
         self.setupUi(self)
-        manager.inited_or_restored.connect(self.show_and_plot)
+        manager.inited_or_restored.connect(self.restore)
+        manager.save.connect(self.updateState)
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -67,6 +68,13 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.actionRmPushButton.clicked.connect(self.removeFromPeaks)
 
         self.plot = Plot(self.widget)
+
+    def restore(self):
+        self.show_and_plot()
+        self.peakfit.ui_state.set_state(self)
+
+    def updateState(self):
+        self.peakfit.ui_state.fromComponents(self, [])
 
     def show_and_plot(self):
         self.show_peaklist.emit()

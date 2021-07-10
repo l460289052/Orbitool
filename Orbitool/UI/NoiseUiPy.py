@@ -58,7 +58,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         self.manager = manager
         self.setupUi(self)
 
-        manager.inited_or_restored.connect(self.init)
+        manager.inited_or_restored.connect(self.restore)
+        manager.save.connect(self.updateState)
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -78,10 +79,20 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     def noise(self):
         return self.manager.workspace.noise_tab
 
-    def init(self):
+    def restore(self):
         self.showNoiseFormula()
         self.plotSelectSpectrum()
-        # self.showNoise()
+        self.showNoise()
+        self.noise.ui_state.set_state(self)
+
+    def updateState(self):
+        self.noise.ui_state .fromComponents(self, [
+            self.quantileDoubleSpinBox,
+            self.nSigmaDoubleSpinBox,
+            self.substractCheckBox,
+            self.sizeDependentCheckBox,
+            self.dependentCheckBox,
+            self.yLogCheckBox])
 
     def showNoiseFormula(self):
         widget = self.tableWidget
@@ -241,6 +252,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         n_sigma = setting.n_sigma
         std = result.global_noise_std
 
+        if result.poly_coef is None:
+            return
         global_noise, global_lod = spectrum_func.getGlobalShownNoise(
             result.poly_coef, n_sigma, std)
 
