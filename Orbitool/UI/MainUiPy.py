@@ -97,6 +97,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.timeseries = TimeseriesUiPy.Widget(manager)
         self.timeseriesDw = self.add_dockerwidget(
             "Timeseries", self.timeseries, self.peakListDw)
+        self.timeseriesesTab.click_series.connect(self.timeseries.showSeries)
 
         self.tabWidget.setCurrentIndex(0)
         self.tabWidget.currentChanged.connect(self.tab_changed)

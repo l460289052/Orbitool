@@ -16,8 +16,8 @@ CALIBRATE_TAB = 1
 
 
 class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
-    def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
-        super().__init__(parent=parent)
+    def __init__(self, manager: Manager) -> None:
+        super().__init__()
         self.manager = manager
         self.setupUi(self)
 

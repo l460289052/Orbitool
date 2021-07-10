@@ -1,6 +1,6 @@
 from typing import List, Optional, Tuple
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 from ..functions.peakfit.base import BaseFunc as BaseFitFunc
 from ..functions.spectrum import splitPeaks
@@ -11,6 +11,7 @@ from ..utils.formula import Formula
 from . import TimeseriesesUi
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
+from .utils import get_tablewidget_selected_row
 
 
 class CalcTimeseries(MultiProcess):
@@ -37,10 +38,13 @@ class CalcTimeseries(MultiProcess):
 
 
 class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
+    click_series = QtCore.pyqtSignal()
+
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager = manager
         self.setupUi(self)
+        manager.inited_or_restored.connect(self.showTimeseries)
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -48,6 +52,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         self.plot = Plot(self.widget)
 
         self.calcPushButton.clicked.connect(self.calc)
+        self.tableWidget.itemDoubleClicked.connect(self.seriesClicked)
 
     @property
     def timeseries(self):
@@ -108,7 +113,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         spectra = self.manager.workspace.calibration_tab.calibrated_spectra
 
         func_args = {"mz_range_list": [(s.position_min, s.position_max)
-                                        for s in series], "func": func}
+                                       for s in series], "func": func}
 
         write_args = {"series": series}
 
@@ -138,4 +143,13 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         for s in series:
             ax.plot(s.times, s.intensity, label=s.tag)
 
+        ax.legend()
+
         self.plot.canvas.draw()
+
+    @state_node(withArgs=True)
+    def seriesClicked(self, item: QtWidgets.QTableWidgetItem):
+        row = self.tableWidget.row(item)
+        self.timeseries.info.show_index = row
+
+        self.click_series.emit()
