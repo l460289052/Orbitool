@@ -35,6 +35,7 @@ class NoiseGeneralSetting(BaseStructure):
 
     noise_formulas: List[NoiseFormulaParameter] = Field(
         default_factory=default_formula_parameter)
+    params_inited: bool = False
 
     spectrum_dependent: bool = True
 

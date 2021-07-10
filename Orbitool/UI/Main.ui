@@ -49,21 +49,29 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>18</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuWorkspace">
     <property name="title">
      <string>Workspace</string>
     </property>
-    <addaction name="loadAction"/>
-    <addaction name="saveAction"/>
-    <addaction name="saveAsAction"/>
+    <addaction name="workspaceLoadAction"/>
+    <addaction name="workspaceSaveAction"/>
+    <addaction name="workspaceSaveAsAction"/>
+   </widget>
+   <widget class="QMenu" name="menuConfig">
+    <property name="title">
+     <string>Config</string>
+    </property>
+    <addaction name="configLoadAction"/>
+    <addaction name="configSaveAction"/>
    </widget>
    <addaction name="menuWorkspace"/>
+   <addaction name="menuConfig"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="saveAction">
+  <action name="workspaceSaveAction">
    <property name="text">
     <string>Save</string>
    </property>
@@ -71,14 +79,24 @@
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="loadAction">
+  <action name="workspaceLoadAction">
    <property name="text">
     <string>Load</string>
    </property>
   </action>
-  <action name="saveAsAction">
+  <action name="workspaceSaveAsAction">
    <property name="text">
     <string>Save as</string>
+   </property>
+  </action>
+  <action name="configLoadAction">
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </action>
+  <action name="configSaveAction">
+   <property name="text">
+    <string>Save</string>
    </property>
   </action>
  </widget>

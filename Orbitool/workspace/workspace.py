@@ -1,5 +1,6 @@
+from __future__ import annotations
 import shutil
-from typing import Generic, List, Optional, Type, TypeVar, Union
+from typing import Generic, List, Optional, Type, TypeVar, Union, Dict
 
 from pydantic import BaseModel, Field
 
@@ -31,7 +32,7 @@ class WorkSpace(H5File):
         super().__init__(path)
         self.info: WorkspaceInfo = self.read("info") if "info" in self else WorkspaceInfo(
         )
-        self.widgets = []
+        self.widgets: Dict[str, Widget] = {}
 
         self.file_tab = self.visit_or_create_widget_specific(
             "file tab", FileWidget)
@@ -54,7 +55,7 @@ class WorkSpace(H5File):
 
     def save(self):
         self.write("info", self.info)
-        for widget in self.widgets:
+        for widget in self.widgets.values():
             widget.save()
 
     def in_memory(self):
@@ -75,7 +76,7 @@ class WorkSpace(H5File):
             widget = Widget(self._obj[path], info_type)
         else:
             widget = Widget(self._obj.create_group(path), info_type)
-        self.widgets.append(widget)
+        self.widgets[path] = widget
         return widget
 
     def visit_or_create_widget_specific(self, path: str, widget_type: Type[T]) -> T:
@@ -83,5 +84,14 @@ class WorkSpace(H5File):
             widget = widget_type(self._obj[path])
         else:
             widget = widget_type(self._obj.create_group(path))
-        self.widgets.append(widget)
+        self.widgets[path] = widget
         return widget
+
+    def load_config(self, another: WorkSpace):
+        for key, widget in self.widgets.items():
+            widget.ui_state = another.widgets[key].ui_state
+
+        self.noise_tab.info.general_setting = another.noise_tab.info.general_setting
+        self.calibration_tab.info.ions = another.calibration_tab.info.ions
+        self.formula_docker.info = another.formula_docker.info
+        self.masslist_docker.info = another.masslist_docker.info

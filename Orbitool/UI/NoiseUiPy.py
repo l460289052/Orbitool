@@ -202,6 +202,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
         setting = info.general_setting
 
+        setting.params_inited = True
         setting.quantile, setting.mass_dependent, setting.n_sigma = quantile, mass_dependent, n_sigma
 
         ind: np.ndarray = slt.cumsum() - 1
@@ -252,7 +253,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         n_sigma = setting.n_sigma
         std = result.global_noise_std
 
-        if result.poly_coef is None:
+        if not setting.params_inited:
             return
         global_noise, global_lod = spectrum_func.getGlobalShownNoise(
             result.poly_coef, n_sigma, std)

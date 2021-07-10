@@ -23,9 +23,12 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         super().setupUi(MainWindow)
         manager = self.manager
 
-        self.loadAction.triggered.connect(self.load)
-        self.saveAction.triggered.connect(self.save)
-        self.saveAsAction.triggered.connect(self.save_as)
+        self.workspaceLoadAction.triggered.connect(self.load)
+        self.workspaceSaveAction.triggered.connect(self.save)
+        self.workspaceSaveAsAction.triggered.connect(self.save_as)
+
+        self.configLoadAction.triggered.connect(self.loadConfig)
+        self.configSaveAction.triggered.connect(self.saveConfig)
 
         # tab widgets
         self.abortPushButton.clicked.connect(self.abort_process)
@@ -166,6 +169,27 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.manager.save.emit()
         self.manager.workspace.close_as(f)
         self.manager.workspace = WorkSpace(f)
+
+    @state_node
+    def loadConfig(self):
+        ret, f = UiUtils.openfile(
+            "Load config from workspace file", "Orbitool Workspace file(*.Orbitool)")
+        if not ret:
+            return
+
+        self.manager.workspace.load_config(WorkSpace(f))
+        self.manager.inited_or_restored.emit()
+
+    @state_node
+    def saveConfig(self):
+        ret, f = UiUtils.savefile(
+            "Save config", "Orbitool Workspace file(*.Orbitool)")
+        if not ret:
+            return
+        self.manager.save.emit()
+        config = WorkSpace()
+        config.load_config(self.manager.workspace)
+        config.close_as(f)
 
     @state_node(mode='x')
     def file_tab_finish(self):
