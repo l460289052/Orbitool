@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>701</width>
-    <height>429</height>
+    <width>699</width>
+    <height>424</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -183,6 +183,9 @@
           </property>
           <item row="0" column="0">
            <widget class="QRadioButton" name="nSpectraRadioButton">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
             <property name="text">
              <string>N spectra</string>
             </property>

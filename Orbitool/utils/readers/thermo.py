@@ -74,6 +74,9 @@ class File:
     def getSpectrumRetentionTimes(self):
         return [self.getSpectrumRetentionTime(scanNum) for scanNum in range(self.firstScanNumber, self.lastScanNumber + 1)]
 
+    def getSpectrumDatetime(self, scanNum):
+        return self.creationDatetime + self.getSpectrumRetentionTime(scanNum)
+
     def checkFilter(self, polarity) -> bool:
         for f in self.rawfile.GetFilters():
             if convertPolarity[f.Polarity] == polarity:
@@ -109,6 +112,9 @@ class File:
         intensity = np.array(list(segmentedScan.Intensities), dtype=np.float)
         time = retentimeTime + self.creationDatetime
         # return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
+
+    def datetimeRange2NumRange(self, datetimeRange: Tuple[datetime, datetime]):
+        return self.timeRange2NumRange((datetimeRange[0] - self.creationDatetime, datetimeRange[1] - self.creationDatetime))
 
     def timeRange2NumRange(self, timeRange: Tuple[timedelta, timedelta]):
         s: slice = functions.binary_search.indexBetween(

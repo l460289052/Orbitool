@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(701, 429)
+        Form.resize(699, 424)
         self.horizontalLayout = QtWidgets.QHBoxLayout(Form)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.verticalLayout_5 = QtWidgets.QVBoxLayout()
@@ -84,6 +84,7 @@ class Ui_Form(object):
         self.formLayout_9.setContentsMargins(0, 9, 0, 0)
         self.formLayout_9.setObjectName("formLayout_9")
         self.nSpectraRadioButton = QtWidgets.QRadioButton(self.groupBox_5)
+        self.nSpectraRadioButton.setEnabled(True)
         self.nSpectraRadioButton.setChecked(False)
         self.nSpectraRadioButton.setObjectName("nSpectraRadioButton")
         self.formLayout_9.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.nSpectraRadioButton)

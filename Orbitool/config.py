@@ -24,10 +24,11 @@ logLevel = "DEBUG" if DEBUG else "WARNING"
 
 log_file_handler = logging.FileHandler(logPath, encoding='utf-8')
 logging.root.handlers.clear()
-logging.basicConfig(format="\n%(asctime)s - %(filename)s - %(levelname)s \n %(message)s",
-                    handlers=[log_file_handler])
+logging.basicConfig(
+    format="\n%(asctime)s - %(filename)s - %(levelname)s \n %(message)s")
 logger = logging.getLogger("Orbitool")
 logger.setLevel(logLevel)
+logger.addHandler(log_file_handler)
 
 
 multi_cores = cpu_count() + 1

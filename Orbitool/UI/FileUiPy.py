@@ -77,7 +77,6 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
 
         length = yield func
 
-        showInfo(str(length))
         self.showPaths()
 
     @addThermoFile.except_node
@@ -164,7 +163,9 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
 
         if self.averageCheckBox.isChecked():
             if self.nSpectraRadioButton.isChecked():
-                pass
+                num = self.nSpectraSpinBox.value()
+                func = partial(FileSpectrumInfo.generate_infos_from_paths_by_number, 
+                    paths, rtol, num, polarity, time_range)
             elif self.nMinutesRadioButton.isChecked():
                 interval = timedelta(
                     minutes=self.nMinutesDoubleSpinBox.value())

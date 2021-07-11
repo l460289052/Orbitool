@@ -212,7 +212,6 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             p.selected = p.useable = s
             if s:
                 p.param = params[i]
-            formula_params[index] = p
             p.delta = d
 
         self.showNoise()
@@ -264,14 +263,18 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
         noises = [global_noise]
         lods = [global_lod]
-        for param in info.general_setting.noise_formulas:
+        for param in setting.noise_formulas:
             useables.append(param.useable)
             checkeds.append(param.selected)
             names.append(str(param.formula))
-            noise, lod = spectrum_func.getShownNoiseLODFromParam(
-                param.param, n_sigma)
-            noises.append(noise)
-            lods.append(lod)
+            if param.useable:
+                noise, lod = spectrum_func.getShownNoiseLODFromParam(
+                    param.param, n_sigma)
+                noises.append(noise)
+                lods.append(lod)
+            else:
+                noises.append(0)
+                lods.append(0)
 
         table = self.paramTableWidget
         table.clearContents()

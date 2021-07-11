@@ -1,4 +1,4 @@
-+ use coroutines (and yield) to substitute for thread (avoid context changing)
++ ~~use coroutines (and yield) to substitute for thread (avoid context changing)~~
 + complete data flow
   + ~~file~~
   + ~~noise~~
@@ -8,13 +8,13 @@
   + ~~peak shape~~
   + ~~calibration~~
   + ~~fit~~
-    + peak fit
-    + peak filter
-    + peak refit
+    + ~~peak fit~~
+    + ~~peak filter~~
+    + ~~peak refit~~
   + ~~mass defect~~
-  + time series
+  + ~~time series~~
   + ~~save/load~~
-  + formula
+  + ~~formula~~
 + details
   + plot
   + shortcuts

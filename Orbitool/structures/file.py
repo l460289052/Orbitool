@@ -104,25 +104,57 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
 
     average_index: int
 
-    @staticmethod
-    def generate_infos_from_paths_by_number(paths, rtol, N, polarity, timeRange) -> List[FileSpectrumInfo]:
-        pass
+    @classmethod
+    def spectrum_iter(cls, paths: List[Path], polarity, timeRange):
+        for path in paths:
+            origin, realpath = path.path.split(':', 1)
+            if origin == PATH_THERMOFILE:
+                f = ThermoFile(realpath)
+                index_range = f.datetimeRange2NumRange(timeRange)
+                for scan_num in range(*index_range):
+                    if polarity == f.getSpectrumPolarity(scan_num):
+                        yield path.path, f.getSpectrumDatetime(scan_num)
 
-    @staticmethod
-    def generate_infos_from_paths_by_time_interval(paths: List[Path], rtol, interval: timedelta, polarity, timeRange) -> List[FileSpectrumInfo]:
+    @classmethod
+    def generate_infos_from_paths_by_number(cls, paths: List[Path], rtol, N: int, polarity, timeRange):
+
+        results: List[cls] = []
+        left_index = N
+        average_index = 0
+        former_path = ""
+        info: cls = None
+        for path, time in cls.spectrum_iter(paths, polarity, timeRange):
+            if former_path == path and left_index:
+                info.end_time = time
+            else:
+                if not left_index:
+                    average_index = 0
+                info = cls(start_time=time, end_time=time, path=path,
+                           rtol=rtol, polarity=polarity, average_index=average_index)
+                results.append(info)
+                average_index += 1
+                former_path = path
+            if left_index:
+                left_index -= 1
+            else:
+                left_index = N - 1
+        return results
+
+    @classmethod
+    def generate_infos_from_paths_by_time_interval(cls, paths: List[Path], rtol, interval: timedelta, polarity, timeRange):
         start_times, end_times = zip(
             *((p.startDatetime, p.endDatetime) for p in paths))
         paths_str = [path.path for path in paths]
         rets = part_by_time_interval(
             paths_str, start_times, end_times, timeRange[0], timeRange[1], interval)
-        ret = [FileSpectrumInfo(
+        ret = [cls(
             path=path, start_time=start, end_time=end, rtol=rtol, polarity=polarity,
             average_index=index) for path, start, end, index in rets]
         return ret
 
-    @staticmethod
-    def generate_infos_from_paths(paths: List[Path], rtol, polarity, timeRange) -> List[FileSpectrumInfo]:
-        info_list = []
+    @classmethod
+    def generate_infos_from_paths(cls, paths: List[Path], rtol, polarity, timeRange):
+        info_list: List[cls] = []
         for path in paths:
             origin, realpath = path.path.split(':', 1)
             if origin == PATH_THERMOFILE:
@@ -132,7 +164,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
                     if f.getSpectrumPolarity(i) == polarity:
                         time = creationTime + f.getSpectrumRetentionTime(i)
                         info = FileSpectrumInfo(path=path.path, start_time=time, end_time=time,
-                                            rtol=rtol, polarity=polarity, average_index=0)
+                                                rtol=rtol, polarity=polarity, average_index=0)
                         info_list.append(info)
         return info_list
 

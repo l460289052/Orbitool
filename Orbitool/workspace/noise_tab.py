@@ -50,7 +50,10 @@ class NoiseGeneralSetting(BaseStructure):
                 params.append(param.param)
                 points.append(param.formula.mass())
                 deltas.append(param.delta)
-        params = np.array(params)
+        if len(params) > 0:
+            params = np.array(params)
+        else:
+            params = np.zeros([0, 2, 3])
         points = np.array(points)
         deltas = np.array(deltas, dtype=int)
 
