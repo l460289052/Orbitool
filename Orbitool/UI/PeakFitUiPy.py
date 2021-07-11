@@ -20,6 +20,10 @@ class SplitPeaks(MultiProcess):
             yield peak
 
     @staticmethod
+    def read_len(raw_peaks: List[Peak], **kwargs) -> int:
+        return len(raw_peaks)
+
+    @staticmethod
     def func(peak: Peak, func: peakfit_func.BaseFunc):
         return func.splitPeak(peak)
 
@@ -97,10 +101,10 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
                 spectrum.mz, spectrum.intensity)
             return spectrum, raw_peaks
 
-        spectrum, raw_peaks = yield read
+        spectrum, raw_peaks = yield read, "read spectrum"
 
         raw_split_num, original_indexes, peaks = yield SplitPeaks(raw_peaks, func_kwargs={
-            "func": workspace.peak_shape_tab.info.func})
+            "func": workspace.peak_shape_tab.info.func}), "fit use peak shape func"
 
         def formula_and_residual():
             calc = workspace.formula_docker.info.restricted_calc
@@ -116,7 +120,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
             return mz, residual
 
-        mz, residual = yield formula_and_residual
+        mz, residual = yield formula_and_residual, "calc formula"
 
         info = self.peakfit.info
         info.spectrum, info.raw_peaks = spectrum, raw_peaks
@@ -140,7 +144,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
             return mz, residual
 
         info = self.peakfit.info
-        info.residual_mz, info.residual_intensity = yield calc
+        info.residual_mz, info.residual_intensity = yield calc, "calculate residual"
         self.show_and_plot()
 
     def plot_peaks(self):
@@ -211,7 +215,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
                 peak.formulas = calc.get(peak.peak_position)
                 peak.formulas = formula_func.correct(peak, peaks)
 
-        yield func
+        yield func, "fit use restricted calc"
 
         self.show_peaklist.emit()
 
@@ -228,7 +232,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
                 peak = peaks[index]
                 peak.formulas = calc.get(peak.peak_position)
 
-        yield func
+        yield func, "fit use unrestricted calc"
 
         self.show_peaklist.emit()
 
@@ -247,7 +251,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
                 peak.formulas = masslist_func.fitUseMassList(
                     peak.peak_position, masslist, rtol)
 
-        yield func
+        yield func, "fit use mass list"
 
         self.show_peaklist.emit()
 
@@ -269,7 +273,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
                                  formulas=peak.formulas),
                     rtol=rtol)
 
-        yield func
+        yield func, "add to mass list"
 
         self.show_masslist.emit()
 
@@ -288,6 +292,6 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
                 original_indexes.pop(index)
             info.shown_indexes = list(range(len(peaks)))
 
-        yield func
+        yield func, "remove"
 
         self.show_peaklist

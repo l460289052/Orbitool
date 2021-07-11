@@ -21,6 +21,10 @@ class CalcTimeseries(MultiProcess):
             yield spectrum
 
     @staticmethod
+    def read_len(file: StructureListView[Spectrum], **kwargs) -> int:
+        return len(file)
+
+    @staticmethod
     def func(spectrum: Spectrum, func: BaseFitFunc, mz_range_list: List[Tuple[float, float]]):
         peaks = splitPeaks(spectrum.mz, spectrum.intensity)
 
@@ -139,7 +143,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
 
         write_args = {"series": series}
 
-        series = yield CalcTimeseries(spectra, func_kwargs=func_args, write_kwargs=write_args)
+        series = yield CalcTimeseries(spectra, func_kwargs=func_args, write_kwargs=write_args), "calculate time series"
 
         info = self.timeseries.info
         info.series.extend(series)

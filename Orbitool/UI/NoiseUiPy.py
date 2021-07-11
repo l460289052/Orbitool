@@ -33,6 +33,10 @@ class ReadFromFile(MultiProcess):
         for info in file.file_tab.info.spectrum_infos:
             yield info, info.get_spectrum_from_info(with_minutes=True)
 
+    @staticmethod
+    def read_len(file: WorkSpace, **kwargs) -> int:
+        return len(file.file_tab.info.spectrum_infos)
+
     @ staticmethod
     def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
         tmp = StructureListView[Spectrum](file._obj, "tmp", True)
@@ -138,7 +142,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             else:
                 return False, None
 
-        success, spectrum = yield read_and_average
+        success, spectrum = yield read_and_average, "read & average"
 
         if success:
             self.noise.info.current_spectrum = spectrum
@@ -198,7 +202,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
         result = info.general_result
 
-        result.poly_coef, result.global_noise_std, slt, params, result.noise, result.LOD = yield func
+        result.poly_coef, result.global_noise_std, slt, params, result.noise, result.LOD = yield func, "get noise infomations"
 
         setting = info.general_setting
 
@@ -359,10 +363,10 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
             return s
 
-        s = yield func
+        s = yield func, "doing denoise"
 
         read_from_file = ReadFromFile(self.manager.workspace)
-        yield read_from_file
+        yield read_from_file, "read and average all spectra"
 
         setting.subtract = subtract
         setting.spectrum_dependent = self.dependentCheckBox.isChecked()

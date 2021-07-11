@@ -1,4 +1,5 @@
 from typing import Union
+from datetime import datetime
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -116,6 +117,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.manager.busy_signal.connect(self.set_busy)
 
         self.manager.inited_or_restored.emit()
+        self.manager.msg.connect(self.showMsg)
+        self.manager.progress.connect(self.showProgress)
         self.manager.set_busy(False)
 
     @property
@@ -190,6 +193,14 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         config = WorkSpace()
         config.load_config(self.manager.workspace)
         config.close_as(f)
+
+    def showMsg(self, msg):
+        self.statusbar.showMessage(
+            f"{datetime.now().replace(microsecond=0).isoformat(sep=' ')} | {msg}")
+
+    def showProgress(self, value, maximum):
+        self.progressBar.setMaximum(maximum)
+        self.progressBar.setValue(value)
 
     @state_node(mode='x')
     def file_tab_finish(self):

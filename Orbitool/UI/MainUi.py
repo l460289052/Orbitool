@@ -25,6 +25,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.processWidget)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.progressBar = QtWidgets.QProgressBar(self.processWidget)
+        self.progressBar.setMaximum(123)
         self.progressBar.setProperty("value", 24)
         self.progressBar.setObjectName("progressBar")
         self.horizontalLayout_2.addWidget(self.progressBar)
@@ -68,6 +69,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.progressBar.setFormat(_translate("MainWindow", "%v/%m"))
         self.abortPushButton.setText(_translate("MainWindow", "Abort"))
         self.menuWorkspace.setTitle(_translate("MainWindow", "Workspace"))
         self.menuConfig.setTitle(_translate("MainWindow", "Config"))

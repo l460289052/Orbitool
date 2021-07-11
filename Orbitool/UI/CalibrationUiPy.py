@@ -23,6 +23,10 @@ class SplitAndFitPeak(MultiProcess):
         return h5_spectra
 
     @staticmethod
+    def read_len(h5_spectra: StructureListView[Spectrum], **kwargs) -> int:
+        return len(h5_spectra)
+
+    @staticmethod
     def func(data: Spectrum, fit_func: NormalDistributionFunc, ions: List[float], intensity_filter: float, **kwargs):
         ions_peak: List[Tuple[float, float]] = []
         for ion in ions:
@@ -55,6 +59,14 @@ class CalibrateMergeDenoise(MultiProcess):
                     yield batch
                 batch = [(spectrum, funcs[spectrum.path])]
         yield batch
+
+    @staticmethod
+    def read_len(file: WorkSpace, **read_kwargs) -> int:
+        cnt = 0
+        for info in file.file_tab.info.spectrum_infos:
+            if info.average_index == 0:
+                cnt += 1
+        return cnt
 
     @staticmethod
     def func(data: List[Tuple[Spectrum, PolynomialRegressionFunc]],
@@ -204,7 +216,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
                 func_kwargs=dict(
                     fit_func=fit_func, ions=ions, intensity_filter=intensity_filter))
 
-            path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = yield split_and_fit
+            path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = yield split_and_fit, "split and fit target peaks"
 
             def get_calibrator():
                 path_calibrators: Dict[str, Calibrator] = {}
@@ -218,12 +230,12 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
                 return path_calibrators
 
-            info.calibrators = yield get_calibrator
+            info.calibrators = yield get_calibrator, "calculate calibrator"
         else:  # get info directly
             def get_calibrator_from_calibrator():
                 return {path: calibrator.regeneratCalibrator(rtol=rtol, use_N_ions=use_N_ions) for path, calibrator in info.calibrators.items()}
 
-            info.calibrators = yield get_calibrator_from_calibrator
+            info.calibrators = yield get_calibrator_from_calibrator, "generate calibrator from former calibrator"
 
         def generate_func_from_calibrator():
             ret = {}
@@ -233,7 +245,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
                     calibrator.ions_position[min_index], calibrator.ions_rtol[min_index], degree)
                 ret[path] = func
             return ret
-        info.poly_funcs = yield generate_func_from_calibrator
+        info.poly_funcs = yield generate_func_from_calibrator, "calculate function from calibrator"
 
         self.calcInfoFinished.emit()
 
@@ -257,5 +269,5 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             "poly_coef": result.poly_coef}
         calibrate_merge = CalibrateMergeDenoise(
             self.manager.workspace, func_kwargs=func_kwargs)
-        yield calibrate_merge
+        yield calibrate_merge, "calibrate"
         self.callback.emit()

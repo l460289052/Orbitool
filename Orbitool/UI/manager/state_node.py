@@ -87,11 +87,19 @@ class node:
                                     raise result
                             to_be_finished = generator.send(result)
 
+                            if isinstance(to_be_finished, tuple):
+                                to_be_finished, msg = to_be_finished
+                            else:
+                                msg = "processing"
+
+                            manager.msg.emit(msg)
+
                             if not issubclass(type(to_be_finished), QtCore.QThread):
                                 thread = Thread(to_be_finished)
                             else:
                                 thread = to_be_finished
                             thread.finished.connect(run_send)
+                            thread.sendStatus.connect(manager.progress.emit)
                             manager.running_thread = thread
                             if config.DEBUG:
                                 thread.run()

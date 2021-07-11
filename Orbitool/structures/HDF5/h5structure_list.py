@@ -42,6 +42,9 @@ class StructureListView(Generic[T]):
         for index in range(len(self.obj)):
             yield StructureConverter.read_from_h5(self.obj, str(index))
 
+    def __len__(self):
+        return len(self.obj)
+
 
 class StructureList(Generic[T]):
     def __init__(self, item_type: Type[T]):

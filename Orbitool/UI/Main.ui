@@ -26,8 +26,14 @@
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QProgressBar" name="progressBar">
+         <property name="maximum">
+          <number>123</number>
+         </property>
          <property name="value">
           <number>24</number>
+         </property>
+         <property name="format">
+          <string>%v/%m</string>
          </property>
         </widget>
        </item>

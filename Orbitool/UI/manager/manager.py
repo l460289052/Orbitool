@@ -15,6 +15,8 @@ class Manager(QObject):
     inited_or_restored = pyqtSignal()
     save = pyqtSignal()
     busy_signal = pyqtSignal(bool)
+    msg = pyqtSignal(str)
+    progress = pyqtSignal(int, int)
 
     def __init__(self) -> None:
         super().__init__()

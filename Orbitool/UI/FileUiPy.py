@@ -75,7 +75,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             pathlist.sort()
             return len(pathlist.paths)
 
-        length = yield func
+        length = yield func, "read files"
 
         self.showPaths()
 
@@ -95,7 +95,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
                 pathlist.addThermoFile(path)
             pathlist.sort()
 
-        yield func
+        yield func, "read folders"
 
         self.showPaths()
 
@@ -139,13 +139,13 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             return None
 
         paths = self.pathlist.subList(indexes)
-        self.file.info.spectrum_infos = yield self.processPaths(paths.paths)
+        self.file.info.spectrum_infos = yield self.processPaths(paths.paths), "get infomations from selected spectra"
 
         self.callback.emit()
 
     @state_node
     def processAll(self):
-        self.file.info.spectrum_infos = yield self.processPaths(self.pathlist.paths)
+        self.file.info.spectrum_infos = yield self.processPaths(self.pathlist.paths), "get infomations from spectra"
 
         self.callback.emit()
 

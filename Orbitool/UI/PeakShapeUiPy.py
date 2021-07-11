@@ -90,7 +90,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
                 [peak.fitted_param for peak in peaks])
             return manager, func
 
-        info.peaks_manager, info.func = yield generate_peak_manager
+        info.peaks_manager, info.func = yield generate_peak_manager , "manage peaks"
 
         self.showNormPeaks()
 
