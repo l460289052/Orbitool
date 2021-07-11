@@ -225,7 +225,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         table = self.paramTableWidget
         checkeds, noises, lods = deque(), deque(), deque()
 
-        for index in table.rowCount():
+        for index in range(table.rowCount()):
             checkbox: QtWidgets.QCheckBox = table.cellWidget(index, 0)
             checkeds.append(checkbox.isChecked())
 

@@ -46,6 +46,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
 
         self.comboBox.addItem("Norm distribution", 1)
         self.showPushButton.clicked.connect(self.showButtonClicked)
+        self.cancelPushButton.clicked.connect(self.cancel)
         self.finishPushButton.clicked.connect(self.finishPeakShape)
 
         self.plot = component.Plot(self.widget)
@@ -67,7 +68,13 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
 
     @state_node
     def showButtonClicked(self):
-        return self.showPeak()
+        yield from self.showPeak()
+
+    @state_node
+    def cancel(self):
+        self.peak_shape.info.peaks_manager.cancel()
+
+        self.showNormPeaks()
 
     def showPeak(self):
         info = self.peak_shape.info
@@ -90,7 +97,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
                 [peak.fitted_param for peak in peaks])
             return manager, func
 
-        info.peaks_manager, info.func = yield generate_peak_manager , "manage peaks"
+        info.peaks_manager, info.func = yield generate_peak_manager, "manage peaks"
 
         self.showNormPeaks()
 
