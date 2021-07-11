@@ -7,7 +7,7 @@ def CheckBoxFactory(checked: bool) -> QtWidgets.QCheckBox:
     return box
 
 
-def DoubleSpinBoxFactory(enable: bool, minimum: float, maximum: float, decimals: int, step: float, value: float) -> QtWidgets.QDoubleSpinBox:
+def DoubleSpinBoxFactory(minimum: float, maximum: float, decimals: int, step: float, value: float) -> QtWidgets.QDoubleSpinBox:
     box = QtWidgets.QDoubleSpinBox()
     box.setMinimum(minimum)
     box.setMaximum(maximum)

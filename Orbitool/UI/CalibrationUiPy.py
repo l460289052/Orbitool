@@ -44,6 +44,10 @@ class SplitAndFitPeak(MultiProcess):
             path_ions_peak.setdefault(path, []).append(ions_peak)
         return path_ions_peak
 
+    @staticmethod
+    def exception(file, **kwargs):
+        pass
+
 
 class CalibrateMergeDenoise(MultiProcess):
     @staticmethod

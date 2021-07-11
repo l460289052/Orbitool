@@ -88,7 +88,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
             def abort():
                 queue.put(None)
                 pool.terminate()
-                self.exception()
+                self.exception(file)
 
             def write_once():
                 ret = results.popleft()
