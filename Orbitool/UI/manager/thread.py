@@ -67,67 +67,70 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
 
     @final
     def run(self):
-        file = self.file
-        results: Deque[AsyncResult] = deque()
-        queue = Queue()
-        length = self.read_len(file, **self.read_kwargs)
+        try:
+            file = self.file
+            results: Deque[AsyncResult] = deque()
+            queue = Queue()
+            length = self.read_len(file, **self.read_kwargs)
 
-        def iter_queue():
-            while True:
-                result = queue.get()
-                if result is None:
-                    break
-                yield result
+            def iter_queue():
+                while True:
+                    result = queue.get()
+                    if result is None:
+                        break
+                    yield result
 
-        write_thread = Thread(
-            self.write, (file, iter_queue()), self.write_kwargs)
-        write_thread.start()
-        limit_parallel = int(multi_cores * 1.3)
+            write_thread = Thread(
+                self.write, (file, iter_queue()), self.write_kwargs)
+            write_thread.start()
+            limit_parallel = int(multi_cores * 1.3)
 
-        with Pool(multi_cores) as pool:
-            def abort():
-                queue.put(None)
-                pool.terminate()
-                self.exception(file)
+            with Pool(multi_cores) as pool:
+                def abort():
+                    queue.put(None)
+                    pool.terminate()
+                    self.exception(file)
 
-            def write_once():
-                ret = results.popleft()
-                while not ret.ready():
-                    sleep(0.01)
+                def write_once():
+                    ret = results.popleft()
+                    while not ret.ready():
+                        sleep(0.01)
+                        if self.aborted:
+                            return abort()
+                    ret = ret.get()
+                    if isinstance(ret, Exception):
+                        self.exception(file)
+                        self.finished.emit(
+                            (ret, (self.func, self.file)))
+                        queue.put(None)
+                        return
+                    queue.put(ret)
+
+                for i, input_data in enumerate(self.read(file, **self.read_kwargs)):
+                    self.send(i - limit_parallel, length)
+
                     if self.aborted:
                         return abort()
-                ret = ret.get()
-                if isinstance(ret, Exception):
-                    self.exception(file)
-                    self.finished.emit(
-                        (ret, (self.func, self.file)))
-                    queue.put(None)
-                    return
-                queue.put(ret)
+                    results.append(pool.apply_async(
+                        self.process, (i, self.func, input_data, self.func_kwargs)))
+                    if i >= limit_parallel:
+                        write_once()
 
-            for i, input_data in enumerate(self.read(file, **self.read_kwargs)):
-                self.send(i - limit_parallel, length)
+                if i < limit_parallel:
+                    i = limit_parallel
+                while results:
+                    self.send(i - limit_parallel, length)
+                    i += 1
 
-                if self.aborted:
-                    return abort()
-                results.append(pool.apply_async(
-                    self.process, (i, self.func, input_data, self.func_kwargs)))
-                if i >= limit_parallel:
                     write_once()
 
-            if i < limit_parallel:
-                i = limit_parallel
-            while results:
-                self.send(i - limit_parallel, length)
-                i += 1
+                queue.put(None)
 
-                write_once()
-
-            queue.put(None)
-
-        write_thread.wait()
-        self.send(i - limit_parallel, 0)
-        self.finished.emit((write_thread.result,))
+            write_thread.wait()
+            self.send(i - limit_parallel, 0)
+            self.finished.emit((write_thread.result,))
+        except Exception as e:
+            self.finished.emit((e,))
 
     @final
     def abort(self, send=True):

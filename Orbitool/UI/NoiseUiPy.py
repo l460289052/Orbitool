@@ -1,6 +1,7 @@
 from collections import deque
 from datetime import datetime
 from typing import List, Optional, Union, Tuple, Generator, Iterable
+import csv
 
 import matplotlib.ticker
 import numpy as np
@@ -16,7 +17,7 @@ from ..utils.formula import Formula
 from . import NoiseUi, component
 from .component import factory
 from .manager import Manager, state_node, MultiProcess
-from .utils import get_tablewidget_selected_row, set_header_sizes, showInfo
+from .utils import get_tablewidget_selected_row, set_header_sizes, showInfo, savefile
 
 
 class ReadFromFile(MultiProcess):
@@ -77,6 +78,9 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         self.delPushButton.clicked.connect(self.delFormula)
         self.calculateNoisePushButton.clicked.connect(self.calcNoise)
         self.recalculateNoisePushButton.clicked.connect(self.reclacNoise)
+        self.exportDenoisedSpectrumPushButton.clicked.connect(
+            self.exportDenoise)
+        self.exportNoisePeaksPushButton.clicked.connect(self.exportNoisePeaks)
         self.denoisePushButton.clicked.connect(self.denoise)
 
     @property
@@ -155,6 +159,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     def plotSelectSpectrum(self):
         spectrum = self.noise.info.current_spectrum
         if spectrum is not None:
+            self.plot.ax.clear()
             self.plot.ax.plot(spectrum.mz, spectrum.intensity)
             self.plot.canvas.draw()
 
@@ -344,6 +349,62 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             ymax *= 5
         ax.set_ylim(ymin, ymax)
         plot.canvas.draw()
+
+    @state_node
+    def exportDenoise(self):
+        info = self.noise.info
+        subtract = self.substractCheckBox.isChecked()
+        spectrum = info.current_spectrum
+        setting = info.general_setting
+
+        ret, f = savefile("Save Denoise Spectrum", "CSV file(*.csv)",
+                          f"denoise_spectrum {spectrum.start_time.strftime(r'%M%d_%H%M%S')}"
+                          f"-{spectrum.end_time.strftime(r'%M%d_%H%M%S')}.csv")
+        if not ret:
+            return
+
+        def func():
+            params, points, deltas = setting.get_params(True)
+            mz, intensity = spectrum_func.denoiseWithParams(
+                spectrum.mz, spectrum.intensity, info.general_result.poly_coef,
+                params, points, deltas, setting.n_sigma, subtract)
+
+            s = Spectrum(path=spectrum.path, mz=mz, intensity=intensity,
+                         start_time=spectrum.start_time, end_time=spectrum.end_time)
+
+            return s
+
+        s: Spectrum = yield func, "doing denoise"
+
+        with open(f, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["mz", "intensity"])
+            writer.writerows(zip(s.mz, s.intensity))
+
+    @state_node
+    def exportNoisePeaks(self):
+        info = self.noise.info
+        spectrum = info.current_spectrum
+        setting = info.general_setting
+        ret, f = savefile("Save Noise Peak", "CSV file(*.csv)",
+                          f"noise_peak {spectrum.start_time.strftime(r'%M%d_%H%M%S')}"
+                          f"-{spectrum.end_time.strftime(r'%M%d_%H%M%S')}.csv")
+        if not ret:
+            return
+
+        def func():
+            params, points, deltas = setting.get_params(True)
+            mz, intensity = spectrum_func.getNoisePeaks(
+                spectrum.mz, spectrum.intensity, info.general_result.poly_coef,
+                params, points, deltas, setting.n_sigma)
+            return mz, intensity
+
+        mz, intensity = func()
+
+        with open(f, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["peak position", "peak intensity"])
+            writer.writerows(zip(mz, intensity))
 
     @state_node
     def denoise(self):

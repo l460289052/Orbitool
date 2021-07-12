@@ -11,10 +11,12 @@ openfolder_dir = './..'
 
 
 @test.override_input
-def savefile(caption, filter) -> Tuple[bool, str]:
+def savefile(caption, filter, prefer_name=None) -> Tuple[bool, str]:
     global savefile_dir
+    if prefer_name:
+        path = os.path.join(savefile_dir, prefer_name)
     f, typ = QtWidgets.QFileDialog.getSaveFileName(
-        caption=caption, directory=savefile_dir, filter=filter)
+        caption=caption, directory=path, filter=filter)
 
     if len(f) == 0:
         return False, f
