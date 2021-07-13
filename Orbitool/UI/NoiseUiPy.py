@@ -1,7 +1,7 @@
+import csv
 from collections import deque
 from datetime import datetime
-from typing import List, Optional, Union, Tuple, Generator, Iterable
-import csv
+from typing import Generator, Iterable, List, Optional, Tuple, Union
 
 import matplotlib.ticker
 import numpy as np
@@ -12,12 +12,13 @@ from ..functions import spectrum as spectrum_func
 from ..structures.file import FileSpectrumInfo
 from ..structures.HDF5 import StructureListView
 from ..structures.spectrum import Spectrum
-from ..workspace import WorkSpace
 from ..utils.formula import Formula
+from ..workspace import WorkSpace
 from . import NoiseUi, component
 from .component import factory
-from .manager import Manager, state_node, MultiProcess
-from .utils import get_tablewidget_selected_row, set_header_sizes, showInfo, savefile
+from .manager import Manager, MultiProcess, state_node
+from .utils import (get_tablewidget_selected_row, savefile, set_header_sizes,
+                    showInfo)
 
 
 class ReadFromFile(MultiProcess):
@@ -358,8 +359,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         setting = info.general_setting
 
         ret, f = savefile("Save Denoise Spectrum", "CSV file(*.csv)",
-                          f"denoise_spectrum {spectrum.start_time.strftime(r'%M%d_%H%M%S')}"
-                          f"-{spectrum.end_time.strftime(r'%M%d_%H%M%S')}.csv")
+                          f"denoise_spectrum {spectrum.start_time.strftime(config.exportTimeFormat)}"
+                          f"-{spectrum.end_time.strftime(config.exportTimeFormat)}.csv")
         if not ret:
             return
 
@@ -387,8 +388,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         spectrum = info.current_spectrum
         setting = info.general_setting
         ret, f = savefile("Save Noise Peak", "CSV file(*.csv)",
-                          f"noise_peak {spectrum.start_time.strftime(r'%M%d_%H%M%S')}"
-                          f"-{spectrum.end_time.strftime(r'%M%d_%H%M%S')}.csv")
+                          f"noise_peak {spectrum.start_time.strftime(config.exportTimeFormat)}"
+                          f"-{spectrum.end_time.strftime(config.exportTimeFormat)}.csv")
         if not ret:
             return
 

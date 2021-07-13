@@ -1,20 +1,23 @@
+import csv
 import math
 from copy import copy
-from typing import Optional, Union, Tuple
+from typing import Optional, Tuple, Union
 
 import matplotlib
 import matplotlib.animation
 import matplotlib.backend_bases
 import matplotlib.lines
 import matplotlib.ticker
-from PyQt5 import QtCore, QtWidgets
 import numpy as np
+from PyQt5 import QtCore, QtWidgets
 
-from ..functions import peakfit as peakfit_func, spectrum as spectrum_func
+from ..config import exportTimeFormat
+from ..functions import peakfit as peakfit_func
+from ..functions import spectrum as spectrum_func
+from ..workspace import UiNameGetter, UiState
 from . import PeakShapeUi, component
 from .manager import Manager, Thread, state_node
-from ..workspace import UiNameGetter, UiState
-from .utils import showInfo
+from .utils import savefile, showInfo
 
 
 class LineAnimation:
@@ -48,6 +51,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
         self.showPushButton.clicked.connect(self.showButtonClicked)
         self.cancelPushButton.clicked.connect(self.cancel)
         self.finishPushButton.clicked.connect(self.finishPeakShape)
+        self.exportPushButton.clicked.connect(self.export)
 
         self.plot = component.Plot(self.widget)
 
@@ -192,5 +196,41 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
             return line,
         return ()
 
+    @state_node
     def finishPeakShape(self):
         self.callback.emit(())
+
+    @state_node
+    def export(self):
+        spectrum = self.peak_shape.info.spectrum
+        ret, f = savefile("Save Peak Shape Info", "CSV file(*.csv)",
+                          f"peak_shape_info {spectrum.start_time.strftime(exportTimeFormat)}"
+                          f"-{spectrum.end_time.strftime(exportTimeFormat)}")
+        if not ret:
+            return
+
+        info = self.peak_shape.info
+        peaks = info.peaks_manager.peaks
+        func = info.func
+        with open(f, 'w', newline='') as file:
+            length = len(peaks)
+            height = max(len(peak.mz) for peak in peaks)
+
+            export_peaks = -2 * np.ones((length, 2, height), dtype=float)
+
+            for ind, peak in enumerate(peaks):
+                peak_length = len(peak.mz)
+                export_peaks[ind][0][:peak_length] = peak.mz
+                export_peaks[ind][1][:peak_length] = peak.intensity
+
+            writer = csv.writer(file)
+            writer.writerow(
+                ['Noirmal distribution',
+                 'sigma:', func.peak_fit_sigma,
+                 'res:', func.peak_fit_res])
+
+            writer.writerow(['x', 'y'] * len(peaks))
+
+            for index in range(export_peaks.shape[2]):
+                writer.writerow(
+                    [item if item > -1 else '' for item in export_peaks[:, :, index].reshape(-1)])

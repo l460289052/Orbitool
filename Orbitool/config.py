@@ -9,6 +9,7 @@ from pydantic import BaseModel
 DEBUG = False
 
 timeFormat = r"%Y-%m-%d %H:%M:%S"
+exportTimeFormat = r"%Y%m%d_%H%M%S"
 
 
 class TempFile:
