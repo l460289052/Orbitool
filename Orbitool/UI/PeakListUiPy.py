@@ -1,12 +1,15 @@
-from typing import Optional, Union
+import csv
+from typing import Optional, Union, Dict, Tuple, List
 
 from PyQt5 import QtCore, QtWidgets
 
+from ..config import exportTimeFormat
 from ..structures.spectrum import FittedPeak
+from ..utils.formula import Formula
 from . import PeakListUi
 from .manager import Manager, state_node
 from .PeakFitFloatUiPy import Window as PeakFloatWin
-from .utils import get_tablewidget_selected_row
+from .utils import get_tablewidget_selected_row, savefile
 
 
 class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
@@ -22,6 +25,10 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
 
         self.tableWidget.itemDoubleClicked.connect(self.openPeakFloatWin)
         self.peak_float: PeakFloatWin = None
+
+        self.exportSpectrumPushButton.clicked.connect(self.exportSpectrum)
+        self.exportPeaksPushButton.clicked.connect(self.exportPeaks)
+        self.exportIsotopePushButton.clicked.connect(self.exportIsotopes)
 
     @property
     def peaks_info(self):
@@ -78,3 +85,96 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         widget.callback.connect(self.peak_refit_finish.emit)
         self.peak_float = widget
         widget.show()
+
+    @state_node
+    def exportSpectrum(self):
+        spectrum = self.peaks_info.spectrum
+        ret, f = savefile("Save Spectrum", "CSV file(*.csv)",
+                          f"fitted_spectrum {spectrum.start_time.strftime(exportTimeFormat)}-"
+                          f"{spectrum.end_time.strftime(exportTimeFormat)}")
+
+        if not ret:
+            return
+
+        with open(f, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['mz', 'intensity'])
+            writer.writerows(zip(spectrum.mz, spectrum.intensity))
+
+    @state_node
+    def exportPeaks(self):
+        spectrum = self.peaks_info.spectrum
+
+        ret, f = savefile("Save Peak List", "CSV file(*.csv)",
+                          f"peak_list {spectrum.start_time.strftime(exportTimeFormat)}"
+                          f"-{spectrum.end_time.strftime(exportTimeFormat)}")
+        if not ret:
+            return
+
+        peaks = self.peaks_info.peaks
+        indexes = self.peaks_info.shown_indexes
+        peaks = [peaks[index] for index in indexes]
+        raw_split_num = self.peaks_info.raw_split_num
+        orginal_indexes = self.peaks_info.original_indexes
+        calc = self.manager.workspace.formula_docker.info.restricted_calc
+
+        with open(f, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['mz', 'intensity', 'area',
+                             'formula', 'DBE', 'rtol', 'peaks num'])
+            for index, peak in enumerate(peaks):
+                writer.writerow([
+                    peak.peak_position,
+                    peak.peak_intensity,
+                    peak.area,
+                    '/'.join([str(formula) for formula in peak.formulas]),
+                    '/'.join([str(calc.getFormulaDBE(formula))
+                              for formula in peak.formulas]),
+                    (peak.peak_position /
+                     peak.formulas[0].mass() - 1) if len(peak.formulas) == 1 else '',
+                    raw_split_num[orginal_indexes[indexes[index]]]])
+
+    @state_node
+    def exportIsotopes(self):
+        spectrum = self.peaks_info.spectrum
+
+        ret, f = savefile("Save Isotopes", "CSV file(*.csv)",
+                          f"isotope {spectrum.start_time.strftime(exportTimeFormat)}"
+                          f"-{spectrum.end_time.strftime(exportTimeFormat)}")
+        if not ret:
+            return
+
+        peaks = self.peaks_info.peaks
+        shown_indexes = self.peaks_info.shown_indexes
+
+        formula_map: Dict[Formula, List[Tuple[int, Formula]]] = {}
+        for index, peak in enumerate(peaks):
+            for formula in peak.formulas:
+                if formula.isIsotope:
+                    formula_map.setdefault(
+                        formula.findOrigin(), []).append((index, formula))
+
+        with open(f, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['formula', 'measured mz', 'intensity',
+                             'intensity ratio', 'theoretic ratio'])
+
+            for index in shown_indexes:
+                peak = peaks[index]
+
+                formulas = [f for f in peak.formulas if not f.isIsotope]
+                if not formulas:
+                    continue
+
+                isotopes = [formula_map.get(formula, [])
+                            for formula in formulas]
+                isotopes = sum(isotopes, [])
+                writer.writerow(['/'.join(str(f) for f in formulas),
+                                 peak.peak_position, peak.peak_intensity, 1, 1])
+
+                for i, isotope in isotopes:
+                    i_peak = peaks[i]
+                    writer.writerow([str(isotope), i_peak.peak_position, i_peak.peak_intensity,
+                                     i_peak.peak_intensity / peak.peak_intensity, isotope.relativeAbundance()])
+
+                writer.writerow([''])

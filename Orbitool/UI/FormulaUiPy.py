@@ -243,6 +243,8 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         for row in range(table.rowCount()):
             i = table.item(row, 0).text()
             calc.setEI(i)
+        
+        calc.clear()
 
         table = self.unrestrictedTableWidget
         nums = {ei: -1 for ei in force_calc.getEIList()}

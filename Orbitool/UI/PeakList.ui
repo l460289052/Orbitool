@@ -99,7 +99,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="spectrumPushButton">
+      <widget class="QPushButton" name="exportSpectrumPushButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
          <horstretch>0</horstretch>

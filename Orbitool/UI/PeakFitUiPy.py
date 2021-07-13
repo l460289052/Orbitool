@@ -113,7 +113,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
             for peak in peaks:
                 peak.formulas = calc.get(peak.peak_position)
-                peak.formulas = formula_func.correct(peak, peaks)
+                peak.formulas = formula_func.correct(peak, peaks, calc.rtol)
 
             mz, residual = peakfit_func.calculateResidual(
                 raw_peaks, original_indexes, peaks, workspace.peak_shape_tab.info.func)
@@ -210,10 +210,12 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         indexes = info.shown_indexes
 
         def func():
+            for peak in peaks:
+                calc.get(peak.peak_position)  # init
             for index in indexes:
                 peak = peaks[index]
                 peak.formulas = calc.get(peak.peak_position)
-                peak.formulas = formula_func.correct(peak, peaks)
+                peak.formulas = formula_func.correct(peak, peaks, calc.rtol)
 
         yield func, "fit use restricted calc"
 
