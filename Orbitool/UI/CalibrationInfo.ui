@@ -15,39 +15,6 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QPushButton" name="showSpectrumPushButton">
-     <property name="text">
-      <string>Show selected spectrum</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="showSelectedPushButton">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Show selected results</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="showAllPushButton">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Show all calibration info</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QTableWidget" name="tableWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">

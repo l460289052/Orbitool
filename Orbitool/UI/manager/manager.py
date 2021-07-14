@@ -5,7 +5,7 @@ import random
 
 
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
-from PyQt5.QtWidgets import QProgressBar
+from PyQt5.QtWidgets import QTableWidget
 
 from ...workspace import WorkSpace
 from ..utils import showInfo
@@ -72,10 +72,10 @@ class Manager(QObject):
         self.running_thread: QThread = None
         self.workspace: WorkSpace = None
         self._busy: bool = True
-        self._func: Dict[str, Callable] = {}
+        self._func: Dict[str, Callable[[], int]] = {}
         self.progress_cnt = 0
 
-        self.calibrationPlot: Plot = None
+        self.calibrationInfoWidget: QTableWidget = None
 
     @overload
     def tqdm(self, iter: Iterable[T], msg: str = "") -> TQDM[T]:
@@ -117,7 +117,7 @@ class Manager(QObject):
         self._func[key] = func
 
     def fetch_func(self, key: str):
-        return self._func.get(key, lambda x: x)
+        return self._func.get(key, lambda: x)
 
     @property
     def busy(self):

@@ -21,6 +21,8 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
         self.manager = manager
         self.setupUi(self)
 
+        manager.register_func("spectra list select", self.get_selected_index)
+
         self.comboBox.currentIndexChanged.connect(self.comboBox_changed)
         self.comboBox_position = {}
         self.former_index = -1

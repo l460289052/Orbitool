@@ -3,6 +3,7 @@ from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 from PyQt5 import QtCore, QtWidgets
+import matplotlib.ticker
 
 from ..functions import spectrum as spectrum_func
 from ..functions.calibration import Calibrator, PolynomialRegressionFunc
@@ -15,6 +16,322 @@ from . import CalibrationUi
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
 from .utils import get_tablewidget_selected_row
+
+
+class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
+    calcInfoFinished = QtCore.pyqtSignal()
+    callback = QtCore.pyqtSignal()
+
+    def __init__(self, manager: Manager) -> None:
+        super().__init__()
+        self.manager: Manager = manager
+        self.setupUi(self)
+        manager.inited_or_restored.connect(self.restore)
+        manager.save.connect(self.updateState)
+
+    def setupUi(self, Form):
+        super().setupUi(Form)
+
+        self.plot = Plot(self.widget)
+
+        self.addIonToolButton.clicked.connect(self.addIon)
+        self.delIonToolButton.clicked.connect(self.removeIon)
+        self.calcInfoPushButton.clicked.connect(self.calcInfo)
+        self.finishPushButton.clicked.connect(self.calibrate)
+
+        self.showSpectrumPushButton.clicked.connect(self.showSpectrum)
+        self.showSelectedPushButton.clicked.connect(self.showSelected)
+        self.showAllPushButton.clicked.connect(self.showAllInfoClicked)
+
+    @ property
+    def calibration(self):
+        return self.manager.workspace.calibration_tab
+
+    def restore(self):
+        self.showIons()
+        self.calibration.ui_state.set_state(self)
+
+    def updateState(self):
+        self.calibration.ui_state.fromComponents(self, [
+            self.rtolDoubleSpinBox,
+            self.degreeSpinBox,
+            self.nIonsSpinBox])
+
+    def showIons(self):
+        info = self.calibration.info
+        table = self.tableWidget
+        table.clearContents()
+        table.setRowCount(len(info.ions))
+        for index, ion in enumerate(info.ions):
+            table.setItem(index, 0, QtWidgets.QTableWidgetItem(ion.shown_text))
+            table.setItem(
+                index, 1, QtWidgets.QTableWidgetItem(format(ion.formula.mass(), ".4f")))
+
+    @ state_node
+    def addIon(self):
+        self.calibration.info.add_ions(self.ionLineEdit.text().split(','))
+        self.showIons()
+
+    @ state_node
+    def removeIon(self):
+        indexes = get_tablewidget_selected_row(self.tableWidget)
+        ions = self.calibration.info.ions
+        for index in reversed(indexes):
+            ions.pop(index)
+        self.showIons()
+
+    @ state_node
+    def calcInfo(self):
+        workspace = self.manager.workspace
+        calibration_tab = self.calibration
+        info = calibration_tab.info
+
+        intensity_filter = 100
+        rtol = self.rtolDoubleSpinBox.value() / 1e-6
+        degree = self.degreeSpinBox.value()
+        use_N_ions = self.nIonsSpinBox.value()
+
+        raw_spectra = workspace.file_tab.raw_spectra
+        fit_func = workspace.peak_shape_tab.info.func
+
+        # use ions to decide whether to split
+        need_to_split = True
+        if len(info.calibrators) > 0:
+            calculator = next(iter(info.calibrators.values()))
+            calculated_ions = {ion.formula for ion in calculator.ions}
+            now_ions = {ion.formula for ion in info.ions}
+            if now_ions == calculated_ions:
+                need_to_split = False
+
+        if need_to_split:  # read ions from spectrum
+            path_time = {
+                path.path: path.createDatetime for path in workspace.file_tab.info.pathlist}
+            ions = [ion.formula.mass() for ion in info.ions]
+            split_and_fit = SplitAndFitPeak(
+                raw_spectra,
+                func_kwargs=dict(
+                    fit_func=fit_func, ions=ions, intensity_filter=intensity_filter))
+
+            path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = yield split_and_fit, "split and fit target peaks"
+            # file path -> info of a file
+            # shape : len(spectrum of file), len(ions), 2 # position, intensity
+
+            def get_calibrator():
+                path_calibrators: Dict[str, Calibrator] = {}
+
+                for path, ions_peak in path_ions_peak.items():
+                    ions_peak = np.array(ions_peak, dtype=float)
+                    ions_position = ions_peak[:, :, 0]
+                    ions_intensity = ions_peak[:, :, 1]
+                    path_calibrators[path] = Calibrator.FactoryFromMzInt(
+                        path_time[path], info.ions, ions_position, ions_intensity, rtol, use_N_ions)
+
+                return path_calibrators
+
+            info.calibrators = yield get_calibrator, "calculate calibrator"
+        else:  # get info directly
+            def get_calibrator_from_calibrator():
+                return {path: calibrator.regeneratCalibrator(rtol=rtol, use_N_ions=use_N_ions) for path, calibrator in info.calibrators.items()}
+
+            info.calibrators = yield get_calibrator_from_calibrator, "generate calibrator from former calibrator"
+
+        def generate_func_from_calibrator():
+            ret = {}
+            for path, calibrator in info.calibrators.items():
+                min_index = calibrator.min_indexes
+                func = PolynomialRegressionFunc.FactoryFit(
+                    calibrator.ions_position[min_index], calibrator.ions_rtol[min_index], degree)
+                ret[path] = func
+            return ret
+        info.poly_funcs = yield generate_func_from_calibrator, "calculate function from calibrator"
+
+        self.calcInfoFinished.emit()
+
+    @state_node
+    def showSpectrum(self):
+        index = self.manager.fetch_func("spectra list select")()
+        workspace = self.manager.workspace
+        spectrum = workspace.file_tab.raw_spectra[index]
+        calibrator = self.calibration.info.calibrators[spectrum.path]
+        inner_index = index
+        for cal in self.calibration.info.calibrators.values():
+            if index < len(cal.ions_raw_position):
+                break
+            inner_index -= len(cal.ions_raw_position)
+
+        ions_position = calibrator.ions_raw_position[inner_index]
+        ions_intensity = calibrator.ions_raw_intensity[inner_index]
+
+        table = self.manager.calibrationInfoWidget
+
+        table.clear()
+        table.setRowCount(0)
+        table.setColumnCount(0)
+
+        table.setColumnCount(3)
+        table.setHorizontalHeaderLabels(["mz", "rtol", "intensity"])
+        table.setVerticalHeaderLabels(
+            [ion.shown_text for ion in calibrator.ions])
+
+        table.setRowCount(len(calibrator.ions))
+
+        for index, (ion, mz, intensity) in enumerate(zip(calibrator.ions, ions_position, ions_intensity)):
+            table.setItem(
+                index, 0, QtWidgets.QTableWidgetItem(format(mz, '.5f')))
+            table.setItem(
+                index, 1, QtWidgets.QTableWidgetItem(
+                    format(abs(1 - ion.formula.mass() / mz) * 1e6, '.5f')))
+            table.setItem(
+                index, 2, QtWidgets.QTableWidgetItem(
+                    format(intensity, '.3e')))
+
+        plot = self.plot
+        ax = plot.ax
+        ax.clear()
+        ax.axhline(color='black', linewidth=0.5)
+        ax.plot(spectrum.mz, spectrum.intensity, color='black')
+
+        for x, y in zip(ions_position, ions_intensity):
+            ax.plot([x, x], [0, y], color='red')
+        ax.xaxis.set_tick_params(rotation=15)
+        ax.yaxis.set_tick_params(rotation=60)
+        ax.yaxis.set_major_formatter(
+            matplotlib.ticker.FormatStrFormatter(r"%.1e"))
+
+        ax.relim()
+        ax.autoscale_view(True, True, True)
+        plot.canvas.draw()
+
+    @state_node
+    def showSelected(self):
+        index = self.manager.fetch_func("calibration info selected index")()
+
+        table = self.manager.calibrationInfoWidget
+        table.clear()
+        table.setRowCount(0)
+        table.setColumnCount(0)
+
+        table.setColumnCount(4)
+        table.setHorizontalHeaderLabels(
+            ['theoretic mz', 'mz', 'ppm', 'use for calibration'])
+
+        calibrator = list(self.calibration.info.calibrators.values())[index]
+        func = list(self.calibration.info.poly_funcs.values())[index]
+
+        table.setRowCount(len(calibrator.ions_position))
+        table.setVerticalHeaderLabels(
+            [ion.shown_text for ion in calibrator.ions])
+        for i in range(len(calibrator.ions_position)):
+            def setValue(column, s):
+                table.setItem(i, column, QtWidgets.QTableWidgetItem(str(s)))
+            setValue(0, format(calibrator.ions[i].formula.mass(), '.5f'))
+            setValue(1, format(calibrator.ions_position[i], '.5f'))
+            setValue(2, format(calibrator.ions_rtol[i] * 1e6, '.5f'))
+            setValue(3, 'True' if i in calibrator.min_indexes else 'False')
+
+        formula_info = self.manager.workspace.formula_docker.info
+
+        x = np.linspace(formula_info.mz_min, formula_info.mz_max, 1000)
+        xx = func.predictRtol(x) * 1e6
+        plot = self.plot
+        ax = plot.ax
+        ax.clear()
+
+        ax.axhline(color='black', linewidth=0.5)
+        ax.plot(x, xx)
+
+        ions_position = calibrator.ions_position
+        ions_rtol = calibrator.ions_rtol
+        min_index = calibrator.min_indexes
+        max_index = calibrator.max_indexes
+        x = ions_position[min_index]
+        y = ions_rtol[min_index] * 1e6
+        ax.scatter(x, y, c='black')
+        x = ions_position[max_index]
+        y = ions_rtol[max_index] * 1e6
+        ax.scatter(x, y, c='red')
+
+        ax.set_ylabel('ppm')
+        ax.set_xlim(formula_info.mz_min, formula_info.mz_max)
+        plot.canvas.draw()
+
+    @state_node
+    def showAllInfoClicked(self):
+        self.showAllInfo()
+
+    def showAllInfo(self):
+        table = self.manager.calibrationInfoWidget
+        table.clearContents()
+
+        info = self.calibration.info
+
+        table.setColumnCount(len(info.ions))
+        hlables = [ion.shown_text for ion in info.ions]
+        table.setHorizontalHeaderLabels(hlables)
+
+        table.setRowCount(len(info.calibrators))
+        if len(info.calibrators) == 0:
+            return
+
+        calibrators = sorted(info.calibrators.values(),
+                             key=lambda calibrator: calibrator.time)
+
+        times = []
+        devitions = []
+        for row, calibrator in enumerate(calibrators):
+            times.append(calibrator.time)
+
+            for column, rtol in enumerate(calibrator.ions_rtol):
+                table.setItem(row, column, QtWidgets.QTableWidgetItem(
+                    format(rtol * 1e6, ".5f")))
+            devitions.append(calibrator.ions_rtol)
+        vlabels = [time.replace(microsecond=0).isoformat(
+            sep=' ')[:-3] for time in times]
+
+        table.setVerticalHeaderLabels(vlabels)
+
+        devitions = np.array(devitions)
+
+        plot = self.plot
+
+        ax = plot.ax
+        ax.clear()
+        ax.axhline(color="k", linewidth=.5)
+
+        if len(devitions) > 0:
+            for index in range(devitions.shape[1]):
+                ax.plot(times, devitions[:, index],
+                        label=info.ions[index].shown_text)
+
+        ax.set_xlabel("starting time")
+        ax.set_ylabel("Deviation (ppm)")
+        ax.legend()
+        ax.relim()
+        ax.autoscale(True, True, True)
+        plot.canvas.draw()
+
+    @state_node
+    def calibrate(self):
+        workspace = self.manager.workspace
+        noise_info = workspace.noise_tab.info
+        setting = noise_info.general_setting
+        result = noise_info.general_result
+        dependent = setting.mass_dependent
+        params, points, deltas = setting.get_params(not dependent)
+        func_kwargs = {
+            "quantile": setting.quantile,
+            "mass_dependent": setting.mass_dependent,
+            "n_sigma": setting.n_sigma,
+            "dependent": dependent,
+            "points": points,
+            "deltas": deltas,
+            "params": params,
+            "subtract": setting.subtract,
+            "poly_coef": result.poly_coef}
+        calibrate_merge = CalibrateMergeDenoise(
+            self.manager.workspace, func_kwargs=func_kwargs)
+        yield calibrate_merge, "calibrate"
+        self.callback.emit()
 
 
 class SplitAndFitPeak(MultiProcess):
@@ -127,151 +444,3 @@ class CalibrateMergeDenoise(MultiProcess):
     def exception(file, **kwargs):
         if "tmp" in file:
             del file["tmp"]
-
-
-class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
-    calcInfoFinished = QtCore.pyqtSignal()
-    callback = QtCore.pyqtSignal()
-
-    def __init__(self, manager: Manager) -> None:
-        super().__init__()
-        self.manager: Manager = manager
-        self.setupUi(self)
-        self.manager.calibrationPlot = self.plot
-        manager.inited_or_restored.connect(self.restore)
-        manager.save.connect(self.updateState)
-
-    def setupUi(self, Form):
-        super().setupUi(Form)
-
-        self.plot = Plot(self.widget)
-
-        self.addIonToolButton.clicked.connect(self.addIon)
-        self.delIonToolButton.clicked.connect(self.removeIon)
-        self.calcInfoPushButton.clicked.connect(self.calcInfo)
-        self.finishPushButton.clicked.connect(self.calibrate)
-
-    @ property
-    def calibration(self):
-        return self.manager.workspace.calibration_tab
-
-    def restore(self):
-        self.showIons()
-        self.calibration.ui_state.set_state(self)
-
-    def updateState(self):
-        self.calibration.ui_state.fromComponents(self, [
-            self.rtolDoubleSpinBox,
-            self.degreeSpinBox,
-            self.nIonsSpinBox])
-
-    def showIons(self):
-        info = self.calibration.info
-        table = self.tableWidget
-        table.clearContents()
-        table.setRowCount(len(info.ions))
-        for index, ion in enumerate(info.ions):
-            table.setItem(index, 0, QtWidgets.QTableWidgetItem(ion.shown_text))
-            table.setItem(
-                index, 1, QtWidgets.QTableWidgetItem(format(ion.formula.mass(), ".4f")))
-
-    @ state_node
-    def addIon(self):
-        self.calibration.info.add_ions(self.ionLineEdit.text().split(','))
-        self.showIons()
-
-    @ state_node
-    def removeIon(self):
-        indexes = get_tablewidget_selected_row(self.tableWidget)
-        ions = self.calibration.info.ions
-        for index in reversed(indexes):
-            ions.pop(index)
-        self.showIons()
-
-    @ state_node
-    def calcInfo(self):
-        workspace = self.manager.workspace
-        calibration_tab = self.calibration
-        info = calibration_tab.info
-
-        intensity_filter = 100
-        rtol = self.rtolDoubleSpinBox.value() / 1e-6
-        degree = self.degreeSpinBox.value()
-        use_N_ions = self.nIonsSpinBox.value()
-
-        raw_spectra = workspace.file_tab.raw_spectra
-        fit_func = workspace.peak_shape_tab.info.func
-
-        # use ions to decide whether to split
-        need_to_split = True
-        if len(info.calibrators) > 0:
-            calculator = next(iter(info.calibrators.values()))
-            calculated_ions = {ion.formula for ion in calculator.ions}
-            now_ions = {ion.formula for ion in info.ions}
-            if now_ions == calculated_ions:
-                need_to_split = False
-
-        if need_to_split:  # read ions from spectrum
-            path_time = {
-                path.path: path.createDatetime for path in workspace.file_tab.info.pathlist}
-            ions = [ion.formula.mass() for ion in info.ions]
-            split_and_fit = SplitAndFitPeak(
-                raw_spectra,
-                func_kwargs=dict(
-                    fit_func=fit_func, ions=ions, intensity_filter=intensity_filter))
-
-            path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = yield split_and_fit, "split and fit target peaks"
-
-            def get_calibrator():
-                path_calibrators: Dict[str, Calibrator] = {}
-
-                for path, ions_peak in path_ions_peak.items():
-                    ions_peak = np.array(ions_peak, dtype=float)
-                    ions_position = ions_peak[:, :, 0]
-                    ions_intensity = ions_peak[:, :, 1]
-                    path_calibrators[path] = Calibrator.FactoryFromMzInt(
-                        path_time[path], info.ions, ions_position, ions_intensity, rtol, use_N_ions)
-
-                return path_calibrators
-
-            info.calibrators = yield get_calibrator, "calculate calibrator"
-        else:  # get info directly
-            def get_calibrator_from_calibrator():
-                return {path: calibrator.regeneratCalibrator(rtol=rtol, use_N_ions=use_N_ions) for path, calibrator in info.calibrators.items()}
-
-            info.calibrators = yield get_calibrator_from_calibrator, "generate calibrator from former calibrator"
-
-        def generate_func_from_calibrator():
-            ret = {}
-            for path, calibrator in info.calibrators.items():
-                min_index = calibrator.min_indexes
-                func = PolynomialRegressionFunc.FactoryFit(
-                    calibrator.ions_position[min_index], calibrator.ions_rtol[min_index], degree)
-                ret[path] = func
-            return ret
-        info.poly_funcs = yield generate_func_from_calibrator, "calculate function from calibrator"
-
-        self.calcInfoFinished.emit()
-
-    @state_node
-    def calibrate(self):
-        workspace = self.manager.workspace
-        noise_info = workspace.noise_tab.info
-        setting = noise_info.general_setting
-        result = noise_info.general_result
-        dependent = setting.mass_dependent
-        params, points, deltas = setting.get_params(not dependent)
-        func_kwargs = {
-            "quantile": setting.quantile,
-            "mass_dependent": setting.mass_dependent,
-            "n_sigma": setting.n_sigma,
-            "dependent": dependent,
-            "points": points,
-            "deltas": deltas,
-            "params": params,
-            "subtract": setting.subtract,
-            "poly_coef": result.poly_coef}
-        calibrate_merge = CalibrateMergeDenoise(
-            self.manager.workspace, func_kwargs=func_kwargs)
-        yield calibrate_merge, "calibrate"
-        self.callback.emit()

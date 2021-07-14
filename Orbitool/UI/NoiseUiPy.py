@@ -21,40 +21,6 @@ from .utils import (get_tablewidget_selected_row, savefile, set_header_sizes,
                     showInfo)
 
 
-class ReadFromFile(MultiProcess):
-    @staticmethod
-    def func(data: Tuple[FileSpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
-        info, (mz, intensity, time) = data
-        mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
-        spectrum = Spectrum(path=info.path, mz=mz, intensity=intensity,
-                            start_time=info.start_time, end_time=info.end_time)
-        return spectrum
-
-    @ staticmethod
-    def read(file: WorkSpace, **kwargs) -> Generator:
-        for info in file.file_tab.info.spectrum_infos:
-            yield info, info.get_spectrum_from_info(with_minutes=True)
-
-    @staticmethod
-    def read_len(file: WorkSpace, **kwargs) -> int:
-        return len(file.file_tab.info.spectrum_infos)
-
-    @ staticmethod
-    def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
-        tmp = StructureListView[Spectrum](file._obj, "tmp", True)
-        tmp.h5_extend(rets)
-
-        h5path = file.file_tab.raw_spectra.h5_path
-        if h5path in file:
-            del file[h5path]
-        file._obj.move(tmp.h5_path, h5path)
-
-    @ staticmethod
-    def exception(file, **kwargs):
-        if "tmp" in file:
-            del file["tmp"]
-
-
 class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     selected_spectrum_average = QtCore.pyqtSignal(Spectrum)
     callback = QtCore.pyqtSignal(tuple)
@@ -441,3 +407,37 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         setting.spectrum_dependent = self.dependentCheckBox.isChecked()
 
         self.callback.emit((s,))
+
+
+class ReadFromFile(MultiProcess):
+    @staticmethod
+    def func(data: Tuple[FileSpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
+        info, (mz, intensity, time) = data
+        mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
+        spectrum = Spectrum(path=info.path, mz=mz, intensity=intensity,
+                            start_time=info.start_time, end_time=info.end_time)
+        return spectrum
+
+    @ staticmethod
+    def read(file: WorkSpace, **kwargs) -> Generator:
+        for info in file.file_tab.info.spectrum_infos:
+            yield info, info.get_spectrum_from_info(with_minutes=True)
+
+    @staticmethod
+    def read_len(file: WorkSpace, **kwargs) -> int:
+        return len(file.file_tab.info.spectrum_infos)
+
+    @ staticmethod
+    def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
+        tmp = StructureListView[Spectrum](file._obj, "tmp", True)
+        tmp.h5_extend(rets)
+
+        h5path = file.file_tab.raw_spectra.h5_path
+        if h5path in file:
+            del file[h5path]
+        file._obj.move(tmp.h5_path, h5path)
+
+    @ staticmethod
+    def exception(file, **kwargs):
+        if "tmp" in file:
+            del file["tmp"]

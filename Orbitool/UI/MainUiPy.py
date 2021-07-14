@@ -83,8 +83,6 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             "Calibration Info", self.calibrationInfo, self.massListDw)
 
         self.spectraList = SpectraListUiPy.Widget(manager)
-        manager.register_func("spectra list select",
-                              self.spectraList.get_selected_index)
         self.spectraListDw = self.add_dockerwidget(
             "Spectra List", self.spectraList, self.calibrationInfoDw)
 

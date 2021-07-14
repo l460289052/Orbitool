@@ -13,33 +13,6 @@ from .component import Plot
 from .manager import Manager, MultiProcess, state_node
 
 
-class SplitPeaks(MultiProcess):
-    @staticmethod
-    def read(raw_peaks: List[Peak], **kwargs):
-        for peak in raw_peaks:
-            yield peak
-
-    @staticmethod
-    def read_len(raw_peaks: List[Peak], **kwargs) -> int:
-        return len(raw_peaks)
-
-    @staticmethod
-    def func(peak: Peak, func: peakfit_func.BaseFunc):
-        return func.splitPeak(peak)
-
-    @staticmethod
-    def write(file, rets):
-        peaks = []
-        original_indexes = []
-        split_num = []
-        for index, ret in enumerate(rets):
-            split_num.append(len(ret))
-            for peak in ret:
-                peaks.append(peak)
-                original_indexes.append(index)
-        return split_num, original_indexes, peaks
-
-
 class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     show_spectrum = QtCore.pyqtSignal(Spectrum)
     show_peaklist = QtCore.pyqtSignal()
@@ -106,12 +79,15 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         raw_split_num, original_indexes, peaks = yield SplitPeaks(raw_peaks, func_kwargs={
             "func": workspace.peak_shape_tab.info.func}), "fit use peak shape func"
 
+        peaks = cast(List[FittedPeak], peaks)
+        manager = self.manager
+
         def formula_and_residual():
             calc = workspace.formula_docker.info.restricted_calc
-            for peak in peaks:
+            for peak in manager.tqdm(peaks, msg="init formula"):
                 calc.get(peak.peak_position)
 
-            for peak in peaks:
+            for peak in manager.tqdm(peaks):
                 peak.formulas = calc.get(peak.peak_position)
                 peak.formulas = formula_func.correct(peak, peaks, calc.rtol)
 
@@ -209,10 +185,12 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         peaks = info.peaks
         indexes = info.shown_indexes
 
+        manager = self.manager
+
         def func():
-            for peak in peaks:
+            for peak in manager.tqdm(peaks, msg="init formula"):
                 calc.get(peak.peak_position)  # init
-            for index in indexes:
+            for index in manager.tqdm(indexes):
                 peak = peaks[index]
                 peak.formulas = calc.get(peak.peak_position)
                 peak.formulas = formula_func.correct(peak, peaks, calc.rtol)
@@ -229,8 +207,10 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         peaks = info.peaks
         indexes = info.shown_indexes
 
+        manager = self.manager
+
         def func():
-            for index in indexes:
+            for index in manager.tqdm(indexes):
                 peak = peaks[index]
                 peak.formulas = calc.get(peak.peak_position)
 
@@ -297,3 +277,30 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         yield func, "remove"
 
         self.show_peaklist
+
+
+class SplitPeaks(MultiProcess):
+    @staticmethod
+    def read(raw_peaks: List[Peak], **kwargs):
+        for peak in raw_peaks:
+            yield peak
+
+    @staticmethod
+    def read_len(raw_peaks: List[Peak], **kwargs) -> int:
+        return len(raw_peaks)
+
+    @staticmethod
+    def func(peak: Peak, func: peakfit_func.BaseFunc):
+        return func.splitPeak(peak)
+
+    @staticmethod
+    def write(file, rets):
+        peaks = []
+        original_indexes = []
+        split_num = []
+        for index, ret in enumerate(rets):
+            split_num.append(len(ret))
+            for peak in ret:
+                peaks.append(peak)
+                original_indexes.append(index)
+        return split_num, original_indexes, peaks

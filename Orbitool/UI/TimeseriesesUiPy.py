@@ -14,33 +14,6 @@ from .manager import Manager, MultiProcess, state_node
 from .utils import get_tablewidget_selected_row
 
 
-class CalcTimeseries(MultiProcess):
-    @staticmethod
-    def read(file: StructureListView[Spectrum], **kwargs):
-        for spectrum in file:
-            yield spectrum
-
-    @staticmethod
-    def read_len(file: StructureListView[Spectrum], **kwargs) -> int:
-        return len(file)
-
-    @staticmethod
-    def func(spectrum: Spectrum, func: BaseFitFunc, mz_range_list: List[Tuple[float, float]]):
-        peaks = splitPeaks(spectrum.mz, spectrum.intensity)
-
-        return spectrum.start_time, [func.fetchTimeseries(peaks, mi, ma) for mi, ma in mz_range_list]
-
-    @staticmethod
-    def write(file, rets, series: List[TimeSeries]):
-        for time, ret in rets:
-            for intensity, s in zip(ret, series):
-                if intensity is not None:
-                    s.times.append(time)
-                    s.intensity.append(intensity)
-
-        return series
-
-
 class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
     click_series = QtCore.pyqtSignal()
 
@@ -179,3 +152,30 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         self.timeseries.info.show_index = row
 
         self.click_series.emit()
+
+
+class CalcTimeseries(MultiProcess):
+    @staticmethod
+    def read(file: StructureListView[Spectrum], **kwargs):
+        for spectrum in file:
+            yield spectrum
+
+    @staticmethod
+    def read_len(file: StructureListView[Spectrum], **kwargs) -> int:
+        return len(file)
+
+    @staticmethod
+    def func(spectrum: Spectrum, func: BaseFitFunc, mz_range_list: List[Tuple[float, float]]):
+        peaks = splitPeaks(spectrum.mz, spectrum.intensity)
+
+        return spectrum.start_time, [func.fetchTimeseries(peaks, mi, ma) for mi, ma in mz_range_list]
+
+    @staticmethod
+    def write(file, rets, series: List[TimeSeries]):
+        for time, ret in rets:
+            for intensity, s in zip(ret, series):
+                if intensity is not None:
+                    s.times.append(time)
+                    s.intensity.append(intensity)
+
+        return series

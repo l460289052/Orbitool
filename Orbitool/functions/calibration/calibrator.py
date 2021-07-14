@@ -23,6 +23,13 @@ class Ion(BaseTableItem):
 
 
 class Calibrator(BaseStructure):
+    """
+        ions_raw_position: shape (len(spectrum), len(ions))
+        ions_raw_intensity: shape (len(spectrum), len(ions))
+
+        ions_position: shape (len(ions))
+        ions_rtol: shape (len(ions))
+    """
     h5_type = "calibrator"
 
     time: datetime
@@ -38,8 +45,8 @@ class Calibrator(BaseStructure):
     @classmethod
     def FactoryFromMzInt(cls, time: datetime, ions: List[Ion], ions_raw_position: np.ndarray, ions_raw_intensity: np.ndarray, rtol: float = 5e-6, use_N_ions=None):
         """
-        ions_position: shape (len(spectrum), len(ion))
-        ions_intensity: shape (len(spectrum), len(ion))
+        ions_raw_position: shape (len(spectrum), len(ions))
+        ions_raw_intensity: shape (len(spectrum), len(ions))
         """
         ions_mz = np.fromiter([ion.formula.mass()
                                for ion in ions], dtype=float)
