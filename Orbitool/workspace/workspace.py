@@ -1,6 +1,7 @@
 from __future__ import annotations
+
 import shutil
-from typing import Generic, List, Optional, Type, TypeVar, Union, Dict
+from typing import Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
@@ -10,6 +11,7 @@ from .base import Widget
 from .calibration import Widget as CalibrationWidget
 from .file_tab import Widget as FileWidget
 from .formula import FormulaInfo
+from .massdefect import MassDefectInfo
 from .masslist import MassListInfo
 from .noise_tab import NoiseTabInfo
 from .peak_fit import PeakFitInfo
@@ -45,6 +47,8 @@ class WorkSpace(H5File):
             "calibration tab", CalibrationWidget)
         self.peakfit_tab = self.visit_or_create_widget(
             "peak fit tab", PeakFitInfo)
+        self.massdefect_tab = self.visit_or_create_widget(
+            "mass detect tab", MassDefectInfo)
         self.timeseries_tab = self.visit_or_create_widget(
             "time series tab", TimeseriesInfo)
 

@@ -69,14 +69,20 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QPushButton" name="calcPushButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>calc mass defect</string>
+            </property>
+           </widget>
+          </item>
          </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="showGreyCheckBox">
-         <property name="text">
-          <string>show peak without formula (in grey)</string>
-         </property>
         </widget>
        </item>
       </layout>
@@ -100,18 +106,18 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="showGreyCheckBox">
+         <property name="text">
+          <string>show peak without formula</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QFormLayout" name="formLayout_8">
          <item row="0" column="0">
           <widget class="QLabel" name="label_14">
            <property name="text">
             <string>min size</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_15">
-           <property name="text">
-            <string>max size</string>
            </property>
           </widget>
          </item>
@@ -128,6 +134,13 @@
            </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_15">
+           <property name="text">
+            <string>max size</string>
            </property>
           </widget>
          </item>
@@ -148,19 +161,6 @@
           </widget>
          </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QPushButton" name="plotPushButton">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Plot  mass defect</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </item>
