@@ -88,12 +88,15 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         if len(info.clr_x) == 0 and len(info.gry_x) == 0:
             return
 
-        min_factor = math.exp(
-            self.minSizeHorizontalSlider.value() / 10.) * 5
-        max_factor = math.exp(
-            self.maxSizeHorizontalSlider.value() / 20.) * 100
-        if min_factor > max_factor:
+        if self.minSizeHorizontalSlider.value() > self.maxSizeHorizontalSlider.value():
+            self.minSizeHorizontalSlider.setValue(
+                self.maxSizeHorizontalSlider.value())  # will call replot
             return
+
+        min_factor = math.exp(
+            self.minSizeHorizontalSlider.value() / 10) * 10
+        max_factor = math.exp(
+            self.maxSizeHorizontalSlider.value() / 10) * 10
 
         is_dbe = info.is_dbe
         gry = self.showGreyCheckBox.isChecked()
@@ -140,9 +143,16 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
 
         plot.canvas.draw()
 
-    @state_node
+    @state_node(mode='x')
     def replot(self):
+        ax = self.plot.ax
+        x = ax.get_xlim()
+        y = ax.get_ylim()
         self.plotMassDefect()
+        ax = self.plot.ax
+        ax.set_xlim(*x)
+        ax.set_ylim(*y)
+        self.plot.canvas.draw()
 
     @state_node
     def export(self):
