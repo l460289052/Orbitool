@@ -89,9 +89,11 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
             return
 
         min_factor = math.exp(
-            self.minSizeHorizontalSlider.value() / 20.)
+            self.minSizeHorizontalSlider.value() / 10.) * 5
         max_factor = math.exp(
-            self.maxSizeHorizontalSlider.value() / 20.)
+            self.maxSizeHorizontalSlider.value() / 20.) * 100
+        if min_factor > max_factor:
+            return
 
         is_dbe = info.is_dbe
         gry = self.showGreyCheckBox.isChecked()
@@ -106,25 +108,27 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
 
         if gry and len(gry_x) > 0:
             maximum = np.max((clr_size.max(), gry_size.max()))
+            minimum = np.min((clr_size.min(), gry_size.min()))
         else:
             maximum = clr_size.max()
+            minimum = clr_size.min()
 
-        if is_log:
-            maximum /= 70
-        else:
-            maximum /= 200
-        maximum /= max_factor
-        minimum = 5 * min_factor
+        # if is_log:
+        #     maximum /= 70
+        # else:
+        #     maximum /= 200
+        # maximum /= max_factor
+        # minimum = 5 * min_factor
 
         ax = plot.ax
         if gry:
-            gry_size /= maximum
-            gry_size[gry_size < minimum] = minimum
+            gry_size = (gry_size - minimum) / (maximum - minimum) * \
+                (max_factor - min_factor) + min_factor
             ax.scatter(gry_x, gry_y, s=gry_size, c='grey',
                        linewidths=0.5, edgecolors='k')
 
-        clr_size /= maximum
-        clr_size[clr_size < minimum] = minimum
+        clr_size = (clr_size - minimum) / (maximum - minimum) * \
+            (max_factor - min_factor) + min_factor
         sc = ax.scatter(clr_x, clr_y, s=clr_size, c=clr_color,
                         cmap=rainbow_color_map, linewidths=0.5, edgecolors='k')
         clrb = plot.fig.colorbar(sc)
