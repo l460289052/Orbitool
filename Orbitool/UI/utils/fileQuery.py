@@ -15,6 +15,8 @@ def savefile(caption, filter, prefer_name=None) -> Tuple[bool, str]:
     global savefile_dir
     if prefer_name:
         path = os.path.join(savefile_dir, prefer_name)
+    else:
+        path = savefile_dir
     f, typ = QtWidgets.QFileDialog.getSaveFileName(
         caption=caption, directory=path, filter=filter)
 

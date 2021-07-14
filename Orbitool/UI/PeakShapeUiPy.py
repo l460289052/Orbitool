@@ -231,6 +231,6 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
 
             writer.writerow(['x', 'y'] * len(peaks))
 
-            for index in range(export_peaks.shape[2]):
+            for index in self.manager.tqdm(range(export_peaks.shape[2])):
                 writer.writerow(
                     [item if item > -1 else '' for item in export_peaks[:, :, index].reshape(-1)])

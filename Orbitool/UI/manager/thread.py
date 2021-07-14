@@ -10,6 +10,7 @@ from PyQt5 import QtCore
 
 from ...config import logger, multi_cores
 from ..utils import sleep
+from . import manager
 
 
 class threadtype(Enum):
@@ -19,7 +20,6 @@ class threadtype(Enum):
 
 class Thread(QtCore.QThread):
     finished = QtCore.pyqtSignal(tuple)
-    sendStatus = QtCore.pyqtSignal(int, int)
 
     def __init__(self, func, args=(), kwargs={}) -> None:
         super().__init__()
@@ -30,10 +30,8 @@ class Thread(QtCore.QThread):
 
     def run(self):
         try:
-            self.sendStatus.emit(0, 1)
             result = self.func(*self.args, **self.kwargs)
             self.result = result
-            self.sendStatus.emit(1, 1)
             self.finished.emit((result,))
         except Exception as e:
             self.result = e
@@ -46,7 +44,6 @@ Result = TypeVar("Result")
 
 class MultiProcess(QtCore.QThread, Generic[Data, Result]):
     finished = QtCore.pyqtSignal(tuple)
-    sendStatus = QtCore.pyqtSignal(int, int)
 
     @final
     def __init__(self, file, read_kwargs: dict = None, func_kwargs: dict = None, write_kwargs: dict = None) -> None:
@@ -56,14 +53,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
         self.func_kwargs = func_kwargs or {}
         self.write_kwargs = write_kwargs or {}
         self.aborted = False
-
-    @final
-    def send(self, now, total):
-        if now < 0:
-            now = 0
-        if now > total:
-            total = now
-        self.sendStatus.emit(now, total)
+        self.manager: manager.Manager = None
 
     @final
     def run(self):
@@ -74,7 +64,9 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
             length = self.read_len(file, **self.read_kwargs)
 
             def iter_queue():
+                tqdm = self.manager.tqdm(msg="write", length=length)
                 while True:
+                    tqdm.update()
                     result = queue.get()
                     if result is None:
                         break
@@ -106,8 +98,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                         return
                     queue.put(ret)
 
-                for i, input_data in enumerate(self.read(file, **self.read_kwargs)):
-                    self.send(i - limit_parallel, length)
+                for i, input_data in self.manager.tqdm(enumerate(self.read(file, **self.read_kwargs)), length=length, msg="read"):
 
                     if self.aborted:
                         return abort()
@@ -119,7 +110,6 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                 if i < limit_parallel:
                     i = limit_parallel
                 while results:
-                    self.send(i - limit_parallel, length)
                     i += 1
 
                     write_once()
@@ -127,7 +117,6 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                 queue.put(None)
 
             write_thread.wait()
-            self.send(i - limit_parallel, 0)
             self.finished.emit((write_thread.result,))
         except Exception as e:
             self.finished.emit((e,))

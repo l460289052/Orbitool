@@ -377,10 +377,14 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
         s: Spectrum = yield func, "doing denoise"
 
-        with open(f, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(["mz", "intensity"])
-            writer.writerows(zip(s.mz, s.intensity))
+        def export():
+            with open(f, 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(["mz", "intensity"])
+                writer.writerows(self.manager.tqdm(
+                    zip(s.mz, s.intensity), length=len(s.mz)))
+
+        yield export, "export"
 
     @state_node
     def exportNoisePeaks(self):
@@ -400,12 +404,15 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
                 params, points, deltas, setting.n_sigma)
             return mz, intensity
 
-        mz, intensity = func()
+        mz, intensity = yield func, "get noise peak"
 
-        with open(f, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(["peak position", "peak intensity"])
-            writer.writerows(zip(mz, intensity))
+        def export():
+            with open(f, 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(["peak position", "peak intensity"])
+                writer.writerows(self.manager.tqdm(
+                    zip(mz, intensity), length=len(mz)))
+        yield export, "export"
 
     @state_node
     def denoise(self):

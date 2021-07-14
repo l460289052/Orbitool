@@ -90,8 +90,9 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             return
         pathlist = self.pathlist
 
+        manager = self.manager
         def func():
-            for path in utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.recursionCheckBox.isChecked()):
+            for path in manager.tqdm(utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.recursionCheckBox.isChecked())):
                 pathlist.addThermoFile(path)
             pathlist.sort()
 
@@ -153,6 +154,8 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         time_range = (self.startDateTimeEdit.dateTime().toPyDateTime(),
                       self.endDateTimeEdit.dateTime().toPyDateTime())
 
+        paths = self.manager.tqdm(paths)
+
         rtol = self.rtolDoubleSpinBox.value() * 1e-6
         if self.positiveRadioButton.isChecked():
             polarity = 1
@@ -164,8 +167,8 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         if self.averageCheckBox.isChecked():
             if self.nSpectraRadioButton.isChecked():
                 num = self.nSpectraSpinBox.value()
-                func = partial(FileSpectrumInfo.generate_infos_from_paths_by_number, 
-                    paths, rtol, num, polarity, time_range)
+                func = partial(FileSpectrumInfo.generate_infos_from_paths_by_number,
+                               paths, rtol, num, polarity, time_range)
             elif self.nMinutesRadioButton.isChecked():
                 interval = timedelta(
                     minutes=self.nMinutesDoubleSpinBox.value())

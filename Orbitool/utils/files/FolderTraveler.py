@@ -1,5 +1,5 @@
 import os
-from typing import Union, List
+from typing import Union, List, Iterator
 
 
 class FolderTraveler:
@@ -47,7 +47,7 @@ class FolderTraveler:
             elif os.path.splitext(f)[1].lower() in self.exts:
                 yield path
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         func = self._findFileRecurrent if self.recurrent else self._findFile
         for root in self.roots:
             for path in func(root):

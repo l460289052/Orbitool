@@ -98,8 +98,8 @@ class node:
                                 thread = Thread(to_be_finished)
                             else:
                                 thread = to_be_finished
+                            thread.manager = manager
                             thread.finished.connect(run_send)
-                            thread.sendStatus.connect(manager.progress.emit)
                             manager.running_thread = thread
                             if config.DEBUG:
                                 thread.run()

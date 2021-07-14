@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Dict
 from datetime import datetime
 
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -116,9 +116,10 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
         self.manager.busy_signal.connect(self.set_busy)
 
+        self.progress_bars: Dict[int, QtWidgets.QProgressBar] = {}
         self.manager.inited_or_restored.emit()
         self.manager.msg.connect(self.showMsg)
-        self.manager.progress.connect(self.showProgress)
+        self.manager.tqdm_signal.connect(self.showBarLabelMessage)
         self.manager.set_busy(False)
 
     @property
@@ -127,9 +128,12 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
     def set_busy(self, value):
         self.tabWidget.setDisabled(value)
-        self.processWidget.setHidden(not value)
         self.formula.setEnabled(True)
-        self.show()
+
+        if not value:
+            for bar in self.progress_bars.values():
+                bar.deleteLater()
+            self.progress_bars.clear()
 
     def add_dockerwidget(self, title, widget, after=None):
         dw = QtWidgets.QDockWidget(title)
@@ -198,9 +202,16 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.statusbar.showMessage(
             f"{datetime.now().replace(microsecond=0).isoformat(sep=' ')} | {msg}")
 
-    def showProgress(self, value, maximum):
-        self.progressBar.setMaximum(maximum)
-        self.progressBar.setValue(value)
+    def showBarLabelMessage(self, label: int, percent: int, msg: str):
+        if (bar := self.progress_bars.get(label, None)) is None:
+            bar = QtWidgets.QProgressBar()
+            bar.setRange(0, 100)
+            bar.setValue(1)
+            bar.setFormat("")
+            self.progressBarLayout.addWidget(bar)
+            self.progress_bars[label] = bar
+        bar.setValue(percent)
+        bar.setFormat(msg)
 
     @state_node(mode='x')
     def file_tab_finish(self):
