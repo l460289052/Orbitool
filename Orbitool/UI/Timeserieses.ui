@@ -303,19 +303,6 @@
         </layout>
        </item>
        <item>
-        <widget class="QCheckBox" name="exportWithPpmCheckBox">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Export with text &quot;with ppm&quot;</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="exportPushButton">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">

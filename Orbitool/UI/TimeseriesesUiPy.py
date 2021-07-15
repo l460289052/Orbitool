@@ -1,6 +1,10 @@
+import csv
 from typing import List, Optional, Tuple
+from datetime import datetime, timedelta
+from itertools import chain
 
 from PyQt5 import QtWidgets, QtCore
+import numpy as np
 
 from ..functions.peakfit.base import BaseFunc as BaseFitFunc
 from ..functions.spectrum import splitPeaks
@@ -8,10 +12,12 @@ from ..structures.HDF5 import StructureListView
 from ..structures.spectrum import MassListItem, Spectrum
 from ..structures.timeseries import TimeSeries
 from ..utils.formula import Formula
+from ..utils.time_convert import getTimesExactToS
 from . import TimeseriesesUi
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
-from .utils import get_tablewidget_selected_row
+from .utils import get_tablewidget_selected_row, savefile
+from .. import config
 
 
 class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
@@ -31,6 +37,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
 
         self.calcPushButton.clicked.connect(self.calc)
         self.tableWidget.itemDoubleClicked.connect(self.seriesClicked)
+        self.exportPushButton.clicked.connect(self.export)
 
     @property
     def timeseries(self):
@@ -152,6 +159,53 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         self.timeseries.info.show_index = row
 
         self.click_series.emit()
+
+    @state_node
+    def export(self):
+        series = self.timeseries.info.series
+        if len(series) == 0:
+            return
+        time_min = min(min(s.times) for s in series if len(s.times) > 0)
+        time_max = max(max(s.times) for s in series if len(s.times) > 0)
+
+        ret, file = savefile("Timeseries", "CSV file(*.csv)",
+                             f"timeseries {time_min.strftime(config.exportTimeFormat)}-{time_max.strftime(config.exportTimeFormat)}.csv")
+        if not ret:
+            return
+
+        manager = self.manager
+
+        def func():
+            delta_time = timedelta(seconds=3)
+            times = list(chain.from_iterable([s.times for s in series]))
+            times.sort()
+            last = times[-1]
+            times = [time_a for time_a, time_b in zip(
+                times, times[1:]) if time_b - time_a > delta_time]
+            times.append(last)
+
+            with open(file, 'w', newline='') as f:
+                writer = csv.writer(f)
+                row = ['isotime', 'igor time', 'matlab time', 'excel time']
+                row.extend(s.tag for s in series)
+
+                writer.writerow(row)
+
+                indexes = np.zeros(len(series), dtype=int)
+                max_indexes = np.array([len(s.times)
+                                        for s in series], dtype=int)
+
+                for current in manager.tqdm(times):
+                    select = indexes < max_indexes
+                    select &= np.array([slt and (abs(s.times[i] - current) < delta_time)
+                                        for slt, i, s in zip(select, indexes, series)])
+                    row = getTimesExactToS(current)
+                    row.extend([s.intensity[i] if slt else '' for slt,
+                                i, s in zip(select, indexes, series)])
+                    indexes[select] += 1
+                    writer.writerow(row)
+
+        yield func
 
 
 class CalcTimeseries(MultiProcess):

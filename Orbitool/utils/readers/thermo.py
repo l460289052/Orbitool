@@ -48,7 +48,7 @@ class File:
         self.name = os.path.split(fullname)[1]
         self.rawfile = initRawFile(fullname)
 
-        time = self.rawfile.FileHeader.CreationDate
+        time = self.rawfile.FileHeader.CreationDate # time doesn't contain time zone info
         self.creationDatetime = datetime(year=time.Year, month=time.Month, day=time.Day, hour=time.Hour,
                                          minute=time.Minute, second=time.Second, microsecond=time.Millisecond * 1000)
         self.startTimedelta = timedelta(
@@ -175,7 +175,7 @@ class File:
         numRange = (start, end)
         return mz, intensity
 
-    def bothToNumRange(self, timeRange: Tuple[timedelta, timedelta], numRange: Tuple[int, int]) -> (int, int):
+    def bothToNumRange(self, timeRange: Tuple[timedelta, timedelta], numRange: Tuple[int, int]) -> Tuple(int, int):
         if timeRange is not None and numRange is None:
             return self.timeRange2NumRange(timeRange)
         elif numRange is not None and timeRange is None:

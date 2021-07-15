@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
 import numpy as np
 
-def getIsoTimeWithZone(dt: datetime):
-    return dt.astimezone().isoformat()
+def getIsoTime(dt: datetime):
+    return dt.isoformat()
 
-def fromIsoTimeWithZone(s: str)->datetime:
-    # return datetime.fromisoformat(s).replace(tzinfo=None) # py 3.7
-    return datetime.strptime(s.split('+')[0], r"%Y-%m-%dT%H:%M:%S")
+def fromIsoTime(s: str)->datetime:
+    return datetime.fromisoformat(s).replace(tzinfo=None) # py 3.7
 
 igorTimeStandard = datetime(1904, 1, 1)
 
@@ -34,6 +33,6 @@ def fromExcelTime(t: float):
 
 def getTimesExactToS(dt: datetime):
     dt = dt.replace(microsecond=0)
-    return [getIsoTimeWithZone(dt), getIgorTime(dt), getMatlabTime(dt), getExcelTime(dt)]
+    return [getIsoTime(dt), getIgorTime(dt), getMatlabTime(dt), getExcelTime(dt)]
 
 __all__ = [s for s in locals() if s.find('get')==0 or s.find('from')==0]

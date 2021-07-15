@@ -126,6 +126,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
     def set_busy(self, value):
         self.tabWidget.setDisabled(value)
+        self.processWidget.setHidden(not value)
         self.formula.setEnabled(True)
 
         if not value:
