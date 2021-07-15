@@ -59,8 +59,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>376</width>
-            <height>344</height>
+            <width>336</width>
+            <height>325</height>
            </rect>
           </property>
           <attribute name="label">
@@ -224,8 +224,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>376</width>
-            <height>344</height>
+            <width>204</width>
+            <height>158</height>
            </rect>
           </property>
           <attribute name="label">
@@ -404,12 +404,18 @@
            <property name="text">
             <string>×2</string>
            </property>
+           <property name="shortcut">
+            <string>Up</string>
+           </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="yLimHalfPushButton">
            <property name="text">
             <string>÷2</string>
+           </property>
+           <property name="shortcut">
+            <string>Down</string>
            </property>
           </widget>
          </item>

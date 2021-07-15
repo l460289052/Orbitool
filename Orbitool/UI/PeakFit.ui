@@ -193,14 +193,14 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QCheckBox" name="checkBox_5">
+        <widget class="QCheckBox" name="yLogcheckBox">
          <property name="text">
           <string>CheckBox</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_5">
+        <widget class="QPushButton" name="scalePushButton">
          <property name="text">
           <string>autoscale y axis</string>
          </property>

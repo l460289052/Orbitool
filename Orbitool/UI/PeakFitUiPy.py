@@ -46,6 +46,15 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         self.plot = Plot(self.widget)
 
+        self.previousShortCut = QtWidgets.QShortcut("Left", self)
+        self.previousShortCut.activated.connect(lambda: self.moveRight(-1))
+        self.nextShortCut = QtWidgets.QShortcut("Right", self)
+        self.nextShortCut.activated.connect(lambda: self.moveRight(1))
+        self.yDoubleShortCut = QtWidgets.QShortcut("Up", self)
+        self.yDoubleShortCut.activated.connect(lambda: self.y_times(2))
+        self.yHalfShortCut = QtWidgets.QShortcut("Down", self)
+        self.yHalfShortCut.activated.connect(lambda: self.y_times(.5))
+
     def restore(self):
         self.show_and_plot()
         self.peakfit.ui_state.set_state(self)
@@ -143,6 +152,23 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         ll, lr = ax.get_xlim()
         ax.set_xlim(mi if ll > mi else ll, ma if lr < ma else lr)
 
+        plot.canvas.draw()
+
+    @state_node(withArgs=True)
+    def moveRight(self, step):
+        plot = self.plot
+        x_min, x_max = plot.ax.get_xlim()
+        plot.ax.set_xlim(x_min + step, x_max + step)
+        self.plot.canvas.draw()
+
+    @state_node(withArgs=True)
+    def y_times(self, times):
+        plot = self.plot
+        y_min, y_max = plot.ax.get_ylim()
+        y_max *= times
+        if not self.yLogcheckBox.isChecked():
+            y_min = - 0.025 * y_max
+        plot.ax.set_ylim(y_min, y_max)
         plot.canvas.draw()
 
     @state_node

@@ -29,6 +29,9 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         manager.inited_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
 
+        self.spectrum_inner_index: int = None
+        self.spectrum_current_ion_index: int = None
+
     def setupUi(self, Form):
         super().setupUi(Form)
 
@@ -42,6 +45,11 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         self.showSpectrumPushButton.clicked.connect(self.showSpectrum)
         self.showSelectedPushButton.clicked.connect(self.showSelected)
         self.showAllPushButton.clicked.connect(self.showAllInfoClicked)
+
+        self.previousIonsShortCut = QtWidgets.QShortcut("Left", self)
+        self.previousIonsShortCut.activated.connect(lambda: self.next_ion(-1))
+        self.nextIonShortCut = QtWidgets.QShortcut("Right", self)
+        self.nextIonShortCut.activated.connect(lambda: self.next_ion(1))
 
     @property
     def calibration(self):
@@ -159,6 +167,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
                 break
             inner_index -= len(cal.ions_raw_position)
 
+        self.spectrum_inner_index = inner_index
         ions_position = calibrator.ions_raw_position[inner_index]
         ions_intensity = calibrator.ions_raw_intensity[inner_index]
 
@@ -200,6 +209,33 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         ax.relim()
         ax.autoscale_view(True, True, True)
+        plot.canvas.draw()
+        self.spectrum_current_ion_index = -1
+
+    @state_node(withArgs=True)
+    def next_ion(self, step):
+        if self.spectrum_current_ion_index is None:
+            return
+
+        index = self.manager.fetch_func("spectra list select")()
+        infos = self.manager.workspace.file_tab.info.spectrum_infos
+        calibrator = self.calibration.info.calibrators[infos[index].path]
+
+        index = self.spectrum_current_ion_index = (
+            self.spectrum_current_ion_index + step) % len(calibrator.ions)
+        inner_index = self.spectrum_inner_index
+        ion_position = calibrator.ions_raw_position[inner_index, index]
+        ion_intensity = calibrator.ions_raw_intensity[inner_index, index]
+
+        x_min = ion_position - .1
+        x_max = ion_position + .1
+        y_min = -ion_intensity * .1
+        y_max = ion_intensity * 1.2
+
+        plot = self.plot
+        ax = plot.ax
+        ax.set_xlim(x_min, x_max)
+        ax.set_ylim(y_min, y_max)
         plot.canvas.draw()
 
     @state_node
@@ -255,9 +291,12 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         ax.set_xlim(formula_info.mz_min, formula_info.mz_max)
         plot.canvas.draw()
 
+        self.spectrum_current_ion_index = None
+
     @state_node
     def showAllInfoClicked(self):
         self.showAllInfo()
+        self.spectrum_current_ion_index = None
 
     def showAllInfo(self):
         table = self.manager.calibrationInfoWidget
