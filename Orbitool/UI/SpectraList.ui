@@ -49,13 +49,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="splitPushButton">
-     <property name="text">
-      <string>split selected spectrum to list</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QPushButton" name="exportPushButton">
      <property name="text">
       <string>export all spectra</string>

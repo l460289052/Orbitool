@@ -1,15 +1,15 @@
-from typing import Union, Optional, List
+import csv
 from datetime import datetime
-from PyQt5 import QtWidgets, QtCore
+from typing import List, Optional, Union
+import os
 
-from . import SpectraListUi
-from .utils import showInfo, set_header_sizes
-from . import utils
-from .manager import Manager, state_node
+from PyQt5 import QtCore, QtWidgets
 
 from .. import config
-
 from ..structures.file import FileSpectrumInfo
+from . import SpectraListUi, utils
+from .manager import Manager, state_node
+from .utils import openfolder, set_header_sizes, showInfo
 
 FILE_TAB = 0
 CALIBRATE_TAB = 1
@@ -32,6 +32,7 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
 
         set_header_sizes(self.tableWidget.horizontalHeader(), [210, 210])
         self.show_combobox_selection()
+        self.exportPushButton.clicked.connect(self.export)
 
     @state_node(mode='x')
     def comboBox_changed(self):
@@ -92,3 +93,29 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
                 return 0
             raise ValueError("Please select a spectrum in spectra list")
         return indexes[0]
+
+    @state_node
+    def export(self):
+        ret, folder = openfolder("choose a folder to place spectra")
+
+        if not ret:
+            return
+
+        comboxBox = self.comboBox
+        data = comboxBox.currentData()
+
+        manager = self.manager
+        if data == FILE_TAB:
+            spectra = self.manager.workspace.file_tab.raw_spectra
+        elif data == CALIBRATE_TAB:
+            spectra = self.manager.workspace.calibration_tab.calibrated_spectra
+
+        def func():
+            for spectrum in manager.tqdm(spectra):
+                filename = f"spectrum {spectrum.start_time.strftime(config.exportTimeFormat)}-{spectrum.end_time.strftime(config.exportTimeFormat)}"
+                manager.msg.emit(f"export {filename}")
+                with open(os.path.join(folder, f"{filename}.csv"), 'w', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(['mz', 'intensity'])
+                    writer.writerows(zip(spectrum.mz, spectrum.intensity))
+        yield func

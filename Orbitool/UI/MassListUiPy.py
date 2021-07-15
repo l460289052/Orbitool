@@ -1,4 +1,6 @@
+import csv
 from typing import Optional, Union
+from functools import partial
 
 from PyQt5 import QtCore, QtWidgets
 
@@ -7,7 +9,7 @@ from ..structures.spectrum import MassListItem
 from ..utils.formula import Formula
 from . import MassListUi
 from .manager import Manager, state_node
-from .utils import get_tablewidget_selected_row
+from .utils import get_tablewidget_selected_row, openfile, savefile
 
 
 class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
@@ -24,9 +26,9 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
         self.addPushButton.clicked.connect(self.addMass)
         self.removePushButton.clicked.connect(self.rmMass)
 
-        # self.mergePushButton.clicked.connect()
-        # self.importPushButton.clicked.connect()
-        # self.exportPushButton.clicked.connect()
+        self.mergePushButton.clicked.connect(self.merge)
+        self.importPushButton.clicked.connect(self.import_masslist)
+        self.exportPushButton.clicked.connect(self.export)
 
     @property
     def masslist(self):
@@ -81,3 +83,63 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
 
     def get_selected_index(self):
         return get_tablewidget_selected_row(self.tableWidget)
+
+    def read_masslist_from(self, f):
+        rtol = self.masslist.rtol
+        ret = []
+        with open(f, "r") as file:
+            reader = csv.reader(file)
+            it = iter(reader)
+            next(it)
+            for row in it:
+                position = row[0]
+                formulas = row[1]
+                formulas = [Formula(formula)
+                            for formula in formulas.split('/')]
+                item = MassListItem(position=position, formulas=formulas)
+                masslist_func.addMassTo(ret, item, rtol)
+        return ret
+
+    @state_node
+    def merge(self):
+        ret, f = openfile("select mass list to merge", "CSV file(*.csv)")
+        if not ret:
+            return
+
+        rtol = self.masslist.rtol
+        masslist = self.masslist.masslist
+
+        def func():
+            imported = self.read_masslist_from(f)
+            masslist_func.MergeInto(masslist, imported, rtol)
+
+        yield func
+        self.showMasslist()
+
+    @state_node
+    def import_masslist(self):
+        ret, f = openfile("select mass list to import", "CSV file(*.csv)")
+        if not ret:
+            return
+
+        self.masslist.masslist = yield partial(self.read_masslist_from, f), "read mass list"
+        self.showMasslist()
+
+    @state_node
+    def export(self):
+        ret, f = savefile("save mass list", "CSV file(*.csv)", "masslist.csv")
+        if not ret:
+            return
+
+        masslist = self.masslist.masslist
+
+        def func():
+            with open(f, 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(['position', 'formulas'])
+
+                for item in masslist:
+                    writer.writerow(
+                        [item.position, '/'.join(str(formula) for formula in item.formulas)])
+
+        yield func, "export mass list"

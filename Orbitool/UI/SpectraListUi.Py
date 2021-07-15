@@ -34,9 +34,6 @@ class Ui_Form(object):
         self.tableWidget.setHorizontalHeaderItem(1, item)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.verticalLayout.addWidget(self.tableWidget)
-        self.splitPushButton = QtWidgets.QPushButton(Form)
-        self.splitPushButton.setObjectName("splitPushButton")
-        self.verticalLayout.addWidget(self.splitPushButton)
         self.exportPushButton = QtWidgets.QPushButton(Form)
         self.exportPushButton.setObjectName("exportPushButton")
         self.verticalLayout.addWidget(self.exportPushButton)
@@ -52,6 +49,5 @@ class Ui_Form(object):
         item.setText(_translate("Form", "start time"))
         item = self.tableWidget.horizontalHeaderItem(1)
         item.setText(_translate("Form", "end time"))
-        self.splitPushButton.setText(_translate("Form", "split selected spectrum to list"))
         self.exportPushButton.setText(_translate("Form", "export all spectra"))
 
