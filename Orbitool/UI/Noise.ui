@@ -52,7 +52,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="noiseTool">
           <property name="geometry">
@@ -372,27 +372,6 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QCheckBox" name="yLogCheckBox">
-           <property name="text">
-            <string>y-log scale</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_10">
-           <property name="text">
-            <string>Autoscale</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="yAxisPushButton">
-           <property name="text">
-            <string>y-axis</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="spectrumPushButton">
            <property name="text">
             <string>Spectrum</string>
@@ -400,9 +379,37 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="noisePushButton">
+          <widget class="QLabel" name="label_10">
            <property name="text">
-            <string>Noise</string>
+            <string>y-lim</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="yLogCheckBox">
+           <property name="text">
+            <string>log scale</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="yAxisPushButton">
+           <property name="text">
+            <string>rescale</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="yLimDoublePushButton">
+           <property name="text">
+            <string>×2</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="yLimHalfPushButton">
+           <property name="text">
+            <string>÷2</string>
            </property>
           </widget>
          </item>

@@ -144,21 +144,21 @@ def init_handlers():
     state_handlers[QDoubleSpinBox] = DoubleSpinBoxHandler
 
     class DataTimeEditHandler(BaseStateHandler):
-        @ staticmethod
+        @staticmethod
         def get(obj: QDateTimeEdit) -> str:
             return obj.dateTime().toPyDateTime().isoformat()
 
-        @ staticmethod
+        @staticmethod
         def set(obj: QDateTimeEdit, value: str):
             obj.setDateTime(datetime.fromisoformat(value))
     state_handlers[QDateTimeEdit] = DataTimeEditHandler
 
     class LineEditHandler(BaseStateHandler):
-        @ staticmethod
+        @staticmethod
         def get(obj: QLineEdit) -> str:
             return obj.text()
 
-        @ staticmethod
+        @staticmethod
         def set(obj: QLineEdit, value: str):
             obj.setText(value)
     state_handlers[QLineEdit] = LineEditHandler

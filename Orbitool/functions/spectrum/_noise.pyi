@@ -36,7 +36,7 @@ def getNoiseParams(mz: np.ndarray, intensity: np.ndarray, quantile: float,
     pass
 
 
-def getShownNoiseLODFromParam(params: np.ndarray, n_sigma: float) -> Tuple[np.ndarray, np.ndarray]:
+def getNoiseLODFromParam(params: np.ndarray, n_sigma: float) -> Tuple[np.ndarray, np.ndarray]:
     """
     return noise, lod
     """

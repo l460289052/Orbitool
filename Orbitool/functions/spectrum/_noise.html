@@ -287,9 +287,9 @@ body.cython { font-family: courier; font-size: 12; }
 .cython.score-253 {background-color: #FFFF09;}
 .cython.score-254 {background-color: #FFFF09;}
 pre { line-height: 125%; }
-td.linenos pre { color: #000000; background-color: #f0f0f0; padding-left: 5px; padding-right: 5px; }
-span.linenos { color: #000000; background-color: #f0f0f0; padding-left: 5px; padding-right: 5px; }
-td.linenos pre.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 .cython .hll { background-color: #ffffcc }
 .cython { background: #f8f8f8; }
@@ -3887,11 +3887,11 @@ static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_28updateGlobalP
   __pyx_t_8 = 0;
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">099</span>: </pre>
-<pre class="cython line score-337" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">100</span>: <span class="k">def</span> <span class="nf">getShownNoiseLODFromParam</span><span class="p">(</span><span class="n">DoubleArray2D</span> <span class="n">params</span><span class="p">,</span> <span class="n">double</span> <span class="n">n_sigma</span><span class="p">):</span></pre>
+<pre class="cython line score-337" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">100</span>: <span class="k">def</span> <span class="nf">getNoiseLODFromParam</span><span class="p">(</span><span class="n">DoubleArray2D</span> <span class="n">params</span><span class="p">,</span> <span class="n">double</span> <span class="n">n_sigma</span><span class="p">):</span></pre>
 <pre class='cython code score-337 '>/* Python wrapper */
-static PyObject *__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_9getShownNoiseLODFromParam(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_8Orbitool_9functions_8spectrum_6_noise_9getShownNoiseLODFromParam = {"getShownNoiseLODFromParam", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_9getShownNoiseLODFromParam, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_9getShownNoiseLODFromParam(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_9getNoiseLODFromParam(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_8Orbitool_9functions_8spectrum_6_noise_9getNoiseLODFromParam = {"getNoiseLODFromParam", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_9getNoiseLODFromParam, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_9getNoiseLODFromParam(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_signatures = 0;
   PyObject *__pyx_v_args = 0;
   PyObject *__pyx_v_kwargs = 0;
@@ -3965,7 +3965,7 @@ static PyObject *__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_9getShownNoiseL
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8Orbitool_9functions_8spectrum_6_noise_8getShownNoiseLODFromParam(__pyx_self, __pyx_v_signatures, __pyx_v_args, __pyx_v_kwargs, __pyx_v_defaults);
+  __pyx_r = __pyx_pf_8Orbitool_9functions_8spectrum_6_noise_8getNoiseLODFromParam(__pyx_self, __pyx_v_signatures, __pyx_v_args, __pyx_v_kwargs, __pyx_v_defaults);
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -3975,7 +3975,7 @@ static PyObject *__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_9getShownNoiseL
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_8getShownNoiseLODFromParam(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_signatures, PyObject *__pyx_v_args, PyObject *__pyx_v_kwargs, CYTHON_UNUSED PyObject *__pyx_v_defaults) {
+static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_8getNoiseLODFromParam(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_signatures, PyObject *__pyx_v_args, PyObject *__pyx_v_kwargs, CYTHON_UNUSED PyObject *__pyx_v_defaults) {
   PyObject *__pyx_v_dest_sig = NULL;
   Py_ssize_t __pyx_v_i;
   PyTypeObject *__pyx_v_ndarray = 0;
@@ -3993,7 +3993,7 @@ static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_8getShownNoiseL
   PyObject *__pyx_v_dst_type = NULL;
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
-  <span class='refnanny'>__Pyx_RefNannySetupContext</span>("getShownNoiseLODFromParam", 0);
+  <span class='refnanny'>__Pyx_RefNannySetupContext</span>("getNoiseLODFromParam", 0);
   <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_v_kwargs);
   __pyx_t_1 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 100, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
@@ -4362,14 +4362,14 @@ static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_8getShownNoiseL
 }
 
 /* Python wrapper */
-static PyObject *__pyx_fuse_0__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_33getShownNoiseLODFromParam(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_fuse_0__pyx_mdef_8Orbitool_9functions_8spectrum_6_noise_33getShownNoiseLODFromParam = {"__pyx_fuse_0getShownNoiseLODFromParam", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_fuse_0__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_33getShownNoiseLODFromParam, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_fuse_0__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_33getShownNoiseLODFromParam(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_fuse_0__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_33getNoiseLODFromParam(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_fuse_0__pyx_mdef_8Orbitool_9functions_8spectrum_6_noise_33getNoiseLODFromParam = {"__pyx_fuse_0getNoiseLODFromParam", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_fuse_0__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_33getNoiseLODFromParam, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_fuse_0__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_33getNoiseLODFromParam(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_params = 0;
   double __pyx_v_n_sigma;
   PyObject *__pyx_r = 0;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
-  <span class='refnanny'>__Pyx_RefNannySetupContext</span>("getShownNoiseLODFromParam (wrapper)", 0);
+  <span class='refnanny'>__Pyx_RefNannySetupContext</span>("getNoiseLODFromParam (wrapper)", 0);
   {
     static PyObject **__pyx_pyargnames[] = {&amp;__pyx_n_s_params,&amp;__pyx_n_s_n_sigma,0};
     PyObject* values[2] = {0,0};
@@ -4393,11 +4393,11 @@ static PyObject *__pyx_fuse_0__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_33g
         case  1:
         if (likely((values[1] = <span class='pyx_c_api'>__Pyx_PyDict_GetItemStr</span>(__pyx_kwds, __pyx_n_s_n_sigma)) != 0)) kw_args--;
         else {
-          <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("getShownNoiseLODFromParam", 1, 2, 2, 1); <span class='error_goto'>__PYX_ERR(0, 100, __pyx_L3_error)</span>
+          <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("getNoiseLODFromParam", 1, 2, 2, 1); <span class='error_goto'>__PYX_ERR(0, 100, __pyx_L3_error)</span>
         }
       }
       if (unlikely(kw_args &gt; 0)) {
-        if (unlikely(<span class='pyx_c_api'>__Pyx_ParseOptionalKeywords</span>(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "getShownNoiseLODFromParam") &lt; 0)) <span class='error_goto'>__PYX_ERR(0, 100, __pyx_L3_error)</span>
+        if (unlikely(<span class='pyx_c_api'>__Pyx_ParseOptionalKeywords</span>(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "getNoiseLODFromParam") &lt; 0)) <span class='error_goto'>__PYX_ERR(0, 100, __pyx_L3_error)</span>
       }
     } else if (<span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -4410,14 +4410,14 @@ static PyObject *__pyx_fuse_0__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_33g
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("getShownNoiseLODFromParam", 1, 2, 2, <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)); <span class='error_goto'>__PYX_ERR(0, 100, __pyx_L3_error)</span>
+  <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("getNoiseLODFromParam", 1, 2, 2, <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)); <span class='error_goto'>__PYX_ERR(0, 100, __pyx_L3_error)</span>
   __pyx_L3_error:;
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("Orbitool.functions.spectrum._noise.getShownNoiseLODFromParam", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("Orbitool.functions.spectrum._noise.getNoiseLODFromParam", __pyx_clineno, __pyx_lineno, __pyx_filename);
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_params), __pyx_ptype_5numpy_ndarray, 1, "params", 0))) <span class='error_goto'>__PYX_ERR(0, 100, __pyx_L1_error)</span>
-  __pyx_r = __pyx_pf_8Orbitool_9functions_8spectrum_6_noise_32getShownNoiseLODFromParam(__pyx_self, __pyx_v_params, __pyx_v_n_sigma);
+  __pyx_r = __pyx_pf_8Orbitool_9functions_8spectrum_6_noise_32getNoiseLODFromParam(__pyx_self, __pyx_v_params, __pyx_v_n_sigma);
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -4431,14 +4431,14 @@ static PyObject *__pyx_fuse_0__pyx_pw_8Orbitool_9functions_8spectrum_6_noise_33g
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_32getShownNoiseLODFromParam(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_params, double __pyx_v_n_sigma) {
+static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_32getNoiseLODFromParam(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_params, double __pyx_v_n_sigma) {
   double __pyx_v_noise;
   double __pyx_v_lod;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_params;
   __Pyx_Buffer __pyx_pybuffer_params;
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
-  <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__pyx_fuse_0getShownNoiseLODFromParam", 0);
+  <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__pyx_fuse_0getNoiseLODFromParam", 0);
   __pyx_pybuffer_params.pybuffer.buf = NULL;
   __pyx_pybuffer_params.refcount = 0;
   __pyx_pybuffernd_params.data = NULL;
@@ -4460,7 +4460,7 @@ static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_32getShownNoise
     <span class='pyx_c_api'>__Pyx_ErrFetch</span>(&amp;__pyx_type, &amp;__pyx_value, &amp;__pyx_tb);
     <span class='pyx_c_api'>__Pyx_SafeReleaseBuffer</span>(&amp;__pyx_pybuffernd_params.rcbuffer-&gt;pybuffer);
   <span class='pyx_c_api'>__Pyx_ErrRestore</span>(__pyx_type, __pyx_value, __pyx_tb);}
-  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("Orbitool.functions.spectrum._noise.getShownNoiseLODFromParam", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  <span class='pyx_c_api'>__Pyx_AddTraceback</span>("Orbitool.functions.spectrum._noise.getNoiseLODFromParam", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -4477,20 +4477,20 @@ static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_32getShownNoise
 /* … */
   __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyDict_NewPresized</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 100, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-  __pyx_t_2 = __pyx_FusedFunction_New(&amp;__pyx_fuse_0__pyx_mdef_8Orbitool_9functions_8spectrum_6_noise_33getShownNoiseLODFromParam, 0, __pyx_n_s_getShownNoiseLODFromParam, NULL, __pyx_n_s_Orbitool_functions_spectrum__noi_2, __pyx_d, ((PyObject *)__pyx_codeobj__43));<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 100, __pyx_L1_error)</span>
+  __pyx_t_2 = __pyx_FusedFunction_New(&amp;__pyx_fuse_0__pyx_mdef_8Orbitool_9functions_8spectrum_6_noise_33getNoiseLODFromParam, 0, __pyx_n_s_getNoiseLODFromParam, NULL, __pyx_n_s_Orbitool_functions_spectrum__noi_2, __pyx_d, ((PyObject *)__pyx_codeobj__43));<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 100, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
   <span class='pyx_c_api'>__Pyx_CyFunction_SetDefaultsTuple</span>(__pyx_t_2, __pyx_empty_tuple);
   if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_t_1, __pyx_kp_s_ndarray_double_ndim_2, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 100, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __pyx_FusedFunction_New(&amp;__pyx_mdef_8Orbitool_9functions_8spectrum_6_noise_9getShownNoiseLODFromParam, 0, __pyx_n_s_getShownNoiseLODFromParam, NULL, __pyx_n_s_Orbitool_functions_spectrum__noi_2, __pyx_d, ((PyObject *)__pyx_codeobj__43));<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 100, __pyx_L1_error)</span>
+  __pyx_t_2 = __pyx_FusedFunction_New(&amp;__pyx_mdef_8Orbitool_9functions_8spectrum_6_noise_9getNoiseLODFromParam, 0, __pyx_n_s_getNoiseLODFromParam, NULL, __pyx_n_s_Orbitool_functions_spectrum__noi_2, __pyx_d, ((PyObject *)__pyx_codeobj__43));<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 100, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
   <span class='pyx_c_api'>__Pyx_CyFunction_SetDefaultsTuple</span>(__pyx_t_2, __pyx_empty_tuple);
   ((__pyx_FusedFunctionObject *) __pyx_t_2)-&gt;__signatures__ = __pyx_t_1;
   <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_1);
   __pyx_t_1 = 0;
-  if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_getShownNoiseLODFromParam, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 100, __pyx_L1_error)</span>
+  if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_getNoiseLODFromParam, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 100, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_codeobj__43 = (PyObject*)<span class='pyx_c_api'>__Pyx_PyCode_New</span>(2, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__42, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Orbitool_functions_spectrum__noi, __pyx_n_s_getShownNoiseLODFromParam, 100, __pyx_empty_bytes);<span class='error_goto'> if (unlikely(!__pyx_codeobj__43)) __PYX_ERR(0, 100, __pyx_L1_error)</span>
+  __pyx_codeobj__43 = (PyObject*)<span class='pyx_c_api'>__Pyx_PyCode_New</span>(2, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__42, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Orbitool_functions_spectrum__noi, __pyx_n_s_getNoiseLODFromParam, 100, __pyx_empty_bytes);<span class='error_goto'> if (unlikely(!__pyx_codeobj__43)) __PYX_ERR(0, 100, __pyx_L1_error)</span>
 </pre><pre class="cython line score-9" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">101</span>:     <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">noise</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mf">0</span><span class="p">,</span><span class="mf">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="mf">0</span><span class="p">,</span><span class="mf">2</span><span class="p">])</span></pre>
 <pre class='cython code score-9 '>  __pyx_t_1 = 0;
   __pyx_t_2 = 0;

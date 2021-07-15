@@ -5,10 +5,11 @@ from typing import Generator, Iterable, List, Optional, Tuple, Union
 
 import matplotlib.ticker
 import numpy as np
+from numpy.polynomial.polynomial import polyval
 from PyQt5 import QtCore, QtWidgets
 
 from .. import config, workspace
-from ..functions import spectrum as spectrum_func
+from ..functions import spectrum as spectrum_func, binary_search
 from ..structures.file import FileSpectrumInfo
 from ..structures.HDF5 import StructureListView
 from ..structures.spectrum import Spectrum
@@ -49,6 +50,14 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             self.exportDenoise)
         self.exportNoisePeaksPushButton.clicked.connect(self.exportNoisePeaks)
         self.denoisePushButton.clicked.connect(self.denoise)
+
+        self.paramTableWidget.itemDoubleClicked.connect(
+            self.moveToTableClickedNoise)
+        self.spectrumPushButton.clicked.connect(self.scaleToSpectrum)
+        self.yLogCheckBox.toggled.connect(self.yLogToggle)
+        self.yAxisPushButton.clicked.connect(self.y_rescale_click)
+        self.yLimDoublePushButton.clicked.connect(lambda: self.y_times(2))
+        self.yLimHalfPushButton.clicked.connect(lambda: self.y_times(.5))
 
     @property
     def noise(self):
@@ -129,6 +138,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             self.plot.ax.clear()
             self.plot.ax.plot(spectrum.mz, spectrum.intensity)
             self.plot.canvas.draw()
+            self.y_rescale(self.yLogCheckBox.isChecked())
 
     @state_node
     def addFormula(self):
@@ -244,7 +254,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             checkeds.append(param.selected)
             names.append(str(param.formula))
             if param.useable:
-                noise, lod = spectrum_func.getShownNoiseLODFromParam(
+                noise, lod = spectrum_func.getNoiseLODFromParam(
                     param.param, n_sigma)
                 noises.append(noise)
                 lods.append(lod)
@@ -302,19 +312,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
                 linewidth=1, color='b', label='noise')
         ax.legend(loc='upper right')
 
-        x_min = spectrum.mz[0]
-        x_max = spectrum.mz[-1]
-        ymax = np.polynomial.polynomial.polyval(
-            x_max, result.poly_coef) + info.general_setting.n_sigma * result.global_noise_std
-        if is_log:
-            ymin = np.polynomial.polynomial.polyval(
-                [x_min, x_max], result.poly_coef).min()
-            ymin *= 0.5
-            ymax *= 10
-        else:
-            ymin = 0
-            ymax *= 5
-        ax.set_ylim(ymin, ymax)
+        self.moveToGlobalNoise()
         plot.canvas.draw()
 
     @state_node
@@ -408,6 +406,136 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
         self.callback.emit((s,))
 
+    @state_node(withArgs=True)
+    def moveToTableClickedNoise(self, item: QtWidgets.QTableWidgetItem):
+        row = self.paramTableWidget.row(item)
+        info = self.noise.info
+        if info.current_spectrum is None:
+            return
+        if not info.general_setting.params_inited:
+            return
+
+        setting = info.general_setting
+        result = info.general_result
+
+        plot = self.plot
+        if row == 0:  # noise
+            self.moveToGlobalNoise()
+        else:
+            param = setting.noise_formulas[row - 1]
+
+            point = param.formula.mass()
+            x_min = point - param.delta * 2
+            x_max = point + param.delta * 2
+            xrange = [x_min, x_max]
+            global_range = polyval(xrange, result.poly_coef)
+            if param.useable:
+                y_min = global_range.min()
+                _, y_max = spectrum_func.getNoiseLODFromParam(
+                    param.param, setting.n_sigma)
+            else:  # global noise
+                y_min = global_range.min()
+                y_max = global_range.max() + setting.n_sigma * result.global_noise_std
+
+            plot.ax.set_xlim(x_min, x_max)
+            plot.ax.set_ylim(y_min, y_max)
+        plot.canvas.draw()
+
+    def moveToGlobalNoise(self):
+        is_log = self.yLogCheckBox.isChecked()
+        ax = self.plot.ax
+
+        info = self.noise.info
+        spectrum = info.current_spectrum
+        result = info.general_result
+
+        x_min = spectrum.mz[0]
+        x_max = spectrum.mz[-1]
+        yrange = polyval([x_min, x_max], result.poly_coef)
+        y_min = yrange.min()
+        y_max = yrange.max() + info.general_setting.n_sigma * result.global_noise_std
+        if is_log:
+            y_min *= 0.5
+            y_max *= 10
+        else:
+            y_min = 0
+            y_max *= 5
+        ax.set_xlim(x_min, x_max)
+        ax.set_ylim(y_min, y_max)
+
+    @state_node
+    def scaleToSpectrum(self):
+        info = self.noise.info
+        if info.current_spectrum is None:
+            return
+
+        is_log = self.yLogCheckBox.isChecked()
+
+        spectrum = info.current_spectrum
+        self.plot.ax.set_xlim(spectrum.mz.min(), spectrum.mz.max())
+
+        self.y_rescale(is_log)
+
+        self.plot.canvas.draw()
+
+    @state_node(withArgs=True)
+    def yLogToggle(self, is_log: bool):
+        ax = self.plot.ax
+        ax.set_yscale('log' if is_log else 'linear')
+
+        if not is_log:
+            ax.yaxis.set_major_formatter(
+                matplotlib.ticker.FormatStrFormatter(r"%.1e"))
+
+        if self.noise.info.current_spectrum is None:
+            return
+
+        self.y_rescale(is_log)
+        self.plot.canvas.draw()
+
+    @state_node
+    def y_rescale_click(self):
+        is_log = self.yLogCheckBox.isChecked()
+        self.y_rescale(is_log)
+        self.plot.canvas.draw()
+
+    def y_rescale(self, is_log: bool):
+        plot = self.plot
+        ax = plot.ax
+        spectrum = self.noise.info.current_spectrum
+
+        x_min, x_max = ax.get_xlim()
+        id_x_min, id_x_max = binary_search.indexBetween_np(
+            spectrum.mz, (x_min, x_max))
+
+        y_max = spectrum.intensity[id_x_min:id_x_max].max()
+
+        if is_log:
+            info = self.noise.info
+            if info.general_setting.params_inited:
+                y_min = polyval(
+                    [x_min, x_max], info.general_result.poly_coef).min() / 10
+            else:
+                y_min = 0.1
+            y_max *= 2
+        else:
+            dy = 0.05 * y_max
+            y_min = -dy
+            y_max = y_max + dy
+
+        ax.set_ylim(y_min, y_max)
+
+    @state_node(withArgs=True)
+    def y_times(self, times: float):
+        plot = self.plot
+        ax = plot.ax
+        y_min, y_max = ax.get_ylim()
+        y_max *= times
+        if not self.yLogCheckBox.isChecked():
+            y_min = - 0.025 * y_max
+        ax.set_ylim(y_min, y_max)
+        plot.canvas.draw()
+
 
 class ReadFromFile(MultiProcess):
     @staticmethod
@@ -418,7 +546,7 @@ class ReadFromFile(MultiProcess):
                             start_time=info.start_time, end_time=info.end_time)
         return spectrum
 
-    @ staticmethod
+    @staticmethod
     def read(file: WorkSpace, **kwargs) -> Generator:
         for info in file.file_tab.info.spectrum_infos:
             yield info, info.get_spectrum_from_info(with_minutes=True)
@@ -427,7 +555,7 @@ class ReadFromFile(MultiProcess):
     def read_len(file: WorkSpace, **kwargs) -> int:
         return len(file.file_tab.info.spectrum_infos)
 
-    @ staticmethod
+    @staticmethod
     def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
         tmp = StructureListView[Spectrum](file._obj, "tmp", True)
         tmp.h5_extend(rets)
@@ -437,7 +565,7 @@ class ReadFromFile(MultiProcess):
             del file[h5path]
         file._obj.move(tmp.h5_path, h5path)
 
-    @ staticmethod
+    @staticmethod
     def exception(file, **kwargs):
         if "tmp" in file:
             del file["tmp"]

@@ -97,7 +97,7 @@ def updateGlobalParam(DoubleArray poly_coef, double n_sigma, double noise, doubl
     cdef double std = (lod - noise) / n_sigma
     return poly_coef, std
 
-def getShownNoiseLODFromParam(DoubleArray2D params, double n_sigma):
+def getNoiseLODFromParam(DoubleArray2D params, double n_sigma):
     cdef double noise = params[0,0] / (math.sqrt(2*math.pi)*params[0,2])
     cdef double lod = noise + n_sigma*params[1,0]/(math.sqrt(2*math.pi)*params[1,2])
     return noise, lod

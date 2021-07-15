@@ -43,7 +43,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         self.showSelectedPushButton.clicked.connect(self.showSelected)
         self.showAllPushButton.clicked.connect(self.showAllInfoClicked)
 
-    @ property
+    @property
     def calibration(self):
         return self.manager.workspace.calibration_tab
 
@@ -67,12 +67,12 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             table.setItem(
                 index, 1, QtWidgets.QTableWidgetItem(format(ion.formula.mass(), ".4f")))
 
-    @ state_node
+    @state_node
     def addIon(self):
         self.calibration.info.add_ions(self.ionLineEdit.text().split(','))
         self.showIons()
 
-    @ state_node
+    @state_node
     def removeIon(self):
         indexes = get_tablewidget_selected_row(self.tableWidget)
         ions = self.calibration.info.ions
@@ -80,7 +80,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             ions.pop(index)
         self.showIons()
 
-    @ state_node
+    @state_node
     def calcInfo(self):
         workspace = self.manager.workspace
         calibration_tab = self.calibration
