@@ -430,7 +430,7 @@
         <string>&amp;All file(s)</string>
        </property>
        <property name="shortcut">
-        <string>Alt+A</string>
+        <string>Return</string>
        </property>
       </widget>
      </item>

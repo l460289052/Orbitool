@@ -248,5 +248,5 @@ class Ui_Form(object):
         self.selectedPushButton.setText(_translate("Form", "&Selected file(s)"))
         self.selectedPushButton.setShortcut(_translate("Form", "Alt+S"))
         self.allPushButton.setText(_translate("Form", "&All file(s)"))
-        self.allPushButton.setShortcut(_translate("Form", "Alt+A"))
+        self.allPushButton.setShortcut(_translate("Form", "Return"))
 

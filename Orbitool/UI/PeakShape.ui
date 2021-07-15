@@ -43,7 +43,10 @@
      <item>
       <widget class="QPushButton" name="showPushButton">
        <property name="text">
-        <string>show</string>
+        <string>&amp;show</string>
+       </property>
+       <property name="shortcut">
+        <string>Alt+S</string>
        </property>
       </widget>
      </item>
@@ -64,7 +67,10 @@
      <item>
       <widget class="QPushButton" name="exportPushButton">
        <property name="text">
-        <string>Export peak shape info</string>
+        <string>&amp;Export peak shape info</string>
+       </property>
+       <property name="shortcut">
+        <string>Alt+E</string>
        </property>
       </widget>
      </item>
@@ -86,12 +92,18 @@
        <property name="text">
         <string>Cancel removal</string>
        </property>
+       <property name="shortcut">
+        <string>Ctrl+Z</string>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="finishPushButton">
        <property name="text">
         <string>Finish and continue</string>
+       </property>
+       <property name="shortcut">
+        <string>Return</string>
        </property>
       </widget>
      </item>

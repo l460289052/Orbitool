@@ -45,7 +45,10 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Export all info</string>
+      <string>&amp;Export all info</string>
+     </property>
+     <property name="shortcut">
+      <string>Alt+E</string>
      </property>
     </widget>
    </item>

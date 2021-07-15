@@ -59,8 +59,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>344</width>
-            <height>325</height>
+            <width>376</width>
+            <height>344</height>
            </rect>
           </property>
           <attribute name="label">
@@ -224,8 +224,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>344</width>
-            <height>325</height>
+            <width>376</width>
+            <height>344</height>
            </rect>
           </property>
           <attribute name="label">
@@ -268,7 +268,7 @@
            <item>
             <widget class="QPushButton" name="recalculateNoisePushButton">
              <property name="text">
-              <string>Recalulate noise</string>
+              <string>&amp;Recalulate noise</string>
              </property>
              <property name="shortcut">
               <string>Alt+R</string>
@@ -338,12 +338,18 @@
            <property name="text">
             <string>denoise</string>
            </property>
+           <property name="shortcut">
+            <string>Return</string>
+           </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="skipPushButton">
            <property name="text">
-            <string>skip</string>
+            <string>ski&amp;p</string>
+           </property>
+           <property name="shortcut">
+            <string>Alt+P</string>
            </property>
           </widget>
          </item>

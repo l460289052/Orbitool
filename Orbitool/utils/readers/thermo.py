@@ -175,7 +175,7 @@ class File:
         numRange = (start, end)
         return mz, intensity
 
-    def bothToNumRange(self, timeRange: Tuple[timedelta, timedelta], numRange: Tuple[int, int]) -> Tuple(int, int):
+    def bothToNumRange(self, timeRange: Tuple[timedelta, timedelta], numRange: Tuple[int, int]) -> Tuple[int, int]:
         if timeRange is not None and numRange is None:
             return self.timeRange2NumRange(timeRange)
         elif numRange is not None and timeRange is None:

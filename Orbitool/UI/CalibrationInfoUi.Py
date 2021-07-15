@@ -43,5 +43,6 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.exportPushButton.setText(_translate("Form", "Export all info"))
+        self.exportPushButton.setText(_translate("Form", "&Export all info"))
+        self.exportPushButton.setShortcut(_translate("Form", "Alt+E"))
 

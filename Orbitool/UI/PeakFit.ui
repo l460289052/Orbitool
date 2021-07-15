@@ -21,6 +21,9 @@
        <property name="text">
         <string>show selected spectrum</string>
        </property>
+       <property name="shortcut">
+        <string>Alt+O</string>
+       </property>
       </widget>
      </item>
      <item>
@@ -34,28 +37,40 @@
           <item row="0" column="1">
            <widget class="QPushButton" name="filterUnselectedPushButton">
             <property name="text">
-             <string>unselect</string>
+             <string>&amp;unselect</string>
+            </property>
+            <property name="shortcut">
+             <string>Alt+U</string>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
            <widget class="QPushButton" name="filterSelectedPushButton">
             <property name="text">
-             <string>selected</string>
+             <string>&amp;selected</string>
+            </property>
+            <property name="shortcut">
+             <string>Alt+S</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
            <widget class="QPushButton" name="filterFormulaWithPushButton">
             <property name="text">
-             <string>with formula</string>
+             <string>with &amp;formula</string>
+            </property>
+            <property name="shortcut">
+             <string>Alt+F</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
            <widget class="QPushButton" name="filterFormulaWithoutPushButton">
             <property name="text">
-             <string>without</string>
+             <string>&amp;without</string>
+            </property>
+            <property name="shortcut">
+             <string>Alt+W</string>
             </property>
            </widget>
           </item>
@@ -64,7 +79,10 @@
         <item>
          <widget class="QPushButton" name="filterClearPushButton">
           <property name="text">
-           <string>clear filter</string>
+           <string>&amp;clear filter</string>
+          </property>
+          <property name="shortcut">
+           <string>Alt+C</string>
           </property>
          </widget>
         </item>
@@ -124,7 +142,10 @@
             <item>
              <widget class="QPushButton" name="actionFit_MassListPushButton">
               <property name="text">
-               <string>mass list</string>
+               <string>&amp;mass list</string>
+              </property>
+              <property name="shortcut">
+               <string>Alt+M</string>
               </property>
              </widget>
             </item>
@@ -135,14 +156,20 @@
         <item>
          <widget class="QPushButton" name="actionRmPushButton">
           <property name="text">
-           <string>remove</string>
+           <string>&amp;remove</string>
+          </property>
+          <property name="shortcut">
+           <string>Alt+R</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="actionAddToMassListPushButton">
           <property name="text">
-           <string>add to mass list</string>
+           <string>&amp;add to mass list</string>
+          </property>
+          <property name="shortcut">
+           <string>Alt+A</string>
           </property>
          </widget>
         </item>
