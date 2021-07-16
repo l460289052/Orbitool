@@ -46,6 +46,12 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
         self.savePushButton.clicked.connect(self.save)
         self.closePushButton.clicked.connect(self.close)
 
+        self.sumCheckBox.clicked.connect(self.replotPeak)
+        self.idealCheckBox.clicked.connect(self.replotPeak)
+        self.legendCheckBox.clicked.connect(self.replotPeak)
+        self.originCheckBox.clicked.connect(self.replotPeak)
+        self.residualCheckBox.clicked.connect(self.replotPeak)
+
     @property
     def peakfit_info(self):
         return self.manager.workspace.peakfit_tab.info
@@ -167,6 +173,10 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
 
         ax.set_xlim(origin_peak.mz.min(), origin_peak.mz.max())
         self.plot.canvas.draw()
+
+    @state_node
+    def replotPeak(self):
+        self.plotPeak()
 
     @state_node
     def refit(self):
