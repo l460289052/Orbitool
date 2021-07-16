@@ -178,7 +178,6 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
 
         calc = self.manager.workspace.formula_docker.info.restricted_calc
         for peak in fittedpeaks:
-            peak.original_index = self.original_index
             peak.formulas = calc.get(peak.peak_position)
             peak.formulas = formula_func.correct(peak, info.peaks)
 

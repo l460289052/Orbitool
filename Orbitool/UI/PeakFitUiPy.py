@@ -2,9 +2,11 @@ from itertools import chain
 from typing import Callable, List, Optional, Tuple, cast
 
 from PyQt5 import QtCore, QtWidgets
+import matplotlib.ticker
+import matplotlib.text
+import numpy as np
 
-from ..functions import formula as formula_func
-from ..functions import peakfit as peakfit_func
+from ..functions import formula as formula_func, peakfit as peakfit_func, binary_search
 from ..functions.peakfit import masslist as masslist_func
 from ..functions import spectrum as spectrum_func
 from ..structures.spectrum import FittedPeak, Peak, Spectrum, MassListItem
@@ -16,6 +18,7 @@ from .manager import Manager, MultiProcess, state_node
 class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     show_spectrum = QtCore.pyqtSignal(Spectrum)
     show_peaklist = QtCore.pyqtSignal()
+    peaklist_left = QtCore.pyqtSignal(float)
     show_masslist = QtCore.pyqtSignal()
     filter_selected = QtCore.pyqtSignal(bool)  # selected or unselected
 
@@ -25,6 +28,12 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.setupUi(self)
         manager.inited_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
+
+        self.timer = QtCore.QTimer(self)
+        self.timer.setInterval(1000)
+        self.timer.timeout.connect(self.timer_timeout)
+        self.timer.start()
+        self.plot_lim: Tuple[Tuple[int, int], Tuple[int, int]] = None
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -46,6 +55,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         self.plot = Plot(self.widget)
 
+        self.yLogcheckBox.toggled.connect(self.ylog_toggle)
+        self.scalePushButton.clicked.connect(self.rescale_clicked)
         self.previousShortCut = QtWidgets.QShortcut("Left", self)
         self.previousShortCut.activated.connect(lambda: self.moveRight(-1))
         self.nextShortCut = QtWidgets.QShortcut("Right", self)
@@ -135,11 +146,17 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     def plot_peaks(self):
         info = self.peakfit.info
         plot = self.plot
+        is_log = self.yLogcheckBox.isChecked()
         ax = plot.ax
         ax.clear()
 
         ax.axhline(color='k', linewidth=.5)
         ax.yaxis.set_tick_params(rotation=45)
+
+        ax.set_yscale('log' if is_log else 'linear')
+        if is_log:
+            ax.yaxis.set_major_formatter(
+                matplotlib.ticker.FormatStrFormatter(r"%.1e"))
 
         ax.plot(info.spectrum.mz, info.spectrum.intensity,
                 color='k', linewidth=1, label="spectrum")
@@ -152,7 +169,19 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         ll, lr = ax.get_xlim()
         ax.set_xlim(mi if ll > mi else ll, ma if lr < ma else lr)
 
+        self.rescale()
+
         plot.canvas.draw()
+
+    @state_node(withArgs=True)
+    def ylog_toggle(self, is_log):
+        ax = self.plot.ax
+        ax.set_yscale('log' if is_log else 'linear')
+        if not is_log:
+            ax.yaxis.set_major_formatter(
+                matplotlib.ticker.FormatStrFormatter(r"%.1e"))
+        self.rescale()
+        self.plot.canvas.draw()
 
     @state_node(withArgs=True)
     def moveRight(self, step):
@@ -170,6 +199,83 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
             y_min = - 0.025 * y_max
         plot.ax.set_ylim(y_min, y_max)
         plot.canvas.draw()
+
+    @state_node
+    def rescale_clicked(self):
+        self.rescale()
+        self.plot.canvas.draw()
+
+    def rescale(self):
+        spectrum = self.peakfit.info.spectrum
+        if spectrum is None:
+            return
+
+        plot = self.plot
+        x_min, x_max = plot.ax.get_xlim()
+        id_min, id_max = binary_search.indexBetween_np(
+            spectrum.mz, (x_min, x_max))
+        if id_min >= id_max:
+            return
+        y_max = spectrum.intensity[id_min:id_max].max()
+
+        if self.yLogcheckBox.isChecked():
+            y_min = .1
+            y_max *= 2
+        else:
+            dy = 0.05 * y_max
+            y_min = -dy
+            y_max += dy
+
+        plot.ax.set_xlim(x_min, x_max)
+        plot.ax.set_ylim(y_min, y_max)
+
+    def timer_timeout(self):
+        ax = self.plot.ax
+        now_lim = (ax.get_xlim(), ax.get_ylim())
+        if self.plot_lim is not None and abs(np.array(now_lim) / np.array(self.plot_lim) - 1).max() < 1e-3:
+            return
+        self.plot_lim = now_lim
+        (x_min, x_max), (y_min, y_max) = now_lim
+
+        raw_peaks = self.peakfit.info.raw_peaks
+        original_indexes = self.peakfit.info.original_indexes
+        peaks = self.peakfit.info.peaks
+        indexes = self.peakfit.info.shown_indexes
+
+        s = binary_search.indexBetween(
+            indexes, (x_min, x_max), method=lambda indexes, ind: peaks[indexes[ind]].peak_position)
+        self.peaklist_left.emit(s.start)
+        indexes = indexes[s]
+        index_peaks_pair = [(index, peak) for index in indexes if y_min < (
+            peak := peaks[index]).peak_intensity < y_max]
+        args = np.array([peak.peak_intensity for _, peak in index_peaks_pair],
+                        dtype=float).argsort()[::-1]
+
+        anns = [child for child in ax.get_children() if isinstance(
+            child, matplotlib.text.Annotation)]
+        while anns:
+            ann = anns.pop()
+            ann.remove()
+            del ann
+
+        cnt = 0
+        for arg in args:
+            index, peak = index_peaks_pair[arg]
+            if len(peak.formulas) == 0:
+                continue
+            raw_peak = raw_peaks[original_indexes[index]]
+            ind = binary_search.indexNearest_np(
+                raw_peak.mz, peak.peak_position)
+            ax.annotate(
+                ','.join([str(f) for f in peak.formulas]),
+                xy=(raw_peak.mz[ind], raw_peak.intensity[ind]),
+                xytext=(peak.peak_position, peak.peak_intensity),
+                arrowprops={"arrowstyle": "-", "alpha": .5})
+
+            cnt += 1
+            if cnt == 5:
+                break
+        self.plot.canvas.draw()
 
     @state_node
     def filterClear(self):

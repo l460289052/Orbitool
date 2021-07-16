@@ -19,7 +19,6 @@ from .utils import get_tablewidget_selected_row
 
 
 class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
-    calcInfoFinished = QtCore.pyqtSignal()
     callback = QtCore.pyqtSignal()
 
     def __init__(self, manager: Manager) -> None:
@@ -152,8 +151,6 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
                 ret[path] = func
             return ret
         info.poly_funcs = yield generate_func_from_calibrator, "calculate function from calibrator"
-
-        self.calcInfoFinished.emit()
 
     @state_node
     def showSpectrum(self):

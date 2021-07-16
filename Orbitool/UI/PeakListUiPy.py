@@ -75,6 +75,10 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
             for index in reversed(selectedindex):
                 indexes.pop(index)
 
+    def scrollToIndex(self, index):
+        if self.autoScrollCheckBox.isChecked():
+            self.tableWidget.verticalScrollBar().setSliderPosition(index)
+
     @state_node(withArgs=True)
     def openPeakFloatWin(self, item: QtWidgets.QTableWidgetItem):
         row = item.row()

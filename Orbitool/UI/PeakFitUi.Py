@@ -129,6 +129,6 @@ class Ui_Form(object):
         self.actionRmPushButton.setShortcut(_translate("Form", "Alt+R"))
         self.actionAddToMassListPushButton.setText(_translate("Form", "&add to mass list"))
         self.actionAddToMassListPushButton.setShortcut(_translate("Form", "Alt+A"))
-        self.yLogcheckBox.setText(_translate("Form", "CheckBox"))
+        self.yLogcheckBox.setText(_translate("Form", "y-log scale"))
         self.scalePushButton.setText(_translate("Form", "autoscale y axis"))
 

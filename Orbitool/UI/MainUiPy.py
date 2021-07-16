@@ -50,8 +50,6 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
         self.calibrationTab = self.add_tab(
             CalibrationUiPy.Widget(manager), "Calibration")
-        self.calibrationTab.calcInfoFinished.connect(
-            self.calibration_info_finish)
         self.calibrationTab.callback.connect(
             self.calibration_finish)
 
@@ -95,6 +93,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             "Peak List", self.peakList, self.spectrumDw)
         self.peakList.peak_refit_finish.connect(self.peakFitTab.calc_residual)
         self.peakFitTab.filter_selected.connect(self.peakList.filterSelected)
+        self.peakFitTab.peaklist_left.connect(self.peakList.scrollToIndex)
 
         self.timeseries = TimeseriesUiPy.Widget(manager)
         self.timeseriesDw = self.add_dockerwidget(
@@ -235,10 +234,6 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     @state_node(mode='x')
     def peak_shape_tab_finish(self):
         self.tabWidget.setCurrentWidget(self.calibrationTab)
-
-    @state_node(mode='x')
-    def calibration_info_finish(self):
-        self.calibrationInfo.showAllInfo()
 
     @state_node(mode='x')
     def calibration_finish(self):

@@ -195,7 +195,7 @@
        <item>
         <widget class="QCheckBox" name="yLogcheckBox">
          <property name="text">
-          <string>CheckBox</string>
+          <string>y-log scale</string>
          </property>
         </widget>
        </item>

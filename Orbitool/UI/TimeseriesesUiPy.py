@@ -60,7 +60,6 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
             self.massListRadioButton,
             self.selectedMassListRadioButton,
             self.rtolDoubleSpinBox,
-            self.exportWithPpmCheckBox,
             self.legendsCheckBox,
             self.logScaleCheckBox])
 
