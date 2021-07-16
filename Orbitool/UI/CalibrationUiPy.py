@@ -39,7 +39,9 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         self.addIonToolButton.clicked.connect(self.addIon)
         self.delIonToolButton.clicked.connect(self.removeIon)
         self.calcInfoPushButton.clicked.connect(self.calcInfo)
-        self.finishPushButton.clicked.connect(self.calibrate)
+        self.finishPushButton.clicked.connect(
+            lambda: self.calibrate(skip=False))
+        self.skipPushButton.clicked.connect(lambda: self.calibrate(skip=True))
 
         self.showSpectrumPushButton.clicked.connect(self.showSpectrum)
         self.showSelectedPushButton.clicked.connect(self.showSelected)
@@ -346,15 +348,18 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         ax.autoscale(True, True, True)
         plot.canvas.draw()
 
-    @state_node
-    def calibrate(self):
+    @state_node(withArgs=True)
+    def calibrate(self, skip: bool):
         workspace = self.manager.workspace
         noise_info = workspace.noise_tab.info
+        noise_skip = noise_info.skip
         setting = noise_info.general_setting
         result = noise_info.general_result
         dependent = setting.mass_dependent
         params, points, deltas = setting.get_params(not dependent)
         func_kwargs = {
+            "noise_skip": noise_skip,
+            "calibrate_skip": skip,
             "quantile": setting.quantile,
             "mass_dependent": setting.mass_dependent,
             "n_sigma": setting.n_sigma,
@@ -366,7 +371,14 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             "poly_coef": result.poly_coef}
         calibrate_merge = CalibrateMergeDenoise(
             self.manager.workspace, func_kwargs=func_kwargs)
-        yield calibrate_merge, "calibrate"
+        msg = []
+        if not skip:
+            msg.append("calibrate")
+        msg.append("merge")
+        if not noise_skip:
+            msg.append("denoise")
+        msg = ', '.join(msg)
+        yield calibrate_merge, msg
         self.callback.emit()
 
 
@@ -410,11 +422,11 @@ class CalibrateMergeDenoise(MultiProcess):
         funcs = file.calibration_tab.info.poly_funcs
         for info, spectrum in zip(file_tab.info.spectrum_infos, file_tab.raw_spectra):
             if info.average_index > 0:
-                batch.append((spectrum, funcs[spectrum.path]))
+                batch.append((spectrum, funcs.get(spectrum.path, None)))
             else:
                 if batch:
                     yield batch
-                batch = [(spectrum, funcs[spectrum.path])]
+                batch = [(spectrum, funcs.get(spectrum.path, None))]
         yield batch
 
     @staticmethod
@@ -427,6 +439,7 @@ class CalibrateMergeDenoise(MultiProcess):
 
     @staticmethod
     def func(data: List[Tuple[Spectrum, PolynomialRegressionFunc]],
+             noise_skip: bool, calibrate_skip: bool,
              quantile: float, mass_dependent: bool, n_sigma: bool,
              dependent: bool, points: np.ndarray, deltas: np.ndarray,
              params: np.ndarray, subtract: bool, poly_coef: np.ndarray) -> Spectrum:
@@ -435,7 +448,8 @@ class CalibrateMergeDenoise(MultiProcess):
         start_times = []
         end_times = []
         for spectrum, func in data:
-            spectrum.mz = func.predictMz(spectrum.mz)
+            if not calibrate_skip:
+                spectrum.mz = func.predictMz(spectrum.mz)
             spectra.append((spectrum.mz, spectrum.intensity,
                             (spectrum.end_time - spectrum.start_time).total_seconds()))
             paths.add(spectrum.path)
@@ -445,14 +459,15 @@ class CalibrateMergeDenoise(MultiProcess):
         path = paths.pop() if len(paths) == 1 else ""
         mz, intensity = spectrum_func.averageSpectra(spectra, drop_input=True)
 
-        if not dependent:
-            poly_coef, _, slt, params = spectrum_func.getNoiseParams(
-                mz, intensity, quantile, mass_dependent, points, deltas)
-            points = points[slt]
-            deltas = deltas[slt]
+        if not noise_skip:
+            if not dependent:
+                poly_coef, _, slt, params = spectrum_func.getNoiseParams(
+                    mz, intensity, quantile, mass_dependent, points, deltas)
+                points = points[slt]
+                deltas = deltas[slt]
 
-        mz, intensity = spectrum_func.denoiseWithParams(
-            mz, intensity, poly_coef, params, points, deltas, n_sigma, subtract)
+            mz, intensity = spectrum_func.denoiseWithParams(
+                mz, intensity, poly_coef, params, points, deltas, n_sigma, subtract)
 
         start_time = min(start_times)
         end_time = max(end_times)

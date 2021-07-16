@@ -374,7 +374,7 @@
          <item>
           <widget class="QPushButton" name="spectrumPushButton">
            <property name="text">
-            <string>Spectrum</string>
+            <string>Scale to spectrum</string>
            </property>
           </widget>
          </item>

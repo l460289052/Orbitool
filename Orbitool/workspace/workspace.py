@@ -26,7 +26,7 @@ class WorkspaceInfo(BaseStructure):
     h5_type = "workspace info"
 
     version: str = "2.0.0"
-    hasRead: bool = False
+    orbitool_file_version:str = "2.0.0"
 
 
 class WorkSpace(H5File):

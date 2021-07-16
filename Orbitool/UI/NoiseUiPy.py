@@ -50,6 +50,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             self.exportDenoise)
         self.exportNoisePeaksPushButton.clicked.connect(self.exportNoisePeaks)
         self.denoisePushButton.clicked.connect(self.denoise)
+        self.skipPushButton.clicked.connect(self.skip)
 
         self.paramTableWidget.itemDoubleClicked.connect(
             self.moveToTableClickedNoise)
@@ -97,6 +98,9 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
     @state_node
     def showSelectedSpectrum(self):
+        yield from self.readSelectedSpectrum()
+
+    def readSelectedSpectrum(self):
         workspace = self.manager.workspace
         index = self.manager.fetch_func("spectra list select")()
         info_list = workspace.file_tab.info.spectrum_infos
@@ -403,8 +407,19 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
         setting.subtract = subtract
         setting.spectrum_dependent = self.dependentCheckBox.isChecked()
+        info.skip = False
 
         self.callback.emit((s,))
+
+    @state_node
+    def skip(self):
+        yield ReadFromFile(self.manager.workspace), "read and average all spectra"
+        self.noise.info.skip = True
+        if self.noise.info.current_spectrum is not None:
+            self.callback.emit((self.noise.info.current_spectrum,))
+        else:
+            yield from self.readSelectedSpectrum()
+            self.callback.emit((self.noise.info.current_spectrum,))
 
     @state_node(withArgs=True)
     def moveToTableClickedNoise(self, item: QtWidgets.QTableWidgetItem):

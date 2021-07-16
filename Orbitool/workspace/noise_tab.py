@@ -72,6 +72,7 @@ class NoiseGeneralResult(BaseStructure):
 class NoiseTabInfo(BaseStructure):
     h5_type = "noise tab"
 
+    skip: bool = False
     current_spectrum: Optional[Spectrum] = None
 
     general_setting: NoiseGeneralSetting = Field(

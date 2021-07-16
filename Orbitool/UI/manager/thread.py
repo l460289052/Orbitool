@@ -75,7 +75,6 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
             write_thread = Thread(
                 self.write, (file, iter_queue()), self.write_kwargs)
             write_thread.start()
-            limit_parallel = int(multi_cores * 1.3)
 
             with Pool(multi_cores) as pool:
                 def abort():
@@ -83,13 +82,19 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                     pool.terminate()
                     self.exception(file)
 
-                def write_once():
-                    ret = results.popleft()
+                def wait_to_ready(force: bool):
+                    ret = results[0]
                     while not ret.ready():
-                        sleep(0.01)
+                        if not force:
+                            not_ready_num = len(
+                                [r for r in results if not r.ready()])
+                            # could put more task
+                            if not_ready_num < multi_cores and len(results) < 2.5 * multi_cores:
+                                return
+                        sleep(.1)
                         if self.aborted:
                             return abort()
-                    ret = ret.get()
+                    ret = results.popleft().get()
                     if isinstance(ret, Exception):
                         self.exception(file)
                         self.finished.emit(
@@ -98,21 +103,18 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                         return
                     queue.put(ret)
 
-                for i, input_data in self.manager.tqdm(enumerate(self.read(file, **self.read_kwargs)), length=length, msg="read"):
+                for i, input_data in self.manager.tqdm(
+                        enumerate(self.read(file, **self.read_kwargs)),
+                        length=length, msg="read"):
 
                     if self.aborted:
                         return abort()
                     results.append(pool.apply_async(
                         self.process, (i, self.func, input_data, self.func_kwargs)))
-                    if i >= limit_parallel:
-                        write_once()
+                    wait_to_ready(False)
 
-                if i < limit_parallel:
-                    i = limit_parallel
                 while results:
-                    i += 1
-
-                    write_once()
+                    wait_to_ready(True)
 
                 queue.put(None)
 

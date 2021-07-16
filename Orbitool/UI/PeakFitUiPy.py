@@ -436,3 +436,7 @@ class SplitPeaks(MultiProcess):
                 peaks.append(peak)
                 original_indexes.append(index)
         return split_num, original_indexes, peaks
+
+    @staticmethod
+    def exception(file, **kwargs):
+        pass

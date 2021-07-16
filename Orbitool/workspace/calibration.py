@@ -17,6 +17,8 @@ def default_ions():
 class CalibratorInfo(BaseStructure):
     h5_type = "calibrator tab"
 
+    skip: bool = False
+
     ions: List[Ion] = Field(default_factory=default_ions)
     calibrators: Dict[str, Calibrator] = Field(default_factory=dict)
     poly_funcs: Dict[str, PolynomialRegressionFunc] = Field(

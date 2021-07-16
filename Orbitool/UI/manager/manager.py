@@ -39,7 +39,10 @@ class TQDM(Generic[T]):
                 minute = int(passed_time.total_seconds() / 60)
                 second = format(passed_time.total_seconds() % 60, '.2f')
                 text = f"{self.msg} {self.now} {minute}:{second} passed"
-                percent = .9
+                if self.length == self.now:
+                    percent = 100
+                else:
+                    percent = 70
             self.callback_func(percent, text)
             self.last_show_time = now
 
