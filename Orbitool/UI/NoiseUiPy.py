@@ -555,7 +555,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 class ReadFromFile(MultiProcess):
     @staticmethod
     def func(data: Tuple[FileSpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
-        info, (mz, intensity, time) = data
+        info, (mz, intensity) = data
         mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
         spectrum = Spectrum(path=info.path, mz=mz, intensity=intensity,
                             start_time=info.start_time, end_time=info.end_time)
@@ -564,7 +564,9 @@ class ReadFromFile(MultiProcess):
     @staticmethod
     def read(file: WorkSpace, **kwargs) -> Generator:
         for info in file.file_tab.info.spectrum_infos:
-            yield info, info.get_spectrum_from_info(with_minutes=True)
+            data = info.get_spectrum_from_info()
+            if data is not None:
+                yield info, data
 
     @staticmethod
     def read_len(file: WorkSpace, **kwargs) -> int:

@@ -14,9 +14,6 @@ class Ui_Form(object):
         Form.resize(284, 338)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.checkBox = QtWidgets.QCheckBox(Form)
-        self.checkBox.setObjectName("checkBox")
-        self.verticalLayout.addWidget(self.checkBox)
         self.tableWidget = QtWidgets.QTableWidget(Form)
         self.tableWidget.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerItem)
         self.tableWidget.setHorizontalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
@@ -42,7 +39,6 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.checkBox.setText(_translate("Form", "scroll according to plot"))
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("Form", "mz"))
         item = self.tableWidget.horizontalHeaderItem(1)

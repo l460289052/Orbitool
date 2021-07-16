@@ -15,13 +15,6 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QCheckBox" name="checkBox">
-     <property name="text">
-      <string>scroll according to plot</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QTableWidget" name="tableWidget">
      <property name="verticalScrollMode">
       <enum>QAbstractItemView::ScrollPerItem</enum>

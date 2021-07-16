@@ -154,6 +154,8 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             return ret
         info.poly_funcs = yield generate_func_from_calibrator, "calculate function from calibrator"
 
+        self.showAllInfo()
+
     @state_node
     def showSpectrum(self):
         index = self.manager.fetch_func("spectra list select")()

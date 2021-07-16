@@ -254,7 +254,7 @@ class Ui_Form(object):
         self.denoisePushButton.setShortcut(_translate("Form", "Return"))
         self.skipPushButton.setText(_translate("Form", "ski&p"))
         self.skipPushButton.setShortcut(_translate("Form", "Alt+P"))
-        self.spectrumPushButton.setText(_translate("Form", "Spectrum"))
+        self.spectrumPushButton.setText(_translate("Form", "Scale to spectrum"))
         self.label_10.setText(_translate("Form", "y-lim"))
         self.yLogCheckBox.setText(_translate("Form", "log scale"))
         self.yAxisPushButton.setText(_translate("Form", "rescale"))

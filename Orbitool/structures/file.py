@@ -117,6 +117,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
 
     @classmethod
     def generate_infos_from_paths_by_number(cls, paths: List[Path], rtol, N: int, polarity, timeRange):
+        delta_time = timedelta(seconds=1)
 
         results: List[cls] = []
         left_index = N
@@ -125,11 +126,11 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
         info: cls = None
         for path, time in cls.spectrum_iter(paths, polarity, timeRange):
             if former_path == path and left_index:
-                info.end_time = time
+                info.end_time = time + delta_time
             else:
                 if not left_index:
                     average_index = 0
-                info = cls(start_time=time, end_time=time, path=path,
+                info = cls(start_time=time - delta_time, end_time=time + delta_time, path=path,
                            rtol=rtol, polarity=polarity, average_index=average_index)
                 results.append(info)
                 average_index += 1
@@ -154,6 +155,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
 
     @classmethod
     def generate_infos_from_paths(cls, paths: List[Path], rtol, polarity, timeRange):
+        delta_time = timedelta(seconds=1)
         info_list: List[cls] = []
         for path in paths:
             origin, realpath = path.path.split(':', 1)
@@ -163,7 +165,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
                 for i in range(*f.timeRange2NumRange((timeRange[0] - creationTime, timeRange[1] - creationTime))):
                     if f.getSpectrumPolarity(i) == polarity:
                         time = creationTime + f.getSpectrumRetentionTime(i)
-                        info = FileSpectrumInfo(path=path.path, start_time=time, end_time=time,
+                        info = FileSpectrumInfo(path=path.path, start_time=time - delta_time, end_time=time + delta_time,
                                                 rtol=rtol, polarity=polarity, average_index=0)
                         info_list.append(info)
         return info_list

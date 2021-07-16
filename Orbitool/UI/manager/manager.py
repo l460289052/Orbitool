@@ -4,7 +4,7 @@ from typing import Callable, Dict, Iterable, overload, TypeVar, Generic, Iterato
 import random
 
 
-from PyQt5.QtCore import QThread, pyqtSignal, QObject
+from PyQt5.QtCore import QThread, pyqtSignal, QObject, QTimer
 from PyQt5.QtWidgets import QTableWidget
 
 from ...workspace import WorkSpace

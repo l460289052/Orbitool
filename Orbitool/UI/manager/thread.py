@@ -83,6 +83,8 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                     self.exception(file)
 
                 def wait_to_ready(force: bool):
+                    if len(results) == 0:
+                        return
                     ret = results[0]
                     while not ret.ready():
                         if not force:
@@ -94,14 +96,15 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                         sleep(.1)
                         if self.aborted:
                             return abort()
-                    ret = results.popleft().get()
-                    if isinstance(ret, Exception):
-                        self.exception(file)
-                        self.finished.emit(
-                            (ret, (self.func, self.file)))
-                        queue.put(None)
-                        return
-                    queue.put(ret)
+                    while len(results) > 0 and results[0].ready():
+                        ret = results.popleft().get()
+                        if isinstance(ret, Exception):
+                            self.exception(file)
+                            self.finished.emit(
+                                (ret, (self.func, self.file)))
+                            queue.put(None)
+                            return
+                        queue.put(ret)
 
                 for i, input_data in self.manager.tqdm(
                         enumerate(self.read(file, **self.read_kwargs)),
