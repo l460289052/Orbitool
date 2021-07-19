@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
+import os
 import sys
 import multiprocessing
 import argparse
+
+os.environ["OPENBLAS_NUM_THREADS"] = '1' 
+os.environ["GOTO_NUM_THREADS"] = '1' 
+os.environ["OMP_NUM_THREADS"] = '1' 
 
 
 multiprocessing.set_start_method('spawn', True)

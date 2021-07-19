@@ -1,6 +1,11 @@
-# Orbitool Readme
 
 [TOC]
+
+# Requirements
+
+.Net Framework >= 4.5
+
+# Readme
 
 This tool can help you process with spectrum averaging, denoising, calibrating, peak fitting and generating time series.
 

@@ -54,7 +54,11 @@ else:
 
         @staticmethod
         def convert_from_h5(value: str):
-            return [Formula(s) for s in value.split(',') if s]
+            if isinstance(value, bytes):
+                value = value.decode()
+            return [Formula(s) for s in value.split(',') if s.strip()]
+
+
 
 
 class FittedPeak(Peak):

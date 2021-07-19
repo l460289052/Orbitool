@@ -3,6 +3,7 @@ from collections import deque
 from enum import Enum
 from multiprocessing import Pool
 from multiprocessing.pool import AsyncResult
+import os
 from queue import Queue
 from typing import List, Tuple, final, Deque, Iterable, Generator, TypeVar, Generic, Any
 
@@ -99,11 +100,9 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                     while len(results) > 0 and results[0].ready():
                         ret = results.popleft().get()
                         if isinstance(ret, Exception):
-                            self.exception(file)
                             self.finished.emit(
                                 (ret, (self.func, self.file)))
-                            queue.put(None)
-                            return
+                            return abort()
                         queue.put(ret)
 
                 for i, input_data in self.manager.tqdm(
