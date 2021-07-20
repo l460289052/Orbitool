@@ -32,7 +32,7 @@ logger.setLevel(logLevel)
 logger.addHandler(log_file_handler)
 
 
-multi_cores = cpu_count() 
+multi_cores = cpu_count()
 if multi_cores <= 0:
     multi_cores = 1
 
