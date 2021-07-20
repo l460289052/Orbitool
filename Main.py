@@ -26,14 +26,14 @@ try:
         args = parser.parse_args()
         config.DEBUG = args.debug
 
+        import matplotlib as mpl
+        mpl.rcParams['agg.path.chunksize'] = 10000
+
         from PyQt5 import QtWidgets
         app = QtWidgets.QApplication(sys.argv)
         app.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
 
         from Orbitool.UI import MainUiPy
-
-        if config.DEBUG:
-            QtWidgets.QMessageBox.information(None, 'info', 'DEBUG')
 
         MainWin = MainUiPy.Window(args.workspacefile)
         MainWin.show()

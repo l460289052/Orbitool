@@ -85,7 +85,7 @@ class Manager(QObject):
         pass
 
     @overload
-    def tqdm(self, iter: Iterable[T], msg: str = "", *, length: int = 0) -> TQDM[T]:
+    def tqdm(self, iter: Iterable[T], msg: str = "", *, length: int = 0, immediate=False) -> TQDM[T]:
         pass
 
     @overload
@@ -96,7 +96,7 @@ class Manager(QObject):
     def tqdm(self, *, msg: str = "") -> TQDM:
         pass
 
-    def tqdm(self, iter: Iterable = None, msg: str = "", *, length=None):
+    def tqdm(self, iter: Iterable = None, msg: str = "", *, length=None, immediate=False):
         if iter is not None:
             if length is None:
                 try:
@@ -106,6 +106,8 @@ class Manager(QObject):
         label = self.progress_cnt
         tqdm = TQDM((lambda percent, msg: self.tqdm_signal.emit(label, percent, msg)),
                     iter, length, msg)
+        if immediate:
+            tqdm.showMsg()
         self.progress_cnt += 1
         return tqdm
 

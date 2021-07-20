@@ -1,7 +1,7 @@
 import csv
 import math
 from copy import copy
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import matplotlib
 import matplotlib.animation
@@ -14,6 +14,7 @@ from PyQt5 import QtCore, QtWidgets
 from ..config import exportTimeFormat
 from ..functions import peakfit as peakfit_func
 from ..functions import spectrum as spectrum_func
+from ..structures.spectrum import FittedPeak
 from ..workspace import UiNameGetter, UiState
 from . import PeakShapeUi, component
 from .manager import Manager, Thread, state_node
@@ -94,11 +95,16 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
             peaks.sort(key=lambda peak: peak.maxIntensity, reverse=True)
             peaks = peaks[:max(1, min(peak_num, len(peaks)))]
 
-            peaks = list(
-                map(peakfit_func.normal_distribution.getNormalizedPeak, peaks))
-            manager = peakfit_func.PeaksManager(peaks)
+            norm_peaks: List[FittedPeak] = []
+            for peak in peaks:
+                try:
+                    norm_peaks.append(
+                        peakfit_func.normal_distribution.getNormalizedPeak(peak))
+                except:
+                    pass
+            manager = peakfit_func.PeaksManager(norm_peaks)
             func = peakfit_func.normal_distribution.NormalDistributionFunc.Factory_FromParams(
-                [peak.fitted_param for peak in peaks])
+                [peak.fitted_param for peak in norm_peaks])
             return manager, func
 
         info.peaks_manager, info.func = yield generate_peak_manager, "manage peaks"
@@ -141,6 +147,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
         lines = ax.plot(mzNorm, intensityNorm, color='black', linewidth=3,
                         label="Fit, Res = " + str(resolution))
         self.animation.norm_line = lines[-1]
+        ax.autoscale(True, "both", True)
         ax.legend()
 
     def mouseToggle(self, event: matplotlib.backend_bases.MouseEvent):

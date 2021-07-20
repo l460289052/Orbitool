@@ -112,6 +112,11 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             if now_ions == calculated_ions:
                 need_to_split = False
 
+            for spectrum_info in workspace.file_tab.info.spectrum_infos:
+                if spectrum_info.path not in info.calibrators:
+                    need_to_split = True
+                    break
+
         if need_to_split:  # read ions from spectrum
             path_time = {
                 path.path: path.createDatetime for path in workspace.file_tab.info.pathlist}
@@ -330,7 +335,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         table.setVerticalHeaderLabels(vlabels)
 
-        devitions = np.array(devitions)
+        devitions = np.array(devitions) * 1e6
 
         plot = self.plot
 
@@ -399,8 +404,11 @@ class SplitAndFitPeak(MultiProcess):
         for ion in ions:
             peak = fit_func.fetchNearestPeak(
                 data, ion, intensity_filter)
-            ions_peak.append(
-                (peak.peak_position, peak.peak_intensity))
+            if peak is not None:
+                ions_peak.append(
+                    (peak.peak_position, peak.peak_intensity))
+            else:
+                ions_peak.append((ion - 5, intensity_filter))
 
         return data.path, ions_peak
 

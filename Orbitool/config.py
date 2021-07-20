@@ -23,10 +23,10 @@ logPath = os.path.join(rootPath, 'log.txt')
 
 logLevel = "DEBUG" if DEBUG else "WARNING"
 
+formatter = logging.Formatter(
+    "\n%(asctime)s - %(filename)s - %(levelname)s \n %(message)s")
 log_file_handler = logging.FileHandler(logPath, encoding='utf-8')
-logging.root.handlers.clear()
-logging.basicConfig(
-    format="\n%(asctime)s - %(filename)s - %(levelname)s \n %(message)s")
+log_file_handler.setFormatter(formatter)
 logger = logging.getLogger("Orbitool")
 logger.setLevel(logLevel)
 logger.addHandler(log_file_handler)

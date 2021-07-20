@@ -35,10 +35,10 @@ cdef np.ndarray[bool, ndim=1] getGlobalMask(DoubleArray mass):
 
 cdef np.ndarray[bool, ndim=1] getMassPointMask(DoubleArray mass, double mass_point,
         int delta):
-    return np.abs(mass - np.round(mass_point)-bin_mid) < delta+bin_wid
+    return np.abs(mass - math.round(mass_point) - bin_mid) < delta + bin_wid
 
 cdef bool getMassPointMasked(double mass, double mass_point, int delta):
-    return math.fabs(mass - math.round(mass_point)-bin_mid)<delta+bin_wid
+    return math.fabs(mass - math.round(mass_point) - bin_mid) < delta+bin_wid
 
 cdef tuple getMassPointParams(DoubleArray mass, DoubleArray intensity,
         DoubleArray poly_coef, double global_std, double mass_point, double delta):
@@ -102,7 +102,7 @@ def getNoiseLODFromParam(DoubleArray2D params, double n_sigma):
     cdef double lod = noise + n_sigma*params[1,0]/(math.sqrt(2*math.pi)*params[1,2])
     return noise, lod
 
-def updateNoiseLODParam(DoubleArray params, double n_sigma, double noise, double lod):
+def updateNoiseLODParam(DoubleArray2D params, double n_sigma, double noise, double lod):
     params[0, 0] = noise * (math.sqrt(2*math.pi)*params[0,2])
     params[1, 0] = (lod-noise)*(math.sqrt(2*math.pi)*params[0,2]) / n_sigma
     return params
@@ -127,10 +127,14 @@ def getNoiseParams(DoubleArray mass, DoubleArray intensity, double quantile,
     intensity = intensity[1:-1][is_peak]
 
     global_mask = getGlobalMask(mass)
+
+    mass = mass[global_mask]
+    intensity = intensity[global_mask]
+
     cdef np.ndarray[bool, ndim=2] mass_masks = np.empty((mass_points.size, intensity.size), np.bool)
     cdef DoubleArray masked_mass, masked_intensity, poly_coef
     cdef double mass_point, std
-    other_mask = global_mask.copy()
+    other_mask = np.empty(intensity.size, np.bool)
     # generate mask
     cdef int i
     for i, mass_point in enumerate(mass_points):

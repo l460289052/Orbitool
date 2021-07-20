@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 
@@ -31,7 +31,7 @@ class BaseFunc:
     def splitPeak(self, peak: Peak, split_num=None, force=False) -> List[FittedPeak]:
         pass
 
-    def fetchNearestPeak(self, spectrum: Spectrum, point: float, intensity_filter: float, delta=5):
+    def fetchNearestPeak(self, spectrum: Spectrum, point: float, intensity_filter: float, delta=5) -> Optional[FittedPeak]:
         l, r = indexBetween_np(spectrum.mz, (point - delta, point + delta))
         mz = spectrum.mz[l:r]
         intensity = spectrum.intensity[l:r]
@@ -39,6 +39,8 @@ class BaseFunc:
         if intensity_filter > 0:
             peaks = [peak for peak in peaks if peak.maxIntensity >
                      intensity_filter]
+        if len(peaks) == 0:
+            return None
         index = indexNearest(peaks, point, method=get_peak_mz_min)
         if index > 0:
             peaks = [peaks[index - 1], peaks[index]]
@@ -61,6 +63,6 @@ class BaseFunc:
                  if min_mz < peak.peak_position < max_mz]
 
         if len(peaks) > 0:
-            peak = max(peaks, key=get_peak_intensity)
+            peak: FittedPeak = max(peaks, key=get_peak_intensity)
             return peak.peak_intensity
         return None

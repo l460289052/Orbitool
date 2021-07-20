@@ -107,7 +107,8 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
 
                 for i, input_data in self.manager.tqdm(
                         enumerate(self.read(file, **self.read_kwargs)),
-                        length=length, msg="read"):
+                        length=length, msg="read",
+                        immediate=True):
 
                     if self.aborted:
                         return abort()

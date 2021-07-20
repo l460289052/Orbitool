@@ -416,6 +416,25 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2021.07.20 version 2.0.1 beta**
+
+Bug fix
++ Matplotlib crash when point too much
++ Index error when calculate calibration information
++ Index error when choosing spectrum
++ Formula noise width
++ Recalculate noise error
++ When get peak shape, remove error peaks
+
+**2021.07.18 version 2.0.0 beta**
+
++ Using HDF5 as backend. Now you can use disk instead of memory store large data.
++ Change UI
++ Abortable multiprocessing
++ Redesign denoise and calibrate logic
++ Almost rewrite the program
++ Shortcuts
+
 **2020.10.15 version 1.4.0**
 
 Bug fix

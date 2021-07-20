@@ -99,6 +99,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     @state_node
     def showSelectedSpectrum(self):
         yield from self.readSelectedSpectrum()
+        self.toolBox.setCurrentIndex(0)
 
     def readSelectedSpectrum(self):
         workspace = self.manager.workspace
@@ -106,10 +107,10 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         info_list = workspace.file_tab.info.spectrum_infos
 
         left = index
-        while info_list[left].average_index != 0:
+        while left > 0 and info_list[left].average_index != 0:
             index -= 1
         right = index + 1
-        while info_list[right].average_index != 0:
+        while right < len(info_list) and info_list[right].average_index != 0:
             right += 1
 
         infos: List[FileSpectrumInfo] = list(info_list[left:right])
@@ -215,10 +216,10 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             checkbox: QtWidgets.QCheckBox = table.cellWidget(index, 0)
             checkeds.append(checkbox.isChecked())
 
-            spinbox: QtWidgets.QDoubleSpinBox = table.cellWidget(index, 1)
+            spinbox: QtWidgets.QDoubleSpinBox = table.cellWidget(index, 2)
             noises.append(spinbox.value())
 
-            spinbox: QtWidgets.QDoubleSpinBox = table.cellWidget(index, 2)
+            spinbox: QtWidgets.QDoubleSpinBox = table.cellWidget(index, 3)
             lods.append(spinbox.value())
 
         info = self.noise.info
@@ -229,9 +230,10 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             result.poly_coef, info.general_setting.n_sigma, noises.popleft(), lods.popleft())
 
         for param, checked, noise, lod in zip(info.general_setting.noise_formulas, checkeds, noises, lods):
-            param.param = spectrum_func.updateNoiseLODParam(
-                param.param, info.general_setting.n_sigma, noise, lod)
-            param.selected = checked
+            if param.useable:
+                param.param = spectrum_func.updateNoiseLODParam(
+                    param.param, info.general_setting.n_sigma, noise, lod)
+                param.selected = checked
 
         self.showNoise()
 
