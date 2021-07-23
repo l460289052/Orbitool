@@ -56,7 +56,12 @@ class TableConverter:
         dataset = h5group[key]
 
         rows = dataset[()]
-        return [item_type(**{key: conv.convert_from_h5(value) for value, (key, conv) in zip(row, converter.items())}) for row in rows]
+        keys = rows.dtype.names
+        rets = []
+        for row in rows:
+            rets.append(item_type(**{key: conv.convert_from_h5(value) for value, key in zip(
+                row, keys) if (conv := converter.get(key, None)) is not None}))
+        return rets
 
 
 class Dtype:

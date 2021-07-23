@@ -130,7 +130,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.show_and_plot()
 
     @state_node(mode='x')
-    def calc_residual(self):
+    def peak_refit_finish(self):
         info = self.peakfit.info
         func = self.manager.workspace.peak_shape_tab.info.func
 
@@ -141,7 +141,14 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         info = self.peakfit.info
         info.residual_mz, info.residual_intensity = yield calc, "calculate residual"
+
+        ax = self.plot.ax
+        xlim = ax.get_xlim()
+        ylim = ax.get_ylim()
         self.show_and_plot()
+        ax = self.plot.ax
+        ax.set_xlim(*xlim)
+        ax.set_ylim(*ylim)
 
     def plot_peaks(self):
         info = self.peakfit.info

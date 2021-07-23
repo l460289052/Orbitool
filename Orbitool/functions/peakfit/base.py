@@ -21,7 +21,7 @@ def get_peak_position(peaks: List[FittedPeak], index):
 
 
 def get_peak_intensity(peak: FittedPeak):
-    return peak.intensity
+    return peak.peak_intensity
 
 
 class BaseFunc:
