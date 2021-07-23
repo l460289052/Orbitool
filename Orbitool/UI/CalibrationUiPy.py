@@ -358,6 +358,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
     @state_node(withArgs=True)
     def calibrate(self, skip: bool):
         workspace = self.manager.workspace
+        rtol = workspace.file_tab.info.rtol
         noise_info = workspace.noise_tab.info
         noise_skip = noise_info.skip
         setting = noise_info.general_setting
@@ -367,6 +368,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         func_kwargs = {
             "noise_skip": noise_skip,
             "calibrate_skip": skip,
+            "rtol": rtol,
             "quantile": setting.quantile,
             "mass_dependent": setting.mass_dependent,
             "n_sigma": setting.n_sigma,
@@ -449,7 +451,7 @@ class CalibrateMergeDenoise(MultiProcess):
 
     @staticmethod
     def func(data: List[Tuple[Spectrum, PolynomialRegressionFunc]],
-             noise_skip: bool, calibrate_skip: bool,
+             noise_skip: bool, calibrate_skip: bool, rtol: float,
              quantile: float, mass_dependent: bool, n_sigma: bool,
              dependent: bool, points: np.ndarray, deltas: np.ndarray,
              params: np.ndarray, subtract: bool, poly_coef: np.ndarray) -> Spectrum:
@@ -467,7 +469,7 @@ class CalibrateMergeDenoise(MultiProcess):
             end_times.append(spectrum.end_time)
 
         path = paths.pop() if len(paths) == 1 else ""
-        mz, intensity = spectrum_func.averageSpectra(spectra, drop_input=True)
+        mz, intensity = spectrum_func.averageSpectra(spectra, rtol, drop_input=True)
 
         if not noise_skip:
             if not dependent:

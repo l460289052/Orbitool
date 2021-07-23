@@ -17,7 +17,14 @@ def part_by_time_interval(ids: list, start_times: List[datetime], end_times: Lis
     zip_input = list(zip(ids, start_times, end_times))
     for index, (_, start, end) in enumerate(zip_input):
         select[:, index] = (start < times[1:]) & (end > times[:-1])
-    return chain.from_iterable((((value[0], time_s.astype(datetime), time_e.astype(datetime), i) for i, value in enumerate(values)) for slt, time_s, time_e in zip(select, times[:-1], times[1:]) if len(values := list(compress(zip_input, slt))) > 0))
+
+    ret = []
+    for slt, time_s, time_e in zip(select, times[:-1], times[1:]):
+        time_s = time_s.astype(datetime)
+        time_e = time_e.astype(datetime)
+        for i, value in enumerate(compress(zip_input, slt)):
+            ret.append((value[0], max(time_s, value[1]), min(time_e, value[2]), i))
+    return ret
 
 
 def part_by_time_interval_fast(ids: list, start_times: List[datetime], end_times: List[datetime],

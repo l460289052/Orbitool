@@ -59,13 +59,23 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
     def show_file_infos(self):
         tableWidget = self.tableWidget
         spectrum_infos: List[FileSpectrumInfo] = self.manager.workspace.file_tab.info.spectrum_infos
-        self.spectra_list.info.shown_indexes, spectrum_infos = zip(*[
-            (index, info) for index, info in enumerate(spectrum_infos) if info.average_index == 0])
-        tableWidget.setRowCount(len(spectrum_infos))
 
-        for i, info in enumerate(spectrum_infos):
+        shown_indexes: List[int] = []
+        infos: List[FileSpectrumInfo] = []
+        ends: List[datetime] = []
+        for index, info in enumerate(spectrum_infos):
+            if info.average_index == 0:
+                shown_indexes.append(index)
+                infos.append(info)
+                ends.append(info.end_time)
+            else:
+                ends[-1] = info.end_time
+        self.spectra_list.info.shown_indexes = shown_indexes
+        tableWidget.setRowCount(len(infos))
+
+        for i, (info, end) in enumerate(zip(infos, ends)):
             time_range = (info.start_time.strftime(config.timeFormat),
-                          info.end_time.strftime(config.timeFormat))
+                          end.strftime(config.timeFormat))
             for j, v in enumerate(time_range):
                 tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(v))
 

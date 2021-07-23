@@ -99,7 +99,6 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
     item_name = "file spectrum info"
 
     path: str  # "type:path"
-    rtol: int
     polarity: int
 
     average_index: int
@@ -116,7 +115,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
                         yield path.path, f.getSpectrumDatetime(scan_num)
 
     @classmethod
-    def generate_infos_from_paths_by_number(cls, paths: List[Path], rtol, N: int, polarity, timeRange):
+    def generate_infos_from_paths_by_number(cls, paths: List[Path], N: int, polarity, timeRange):
         delta_time = timedelta(seconds=1)
 
         results: List[cls] = []
@@ -131,7 +130,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
                 if not left_index:
                     average_index = 0
                 info = cls(start_time=time - delta_time, end_time=time + delta_time, path=path,
-                           rtol=rtol, polarity=polarity, average_index=average_index)
+                           polarity=polarity, average_index=average_index)
                 results.append(info)
                 average_index += 1
                 former_path = path
@@ -142,19 +141,19 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
         return results
 
     @classmethod
-    def generate_infos_from_paths_by_time_interval(cls, paths: List[Path], rtol, interval: timedelta, polarity, timeRange):
+    def generate_infos_from_paths_by_time_interval(cls, paths: List[Path], interval: timedelta, polarity, timeRange):
         start_times, end_times = zip(
             *((p.startDatetime, p.endDatetime) for p in paths))
         paths_str = [path.path for path in paths]
         rets = part_by_time_interval(
             paths_str, start_times, end_times, timeRange[0], timeRange[1], interval)
         ret = [cls(
-            path=path, start_time=start, end_time=end, rtol=rtol, polarity=polarity,
+            path=path, start_time=start, end_time=end, polarity=polarity,
             average_index=index) for path, start, end, index in rets]
         return ret
 
     @classmethod
-    def generate_infos_from_paths(cls, paths: List[Path], rtol, polarity, timeRange):
+    def generate_infos_from_paths(cls, paths: List[Path], polarity, timeRange):
         delta_time = timedelta(seconds=1)
         info_list: List[cls] = []
         for path in paths:
@@ -166,16 +165,16 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
                     if f.getSpectrumPolarity(i) == polarity:
                         time = creationTime + f.getSpectrumRetentionTime(i)
                         info = FileSpectrumInfo(path=path.path, start_time=time - delta_time, end_time=time + delta_time,
-                                                rtol=rtol, polarity=polarity, average_index=0)
+                                                polarity=polarity, average_index=0)
                         info_list.append(info)
         return info_list
 
-    def get_spectrum_from_info(self, with_minutes=False):
+    def get_spectrum_from_info(self, rtol: float = 1e-6, with_minutes=False):
         origin, realpath = self.path.split(':', 1)
         if origin == PATH_THERMOFILE:
             reader = ThermoFile(realpath)
             ret = reader.getAveragedSpectrumInTimeRange(
-                self.start_time, self.end_time, self.rtol, self.polarity)
+                self.start_time, self.end_time, rtol, self.polarity)
             if ret is None:
                 return None
             mz, intensity = ret

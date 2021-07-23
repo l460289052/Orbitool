@@ -12,6 +12,7 @@ from .base import Widget as BaseWidget
 class FileTabInfo(BaseStructure):
     h5_type = "file tab"
 
+    rtol:float = 1e-6
     spectrum_infos: List[FileSpectrumInfo] = Field(default_factory=list)
     pathlist: PathList = Field(default_factory=PathList)
 

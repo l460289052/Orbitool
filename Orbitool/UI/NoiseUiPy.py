@@ -113,14 +113,20 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         while right < len(info_list) and info_list[right].average_index != 0:
             right += 1
 
+        rtol = workspace.file_tab.info.rtol
         infos: List[FileSpectrumInfo] = list(info_list[left:right])
 
         def read_and_average():
-            if len(spectra := [spectrum for info in infos if (spectrum := info.get_spectrum_from_info(with_minutes=True)) is not None]) > 0:
+            spectra: List[Tuple[np.ndarray, np.ndarray, float]] = []
+            for info in infos:
+                spectrum = info.get_spectrum_from_info(rtol, True)
+                if spectrum is not None:
+                    spectra.append(spectrum)
+            if len(spectra) > 0:
                 spectra = [(*spectrum_func.removeZeroPositions(
                     spectrum[0], spectrum[1]), spectrum[2]) for spectrum in spectra]
                 mz, intensity = spectrum_func.averageSpectra(
-                    spectra, infos[0].rtol, True)
+                    spectra, rtol, True)
                 spectrum = Spectrum(path='none:', mz=mz, intensity=intensity,
                                     start_time=infos[0].start_time, end_time=infos[-1].end_time)
                 return True, spectrum
@@ -565,8 +571,9 @@ class ReadFromFile(MultiProcess):
 
     @staticmethod
     def read(file: WorkSpace, **kwargs) -> Generator:
+        rtol = file.file_tab.info.rtol
         for info in file.file_tab.info.spectrum_infos:
-            data = info.get_spectrum_from_info()
+            data = info.get_spectrum_from_info(rtol)
             if data is not None:
                 yield info, data
 

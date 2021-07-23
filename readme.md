@@ -3,56 +3,140 @@
 
 # Requirements
 
+## Executable file
+
 .Net Framework >= 4.5
 
-# Readme
+## Run by python
+
+please view requirements.txt
+
+# Try
 
 This tool can help you process with spectrum averaging, denoising, calibrating, peak fitting and generating time series.
 
-There are 3 parts: Toolbar, Tabs, Formula/Masslist.
+There are 3 parts: Toolbar, Tabs, Dockers.
 
 If you have no idea about this. Just open 'Orbitool.exe' and follow those steps
 
-1. add a single file -> 
-2. 'Average selected file' button ->
-3. double click at a spectra list item->
-4. 'Continue without denoising' button->
-5. double click at spectra list->
-6. 'Show selected's num-th highest peak' button->
-7. add several ions->
-8. 'Calc calibrate info' button->
-9. 'Calibrate ALL SPECTRA use info and continue' button->
-10. 'default' button->
-11. have fun
+1. add a single file
+2. 'All file' button (Alt + A)
+3. show selected raw spectrum in spectra list (Alt + A)
+4. Calc noise level for selected spectrum (Alt + C)
+5. denoise (Enter)
+6. Finish and continue (Enter)
+7. Calc calibrate info (Alt + C)
+8. Calibrate and continue (Enter)
+9. show selected spectrum
 
-## UI
+# UI
 
-you can change some panels' width with mouse:
+Underlined character is a shortcut with Alt. Like 'Alt + A', 'Alt + B', etc.
 
-+ Spectra List
-+ tab 'Formula' and tab 'Mass list'
-+ panels in tab 'Spectra'
-+ panels in tab 'Calibration'
-+ panels in tab 'Spectra&Peak fit'
+Arrow keys is useful in peak fit tab. Up and down keys could change y axis, and left and right keys could change x axis.
+
+
+## Tabs
+
+### Files
+
+You can determine whether use number or time to average and the time range when averaging.
+
+You can simply show file without averaging or averaging all files.
+
+Hint: push those buttons won't do any calculation.
+
+> Shortcuts: Del for remove selected files
+
+### Noise
+
+You can add some independent point for fit separately.
+
+The 'denoise' button will read all files and save denoise information. (The real denoise will be done after calibration because of files' difference)
+
+> Shortcuts: double click 'type' column will scale to that noise.
+
+### Peak Shape
+
+Orbitool will use some peaks to calculate the width of peak. (if use norm distribution)
+
+> Shortcuts: use mouse plot a red line to remove peaks
+
+### Calibration
+
+Orbitool will use provided ions calibrate files. Different files will use different infos because of different files really need to calibrate separately.
+
+### Peak Fit
+
+Orbitool will show fitted peaks in peak list docker.
+
+You can filter use peaks filter, and filters will overlay.
+
+Actions will done for all shown peaks in peak list docker.
+
+> Shortcuts: Arrow keys.
+
+### Mass Defect
+
+...
+
+### Timereries
+
+...
+
+### Concatenate time series
+
+You can add time series by importing csv files.
+
+To recognize csv file's format, your csv file should be like:
+
+| time  | formula1 | formula2 | ...  |
+| ----- | -------- | -------- | ---- |
+| time1 | ...      | ...      | ...  |
+| time2 | ...      | ...      | ...  |
+| ...   | ...      | ...      | ...  |
+
+You can change some key row/column's position to fit your csv file
+
++ Ion row ( formula row )
++ time column
++ ion ( formula) beginning column
+
+<img src="img\timeSeriesCatCsv.svg" alt="timeSeriesCatCsv" style="zoom:150%;" />
+
+## Dockers
+
+Docker could be dragged out or be stacked.
+
+<img src="img\dockers-draged-out.png" alt="dockers-draged-out" style="zoom: 50%;" /> <img src="img\dockers-stack.png" alt="dockers-stack" style="zoom: 50%;" /> 
+
+### Formula
+
+There are two formula calculator. One use DBE and the other not.
+
+### Mass List
+
+Orbitool use mass list to fit peak or calculate timeseries.
+
+### Spectra List
+
+### Spectrum
+
+### Peak List
+
+Double click at peaks could refit this peak.
 
 ## Toolbar
 
-you can export workspace and option used in this tool.
+you can export workspace and config used in this tool.
 
 ### Workspace
 
-Workspace includes
-
-+ Option
-+ Mass List
-+ Files used
-+ Spectra (excepted raw data)
-+ Peak list
-+ Time series
+Almost all data. File format is HDF5 file. When processing large files, please save it to disk first or will consume 
 
 #### Input&Output
 
-It could be exported as *.OrbitWork file, when you import it, all the widgets related will be set.
+It could be exported as *.Orbitool file, when you import it, all the widgets related will be set.
 
 ### Option
 
@@ -61,18 +145,71 @@ Option includes
 + all states of the check box, spin box, text box and radio box.
 + formula settings, like elements' minimum and maximum and charge, ppm.
 + the ions used in calibration stage
++ mass list
 
 #### Input&Output
 
-It could be exported as *.OrbitOption file.
+It could be exported as *.Orbitool Workspace file. Means you can only import config from another workspace file.
 
-## Formula/Mass list
+# Details
 
-### Formula
+## Noise
+
+### Global noise
+
+use modified binPMF:
+
+  1. make a set, called `noise set`, contains all peaks in [x.5~x.8]
+
+  2. delete peaks bigger than $mean+N\_sigma*std$ of the `noise set`
+
+  3. use $quantile value+N\_sigma*std$  of `noise set` as LOD line
+
+     ps: I tested out that when quantile = 0.7, quantile value is close to mean
+
+  4. delete peaks below LOD in original spectrum to get denoised spectrum
+
+### Noise points
+
+There are some points with larger noise, like NO3- and HN2O6-, etc. They should be calculated independently.
+
+## Peak Shape
+
+...
+
+## Calibration
+
+When averaging spectra between files, make sure calibration first.
+
+Before calibration:
+
+
+
+After calibration:
+
+
+
+## Spectra&Peak fit
+
+...
+
+## Mass defect
+
+you can choose what rainbow stand for, DBE or certain element's num. And you can choose whether use size( aka area) stand for log intensity or intensity.
+
+![mass defect](img/massdefect.png)
+
+## Time series
+
+...
+
+
+
+## Formula
 
 this part is for formula guessing when fitting peaks in 'Spectra&Peak fit' tab using 'default' button.
 
-#### Settings
+### Settings
 
 You can change the formula's settings used in formula guessing.
 
@@ -84,7 +221,7 @@ You can change the formula's settings used in formula guessing.
 + elements and isotopes to be used
 + elements' parameters
 
-#### Calculator
+### Calculator
 
 You can input **formula** or **mass**. 
 
@@ -93,7 +230,7 @@ You can input **formula** or **mass**.
 
 Just a hint: the result text box is editable just for copying. Orbitool won't read anything from it.
 
-#### Calculation method
+### Calculation method
 
 each element (take electron as a special element) has 7 parameters can be changed (some elements' some parameters won't be changed):
 
@@ -135,7 +272,7 @@ some parameters have some initial value:
 | ----- | ----- | ----- | ----- | ----- |
 | 2     | -0.5  | 2.5   | 0     | 0     |
 
-##### example
+#### example
 
 If I have a part of formula 'C10N-', for this part: 
 
@@ -155,251 +292,15 @@ I will add some mass constrains within iteration.
 
 for a ion 'C10H15O11N-', $DBE=\frac{2_{initial:2DBE}+1*(-1)_{e:2DBE}+10*2_{C:2DBE}+1*1_{N:2DBE}+15*(-1)_{H:2DBE}}{2}=3.5$
 
-#### Unstricted Calculator
+### Unstricted Calculator
 
 This calculator will ignore DBE, search all formulas which is correspond with ppm restriction and elements/isotopes number constrain.
 
 It can find formulas like 'C5HO5-' or 'C[13]3H3O[18]-'. So the result maybe very long.
 
-### Mass list
 
-this part is for fitting peaks in 'Spectra&Peak fit' tab using 'mass list' button, or for calculating time series in 'Time series' tab.
 
-#### ppm
-
-2 peaks within setted ppm added to mass list will be merged into 1 single peak.
-
-eg. 100.00 and 100.0001 added to mass list with 1ppm will be a peak 100.00005
-
-#### Add
-
-you can add an item to mass list like those:
-
-+ input formula or mass in text box and push 'Add' button in mass list box. If you input a formula, the mz field and formula field will be filled. If a mass was inputted, only the mz field will be filled.
-
-+ In 'Spectra&Peak fit' tab, select some peaks and push 'Add selected peak(s) to mass list', or just push 'Add all peaks to mass list'.
-
-  If a peak have only one formula, the mz added to mass list will be its theoretical value.
-
-#### Remove peaks
-
-#### Input&Output
-
-##### OrbitMassList file
-
-*.OrbitMassList
-
-ps: If you import a OrbitMassList file, peak within this mass list won't be merged automatically.
-
-##### csv file
-
-Two columns
-
-format:
-
-| formula           | mz           |
-| ----------------- | ------------ |
-| formula1 or empty | mz1 or empty |
-| formula2 or empty | mz2 or empty |
-| ...               | ...          |
-
-example:
-
-| formula    | mz        |
-| ---------- | --------- |
-|            | 199.09763 |
-| C6H5O8N2-  | 233.00514 |
-| C4H8O12N3- |           |
-
-When import mass list from csv file, you can choose formula or mz (If you provide both, Orbitool will insert formula instead of mz into mass list).
-
-When export mass list to csv file, Orbitool will fill mz column and formula for peak who has formula.
-
-#### Merge
-
-similar to 'Import', but don't delete original mass list. Use merge will merge peaks within ppm.
-
-eg. your mass list has 3 peaks a, b, c. And a OrbitMassList file or csv file contains a mass list including peaks a, b, d, e. You can use merge to make your mass list become peaks a, b, c, d, e
-
-## Tabs
-
-### Files
-
-------
-
-#### Add file
-
-'recurrence ' check box is used when open a folder. If it's checked, I will go through every files under selected folder.
-
-#### Average
-
-You can determine whether use number or time to average and the time range when averaging. Whenever a file as added, the time range will be recalculated.
-
-You can simply show file without averaging or averaging all files.
-
-Hint: push those buttons won't do any calculation.
-
-### Spectra
-
-------
-
-#### tables
-
-+ Spectra
-
-  all spectra will be shown here. Spectrum will be shown right if double click at a spectrum.
-
-+ Spectrum's property
-
-  preserved
-
-+ Spectrum
-
-  mz-intensity
-
-#### Background
-
-use modified binPMF:
-
-  1. make a set, called `noise set`, contains all peaks in [x.5~x.8]
-
-  2. delete peaks bigger than $mean+3*std$ of the `noise set`
-
-  3. use $quantile value+3*std$  of `noise set` as LOD line
-
-     ps: I tested out that when quantile = 0.7, quantile value is close to mean
-
-  4. delete peaks below LOD in original spectrum to get denoised spectrum
-
-Denoised spectrum will be shown as green while original spectrum will be shown as blue. You can choose to remove peaks below LOD, or all peaks minus LOD, or don't do denoise.
-
-![spectrum1](img/spectrum1.png)
-
-##### Export noise
-
-as csv file with header = "mz intensity", contains all peaks in `noise set` after step 2.
-
-#### Calculation
-
-If push 'Denoising for every spectrum' or 'Continue without denoising', calculation will begin to do averaging and denoising.
-
-#### Export spectrum
-
-as csv file with header = "mz intensity"
-
-#### Figure
-
-If 'Scroll according to plot' check box is checked, the spectrum table will scroll to the left mz of the figure.
-
-##### y log scale
-
-I will autoscale y axis after toggling
-
-##### autoscale y axis
-
-rescale the figure to fit the highest peak and x axis within current x range
-
-### Pre peak fitting
-
-------
-
-all spectra are shown in left table. Select how much peak used in peak fitting and show.
-
-#### Remove unique peak
-
-Push your left mouse button and scroll, a red line will appear like below figure. When you release button, all peak crossed will be removed. If you delete caches, may take seconds initializing.
-
-![peakfit1](img/peakfit1.png)
-
-#### Cancel remove
-
-canceled peak's color often is different with color before removing
-
-### Calibration
-
------
-
-#### Tables
-
-+ Ions
-
-  There are ions used for mass calibration, added by typing ions to text box. Multi ions could be add by split by comma as "HNO3NO3-,C6H3O2NNO3-,C6H5O3NNO3-"
-
-+ Information
-
-  ions' formula and files' ppm will be shown
-
-#### Calibrate step
-
-1. Add ions
-2. click 'Calc calibrate info' to get calibration information
-3. click 'Calibrate ALL SPECTRA use info and continue'  to finish calibration and begin calculation
-
-#### Show single file's information
-
-by pushing "Show selected file's info", you will get a figure show a file's calibration curve. The x axis will be mz range you set in tab 'Formula'.
-
-![filecalibrationinfo](\img/filecalibrationinfo.png)
-
-### Spectra&Peak fit
-
----
-
-If you want to see a spectrum's peaks, select a spectrum and push 'default'. This tool will calculate formulas for each peaks and show them in peak list table.
-
-This figure will automatically show 5 highest peaks' formula whose peak point is in window. If one of the 5 highest peak have no formula, formula will belong to the sixth one, etc.
-
-![spectrum2](img/spectrum2.png)
-
-If you want to refit a peak, could double click a peak in peak list. You can change 'peak num' and push 'Re-fit' button. If you click 'Save' button, the change will be added to peak list, and the peaks' formulas won't be changed unless you refit the spectrum again. You can change formula in 'Peak fit' box by double clicking that cell.
-
-![peakfit2](img/peakfit2.png)
-
-> you can change 2 things in this groupbox: peak num, formulas
->
-> Because sometimes Orbitool can't fit noise peaks, Orbitool will print those to error.txt silently.
-
-#### Mass defect
-
-you can choose what rainbow stand for, DBE or certain element's num. And you can choose whether use size( aka area) stand for log intensity or intensity.
-
-![mass defect](img/massdefect.png)
-
-### Time series
-
-you can add time series by following methods:
-
-+ mz with ppm
-+ formula with ppm
-+ mz range (eg. 100.001-100.002)
-+ selected peaks in 'Spectra&Peak fit' tab's peak list with ppm
-+ (selected) peaks in mass list with ppm
-
-Time series will be shown right. If you want to check a specific time series, double it in the table, or export all time series.
-
-### Concatenate time series
-
-You can add time series by importing csv files.
-
-To recognize csv file's format, your csv file should be like:
-
-| time  | formula1 | formula2 | ...  |
-| ----- | -------- | -------- | ---- |
-| time1 | ...      | ...      | ...  |
-| time2 | ...      | ...      | ...  |
-| ...   | ...      | ...      | ...  |
-
-You can change some key row/column's position to fit your csv file
-
-+ Ion row ( formula row )
-+ time column
-+ ion ( formula) beginning column
-
-<img src="img\timeSeriesCatCsv.svg" alt="timeSeriesCatCsv" style="zoom:150%;" />
-
-### Bugs
-
-If you meet any bugs, please let me know. You can send me the 'error.txt' file which is under the same directory with 'Orbitool.exe'.
+# Maintain
 
 ## Maintainer
 + School of Electronic, Information and Electrical Engineering, Shanghai Jiao Tong University, Shanghai, 200240, China
@@ -412,9 +313,16 @@ If you meet any bugs, please let me know. You can send me the 'error.txt' file w
 
 ## Bugs report & function require
 
+If you meet any bugs, please let me know. You can send me the 'log.txt' file which is under the same directory with 'Orbitool.exe'.
+
 mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huang"\<<huangc@saes.sh.cn>\>
 
 ## log
+
+**2021.07.23 version 2.0.2 beta**
+
+Bug fix
++ rtol setting in noise tab
 
 **2021.07.20 version 2.0.1 beta**
 
@@ -648,7 +556,6 @@ Bug fix
 + wrong elements shown in formula. eg. Na when negative and S when positive
   rewrite formula interface logic
 + "'NoneType' object has no attribute 'addPeaks'" when add peak to mass list without initialize in 'Spectra&Peak fit'
-  
 
 Appended
 
