@@ -249,7 +249,7 @@ class Ui_Form(object):
         self.peakListRadioButton.setText(_translate("Form", "peak list"))
         self.selectedMassListRadioButton.setText(_translate("Form", "mass list selected peak(s)"))
         self.massListRadioButton.setText(_translate("Form", "mass list all peaks"))
-        self.label_22.setText(_translate("Form", "<html><head/><body><p>rtol</p></body></html>"))
+        self.label_22.setText(_translate("Form", "<html><head/><body><p>tolerance(ppm)</p></body></html>"))
         self.label.setText(_translate("Form", "when use mz,formula,peak"))
         self.calcPushButton.setText(_translate("Form", "Calc time series"))
         item = self.tableWidget.horizontalHeaderItem(0)

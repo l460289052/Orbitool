@@ -25,7 +25,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>&amp;Import file</string>
+        <string>&amp;Import file(s)</string>
        </property>
        <property name="shortcut">
         <string>Alt+I</string>

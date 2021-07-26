@@ -29,6 +29,10 @@ If you have no idea about this. Just open 'Orbitool.exe' and follow those steps
 8. Calibrate and continue (Enter)
 9. show selected spectrum
 
+# Tips
+
++ Please save workspace to disk when processing large file for saving memory. (Click Workspace->Save as)
+
 # UI
 
 Underlined character is a shortcut with Alt. Like 'Alt + A', 'Alt + B', etc.
@@ -36,55 +40,89 @@ Underlined character is a shortcut with Alt. Like 'Alt + A', 'Alt + B', etc.
 Arrow keys is useful in peak fit tab. Up and down keys could change y axis, and left and right keys could change x axis.
 
 
-## Tabs
+## I. Tabs
 
-### Files
+### 1.Files
 
-You can determine whether use number or time to average and the time range when averaging.
++ Import
 
-You can simply show file without averaging or averaging all files.
+  Import RAW file directly or from a folder.
 
-Hint: push those buttons won't do any calculation.
++ Average
 
+  + Use time period
+  + Use num period
+  + Determine time range for period
+
+> push those buttons won't do any calculation.
+>
 > Shortcuts: Del for remove selected files
 
-### Noise
+### 2.Noise
 
-You can add some independent point for fit separately.
++ Calculate
 
-The 'denoise' button will read all files and save denoise information. (The real denoise will be done after calibration because of files' difference)
+  You can add some independent point for fit separately.
 
++ Denoise
+
+> The 'denoise' button will read all files and save denoise information. (The real denoise will be done after calibration because of files' difference)
+>
 > Shortcuts: double click 'type' column will scale to that noise.
 
-### Peak Shape
+### 3.Peak Shape
 
 Orbitool will use some peaks to calculate the width of peak. (if use norm distribution)
 
 > Shortcuts: use mouse plot a red line to remove peaks
 
-### Calibration
+### 4.Calibration
 
 Orbitool will use provided ions calibrate files. Different files will use different infos because of different files really need to calibrate separately.
 
-### Peak Fit
+### 5.Peak Fit
 
-Orbitool will show fitted peaks in peak list docker.
++ Filter
 
-You can filter use peaks filter, and filters will overlay.
+  Orbitool will show fitted peaks in peak list docker. You can filter use peaks filter, and filters will overlay.
 
-Actions will done for all shown peaks in peak list docker.
++ Actions
 
-> Shortcuts: Arrow keys.
+  Actions will done for all shown peaks in peak list docker.
 
-### Mass Defect
+> Shortcuts: Arrow keys for plot.
 
-...
-
-### Timereries
+### 6.Mass Defect
 
 ...
 
-### Concatenate time series
+### 7.Timeseries
+
++ Add a timeseries by
+
+  + mz &  tolerance(ppm)
+
+  + a formula
+
+  + mz range
+
+    will use max intensity in mz range as a timeseries
+
++ Add many timeseries by
+
+  + peak list
+  + mass list selected peaks
+  + mass list all peaks
+
+Export Time series
+
+| isotime | igor time | matlab time | excel time | C3H3O3- | C2HO4- |...|
+| ------- | --------- | ----------- | ---------- | ------- | ------ |-|
+| time1 | ... | ... | ... | ... | ... |...|
+| time2 | ... | ... | ... | ... | ... |...|
+| ... | ... | ... | ... | ... | ... |...|
+
+### 8.Concatenate time series
 
 You can add time series by importing csv files.
 
@@ -104,29 +142,43 @@ You can change some key row/column's position to fit your csv file
 
 <img src="img\timeSeriesCatCsv.svg" alt="timeSeriesCatCsv" style="zoom:150%;" />
 
-## Dockers
+## II. Dockers
 
 Docker could be dragged out or be stacked.
 
 <img src="img\dockers-draged-out.png" alt="dockers-draged-out" style="zoom: 50%;" /> <img src="img\dockers-stack.png" alt="dockers-stack" style="zoom: 50%;" /> 
 
-### Formula
+### 1.Formula
 
 There are two formula calculator. One use DBE and the other not.
 
-### Mass List
+### 2.Mass List
 
 Orbitool use mass list to fit peak or calculate timeseries.
 
-### Spectra List
++ Chemical group
 
-### Spectrum
+  You can plus or minus a chemical group to a whole list
 
-### Peak List
+Import/Export
+
+| mz   | formulas |
+| ---- | -------- |
+| mz1  | formula1 |
+| mz2  | formula2 |
+| ...  | ...      |
+
+> If a mass list item has a formula, its mz doesn't matter.
+
+### 3.Spectra List
+
+### 4.Spectrum
+
+### 5.Peak List
 
 Double click at peaks could refit this peak.
 
-## Toolbar
+## III. Toolbar
 
 you can export workspace and config used in this tool.
 
@@ -153,7 +205,7 @@ It could be exported as *.Orbitool Workspace file. Means you can only import con
 
 # Details
 
-## Noise
+## 1.Noise
 
 ### Global noise
 
@@ -173,11 +225,11 @@ use modified binPMF:
 
 There are some points with larger noise, like NO3- and HN2O6-, etc. They should be calculated independently.
 
-## Peak Shape
+## 2.Peak Shape
 
 ...
 
-## Calibration
+## 3.Calibration
 
 When averaging spectra between files, make sure calibration first.
 
@@ -189,23 +241,23 @@ After calibration:
 
 
 
-## Spectra&Peak fit
+## 4.Spectra&Peak fit
 
 ...
 
-## Mass defect
+## 5.Mass defect
 
 you can choose what rainbow stand for, DBE or certain element's num. And you can choose whether use size( aka area) stand for log intensity or intensity.
 
 ![mass defect](img/massdefect.png)
 
-## Time series
+## 6.Time series
 
 ...
 
 
 
-## Formula
+## 7.Formula
 
 this part is for formula guessing when fitting peaks in 'Spectra&Peak fit' tab using 'default' button.
 
