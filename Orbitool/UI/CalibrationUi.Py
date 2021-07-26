@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(396, 300)
+        Form.resize(396, 308)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.calibrationSplitter = QtWidgets.QSplitter(Form)
@@ -213,8 +213,8 @@ class Ui_Form(object):
         self.addIonToolButton.setShortcut(_translate("Form", "+"))
         self.delIonToolButton.setText(_translate("Form", "-"))
         self.delIonToolButton.setShortcut(_translate("Form", "Del"))
-        self.rtolLabel.setText(_translate("Form", "rtol"))
-        self.degreeLabel.setText(_translate("Form", "degree"))
+        self.rtolLabel.setText(_translate("Form", "tolerance(ppm)"))
+        self.degreeLabel.setText(_translate("Form", "degree of freedom"))
         self.nIonsLabel.setText(_translate("Form", "use best N ions"))
         self.calcInfoPushButton.setText(_translate("Form", "&Calc calibrate info"))
         self.calcInfoPushButton.setShortcut(_translate("Form", "Alt+C"))

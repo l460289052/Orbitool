@@ -166,7 +166,7 @@
           </sizepolicy>
          </property>
          <property name="title">
-          <string>Average</string>
+          <string>Average period</string>
          </property>
          <layout class="QFormLayout" name="formLayout_9">
           <property name="leftMargin">
@@ -294,8 +294,11 @@
        </item>
        <item row="5" column="0">
         <widget class="QLabel" name="rtolLabel">
+         <property name="toolTip">
+          <string>tolerance(ppm)</string>
+         </property>
          <property name="text">
-          <string>rtol</string>
+          <string>tolerance</string>
          </property>
         </widget>
        </item>

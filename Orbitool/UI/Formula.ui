@@ -17,25 +17,25 @@
    <item>
     <widget class="QToolBox" name="toolBox">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>208</width>
-        <height>311</height>
+        <width>206</width>
+        <height>286</height>
        </rect>
       </property>
       <attribute name="label">
-       <string>unified</string>
+       <string>Spctrum information</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
-          <string>Polarity</string>
+          <string>Ion polarity</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
@@ -84,7 +84,7 @@
          <item row="2" column="0">
           <widget class="QLabel" name="label_6">
            <property name="text">
-            <string>rtol</string>
+            <string>tolerance(ppm)</string>
            </property>
           </widget>
          </item>
@@ -113,12 +113,12 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>126</width>
-        <height>510</height>
+        <width>191</width>
+        <height>526</height>
        </rect>
       </property>
       <attribute name="label">
-       <string>standard element</string>
+       <string>Standard element table</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
@@ -535,12 +535,12 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>208</width>
-        <height>311</height>
+        <width>206</width>
+        <height>286</height>
        </rect>
       </property>
       <attribute name="label">
-       <string>unrestricted element</string>
+       <string>Unrestricted element table</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
@@ -649,7 +649,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Calculator</string>
+      <string>Mass calculator</string>
      </property>
      <layout class="QFormLayout" name="formLayout_2">
       <item row="0" column="0" colspan="2">

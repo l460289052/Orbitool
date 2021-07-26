@@ -59,7 +59,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>336</width>
+            <width>319</width>
             <height>325</height>
            </rect>
           </property>
@@ -133,7 +133,7 @@
            <item>
             <widget class="QGroupBox" name="groupBox_2">
              <property name="title">
-              <string>independent noise points</string>
+              <string>Noise for high-intensity peaks</string>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_6">
               <item>
@@ -159,7 +159,7 @@
                 </column>
                 <column>
                  <property name="text">
-                  <string>position</string>
+                  <string>mass</string>
                  </property>
                 </column>
                </widget>
@@ -210,7 +210,7 @@
            <item>
             <widget class="QPushButton" name="calculateNoisePushButton">
              <property name="text">
-              <string>&amp;Calc noise level for selected spectrum</string>
+              <string>&amp;Calc noise for the selected spectrum</string>
              </property>
              <property name="shortcut">
               <string>Alt+C</string>
@@ -224,8 +224,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>204</width>
-            <height>158</height>
+            <width>319</width>
+            <height>325</height>
            </rect>
           </property>
           <attribute name="label">

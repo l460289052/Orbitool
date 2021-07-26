@@ -127,15 +127,21 @@
            <layout class="QVBoxLayout" name="verticalLayout_5">
             <item>
              <widget class="QPushButton" name="actionFit_FormulaPushButton">
+              <property name="toolTip">
+               <string>standard calculator</string>
+              </property>
               <property name="text">
-               <string> formula</string>
+               <string>standard calc</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="actionFit_ForceFormulaPushButton">
+              <property name="toolTip">
+               <string>unrestricted calculator</string>
+              </property>
               <property name="text">
-               <string>force formula</string>
+               <string>unrestricted calc</string>
               </property>
              </widget>
             </item>

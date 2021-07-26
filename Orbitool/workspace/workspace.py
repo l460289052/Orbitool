@@ -25,7 +25,7 @@ T = TypeVar("T")
 class WorkspaceInfo(BaseStructure):
     h5_type = "workspace info"
 
-    version: str = "2.0.3"
+    version: str = "2.0.4"
     orbitool_file_version:str = "2.0.2"
 
 
