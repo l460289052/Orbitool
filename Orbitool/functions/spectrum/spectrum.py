@@ -16,4 +16,4 @@ def removeZeroPositions(mz: np.ndarray, intensity: np.ndarray, min_intensity: fl
 
 def splitPeaks(mz: np.ndarray, intensity: np.ndarray) -> List[spectrum.Peak]:
     ranges = _splitPeaks(mz, intensity)
-    return [spectrum.Peak(mz=mz[r[0]:r[1]], intensity=intensity[r[0]:r[1]]) for r in ranges]
+    return [spectrum.Peak(mz=mz[r[0]:r[1]], intensity=intensity[r[0]:r[1]]) for r in ranges if r[0] < r[1]]

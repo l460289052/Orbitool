@@ -30,7 +30,7 @@ class FormulaDatatableConverter(TableConverter):
 
     @staticmethod
     def convert_from_h5(value):
-        return Formula(value)
+        return Formula(value.decode('ascii'))
 
 
 class RestrictedCalcElementNumItem(BaseTableItem):

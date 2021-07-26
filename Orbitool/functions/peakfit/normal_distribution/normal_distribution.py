@@ -144,6 +144,8 @@ class NormalDistributionFunc(BaseFunc):
                     select[:-1] |= select[1:]
                     select[1:] |= select[:-1]
                     new_intensity = new_intensity[select]
+                    if len(new_intensity) == 0:
+                        raise RuntimeError()
                     new_intensity[-1] = 0
                     new_intensity[0] = 0
                     new_peak = FittedPeak(

@@ -90,11 +90,11 @@ You can add time series by importing csv files.
 
 To recognize csv file's format, your csv file should be like:
 
-| time  | formula1 | formula2 | ...  |
-| ----- | -------- | -------- | ---- |
-| time1 | ...      | ...      | ...  |
-| time2 | ...      | ...      | ...  |
-| ...   | ...      | ...      | ...  |
+| time  | formula1 | formula2 | ... |
+| ----- | -------- | -------- | --- |
+| time1 | ...      | ...      | ... |
+| time2 | ...      | ...      | ... |
+| ...   | ...      | ...      | ... |
 
 You can change some key row/column's position to fit your csv file
 
@@ -242,29 +242,29 @@ each element (take electron as a special element) has 7 parameters can be change
 
  I will show you with this tool's built-in elements' parameters:
 
-|      | min  | max  | 2*DBE | H min | H max | O min | O max |
-| ---- | ---- | ---- | ----- | ----- | ----- | ----- | ----- |
-| e    | -1   | 1    | -1    | -0.5  | -0.5  | 0     | 0     |
-| C    | 0    | 20   | 2     | -     | 2     | 0     | 3     |
-| H    | 0    | 40   | -1    | -1    | -1    | 0     | 0     |
-| O    | 0    | 15   | 0     | 0     | 0     | -1    | -1    |
-| N    | 0    | 4    | 1     | -1    | 1     | 0     | 3     |
-| S    | 0    | 3    | 0     | 0     | 0     | 0     | 4     |
-| Li   | 0    | 3    | -1    | 0     | 0     | 0     | 0     |
-| Na   | 0    | 3    | -1    | 0     | 0     | 0     | 0     |
-| K    | 0    | 3    | -1    | 0     | 0     | 0     | 0     |
-| F    | 0    | 15   | -1    | -1    | 0     | 0     | 0     |
-| Cl   | 0    | 3    | -1    | -1    | 0     | 0     | 3     |
-| Br   | 0    | 3    | -1    | -1    | 0     | 0     | 3     |
-| I    | 0    | 3    | -1    | -1    | 0     | 0     | 3     |
-| P    | 0    | 4    | 1     | -1    | 1     | 0     | 6     |
-| Si   | 0    | 5    | 2     | 0     | 2     | 0     | 3     |
+|     | min | max | 2*DBE | H min | H max | O min | O max |
+| --- | --- | --- | ----- | ----- | ----- | ----- | ----- |
+| e   | -1  | 1   | -1    | -0.5  | -0.5  | 0     | 0     |
+| C   | 0   | 20  | 2     | -     | 2     | 0     | 3     |
+| H   | 0   | 40  | -1    | -1    | -1    | 0     | 0     |
+| O   | 0   | 15  | 0     | 0     | 0     | -1    | -1    |
+| N   | 0   | 4   | 1     | -1    | 1     | 0     | 3     |
+| S   | 0   | 3   | 0     | 0     | 0     | 0     | 4     |
+| Li  | 0   | 3   | -1    | 0     | 0     | 0     | 0     |
+| Na  | 0   | 3   | -1    | 0     | 0     | 0     | 0     |
+| K   | 0   | 3   | -1    | 0     | 0     | 0     | 0     |
+| F   | 0   | 15  | -1    | -1    | 0     | 0     | 0     |
+| Cl  | 0   | 3   | -1    | -1    | 0     | 0     | 3     |
+| Br  | 0   | 3   | -1    | -1    | 0     | 0     | 3     |
+| I   | 0   | 3   | -1    | -1    | 0     | 0     | 3     |
+| P   | 0   | 4   | 1     | -1    | 1     | 0     | 6     |
+| Si  | 0   | 5   | 2     | 0     | 2     | 0     | 3     |
 
 for element C, H min change with number
 
-| C num | 0    | 1    | 2    | 3    | 4    | 5    | 6    | 7    | 8    | 9    | 10   | 11   | 12   |
-| ----- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-| H min | 0    | 4    | 4    | 6    | 6    | 6    | 6    | 8    | 8    | 8    | 8    | 10   | ...  |
+| C num | 0   | 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 9   | 10  | 11  | 12  |
+| ----- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| H min | 0   | 4   | 4   | 6   | 6   | 6   | 6   | 8   | 8   | 8   | 8   | 10  | ... |
 
 some parameters have some initial value:
 
@@ -318,6 +318,10 @@ If you meet any bugs, please let me know. You can send me the 'log.txt' file whi
 mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huang"\<<huangc@saes.sh.cn>\>
 
 ## log
+
+** 2.0.4 beta**
+
++ Mass list export with split formula
 
 **2021.07.26 version 2.0.3 beta**
 

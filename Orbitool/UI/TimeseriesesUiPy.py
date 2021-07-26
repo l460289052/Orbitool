@@ -37,6 +37,8 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
 
         self.calcPushButton.clicked.connect(self.calc)
         self.tableWidget.itemDoubleClicked.connect(self.seriesClicked)
+        self.removeSelectedPushButton.clicked.connect(self.removeSelect)
+        self.removeAllPushButton.clicked.connect(self.removeAll)
         self.exportPushButton.clicked.connect(self.export)
 
     @property
@@ -158,6 +160,19 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         self.timeseries.info.show_index = row
 
         self.click_series.emit()
+
+    @state_node
+    def removeSelect(self):
+        indexes = get_tablewidget_selected_row(self.tableWidget)
+        timeseries = self.timeseries.info.series
+        for index in reversed(indexes):
+            timeseries.pop(index)
+        self.showTimeseries()
+
+    @state_node
+    def removeAll(self):
+        self.timeseries.info.series.clear()
+        self.showTimeseries()
 
     @state_node
     def export(self):

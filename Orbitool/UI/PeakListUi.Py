@@ -14,9 +14,6 @@ class Ui_Form(object):
         Form.resize(263, 336)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.pushButton = QtWidgets.QPushButton(Form)
-        self.pushButton.setObjectName("pushButton")
-        self.verticalLayout.addWidget(self.pushButton)
         self.autoScrollCheckBox = QtWidgets.QCheckBox(Form)
         self.autoScrollCheckBox.setChecked(True)
         self.autoScrollCheckBox.setObjectName("autoScrollCheckBox")
@@ -89,7 +86,6 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.pushButton.setText(_translate("Form", "Import"))
         self.autoScrollCheckBox.setText(_translate("Form", "Scroll according to plot"))
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("Form", "position"))

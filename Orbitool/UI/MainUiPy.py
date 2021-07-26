@@ -22,7 +22,9 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
+
         manager = self.manager
+        self.setWindowTitle(f"Orbitool {manager.workspace.info.version}")
 
         self.workspaceLoadAction.triggered.connect(self.load)
         self.workspaceSaveAction.triggered.connect(self.save)

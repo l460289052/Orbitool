@@ -96,13 +96,14 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                                 return
                         sleep(.1)
                         if self.aborted:
-                            return abort()
+                            return
                     while len(results) > 0 and results[0].ready():
                         ret = results.popleft().get()
                         if isinstance(ret, Exception):
                             self.finished.emit(
                                 (ret, (self.func, self.file)))
-                            return abort()
+                            self.abort()
+                            return
                         queue.put(ret)
 
                 for i, input_data in self.manager.tqdm(
@@ -117,6 +118,8 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                     wait_to_ready(False)
 
                 while results:
+                    if self.aborted:
+                        return abort()
                     wait_to_ready(True)
 
                 queue.put(None)

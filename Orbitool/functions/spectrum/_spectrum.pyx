@@ -33,8 +33,8 @@ def splitPeaks(np.ndarray[floats,ndim=1] mz, np.ndarray[floats,ndim=1] intensity
     cdef np.ndarray[bool,ndim=1] peaksIndex = intensity > delta
     cdef np.ndarray[int32,ndim=1] l = index[:-1][peaksIndex[1:] > peaksIndex[:-1]]
     cdef np.ndarray[int32,ndim=1] r = index[1:][peaksIndex[:-1] > peaksIndex[1:]] + 1
-    if l[0] + 1 >= r[0]:
+    if len(l) < len(r):
         l = np.append((start,), l)
-    if l[-1] + 1 >= r[-1]:
+    elif len(l) > len(r):
         r = np.append(r, np.array((stop,)))
     return np.stack((l, r), 1)

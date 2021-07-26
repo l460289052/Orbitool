@@ -80,7 +80,10 @@ cdef tuple getMassPointParams(DoubleArray mass, DoubleArray intensity,
     if not flag:
         global_peak_noise = polynomial.polyval(params[0, 1], poly_coef)
         params[1] = params[0]
-        params[1, 0] *= global_std / global_peak_noise
+        if abs(global_peak_noise) < 1e-6:
+            params[1, 0] = 0
+        else:
+            params[1, 0] *= global_std / global_peak_noise
     return True, params
 
 def getGlobalShownNoise(DoubleArray poly_coef, double n_sigma, double std):
@@ -143,15 +146,19 @@ def getNoiseParams(DoubleArray mass, DoubleArray intensity, double quantile,
 
     masked_intensity = intensity[other_mask]
     
-    quantile_mask = masked_intensity < np.quantile(masked_intensity, quantile)
-    masked_mass = mass[other_mask][quantile_mask]
-    masked_intensity = masked_intensity[quantile_mask]
-    # poly
-    poly_coef = polynomial.polyfit(mass[other_mask][quantile_mask],
-        masked_intensity, 1 if mass_dependent else 0)
-    
-    # norm
-    std = masked_intensity.std()
+    if len(masked_intensity) == 0:
+        poly_coef = np.zeros(1, dtype=npdouble)
+        std = 0
+    else:
+        quantile_mask = masked_intensity < np.quantile(masked_intensity, quantile)
+        masked_mass = mass[other_mask][quantile_mask]
+        masked_intensity = masked_intensity[quantile_mask]
+        # poly
+        poly_coef = polynomial.polyfit(mass[other_mask][quantile_mask],
+            masked_intensity, 1 if mass_dependent else 0)
+        
+        # norm
+        std = masked_intensity.std()
     cdef list ret = []
     for i, mass_point in enumerate(mass_points):
         masked_mass = mass[mass_masks[i]]

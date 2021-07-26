@@ -15,13 +15,6 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QPushButton" name="pushButton">
-     <property name="text">
-      <string>Import</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QCheckBox" name="autoScrollCheckBox">
      <property name="text">
       <string>Scroll according to plot</string>
