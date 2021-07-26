@@ -319,6 +319,10 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2021.07.26 version 2.0.3 beta**
+
++ Adjust mass list item by group
+
 **2021.07.23 version 2.0.2 beta**
 
 Bug fix

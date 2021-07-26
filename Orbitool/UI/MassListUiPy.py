@@ -26,6 +26,9 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
         self.addPushButton.clicked.connect(self.addMass)
         self.removePushButton.clicked.connect(self.rmMass)
 
+        self.groupPlusPushButton.clicked.connect(lambda: self.group_plus(1))
+        self.groupMinusPushButton.clicked.connect(lambda: self.group_plus(-1))
+
         self.mergePushButton.clicked.connect(self.merge)
         self.importPushButton.clicked.connect(self.import_masslist)
         self.exportPushButton.clicked.connect(self.export)
@@ -52,7 +55,7 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
 
     @state_node
     def addMass(self):
-        text = self.lineEdit.text()
+        text = self.addItemLineEdit.text()
         rtol = self.doubleSpinBox.value() / 1e6
         masslist = self.masslist.masslist
         for item in text.split(','):
@@ -79,6 +82,28 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
         masslist = self.masslist.masslist
         for index in reversed(indexes):
             masslist.pop(index)
+        self.showMasslist()
+
+    @state_node(withArgs=True)
+    def group_plus(self, times):
+        abs_times = abs(times)
+        sign = times / abs_times
+        group = Formula(self.groupLineEdit.text())
+        group *= abs_times
+        mass_delta = sign * group.mass()
+        for item in self.masslist.masslist:
+            if len(item.formulas) > 0:
+                for f in item.formulas:
+                    if sign > 0:
+                        f += group
+                    else:
+                        f -= group
+                if len(item.formulas) == 1:
+                    item.position = item.formulas[0].mass()
+                else:
+                    item.position += mass_delta
+            else:
+                item.position += mass_delta
         self.showMasslist()
 
     def get_selected_index(self):
