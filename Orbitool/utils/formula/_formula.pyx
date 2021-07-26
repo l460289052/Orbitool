@@ -114,6 +114,8 @@ cdef class Formula:
                         self.addElement(e, m_int, v)
                     elif k == 'charge':
                         self.setE(0,-v)
+                    elif k.startswith('e'):
+                        self.setE(0,v)
                     else:
                         raise ValueError('wrong kwargs'+k)
         except ValueError as e:
@@ -395,6 +397,16 @@ cdef class Formula:
             ret[i,1]=iit.first.second
             ret[i,2]=iit.second
             inc(i)
+        return ret
+
+    def to_dict(self):
+        cdef dict ret = {}
+        cdef int_pair it
+        cdef ints_pair iit
+        for it in self.elements:
+            ret[elements[it.first]] = it.second - self.getI(it.first, 0)
+        for iit in self.isotopes:
+            ret[f"{elements[iit.first.first]}[{iit.first.second}]"] = iit.second
         return ret
 
     @staticmethod

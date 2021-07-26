@@ -4,6 +4,7 @@ from copy import copy
 
 from .. import Formula
 
+
 def test_formula1():
     s = "N[15]O3-"
     f = Formula(s)
@@ -61,7 +62,28 @@ def test_isotopes():
     assert h.mass() == f.mass()
     assert (h.to_numpy() == f.to_numpy()).all()
     assert h == f
-    
+
     assert Formula.from_numpy(f.to_numpy()) == f
-    
+
     assert g.findOrigin() == f.findOrigin()
+
+
+def test_to_dict():
+    f = Formula("C10H17O10N3NO3-")
+    assert f.to_dict() == {
+        "C": 10,
+        "H": 17,
+        "O": 13,
+        "N": 4,
+        "e": 1}
+    assert Formula(f.to_dict()) == f
+
+    f = Formula("C16H20O10O[18]2N3-")
+    assert f.to_dict() == {
+        "C": 16,
+        "H": 20,
+        "O": 10,
+        "N": 3,
+        "O[18]": 2,
+        "e": 1}
+    assert Formula(f.to_dict()) == f

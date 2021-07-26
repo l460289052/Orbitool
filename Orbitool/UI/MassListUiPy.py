@@ -157,14 +157,30 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
             return
 
         masslist = self.masslist.masslist
+        export_split = self.splitFormulaCheckBox.isChecked()
 
         def func():
+            if export_split:
+                dicts = [item.formulas[0].to_dict() if len(
+                    item.formulas) == 1 else {} for item in masslist]
+                # use dict instead of orderedset
+                header = dict.fromkeys(["e", "C", "H", "O", "N"])
+                for d in dicts:
+                    header.update(d)
             with open(f, 'w', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerow(['position', 'formulas'])
-
-                for item in masslist:
-                    writer.writerow(
-                        [item.position, '/'.join(str(formula) for formula in item.formulas)])
+                if export_split:
+                    writer.writerow(['position', 'formulas', *header])
+                    for item, d in zip(masslist, dicts):
+                        writer.writerow([
+                            item.position,
+                            '/'.join(str(formula)
+                                     for formula in item.formulas),
+                            *(d.get(k, 0) for k in header)])
+                else:
+                    writer.writerow(['position', 'formulas'])
+                    for item in masslist:
+                        writer.writerow(
+                            [item.position, '/'.join(str(formula) for formula in item.formulas)])
 
         yield func, "export mass list"
