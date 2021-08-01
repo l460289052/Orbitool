@@ -216,7 +216,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.addFilePushButton.setText(_translate("Form", "&Import file"))
+        self.addFilePushButton.setText(_translate("Form", "&Import file(s)"))
         self.addFilePushButton.setShortcut(_translate("Form", "Alt+I"))
         self.addFolderPushButton.setText(_translate("Form", "Import &folder"))
         self.addFolderPushButton.setShortcut(_translate("Form", "Alt+F"))

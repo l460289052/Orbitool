@@ -1,11 +1,14 @@
 import csv
-from typing import List, Optional, Tuple
 from datetime import datetime, timedelta
 from itertools import chain
+from typing import Dict, List, Optional, Tuple
+from functools import partial
 
-from PyQt5 import QtWidgets, QtCore
+import matplotlib.lines
 import numpy as np
+from PyQt5 import QtCore, QtWidgets
 
+from .. import config
 from ..functions.peakfit.base import BaseFunc as BaseFitFunc
 from ..functions.spectrum import splitPeaks
 from ..structures.HDF5 import StructureListView
@@ -14,10 +17,9 @@ from ..structures.timeseries import TimeSeries
 from ..utils.formula import Formula
 from ..utils.time_convert import getTimesExactToS
 from . import TimeseriesesUi
-from .component import Plot
+from .component import Plot, factory
 from .manager import Manager, MultiProcess, state_node
 from .utils import get_tablewidget_selected_row, savefile
-from .. import config
 
 
 class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
@@ -29,6 +31,8 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         self.setupUi(self)
         manager.inited_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
+
+        self.shown_series: Dict[int, matplotlib.lines.Line2D] = {}
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -138,20 +142,37 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         table.clearContents()
         table.setRowCount(0)
         table.setRowCount(len(series))
+        shown_series = self.shown_series
         for index, s in enumerate(series):
-            table.setItem(index, 0, QtWidgets.QTableWidgetItem(s.tag))
-            table.setItem(index, 1, QtWidgets.QTableWidgetItem(
-                format(s.position_min, '.5f')))
+            chb = factory.CheckBoxFactory(index in shown_series)
+            chb.toggled.connect(partial(self.showTimeseriesAt, index))
+            table.setCellWidget(index, 0, chb)
+            table.setItem(index, 1, QtWidgets.QTableWidgetItem(s.tag))
             table.setItem(index, 2, QtWidgets.QTableWidgetItem(
+                format(s.position_min, '.5f')))
+            table.setItem(index, 3, QtWidgets.QTableWidgetItem(
                 format(s.position_max, '.5f')))
 
+    @state_node(withArgs=True)
+    def showTimeseriesAt(self, index: int, checked: bool):
+        shown_series = self.shown_series
         ax = self.plot.ax
-        ax.clear()
-        for s in series:
-            ax.plot(s.times, s.intensity, label=s.tag)
+        if checked:
+            if index in shown_series:
+                return
+
+            series = self.timeseries.info.series
+            s = series[index]
+            lines = ax.plot(s.times, s.intensity, label=s.tag)
+            shown_series[index] = lines[-1]
+        else:
+            if index not in shown_series:
+                return
+
+            line = shown_series.pop(index)
+            line.remove()
 
         ax.legend()
-
         self.plot.canvas.draw()
 
     @state_node(withArgs=True)
@@ -167,12 +188,15 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         timeseries = self.timeseries.info.series
         for index in reversed(indexes):
             timeseries.pop(index)
+        self.shown_series = {index - (index>indexes).sum(): line for index, line in self.shown_series.items()}
         self.showTimeseries()
 
     @state_node
     def removeAll(self):
         self.timeseries.info.series.clear()
+        self.shown_series.clear()
         self.showTimeseries()
+        self.plot.ax.clear()
 
     @state_node
     def export(self):

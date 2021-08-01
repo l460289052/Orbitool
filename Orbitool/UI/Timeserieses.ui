@@ -244,6 +244,11 @@
          </attribute>
          <column>
           <property name="text">
+           <string>show</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
            <string>tag</string>
           </property>
          </column>

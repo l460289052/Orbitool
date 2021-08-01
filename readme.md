@@ -13,6 +13,8 @@ please view requirements.txt
 
 # Try
 
+Open "Orbitool.exe"
+
 This tool can help you process with spectrum averaging, denoising, calibrating, peak fitting and generating time series.
 
 There are 3 parts: Toolbar, Tabs, Dockers.
@@ -371,7 +373,7 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
-** 2.0.4 beta**
+**2021.07.27 version 2.0.4**
 
 + Mass list export with split formula
 
