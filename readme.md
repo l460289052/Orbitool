@@ -373,6 +373,15 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2021.08.01 version 2.0.5**
+
++ Orbitool won't plot timeseries by default (too slow)
+
+Bug fix
++ adjust timeseries
++ calculate noise
++ export timeseries
+
 **2021.07.27 version 2.0.4**
 
 + Mass list export with split formula

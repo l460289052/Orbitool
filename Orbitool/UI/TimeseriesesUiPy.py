@@ -1,14 +1,16 @@
 import csv
 from datetime import datetime, timedelta
+from functools import partial
 from itertools import chain
 from typing import Dict, List, Optional, Tuple
-from functools import partial
 
 import matplotlib.lines
+import matplotlib.ticker
 import numpy as np
 from PyQt5 import QtCore, QtWidgets
 
 from .. import config
+from ..functions import binary_search
 from ..functions.peakfit.base import BaseFunc as BaseFitFunc
 from ..functions.spectrum import splitPeaks
 from ..structures.HDF5 import StructureListView
@@ -44,6 +46,9 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         self.removeSelectedPushButton.clicked.connect(self.removeSelect)
         self.removeAllPushButton.clicked.connect(self.removeAll)
         self.exportPushButton.clicked.connect(self.export)
+
+        self.rescalePushButton.clicked.connect(self.rescale)
+        self.logScaleCheckBox.toggled.connect(self.logScale)
 
     @property
     def timeseries(self):
@@ -245,6 +250,47 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
                     writer.writerow(row)
 
         yield func
+
+    @state_node(mode='x')
+    def rescale(self):
+        plot = self.plot
+        series = self.timeseries.info.series
+        if len(plot.ax.get_lines()) == 0:
+            return
+        l, r = plot.ax.get_xlim()
+        l = np.array(matplotlib.dates.num2date(
+            l).replace(tzinfo=None), dtype=np.datetime64)
+        r = np.array(matplotlib.dates.num2date(
+            r).replace(tzinfo=None), dtype=np.datetime64)
+        b = 0
+        t = 1
+        shown_series = self.shown_series
+        for index, s in enumerate(series):
+            if index not in shown_series:
+                continue
+            sli = binary_search.indexBetween(s.times, (l, r))
+            if sli.stop > sli.start:
+                t = max(t, max(s.intensity[sli]))
+
+        if self.logScaleCheckBox.isChecked():
+            t *= 10
+            b = 1
+        else:
+            delta = 0.05 * t
+            b = -delta
+            t += delta
+        plot.ax.set_ylim(b, t)
+        plot.canvas.draw()
+
+    @state_node
+    def logScale(self):
+        log = self.logScaleCheckBox.isChecked()
+        ax = self.plot.ax
+        ax.set_yscale('log' if log else 'linear')
+        if not log:
+            ax.yaxis.set_major_formatter(
+                matplotlib.ticker.FormatStrFormatter(r"%.1e"))
+        self.rescale()
 
 
 class CalcTimeseries(MultiProcess):
