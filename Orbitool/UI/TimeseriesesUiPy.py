@@ -188,7 +188,8 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         timeseries = self.timeseries.info.series
         for index in reversed(indexes):
             timeseries.pop(index)
-        self.shown_series = {index - (index>indexes).sum(): line for index, line in self.shown_series.items()}
+        self.shown_series = {
+            index - (index > indexes).sum(): line for index, line in self.shown_series.items()}
         self.showTimeseries()
 
     @state_node
@@ -201,7 +202,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
     @state_node
     def export(self):
         series = self.timeseries.info.series
-        if len(series) == 0:
+        if len(series) == 0 or all(len(s.times) == 0 for s in series):
             return
         time_min = min(min(s.times) for s in series if len(s.times) > 0)
         time_max = max(max(s.times) for s in series if len(s.times) > 0)

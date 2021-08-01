@@ -147,15 +147,18 @@ def getNoiseParams(DoubleArray mass, DoubleArray intensity, double quantile,
     masked_intensity = intensity[other_mask]
     
     if len(masked_intensity) == 0:
-        poly_coef = np.zeros(1, dtype=npdouble)
+        poly_coef = np.zeros(2 if mass_dependent else 0, dtype=npdouble)
         std = 0
     else:
         quantile_mask = masked_intensity < np.quantile(masked_intensity, quantile)
         masked_mass = mass[other_mask][quantile_mask]
         masked_intensity = masked_intensity[quantile_mask]
         # poly
-        poly_coef = polynomial.polyfit(mass[other_mask][quantile_mask],
-            masked_intensity, 1 if mass_dependent else 0)
+        if len(masked_mass) > 0:
+            poly_coef = polynomial.polyfit(masked_mass,
+                masked_intensity, 1 if mass_dependent else 0)
+        else:
+            poly_coef = np.zeros(2 if mass_dependent else 0)
         
         # norm
         std = masked_intensity.std()
