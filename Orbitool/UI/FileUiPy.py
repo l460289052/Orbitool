@@ -122,8 +122,8 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         table.setRowCount(len(pathlist))
 
         for i, f in enumerate(pathlist):
-            v = [os.path.split(f.path)[1], f.startDatetime,
-                 f.endDatetime, f.path]
+            v = [os.path.split(f.path)[1], f.startDatetime.replace(microsecond=0),
+                 f.endDatetime.replace(microsecond=0), f.path]
             for j, vv in enumerate(v):
                 table.setItem(i, j, QtWidgets.QTableWidgetItem(str(vv)))
 

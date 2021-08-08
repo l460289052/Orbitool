@@ -71,7 +71,6 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
             self.massListRadioButton,
             self.selectedMassListRadioButton,
             self.rtolDoubleSpinBox,
-            self.legendsCheckBox,
             self.logScaleCheckBox])
 
     @state_node
