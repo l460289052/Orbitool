@@ -25,3 +25,4 @@ tmptest
 .coverage
 htmlcov
 *.sqlite3
+collect.txt
