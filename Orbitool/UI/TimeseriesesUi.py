@@ -118,7 +118,7 @@ class Ui_Form(object):
         sizePolicy.setHeightForWidth(self.rtolDoubleSpinBox.sizePolicy().hasHeightForWidth())
         self.rtolDoubleSpinBox.setSizePolicy(sizePolicy)
         self.rtolDoubleSpinBox.setMinimum(0.01)
-        self.rtolDoubleSpinBox.setMaximum(9.99)
+        self.rtolDoubleSpinBox.setMaximum(99.99)
         self.rtolDoubleSpinBox.setProperty("value", 1.0)
         self.rtolDoubleSpinBox.setObjectName("rtolDoubleSpinBox")
         self.formLayout_4.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.rtolDoubleSpinBox)

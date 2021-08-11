@@ -91,7 +91,7 @@ class Ui_Form(object):
         sizePolicy.setHeightForWidth(self.doubleSpinBox.sizePolicy().hasHeightForWidth())
         self.doubleSpinBox.setSizePolicy(sizePolicy)
         self.doubleSpinBox.setMinimum(0.01)
-        self.doubleSpinBox.setMaximum(9.99)
+        self.doubleSpinBox.setMaximum(999.99)
         self.doubleSpinBox.setProperty("value", 1.0)
         self.doubleSpinBox.setObjectName("doubleSpinBox")
         self.horizontalLayout_14.addWidget(self.doubleSpinBox)

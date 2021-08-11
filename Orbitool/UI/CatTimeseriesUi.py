@@ -145,7 +145,7 @@ class Ui_Form(object):
         self.horizontalLayout_28.addWidget(self.label_16)
         self.rtolDoubleSpinBox = QtWidgets.QDoubleSpinBox(self.verticalLayoutWidget)
         self.rtolDoubleSpinBox.setMinimum(0.01)
-        self.rtolDoubleSpinBox.setMaximum(9.99)
+        self.rtolDoubleSpinBox.setMaximum(99.99)
         self.rtolDoubleSpinBox.setProperty("value", 1.0)
         self.rtolDoubleSpinBox.setObjectName("rtolDoubleSpinBox")
         self.horizontalLayout_28.addWidget(self.rtolDoubleSpinBox)

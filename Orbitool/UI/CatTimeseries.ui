@@ -270,7 +270,7 @@
             <double>0.010000000000000</double>
            </property>
            <property name="maximum">
-            <double>9.990000000000000</double>
+            <double>99.989999999999995</double>
            </property>
            <property name="value">
             <double>1.000000000000000</double>

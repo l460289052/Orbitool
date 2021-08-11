@@ -65,7 +65,11 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QDoubleSpinBox" name="mzMinDoubleSpinBox"/>
+          <widget class="QDoubleSpinBox" name="mzMinDoubleSpinBox">
+           <property name="maximum">
+            <double>999.990000000000009</double>
+           </property>
+          </widget>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_3">
@@ -77,7 +81,7 @@
          <item row="1" column="1">
           <widget class="QDoubleSpinBox" name="mzMaxDoubleSpinBox">
            <property name="maximum">
-            <double>999.990000000000009</double>
+            <double>9999.989999999999782</double>
            </property>
           </widget>
          </item>
