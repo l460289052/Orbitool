@@ -134,8 +134,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
             self.animation.norm_line = None
         ax = self.plot.ax
 
-        # resolution = self.peak_shape.info.peaks_manager.resolution
-        resolution = None
+        resolution = info.func.peak_fit_res
         if resolution is None:
             xlim = 2e-5
         else:

@@ -18,5 +18,5 @@ def sleep(second):
         loop = QtCore.QEventLoop()
         timer = QtCore.QTimer()
         timer.timeout.connect(loop.quit)
-        timer.start(second * 1000)
+        timer.start(int(second * 1000))
         loop.exec_()

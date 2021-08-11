@@ -59,8 +59,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>319</width>
-            <height>325</height>
+            <width>341</width>
+            <height>327</height>
            </rect>
           </property>
           <attribute name="label">
@@ -97,35 +97,21 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>subtract</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QCheckBox" name="substractCheckBox">
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0" colspan="2">
+             <item row="2" column="0" colspan="2">
               <widget class="Line" name="line">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
               </widget>
              </item>
-             <item row="4" column="0">
+             <item row="3" column="0">
               <widget class="QLabel" name="sizeDependentLabel">
                <property name="text">
                 <string>size-dependent</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
+             <item row="3" column="1">
               <widget class="QCheckBox" name="sizeDependentCheckBox"/>
              </item>
             </layout>
@@ -224,8 +210,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>319</width>
-            <height>325</height>
+            <width>341</width>
+            <height>327</height>
            </rect>
           </property>
           <attribute name="label">
@@ -319,6 +305,13 @@
            </item>
           </layout>
          </widget>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="substractCheckBox">
+         <property name="text">
+          <string>Subtract noise level from peaks</string>
+         </property>
         </widget>
        </item>
        <item>

@@ -85,7 +85,7 @@ class FloatDtype(Dtype):
 
 
 class BoolDtype(Dtype):
-    dtype = np.dtype(np.bool)
+    dtype = np.dtype(bool)
 
 
 class StrDtype(Dtype):

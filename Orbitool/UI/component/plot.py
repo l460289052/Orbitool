@@ -29,7 +29,7 @@ class Plot:
         self.resized = True
         self.timer = QTimer()
         self.timer.timeout.connect(self.resize)
-        self.timer.start(plot_refresh_interval.total_seconds() * 1000)
+        self.timer.start(int(plot_refresh_interval.total_seconds() * 1000))
 
     def clear(self):
         self.fig.clf()

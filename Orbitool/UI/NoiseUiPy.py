@@ -91,7 +91,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
             dsb = QtWidgets.QSpinBox()
             dsb.setMinimum(1)
             dsb.setMaximum(50)
-            dsb.setValue(formula.delta)
+            dsb.setValue(int(formula.delta))
             widget.setCellWidget(i, 1, dsb)
             widget.setItem(i, 2, QtWidgets.QTableWidgetItem(
                 format(formula.formula.mass(), ".6f")))
