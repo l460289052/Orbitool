@@ -373,6 +373,16 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2021.08.11 version 2.0.7**
+
+Bug fix
++ Res = None at peak shape tab
++ unify plot actions
++ add tool tips
++ change spin boxes' limits
++ mass defect transparent
+
+
 **2021.08.08 version 2.0.6**
 
 + Remove microsecond when show files
