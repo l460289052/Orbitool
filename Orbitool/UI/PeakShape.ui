@@ -89,6 +89,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="cancelPushButton">
+       <property name="toolTip">
+        <string>Ctrl+Z</string>
+       </property>
        <property name="text">
         <string>Cancel removal</string>
        </property>
@@ -99,6 +102,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="finishPushButton">
+       <property name="toolTip">
+        <string>Return Key</string>
+       </property>
        <property name="text">
         <string>Finish and continue</string>
        </property>

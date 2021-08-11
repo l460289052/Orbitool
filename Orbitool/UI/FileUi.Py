@@ -216,11 +216,14 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
+        self.addFilePushButton.setToolTip(_translate("Form", "Alt+I"))
         self.addFilePushButton.setText(_translate("Form", "&Import file(s)"))
         self.addFilePushButton.setShortcut(_translate("Form", "Alt+I"))
+        self.addFolderPushButton.setToolTip(_translate("Form", "Alt+F"))
         self.addFolderPushButton.setText(_translate("Form", "Import &folder"))
         self.addFolderPushButton.setShortcut(_translate("Form", "Alt+F"))
         self.recursionCheckBox.setText(_translate("Form", "Subdirectory"))
+        self.removeFilePushButton.setToolTip(_translate("Form", "Del Key"))
         self.removeFilePushButton.setText(_translate("Form", "Remove selected"))
         self.removeFilePushButton.setShortcut(_translate("Form", "Del"))
         item = self.tableWidget.horizontalHeaderItem(0)
@@ -246,8 +249,10 @@ class Ui_Form(object):
         self.label.setText(_translate("Form", "auto"))
         self.averageCheckBox.setText(_translate("Form", "Average"))
         self.label_2.setText(_translate("Form", "Show spectra for"))
+        self.selectedPushButton.setToolTip(_translate("Form", "Alt+S"))
         self.selectedPushButton.setText(_translate("Form", "&Selected file(s)"))
         self.selectedPushButton.setShortcut(_translate("Form", "Alt+S"))
+        self.allPushButton.setToolTip(_translate("Form", "Return Key"))
         self.allPushButton.setText(_translate("Form", "&All file(s)"))
         self.allPushButton.setShortcut(_translate("Form", "Return"))
 

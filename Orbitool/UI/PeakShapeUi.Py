@@ -68,8 +68,10 @@ class Ui_Form(object):
         self.showPushButton.setShortcut(_translate("Form", "Alt+S"))
         self.exportPushButton.setText(_translate("Form", "&Export peak shape info"))
         self.exportPushButton.setShortcut(_translate("Form", "Alt+E"))
+        self.cancelPushButton.setToolTip(_translate("Form", "Ctrl+Z"))
         self.cancelPushButton.setText(_translate("Form", "Cancel removal"))
         self.cancelPushButton.setShortcut(_translate("Form", "Ctrl+Z"))
+        self.finishPushButton.setToolTip(_translate("Form", "Return Key"))
         self.finishPushButton.setText(_translate("Form", "Finish and continue"))
         self.finishPushButton.setShortcut(_translate("Form", "Return"))
 

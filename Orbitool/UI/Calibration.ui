@@ -297,6 +297,9 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="toolTip">
+          <string>Alt+C</string>
+         </property>
          <property name="text">
           <string>&amp;Calc calibrate info</string>
          </property>
@@ -313,6 +316,9 @@
          <layout class="QFormLayout" name="formLayout">
           <item row="0" column="0">
            <widget class="QPushButton" name="showSpectrumPushButton">
+            <property name="toolTip">
+             <string>Alt+S</string>
+            </property>
             <property name="text">
              <string>selected &amp;spectrum</string>
             </property>
@@ -328,6 +334,9 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Alt+R</string>
             </property>
             <property name="text">
              <string>selected &amp;results</string>
@@ -348,9 +357,6 @@
             <property name="text">
              <string>all calibration info</string>
             </property>
-            <property name="shortcut">
-             <string>Ctrl+S</string>
-            </property>
            </widget>
           </item>
          </layout>
@@ -366,6 +372,9 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="toolTip">
+            <string>Return Key</string>
+           </property>
            <property name="text">
             <string>Calibrate and continue</string>
            </property>
@@ -376,6 +385,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="skipPushButton">
+           <property name="toolTip">
+            <string>Alt+P</string>
+           </property>
            <property name="text">
             <string>Ski&amp;p calibration</string>
            </property>

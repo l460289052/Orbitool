@@ -24,6 +24,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Alt+I</string>
+       </property>
        <property name="text">
         <string>&amp;Import file(s)</string>
        </property>
@@ -39,6 +42,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Alt+F</string>
        </property>
        <property name="text">
         <string>Import &amp;folder</string>
@@ -81,6 +87,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Del Key</string>
        </property>
        <property name="text">
         <string>Remove selected</string>
@@ -413,6 +422,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Alt+S</string>
+       </property>
        <property name="text">
         <string>&amp;Selected file(s)</string>
        </property>
@@ -428,6 +440,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Return Key</string>
        </property>
        <property name="text">
         <string>&amp;All file(s)</string>

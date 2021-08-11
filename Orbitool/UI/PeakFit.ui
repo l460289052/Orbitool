@@ -18,8 +18,11 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QPushButton" name="showSelectedPushButton">
+       <property name="toolTip">
+        <string>Alt+O</string>
+       </property>
        <property name="text">
-        <string>show selected spectrum</string>
+        <string>sh&amp;ow selected spectrum</string>
        </property>
        <property name="shortcut">
         <string>Alt+O</string>
@@ -36,6 +39,9 @@
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="1">
            <widget class="QPushButton" name="filterUnselectedPushButton">
+            <property name="toolTip">
+             <string>Alt+U</string>
+            </property>
             <property name="text">
              <string>&amp;unselect</string>
             </property>
@@ -46,6 +52,9 @@
           </item>
           <item row="0" column="0">
            <widget class="QPushButton" name="filterSelectedPushButton">
+            <property name="toolTip">
+             <string>Alt+S</string>
+            </property>
             <property name="text">
              <string>&amp;selected</string>
             </property>
@@ -56,6 +65,9 @@
           </item>
           <item row="1" column="0">
            <widget class="QPushButton" name="filterFormulaWithPushButton">
+            <property name="toolTip">
+             <string>Alt+F</string>
+            </property>
             <property name="text">
              <string>with &amp;formula</string>
             </property>
@@ -66,6 +78,9 @@
           </item>
           <item row="1" column="1">
            <widget class="QPushButton" name="filterFormulaWithoutPushButton">
+            <property name="toolTip">
+             <string>Alt+W</string>
+            </property>
             <property name="text">
              <string>&amp;without</string>
             </property>
@@ -78,6 +93,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="filterClearPushButton">
+          <property name="toolTip">
+           <string>Alt+C</string>
+          </property>
           <property name="text">
            <string>&amp;clear filter</string>
           </property>
@@ -147,6 +165,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="actionFit_MassListPushButton">
+              <property name="toolTip">
+               <string>Alt+M</string>
+              </property>
               <property name="text">
                <string>&amp;mass list</string>
               </property>
@@ -161,6 +182,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="actionRmPushButton">
+          <property name="toolTip">
+           <string>Alt+R</string>
+          </property>
           <property name="text">
            <string>&amp;remove</string>
           </property>
@@ -171,6 +195,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="actionAddToMassListPushButton">
+          <property name="toolTip">
+           <string>Alt+A</string>
+          </property>
           <property name="text">
            <string>&amp;add to mass list</string>
           </property>
