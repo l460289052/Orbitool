@@ -59,8 +59,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>341</width>
-            <height>327</height>
+            <width>319</width>
+            <height>305</height>
            </rect>
           </property>
           <attribute name="label">
@@ -210,8 +210,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>341</width>
-            <height>327</height>
+            <width>319</width>
+            <height>305</height>
            </rect>
           </property>
           <attribute name="label">
@@ -393,7 +393,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="yLimDoublePushButton">
+          <widget class="QToolButton" name="yLimDoubleToolButton">
            <property name="text">
             <string>×2</string>
            </property>
@@ -403,7 +403,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="yLimHalfPushButton">
+          <widget class="QToolButton" name="yLimHalfToolButton">
            <property name="text">
             <string>÷2</string>
            </property>

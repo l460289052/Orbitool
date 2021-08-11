@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>523</width>
-    <height>337</height>
+    <width>679</width>
+    <height>383</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -199,6 +199,40 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
+        <widget class="QPushButton" name="scaleToSpectrumPushButton">
+         <property name="text">
+          <string>Scale to spectrum</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="leftToolButton">
+         <property name="text">
+          <string>&lt;-</string>
+         </property>
+         <property name="shortcut">
+          <string>Left</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="rightToolButton">
+         <property name="text">
+          <string>-&gt;</string>
+         </property>
+         <property name="shortcut">
+          <string>Right</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>y-lim</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="yLogcheckBox">
          <property name="text">
           <string>y-log scale</string>
@@ -206,9 +240,29 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="scalePushButton">
+        <widget class="QToolButton" name="rescaleToolButton">
          <property name="text">
-          <string>autoscale y axis</string>
+          <string>rescale</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="yLimDoubleToolButton">
+         <property name="text">
+          <string>×2</string>
+         </property>
+         <property name="shortcut">
+          <string>Up</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="yLimHalfToolButton">
+         <property name="text">
+          <string>÷2</string>
+         </property>
+         <property name="shortcut">
+          <string>Down</string>
          </property>
         </widget>
        </item>

@@ -32,8 +32,3 @@ def test_export_load():
         window.manager.workspace = WorkSpace(tmppath)
         window.manager.inited_or_restored.emit()
         window.close()
-
-
-def test_():
-    with tempfile.TemporaryFile() as f:
-        raise Exception("123")

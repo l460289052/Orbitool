@@ -55,16 +55,13 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         self.plot = Plot(self.widget)
 
+        self.scaleToSpectrumPushButton.clicked.connect(self.scale_spectrum)
         self.yLogcheckBox.toggled.connect(self.ylog_toggle)
-        self.scalePushButton.clicked.connect(self.rescale_clicked)
-        self.previousShortCut = QtWidgets.QShortcut("Left", self)
-        self.previousShortCut.activated.connect(lambda: self.moveRight(-1))
-        self.nextShortCut = QtWidgets.QShortcut("Right", self)
-        self.nextShortCut.activated.connect(lambda: self.moveRight(1))
-        self.yDoubleShortCut = QtWidgets.QShortcut("Up", self)
-        self.yDoubleShortCut.activated.connect(lambda: self.y_times(2))
-        self.yHalfShortCut = QtWidgets.QShortcut("Down", self)
-        self.yHalfShortCut.activated.connect(lambda: self.y_times(.5))
+        self.rescaleToolButton.clicked.connect(self.rescale_clicked)
+        self.leftToolButton.clicked.connect(lambda: self.moveRight(-1))
+        self.rightToolButton.clicked.connect(lambda: self.moveRight(1))
+        self.yLimDoubleToolButton.clicked.connect(lambda: self.y_times(2))
+        self.yLimHalfToolButton.clicked.connect(lambda: self.y_times(.5))
 
     def restore(self):
         self.show_and_plot()
@@ -235,6 +232,18 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         plot.ax.set_xlim(x_min, x_max)
         plot.ax.set_ylim(y_min, y_max)
+
+    @state_node
+    def scale_spectrum(self):
+        info = self.peakfit.info
+        if info.spectrum is None:
+            return
+        spectrum = info.spectrum
+        self.plot.ax.set_xlim(spectrum.mz.min(), spectrum.mz.max())
+
+        self.rescale()
+
+        self.plot.canvas.draw()
 
     def timer_timeout(self):
         ax = self.plot.ax

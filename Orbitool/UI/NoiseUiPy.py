@@ -57,8 +57,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         self.spectrumPushButton.clicked.connect(self.scaleToSpectrum)
         self.yLogCheckBox.toggled.connect(self.yLogToggle)
         self.yAxisPushButton.clicked.connect(self.y_rescale_click)
-        self.yLimDoublePushButton.clicked.connect(lambda: self.y_times(2))
-        self.yLimHalfPushButton.clicked.connect(lambda: self.y_times(.5))
+        self.yLimDoubleToolButton.clicked.connect(lambda: self.y_times(2))
+        self.yLimHalfToolButton.clicked.connect(lambda: self.y_times(.5))
 
     @property
     def noise(self):
