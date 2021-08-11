@@ -29,6 +29,7 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         self.calcPushButton.clicked.connect(self.calc)
         self.exportPushButton.clicked.connect(self.export)
 
+        self.opaqueDoubleSpinBox.valueChanged.connect(self.replot)
         self.logCheckBox.toggled.connect(self.replot)
         self.showGreyCheckBox.toggled.connect(self.replot)
         self.minSizeHorizontalSlider.valueChanged.connect(self.replot)
@@ -101,6 +102,7 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         is_dbe = info.is_dbe
         gry = self.showGreyCheckBox.isChecked()
         is_log = self.logCheckBox.isChecked()
+        alpha = self.opaqueDoubleSpinBox.value()
 
         clr_x, clr_y, clr_size, clr_color = info.clr_x, info.clr_y, info.clr_size, info.clr_color
         gry_x, gry_y, gry_size = info.gry_x, info.gry_y, info.gry_size
@@ -128,12 +130,12 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
             gry_size = (gry_size - minimum) / (maximum - minimum) * \
                 (max_factor - min_factor) + min_factor
             ax.scatter(gry_x, gry_y, s=gry_size, c='grey',
-                       linewidths=0.5, edgecolors='k')
+                       linewidths=0.5, edgecolors='k', alpha=alpha)
 
         clr_size = (clr_size - minimum) / (maximum - minimum) * \
             (max_factor - min_factor) + min_factor
         sc = ax.scatter(clr_x, clr_y, s=clr_size, c=clr_color,
-                        cmap=rainbow_color_map, linewidths=0.5, edgecolors='k')
+                        cmap=rainbow_color_map, linewidths=0.5, edgecolors='k', alpha=alpha)
         clrb = plot.fig.colorbar(sc)
         element = info.element
         clrb.ax.set_title('DBE' if is_dbe else f'Element {element}')
