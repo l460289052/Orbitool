@@ -20,7 +20,8 @@ import numpy as np
 cimport numpy as np
 
 from ._element cimport elements, elementsMap, elementMass,\
-     elementMassNum, elementMassDist, str2element, element2str
+     elementMassNum, elementMassDist, str2element, element2str,\
+     elementsDbe2
 
 from ._element cimport dou_pair, int_pair
 
@@ -134,6 +135,16 @@ cdef class Formula:
 
     cpdef double mass(self):
         return _elements_isotopes_mass(self.elements, self.isotopes)
+
+    cpdef double dbe(self) except*:
+        cdef int_pair e
+        cdef double dbe = 2
+        for e in self.elements:
+            it = elementsDbe2.find(e.first)
+            if it == elementsDbe2.end():
+                raise ValueError(f"Please set DBE for '{elements[e]}'")
+            dbe += e.second * deref(it).second
+        return dbe / 2
 
     cpdef Formula findOrigin(self):
         cdef Formula formula = Formula.__new__(Formula)

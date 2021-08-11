@@ -12,6 +12,7 @@ def test_formula1():
     assert f['N[15]'] == 1
     assert f['N'] == 1
     assert f.charge == -1
+    assert f.dbe() == 1.
 
 
 def formula2():

@@ -28,6 +28,7 @@ cdef:
         cdef map[int32_t, int32_t] elements
         cdef map[pair[int32_t, int32_t], int32_t] isotopes
         cpdef double mass(self)
+        cpdef double dbe(self)except *
         cpdef Formula findOrigin(self)
         cpdef void addElement(self, str element, int32_t m=*, int32_t num=*) except *
         cdef void addEI(self, int32_t index, int32_t m, int32_t num) except *

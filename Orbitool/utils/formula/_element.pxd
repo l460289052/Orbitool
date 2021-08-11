@@ -26,3 +26,4 @@ cdef:
     str element2str(int_pair&)
     
     double getMass(int_pair&)
+    unordered_map[int32_t, int32_t] elementsDbe2

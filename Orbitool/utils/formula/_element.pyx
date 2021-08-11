@@ -86,3 +86,13 @@ def py_element2str(int32_t index, int32_t m):
 
 cdef double getMass(int_pair& p):
     return elementMassDist[p.first][p.second].first
+
+
+cdef dict _DBE2 = {
+    'e': -1, 'C': 2, 'H': -1, 'O': 0, 'N': 1, 'S': 0, 'Li': -1,
+    'Na': -1, 'K': -1, 'F': -1, 'Cl': -1, 'Br': -1, 'I': -1,
+    'P': 1, 'Si': 2}
+cdef unordered_map[int32_t,int32_t] elementsDbe2
+
+for e, i in _DBE2.items():
+    elementsDbe2[elementsMap[e]] = i
