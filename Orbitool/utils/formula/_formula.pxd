@@ -37,6 +37,7 @@ cdef:
         @staticmethod
         cdef str iToStr(int32_t index, int32_t m, int32_t num)
         cpdef toStr(self, bool showProton = *, bool withCharge = *)
+        cpdef double absoluteAbundance(self)
         cpdef double relativeAbundance(self)
         cpdef void clear(self)
         cdef void setE(self, int32_t index, int32_t num)except *

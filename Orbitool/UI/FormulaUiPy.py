@@ -7,6 +7,7 @@ from .manager import Manager, state_node
 from .component import factory
 from ..utils.formula import Formula
 from .utils import get_tablewidget_selected_row
+from . import FormulaResultUiPy
 
 
 class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
@@ -120,19 +121,14 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
     @state_node(withArgs=True)
     def calc(self, force: bool):
         text = self.inputLineEdit.text()
-        try:  # number
-            info = self.formula.info
-            mass = float(text)
-            if force:
-                result = info.force_calc.get(mass)
-            else:
-                result = info.restricted_calc.get(mass)
-            result.sort(key=lambda f: abs(f.mass() - mass))
-            result = ", ".join(str(r) for r in result)
-        except ValueError:
-            mass = Formula(text).mass()
-            result = format(mass, '.6f')
-        self.resultPlainTextEdit.setPlainText(result)
+
+        manager = self.manager
+        if manager.formulas_result_win is not None:
+            manager.formulas_result_win.close()
+            del manager.formulas_result_win
+        manager.formulas_result_win = FormulaResultUiPy.Window.FactoryCalc(
+            manager, text, force)
+        manager.formulas_result_win.show()
 
     @state_node
     def restrictedAddElement(self):
@@ -243,7 +239,7 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         for row in range(table.rowCount()):
             i = table.item(row, 0).text()
             calc.setEI(i)
-        
+
         calc.clear()
 
         table = self.unrestrictedTableWidget

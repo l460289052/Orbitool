@@ -5,7 +5,7 @@ import random
 
 
 from PyQt5.QtCore import QThread, pyqtSignal, QObject, QTimer
-from PyQt5.QtWidgets import QTableWidget
+from PyQt5.QtWidgets import QTableWidget, QMainWindow
 
 from ...workspace import WorkSpace
 from ..utils import showInfo
@@ -79,6 +79,7 @@ class Manager(QObject):
         self.progress_cnt = 0
 
         self.calibrationInfoWidget: QTableWidget = None
+        self.formulas_result_win: QMainWindow = None
 
     @overload
     def tqdm(self, iter: Iterable[T], msg: str = "") -> TQDM[T]:

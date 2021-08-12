@@ -233,6 +233,9 @@ cdef class Formula:
                 return ''.join(rets)+ f'e+{-index}'
         return ''.join(rets)
 
+    cpdef double absoluteAbundance(self):
+        return pyteomics.mass.isotopic_composition_abundance(formula=self.toStr(True, False))
+
     cpdef double relativeAbundance(self):
         if not self.isIsotope:
             return 1

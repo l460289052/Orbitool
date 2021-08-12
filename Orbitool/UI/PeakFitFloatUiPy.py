@@ -11,6 +11,8 @@ from ..utils.formula import Formula
 from . import PeakFitFloatUi
 from .component import Plot
 from .manager import Manager, state_node
+from .utils import set_header_sizes
+from . import FormulaResultUiPy
 
 
 class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
@@ -51,10 +53,33 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
         self.legendCheckBox.clicked.connect(self.replotPeak)
         self.originCheckBox.clicked.connect(self.replotPeak)
         self.residualCheckBox.clicked.connect(self.replotPeak)
+        set_header_sizes(self.peaksTableWidget.horizontalHeader(),
+                         [140, 300, 130, 130, 130, 130, 130])
+
+        self.peaksTableWidget.itemDoubleClicked.connect(self.finetuneFormula)
 
     @property
     def peakfit_info(self):
         return self.manager.workspace.peakfit_tab.info
+
+    @state_node(withArgs=True)
+    def finetuneFormula(self, item: QtWidgets.QTableWidgetItem):
+        row = self.peaksTableWidget.row(item)
+        peak_index = self.original_slice.start + row
+
+        manager = self.manager
+        if manager.formulas_result_win is not None:
+            manager.formulas_result_win.close()
+            del manager.formulas_result_win
+        manager.formulas_result_win = FormulaResultUiPy.Window.FactoryPeak(
+            manager, peak_index)
+        manager.formulas_result_win.show()
+        manager.formulas_result_win.acceptSignal.connect(
+            lambda formulas: self.finetuneFinish(row, formulas))
+
+    def finetuneFinish(self, local_index, formulas: List[Formula]):
+        self.peaks[local_index].formulas = formulas
+        self.showPeak()
 
     def showPeak(self):
         origin_peak = self.peakfit_info.raw_peaks[self.original_index]
@@ -71,17 +96,16 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
         rtol = self.manager.workspace.formula_docker.info.restricted_calc.rtol
 
         for index, peak in enumerate(show_peaks):
-            def setItem(column, msg):
+            def setText(column, msg):
                 table.setItem(
                     index, column, QtWidgets.QTableWidgetItem(str(msg)))
 
-            setItem(0, format(peak.peak_position, '.5f'))
-            table.setCellWidget(index, 1, QtWidgets.QLineEdit(
-                ', '.join(str(f) for f in peak.formulas)))
-            setItem(2, format(peak.peak_intensity, '.3e'))
-            setItem(4, format(peak.area, '.3e'))
+            setText(0, format(peak.peak_position, '.5f'))
+            setText(1, ', '.join(str(f) for f in peak.formulas))
+            setText(2, format(peak.peak_intensity, '.3e'))
+            setText(4, format(peak.area, '.3e'))
             if len(peak.formulas) == 1:
-                setItem(3,
+                setText(3,
                         format((peak.peak_position / peak.formulas[0].mass() - 1) * 1e6, '.5f'))
                 formula = peak.formulas[0]
                 if formula.isIsotope:
@@ -93,9 +117,9 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
                     for p in peaks[s]:
                         for f in p.formulas:
                             if f == origin:
-                                setItem(5, format(peak.peak_intensity /
+                                setText(5, format(peak.peak_intensity /
                                                   p.peak_intensity, '5f'))
-                                setItem(
+                                setText(
                                     6, format(formula.relativeAbundance(), '.5f'))
                                 break
                         else:
@@ -198,12 +222,7 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
 
     @state_node
     def save(self):
-        table = self.peaksTableWidget
         new_peaks = self.peaks
-        for index, peak in zip(range(table.rowCount()), new_peaks):
-            formula_line_edit: QtWidgets.QLineEdit = table.cellWidget(index, 1)
-            peak.formulas = [Formula(striped) for s in formula_line_edit.text(
-            ).split(',') if len(striped := s.strip()) > 0]
 
         self.peakfit_info.raw_split_num[self.original_index] = len(new_peaks)
 
