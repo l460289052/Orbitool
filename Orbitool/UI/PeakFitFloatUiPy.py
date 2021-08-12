@@ -1,4 +1,5 @@
 from typing import List, Optional, Union
+from copy import deepcopy
 
 import matplotlib.ticker
 import numpy as np
@@ -36,7 +37,7 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
         while end < length and self.original_index == original_indexes[end]:
             end += 1
         self.original_slice = slice(start, end)
-        self.peaks: List[FittedPeak] = info.peaks[start:end]
+        self.peaks: List[FittedPeak] = deepcopy(info.peaks[start:end])
 
         self.showPeak()
         self.plotPeak()
