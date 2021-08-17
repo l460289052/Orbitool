@@ -147,7 +147,7 @@ class Ui_Form(object):
         self.label_2.setText(_translate("Form", "group"))
         self.groupPlusPushButton.setText(_translate("Form", "plus"))
         self.groupMinusPushButton.setText(_translate("Form", "minus"))
-        self.label.setText(_translate("Form", "rtol"))
+        self.label.setText(_translate("Form", "tolerance(ppm)"))
         self.removePushButton.setText(_translate("Form", "Remove selected"))
         self.mergePushButton.setText(_translate("Form", "Merge"))
         self.importPushButton.setText(_translate("Form", "Import"))

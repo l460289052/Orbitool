@@ -163,8 +163,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     @state_node
     def delFormula(self):
         indexes = get_tablewidget_selected_row(self.tableWidget)
-        indexes.reverse()
-        for index in indexes:
+        for index in reversed(indexes):
             del self.noise.info.general_setting.noise_formulas[index]
         self.showNoiseFormula()
 

@@ -95,6 +95,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
+        self.acceptEmptyToolButton = QtWidgets.QToolButton(self.centralwidget)
+        self.acceptEmptyToolButton.setObjectName("acceptEmptyToolButton")
+        self.horizontalLayout_2.addWidget(self.acceptEmptyToolButton)
         self.acceptToolButton = QtWidgets.QToolButton(self.centralwidget)
         self.acceptToolButton.setObjectName("acceptToolButton")
         self.horizontalLayout_2.addWidget(self.acceptToolButton)
@@ -140,6 +143,7 @@ class Ui_MainWindow(object):
         item = self.isotopesTableWidget.horizontalHeaderItem(5)
         item.setText(_translate("MainWindow", "actual ratio"))
         self.showAllToolButton.setText(_translate("MainWindow", "show all"))
+        self.acceptEmptyToolButton.setText(_translate("MainWindow", "Accept empty list"))
         self.acceptToolButton.setText(_translate("MainWindow", "Accept"))
         self.closeToolButton.setText(_translate("MainWindow", "Close"))
 

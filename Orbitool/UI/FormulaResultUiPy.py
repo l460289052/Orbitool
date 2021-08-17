@@ -41,6 +41,7 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
         self.showAllToolButton.clicked.connect(self.showResult)
         self.closeToolButton.clicked.connect(self.close)
         self.acceptToolButton.clicked.connect(self.accept)
+        self.acceptEmptyToolButton.clicked.connect(self.acceptEmpty)
 
     @classmethod
     def FactoryCalc(cls, manager: Manager, input: str, force: bool):
@@ -111,8 +112,12 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
         row = self.resultTableWidget.row(item)
         formula = self.formulas[row].findOrigin()
         origin = formula.absoluteAbundance()
-        isotopes = list(isotopologues(formula=str(formula.toStr(
-            True, False)), isotope_threshold=origin * 2e-3, overall_threshold=origin * 1e-3, report_abundance=True))
+        isotopes = [(Formula(isotope), abundance) for isotope, abundance in isotopologues(formula=str(formula.toStr(
+            True, False)), isotope_threshold=origin * 2e-3, overall_threshold=origin * 1e-3, report_abundance=True)]
+
+        first = isotopes.pop(0)
+        isotopes.sort(key=lambda i: i[0].mass())
+        isotopes.insert(0, first)
 
         rtol = self.manager.workspace.formula_docker.info.rtol
 
@@ -138,7 +143,6 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
         ax.clear()
 
         for row, (isotope, abundance) in enumerate(isotopes):  # include original formula
-            isotope = Formula(isotope)
             isotope.charge = formula.charge
             mass = isotope.mass()
 
@@ -196,6 +200,11 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
         self.acceptSignal.emit(formulas)
         self.close()
 
+    @state_node
+    def acceptEmpty(self):
+        self.acceptSignal.emit([])
+        self.close()
+
 
 def peak_position(peaks: List[FittedPeak], index):
     return peaks[index].peak_position
@@ -224,5 +233,7 @@ def calc(manager: Manager, input: str, force: bool):
             peak.peak_position / mass - 1) < 3e-8 else None
     else:
         peak_index = None
+
+    formulas.sort(key=lambda f: abs(f.mass() / mass - 1))
 
     return input, mass, formulas, peak_index

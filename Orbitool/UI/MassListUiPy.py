@@ -23,6 +23,8 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
     def setupUi(self, Form):
         super().setupUi(Form)
 
+        self.doubleSpinBox.valueChanged.connect(self.updateRtol)
+
         self.addPushButton.clicked.connect(self.addMass)
         self.removePushButton.clicked.connect(self.rmMass)
 
@@ -54,9 +56,13 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
                 ', '.join(str(f) for f in mass.formulas)))
 
     @state_node
+    def updateRtol(self):
+        self.masslist.rtol = self.doubleSpinBox.value() * 1e-6
+
+    @state_node
     def addMass(self):
         text = self.addItemLineEdit.text()
-        rtol = self.doubleSpinBox.value() / 1e6
+        rtol = self.masslist.rtol
         masslist = self.masslist.masslist
         for item in text.split(','):
             item = item.strip()
@@ -72,7 +78,6 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
                     masslist, MassListItem(
                         position=formula.mass(),
                         formulas=[formula]), rtol)
-        self.masslist.rtol = rtol
 
         self.showMasslist()
 
@@ -119,8 +124,8 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
             for row in it:
                 position = row[0]
                 formulas = row[1]
-                formulas = [Formula(formula)
-                            for formula in formulas.split('/')]
+                formulas = [Formula(f)
+                            for formula in formulas.split('/') if (f := formula.strip())]
                 item = MassListItem(position=position, formulas=formulas)
                 masslist_func.addMassTo(ret, item, rtol)
         return ret

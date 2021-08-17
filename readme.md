@@ -118,11 +118,11 @@ Orbitool will use provided ions calibrate files. Different files will use differ
 
 Export Time series
 
-| isotime | igor time | matlab time | excel time | C3H3O3- | C2HO4- |...|
-| ------- | --------- | ----------- | ---------- | ------- | ------ |-|
-| time1 | ... | ... | ... | ... | ... |...|
-| time2 | ... | ... | ... | ... | ... |...|
-| ... | ... | ... | ... | ... | ... |...|
+| isotime | igor time | matlab time | excel time | C3H3O3- | C2HO4- | ... |
+| ------- | --------- | ----------- | ---------- | ------- | ------ | --- |
+| time1   | ...       | ...         | ...        | ...     | ...    | ... |
+| time2   | ...       | ...         | ...        | ...     | ...    | ... |
+| ...     | ...       | ...         | ...        | ...     | ...    | ... |
 
 ### 8.Concatenate time series
 
@@ -164,11 +164,11 @@ Orbitool use mass list to fit peak or calculate timeseries.
 
 Import/Export
 
-| mz   | formulas |
-| ---- | -------- |
-| mz1  | formula1 |
-| mz2  | formula2 |
-| ...  | ...      |
+| mz  | formulas |
+| --- | -------- |
+| mz1 | formula1 |
+| mz2 | formula2 |
+| ... | ...      |
 
 > If a mass list item has a formula, its mz doesn't matter.
 
@@ -372,6 +372,19 @@ If you meet any bugs, please let me know. You can send me the 'log.txt' file whi
 mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huang"\<<huangc@saes.sh.cn>\>
 
 ## log
+
+**2021.08.17 version 2.0.8**
+
++ Accept Zero formulas as formula calculation result
++ Sort formula by ppm
++ Sort isotopes by mass
++ Change opaque to transparency
+
+Bug fix
++ Error when delete high-intensity peaks from noise tab
++ Error when import mass list without formulas
++ Unify rtol when fit use mass list
+
 
 **2021.08.11 version 2.0.7**
 

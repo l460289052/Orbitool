@@ -6,12 +6,18 @@ from ..structures.base import BaseStructure, Field
 def RestrictedCalcFactory():
     calc = RestrictedCalc()
     calc.setEI('N')
+    calc.setEI('C[13]')
+    calc.setEI('O[18]')
     return calc
 
 
 def ForceCalcFactory():
     calc = ForceCalc()
-    calc['N'] = 999
+    calc['C'] = 20
+    calc['H'] = 40
+    calc['C[13]'] = 3
+    calc['O[18]'] = 3
+    calc['N'] = 5
     return calc
 
 

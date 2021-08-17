@@ -185,6 +185,13 @@
        </spacer>
       </item>
       <item>
+       <widget class="QToolButton" name="acceptEmptyToolButton">
+        <property name="text">
+         <string>Accept empty list</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="acceptToolButton">
         <property name="text">
          <string>Accept</string>

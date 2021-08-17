@@ -9,7 +9,7 @@ def set_header_sizes(header: QtWidgets.QHeaderView, sizes: list):
 
 
 @test.override_input
-def get_tablewidget_selected_row(tableWidget: QtWidgets.QTableWidget) -> list:
+def get_tablewidget_selected_row(tableWidget: QtWidgets.QTableWidget) -> np.ndarray:
     return np.unique([index.row() for index in tableWidget.selectedIndexes()])
 
 

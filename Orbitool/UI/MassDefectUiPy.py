@@ -29,7 +29,7 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         self.calcPushButton.clicked.connect(self.calc)
         self.exportPushButton.clicked.connect(self.export)
 
-        self.opaqueDoubleSpinBox.valueChanged.connect(self.replot)
+        self.transparencyDoubleSpinBox.valueChanged.connect(self.replot)
         self.logCheckBox.toggled.connect(self.replot)
         self.showGreyCheckBox.toggled.connect(self.replot)
         self.minSizeHorizontalSlider.valueChanged.connect(self.replot)
@@ -102,7 +102,7 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         is_dbe = info.is_dbe
         gry = self.showGreyCheckBox.isChecked()
         is_log = self.logCheckBox.isChecked()
-        alpha = self.opaqueDoubleSpinBox.value()
+        alpha = 1 - self.transparencyDoubleSpinBox.value()
 
         clr_x, clr_y, clr_size, clr_color = info.clr_x, info.clr_y, info.clr_size, info.clr_color
         gry_x, gry_y, gry_size = info.gry_x, info.gry_y, info.gry_size
