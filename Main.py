@@ -20,11 +20,13 @@ try:
         parser = argparse.ArgumentParser()
         parser.add_argument("workspacefile", nargs='?')
         parser.add_argument("--debug", action="store_true")
+        parser.add_argument("--no_multiprocess", action="store_true")
         parser.add_argument("--to_step")
 
         from Orbitool import config
         args = parser.parse_args()
         config.DEBUG = args.debug
+        config.NO_MULTIPROCESS = args.no_multiprocess
 
         import matplotlib as mpl
         mpl.rcParams['agg.path.chunksize'] = 10000

@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 
 DEBUG = False
+NO_MULTIPROCESS = False
 
 timeFormat = r"%Y-%m-%d %H:%M:%S"
 exportTimeFormat = r"%Y%m%d_%H%M%S"

@@ -9,7 +9,7 @@ from typing import List, Tuple, final, Deque, Iterable, Generator, TypeVar, Gene
 
 from PyQt5 import QtCore
 
-from ...config import logger, multi_cores
+from ...config import logger, multi_cores, NO_MULTIPROCESS
 from ..utils import sleep
 from . import manager
 
@@ -59,75 +59,91 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
     @final
     def run(self):
         try:
-            file = self.file
-            results: Deque[AsyncResult] = deque()
-            queue = Queue()
-            length = self.read_len(file, **self.read_kwargs)
-
-            def iter_queue():
-                tqdm = self.manager.tqdm(msg="write", length=length)
-                while True:
-                    tqdm.update()
-                    result = queue.get()
-                    if result is None:
-                        break
-                    yield result
-
-            write_thread = Thread(
-                self.write, (file, iter_queue()), self.write_kwargs)
-            write_thread.start()
-
-            with Pool(multi_cores) as pool:
-                def abort():
-                    queue.put(None)
-                    pool.terminate()
-                    self.exception(file)
-
-                def wait_to_ready(force: bool):
-                    if len(results) == 0:
-                        return
-                    ret = results[0]
-                    while not ret.ready():
-                        if not force:
-                            not_ready_num = len(
-                                [r for r in results if not r.ready()])
-                            # could put more task
-                            if not_ready_num < multi_cores and len(results) < 2.5 * multi_cores:
-                                return
-                        sleep(.1)
-                        if self.aborted:
-                            return
-                    while len(results) > 0 and results[0].ready():
-                        ret = results.popleft().get()
-                        if isinstance(ret, Exception):
-                            self.finished.emit(
-                                (ret, (self.func, self.file)))
-                            self.abort()
-                            return
-                        queue.put(ret)
-
-                for i, input_data in self.manager.tqdm(
-                        enumerate(self.read(file, **self.read_kwargs)),
-                        length=length, msg="read",
-                        immediate=True):
-
-                    if self.aborted:
-                        return abort()
-                    results.append(pool.apply_async(
-                        self.process, (i, self.func, input_data, self.func_kwargs)))
-                    wait_to_ready(False)
-
-                while results:
-                    if self.aborted:
-                        return abort()
-                    wait_to_ready(True)
-
-                queue.put(None)
-
-            write_thread.wait()
-            self.finished.emit((write_thread.result,))
+            if NO_MULTIPROCESS:
+                self._single_run_memory()
+            else:
+                self._run()
         except Exception as e:
             self.finished.emit((e,))
+
+    @final
+    def _run(self):
+        file = self.file
+        results: Deque[AsyncResult] = deque()
+        queue = Queue()
+        length = self.read_len(file, **self.read_kwargs)
+
+        def iter_queue():
+            tqdm = self.manager.tqdm(msg="write", length=length)
+            while True:
+                tqdm.update()
+                result = queue.get()
+                if result is None:
+                    break
+                yield result
+
+        write_thread = Thread(
+            self.write, (file, iter_queue()), self.write_kwargs)
+        write_thread.start()
+
+        with Pool(multi_cores) as pool:
+            def abort():
+                queue.put(None)
+                pool.terminate()
+                self.exception(file)
+
+            def wait_to_ready(force: bool):
+                if len(results) == 0:
+                    return
+                ret = results[0]
+                while not ret.ready():
+                    if not force:
+                        not_ready_num = len(
+                            [r for r in results if not r.ready()])
+                        # could put more task
+                        if not_ready_num < multi_cores and len(results) < 2.5 * multi_cores:
+                            return
+                    sleep(.1)
+                    if self.aborted:
+                        return
+                while len(results) > 0 and results[0].ready():
+                    ret = results.popleft().get()
+                    if isinstance(ret, Exception):
+                        self.finished.emit(
+                            (ret, (self.func, self.file)))
+                        self.abort()
+                        return
+                    queue.put(ret)
+
+            for i, input_data in self.manager.tqdm(
+                    enumerate(self.read(file, **self.read_kwargs)),
+                    length=length, msg="read",
+                    immediate=True):
+
+                if self.aborted:
+                    return abort()
+                results.append(pool.apply_async(
+                    self.process, (i, self.func, input_data, self.func_kwargs)))
+                wait_to_ready(False)
+
+            while results:
+                if self.aborted:
+                    return abort()
+                wait_to_ready(True)
+
+            queue.put(None)
+
+        write_thread.wait()
+        self.finished.emit((write_thread.result,))
+
+    @final
+    def _single_run_memory(self):
+        file = self.file
+        rets = []
+        for i, data in enumerate(self.manager.tqdm(self.read(file, **self.read_kwargs), "read")):
+            rets.append(self.process(i, self.func, data, self.func_kwargs))
+        ret = self.write(file, rets, **self.write_kwargs)
+        self.finished.emit((ret,))
 
     @final
     def abort(self, send=True):
