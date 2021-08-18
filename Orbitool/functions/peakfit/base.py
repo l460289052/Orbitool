@@ -31,26 +31,6 @@ class BaseFunc:
     def splitPeak(self, peak: Peak, split_num=None, force=False) -> List[FittedPeak]:
         pass
 
-    def fetchNearestPeak(self, spectrum: Spectrum, point: float, intensity_filter: float, delta=5) -> Optional[FittedPeak]:
-        l, r = indexBetween_np(spectrum.mz, (point - delta, point + delta))
-        mz = spectrum.mz[l:r]
-        intensity = spectrum.intensity[l:r]
-        peaks = splitPeaks(mz, intensity)
-        if intensity_filter > 0:
-            peaks = [peak for peak in peaks if peak.maxIntensity >
-                     intensity_filter]
-        if len(peaks) == 0:
-            return None
-        index = indexNearest(peaks, point, method=get_peak_mz_min)
-        if index > 0:
-            peaks = [peaks[index - 1], peaks[index]]
-        else:
-            peaks = [peaks[index]]
-
-        peaks = list(chain.from_iterable(map(self.splitPeak, peaks)))
-        index = indexNearest(peaks, point, method=get_peak_position)
-        return peaks[index]
-
     def fetchTimeseries(self, peaks: List[Peak], min_mz: float, max_mz: float):
         lindex = indexFirstBiggerThan(peaks, min_mz, method=get_peak_mz_max)
         rindex = indexFirstBiggerThan(peaks, max_mz, method=get_peak_mz_min)

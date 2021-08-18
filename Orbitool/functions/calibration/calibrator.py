@@ -54,6 +54,7 @@ class Calibrator(BaseStructure):
         for index, ion in enumerate(ions_mz):
             position: np.ndarray = ions_raw_position[:, index]
             select: np.ndarray = abs(ion / position - 1) < rtol
+            select &= ~np.isnan(position)
             if select.sum():
                 position = position[select]
             ions_position.append(position.mean())

@@ -1,4 +1,5 @@
 from typing import List, Dict
+import math
 
 from ..functions.calibration import Ion, Calibrator, PolynomialRegressionFunc
 from ..utils.formula import Formula
@@ -19,6 +20,7 @@ class CalibratorInfo(BaseStructure):
 
     skip: bool = False
 
+    rtol: float = math.inf
     ions: List[Ion] = Field(default_factory=default_ions)
     calibrators: Dict[str, Calibrator] = Field(default_factory=dict)
     poly_funcs: Dict[str, PolynomialRegressionFunc] = Field(

@@ -22,11 +22,12 @@ from .timeseries import TimeseriesInfo
 T = TypeVar("T")
 
 
+LAST_SUPPORT_VERSION = "2.0.2"
 class WorkspaceInfo(BaseStructure):
     h5_type = "workspace info"
 
-    version: str = "2.0.8"
-    orbitool_file_version:str = "2.0.8"
+    version: str = "2.0.9"
+    orbitool_file_version: str = "2.0.9"
 
 
 class WorkSpace(H5File):

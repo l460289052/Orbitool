@@ -373,6 +373,13 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2021.08.18 version 2.0.9**
+
++ use another strategy when calc calibration infomation
+
+Bug fix
++ large ppm when calibration
+
 **2021.08.17 version 2.0.8**
 
 + Accept Zero formulas as formula calculation result

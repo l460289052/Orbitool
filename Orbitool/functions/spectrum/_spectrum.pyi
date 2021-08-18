@@ -13,8 +13,16 @@ def getPeaksPositions(intensity: np.ndarray) -> np.ndarray:
 def getNotZeroPositions(intensity: np.ndarray,
                         min_intensity: float = 1e-6) -> np.ndarray: ...
 
-def splitPeaks(mz:np.ndarray, intensity:np.ndarray)->np.ndarray:
+
+def splitPeaks(mz: np.ndarray, intensity: np.ndarray) -> np.ndarray:
     """
     return List[Tuple[int, int]] means left and right of a peak
+    """
+    pass
+
+
+def safeCutSpectrum(mz: np.ndarray, intensity: np.ndarray, mzMin: float, mzMax: float) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    return mz, intensity
     """
     pass

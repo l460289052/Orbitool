@@ -1,4 +1,4 @@
-from ._spectrum import getPeaksPositions, getNotZeroPositions
+from ._spectrum import getPeaksPositions, getNotZeroPositions, safeCutSpectrum
 from .spectrum import removeZeroPositions, splitPeaks
 from ._noise import getNoisePeaks, noiseLODFunc, getGlobalShownNoise, getNoiseLODFromParam, updateGlobalParam, updateNoiseLODParam
 from .noise import getNoiseParams, denoiseWithParams, denoise

@@ -1,11 +1,14 @@
+import math
+from enum import Enum
 from datetime import datetime
 from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
+from itertools import chain
 
 import numpy as np
 from PyQt5 import QtCore, QtWidgets
 import matplotlib.ticker
 
-from ..functions import spectrum as spectrum_func
+from ..functions import spectrum as spectrum_func, binary_search, peakfit as peakfit_func
 from ..functions.calibration import Calibrator, PolynomialRegressionFunc
 from ..functions.peakfit.normal_distribution import NormalDistributionFunc
 from ..structures.file import FileSpectrumInfo
@@ -15,7 +18,13 @@ from ..workspace import WorkSpace
 from . import CalibrationUi
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
-from .utils import get_tablewidget_selected_row
+from .utils import get_tablewidget_selected_row, showInfo
+
+
+class ShownState(int, Enum):
+    all_info = 0
+    spectrum = 1
+    file = 2
 
 
 class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
@@ -30,6 +39,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         self.spectrum_inner_index: int = None
         self.spectrum_current_ion_index: int = None
+        self.shown_state: ShownState = ShownState.all_info
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -96,7 +106,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         info = calibration_tab.info
 
         intensity_filter = 100
-        rtol = self.rtolDoubleSpinBox.value() / 1e-6
+        rtol = self.rtolDoubleSpinBox.value() * 1e-6
         degree = self.degreeSpinBox.value()
         use_N_ions = self.nIonsSpinBox.value()
 
@@ -105,7 +115,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         # use ions to decide whether to split
         need_to_split = True
-        if len(info.calibrators) > 0:
+        if abs(info.rtol / rtol - 1) < 1e-6 and len(info.calibrators) > 0:
             calculator = next(iter(info.calibrators.values()))
             calculated_ions = {ion.formula for ion in calculator.ions}
             now_ions = {ion.formula for ion in info.ions}
@@ -116,6 +126,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
                 if spectrum_info.path not in info.calibrators:
                     need_to_split = True
                     break
+        info.rtol = rtol
 
         if need_to_split:  # read ions from spectrum
             path_time = {
@@ -124,7 +135,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             split_and_fit = SplitAndFitPeak(
                 raw_spectra,
                 func_kwargs=dict(
-                    fit_func=fit_func, ions=ions, intensity_filter=intensity_filter))
+                    fit_func=fit_func, ions=ions, intensity_filter=intensity_filter, rtol=rtol))
 
             path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = yield split_and_fit, "split and fit target peaks"
             # file path -> info of a file
@@ -185,17 +196,17 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         table.setColumnCount(3)
         table.setHorizontalHeaderLabels(["mz", "rtol", "intensity"])
-        table.setVerticalHeaderLabels(
-            [ion.shown_text for ion in calibrator.ions])
 
         table.setRowCount(len(calibrator.ions))
+        table.setVerticalHeaderLabels(
+            [ion.shown_text for ion in calibrator.ions])
 
         for index, (ion, mz, intensity) in enumerate(zip(calibrator.ions, ions_position, ions_intensity)):
             table.setItem(
                 index, 0, QtWidgets.QTableWidgetItem(format(mz, '.5f')))
             table.setItem(
                 index, 1, QtWidgets.QTableWidgetItem(
-                    format(abs(1 - ion.formula.mass() / mz) * 1e6, '.5f')))
+                    format((1 - ion.formula.mass() / mz) * 1e6, '.5f')))
             table.setItem(
                 index, 2, QtWidgets.QTableWidgetItem(
                     format(intensity, '.3e')))
@@ -206,17 +217,22 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         ax.axhline(color='black', linewidth=0.5)
         ax.plot(spectrum.mz, spectrum.intensity, color='black')
 
-        for x, y in zip(ions_position, ions_intensity):
+        for ion, x, y in zip(calibrator.ions, ions_position, ions_intensity):
+            if math.isnan(x):
+                continue
             ax.plot([x, x], [0, y], color='red')
+            ax.annotate(ion.shown_text, (x, y))
         ax.xaxis.set_tick_params(rotation=15)
         ax.yaxis.set_tick_params(rotation=60)
         ax.yaxis.set_major_formatter(
             matplotlib.ticker.FormatStrFormatter(r"%.1e"))
 
+        ax.legend()
         ax.relim()
         ax.autoscale_view(True, True, True)
         plot.canvas.draw()
         self.spectrum_current_ion_index = -1
+        self.shown_state = ShownState.spectrum
 
     @state_node(withArgs=True)
     def next_ion(self, step):
@@ -246,6 +262,10 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
     @state_node
     def showSelected(self):
+        if self.shown_state != ShownState.all_info:
+            showInfo(
+                "please show all info first\nthen choose a file from calibration info window")
+            return
         index = self.manager.fetch_func("calibration info selected index")()
 
         table = self.manager.calibrationInfoWidget
@@ -298,6 +318,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         plot.canvas.draw()
 
         self.spectrum_current_ion_index = None
+        self.shown_state = ShownState.file
 
     @state_node
     def showAllInfoClicked(self):
@@ -354,6 +375,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         ax.relim()
         ax.autoscale(True, True, True)
         plot.canvas.draw()
+        self.shown_state = ShownState.all_info
 
     @state_node(withArgs=True)
     def calibrate(self, skip: bool):
@@ -401,16 +423,40 @@ class SplitAndFitPeak(MultiProcess):
         return len(h5_spectra)
 
     @staticmethod
-    def func(data: Spectrum, fit_func: NormalDistributionFunc, ions: List[float], intensity_filter: float, **kwargs):
+    def func(data: Spectrum, fit_func: NormalDistributionFunc, ions: List[float], intensity_filter: float, rtol: float, **kwargs):
         ions_peak: List[Tuple[float, float]] = []
+        mz = data.mz
+        intensity = data.intensity
         for ion in ions:
-            peak = fit_func.fetchNearestPeak(
-                data, ion, intensity_filter)
-            if peak is not None:
-                ions_peak.append(
-                    (peak.peak_position, peak.peak_intensity))
-            else:
-                ions_peak.append((ion - 5, intensity_filter))
+            delta = ion * rtol
+            mz_, intensity_ = spectrum_func.safeCutSpectrum(
+                mz, intensity, ion - delta, ion + delta)
+
+            peaks = spectrum_func.splitPeaks(mz_, intensity_)
+
+            # intensity filter for noise
+            # don't fit noise
+            peaks = [peak for peak in peaks if peak.maxIntensity > 100]
+
+            find = False
+            if len(peaks) > 0:
+                indexes = np.argsort(peak.maxIntensity for peak in peaks)
+                peaks = [peaks[index] for index in indexes]
+
+                while len(peaks) > 0:
+                    peak = peaks.pop()
+                    target_peaks = fit_func.splitPeak(peak)
+
+                    index = np.argmax(
+                        peak.peak_intensity for peak in target_peaks)
+                    peak = target_peaks[index]
+                    if abs(peak.peak_position / ion - 1) < rtol:
+                        ions_peak.append(
+                            (peak.peak_position, peak.peak_intensity))
+                        find = True
+                        break
+            if not find:
+                ions_peak.append((math.nan, math.nan))
 
         return data.path, ions_peak
 
@@ -469,7 +515,8 @@ class CalibrateMergeDenoise(MultiProcess):
             end_times.append(spectrum.end_time)
 
         path = paths.pop() if len(paths) == 1 else ""
-        mz, intensity = spectrum_func.averageSpectra(spectra, rtol, drop_input=True)
+        mz, intensity = spectrum_func.averageSpectra(
+            spectra, rtol, drop_input=True)
 
         if not noise_skip:
             if not dependent:
