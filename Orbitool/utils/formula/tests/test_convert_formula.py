@@ -1,5 +1,5 @@
 import pytest
-from utils.convert_formula import *
+from ..convert_formula import *
 
 
 def test_convert_to_dict():

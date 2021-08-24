@@ -62,6 +62,23 @@ cdef double _mass_isotopes_mass(double mass, ints_map&isotopes):
 
 cdef double _elements_isotopes_mass(int_map&elements, ints_map&isotopes):
     return _mass_isotopes_mass(_elements_mass(elements), isotopes)
+
+
+cdef int get_right_parenthesis_index(str s,int left_index,int length = -1) except *:
+    if length < 0:
+        length = len(s)
+    cdef int index = left_index, cnt = 1
+    while index < length:
+        index += 1
+        now_c = s[index]
+        if now_c == '(':
+            cnt += 1
+        elif now_c == ')':
+            cnt -= 1
+            if cnt == 0:
+                return index
+    raise ValueError(
+        f'Cannot understand {s[left_index:]}')
     
 
 cdef class Formula:
@@ -78,49 +95,103 @@ cdef class Formula:
         cdef dict dic
         try:
             if isinstance(formula, str):
-                formula = formula.strip()
-                if not re.fullmatch(r"([A-Z][a-z]{0,2}(\[\d+\])?\d*)*[-+]?", formula):
-                    raise ValueError(str(formula))
-                if len(formula) > 0:
-                    charge = formula[-1]
-                    if charge == '+':
-                        self.setE(0,-1)
-                    elif charge == '-':
-                        self.setE(0,1)
-                for match in re.finditer(r"([A-Z][a-z]{0,2})(\[\d+\])?(\d*)", formula):
-                    e = match.group(1)
-                    m_str = match.group(2)
-                    if m_str is None:
-                        m_int = 0
-                    else:
-                        m_int = int(m_str[1:-1])
-                    num = match.group(3)
-                    if len(num) == 0:
-                        self.addElement(e, m_int)
-                    else:
-                        self.addElement(e, m_int, int(num))
+                self.parse_str_from(formula)
             else:
                 dic = kwargs
                 if isinstance(formula, dict):
                     dic.update(formula)
-                for k, v in dic.items():
-                    match = re.fullmatch(r"([A-Z][a-z]{0,2})(\[\d+\])?", k)
-                    if match is not None:
-                        e = match.group(1)
-                        m_str = match.group(2)
-                        if m_str is None:
-                            m_int = 0
-                        else:
-                            m_int = int(m_str[1:-1])
-                        self.addElement(e, m_int, v)
-                    elif k == 'charge':
-                        self.setE(0,-v)
-                    elif k.startswith('e'):
-                        self.setE(0,v)
-                    else:
-                        raise ValueError('wrong kwargs'+k)
+                self._parse_dict_from(dic)
         except ValueError as e:
-            raise ValueError('wrong formula:' + str(e))
+            raise ValueError('wrong formula,' + str(e))
+
+    @classmethod
+    def parse_str(cls, str formula):
+        f = cls.__new__(cls)
+        f.parse_str_from(formula)
+        return f
+
+    @classmethod
+    def _parse_str(cls, str formula):
+        f = cls.__new__(cls)
+        f._parse_str_from(formula)
+        return f
+
+    def parse_str_from(self, str formula):
+        new_formula = []
+        for part in formula.split():
+            new_formula.append(part[0].upper()+part[1:])
+        new_formula = ''.join(new_formula)
+        self._parse_str_from(new_formula)
+
+    part_format = re.compile(r"(e?[+-]|([A-Za-z][a-z]{0,2})(\[\d+\])?)(\d*)")
+    num_format = re.compile(r"\d*")
+
+    def _parse_str_from(self, str formula):
+        cdef str e, now_c
+        cdef int now, length, m, num
+        cdef Formula sub_formula
+        now = 0
+        length = len(formula)
+        while now < length:
+            print(formula[:now], formula[now:])
+            now_c = formula[now]
+            if now_c == '(':
+                right_index = get_right_parenthesis_index(formula, now, length)
+                sub_formula = Formula._parse_str(formula[now + 1:right_index])
+
+                now = right_index + 1
+
+                match = Formula.num_format.match(formula, now)
+                if match.group(0):
+                    sub_formula *= int(match.group(0))
+                    now = match.end()
+                self += sub_formula
+            else:
+                match = Formula.part_format.match(formula, now)
+                if not match:
+                    raise ValueError("wrong part "+formula[now:])
+                if match.group(2):
+                    e = match.group(2)
+                    e = e[0].upper() + e[1:]
+                    if match.group(3):
+                        m = int(match.group(3)[1:-1])
+                    else:
+                        m = 0
+                    num = int(match.group(4) or 1)
+                    self.addElement(e, m, num)
+                else:
+                    num = int(match.group(4) or 1)
+                    if match.group(1)[-1] == "+":
+                        num = -num
+                    self.setE(0, num)
+
+                now = match.end()
+
+    @classmethod
+    def parse_dict(cls, dict formula):
+        f = cls.__new__(cls)
+        f._parse_dict_from(cls)
+        return f
+
+    def _parse_dict_from(self, dict formula):
+        cdef str k, e, m_str
+        cdef int v, m_int
+        for k, v in formula.items():
+            match = re.fullmatch(r"([A-Z][a-z]{0,2})(\[\d+\])?", k)
+            if match is not None:
+                e = match.group(1)
+                m_str = match.group(2)
+                if m_str is None:
+                    m_int = 0
+                else:
+                    m_int = int(m_str[1:-1])
+                self.addElement(e, m_int, v)
+            elif k == 'charge':
+                self.setE(0,-v)
+            elif k.startswith('e'):
+                self.setE(0,v)
+            else:
+                raise ValueError('wrong kwargs'+k)
         
     property charge:
         def __get__(self):

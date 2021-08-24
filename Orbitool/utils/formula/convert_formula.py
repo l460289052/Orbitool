@@ -1,48 +1,48 @@
 import re
 from collections import defaultdict
 
-element = re.compile(r"([A-Z][a-z]{0,2})(\d+)?")
-num_re = re.compile(r"(\d+)?")
+element = re.compile(r"((e?[+-]|[A-Za-z][a-z]{0,2})(\[\d+\])?)(\d*)")
+num_re = re.compile(r"\d*")
 
 
-def convert_to_dict(formula) -> dict:
+def get_right_parenthesis_index(s: str, left_index, length: int = None):
+    length = length or len(s)
+    index = left_index
+    sum = 1
+    while index < length:
+        index += 1
+        now_c = s[index]
+        if now_c == '(':
+            sum += 1
+        elif now_c == ')':
+            sum -= 1
+            if sum == 0:
+                return index
+    raise ValueError(
+        f'Cannot understand {s[left_index:]}')
+
+
+def convert_to_dict(formula: str) -> dict:
     ret = defaultdict(int)
     now = 0
     length = len(formula)
     while now < length:
-        now_c: str = formula[now]
+        now_c = formula[now]
         if now_c.isupper():
             match = element.match(formula, now)
             if match:
-                ele = match.group(1)
-                num = match.group(2) or 1
+                ele = match.group(2)
+                num = match.group(4) or 1
                 ret[ele] += int(num)
             now = match.end()
         elif now_c == '(':
-            index = 0
-            i = now
-            while i < length:
-                now_c = formula[i]
-                if now_c == '(':
-                    index += 1
-                elif now_c == ')':
-                    index -= 1
-                    if index <= 0:
-                        if index == 0:
-                            break
-                        else:
-                            raise ValueError(
-                                f'Cannot understand {formula[now:i+1]}')
-                i += 1
-            if index != 0:
-                raise ValueError(
-                    f'Cannot understand {formula[now:i+1]}')
+            right_index = get_right_parenthesis_index(formula, now, length)
+            sub_d = convert_to_dict(formula[now + 1:right_index])
 
-            sub_d = convert_to_dict(formula[now + 1:i])
-            now = i + 1
+            now = right_index + 1
 
             match = num_re.match(formula, now)
-            num = int(match.group(1) or 1)
+            num = int(match.group(0) or 1)
             for key in sub_d.keys():
                 ret[key] += sub_d[key] * num
 

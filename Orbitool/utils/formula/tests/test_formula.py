@@ -88,3 +88,22 @@ def test_to_dict():
         "O[18]": 2,
         "e": 1}
     assert Formula(f.to_dict()) == f
+
+
+def test_recurrent():
+    f = Formula("(C2(C2(C2H4O[18])2)2e-2)2")
+    assert f['C'] == 28
+    assert f['H'] == 32
+    assert f['O[18]'] == 8
+    assert f.charge == -4
+
+def test_lower():
+    f = Formula("c2h5-")
+    assert f['C'] == 2
+    assert f['H'] == 5
+    assert f.charge == -1
+
+def test_space():
+    f = Formula("c 25 h 36")
+    assert f['C'] == 25
+    assert f['H'] == 36
