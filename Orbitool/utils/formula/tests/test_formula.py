@@ -1,6 +1,8 @@
 import threading
-from pyteomics import mass as pyteomass
 from copy import copy
+
+import pytest
+from pyteomics import mass as pyteomass
 
 from .. import Formula
 
@@ -97,11 +99,27 @@ def test_recurrent():
     assert f['O[18]'] == 8
     assert f.charge == -4
 
+
+def test_recurrent_error():
+    with pytest.raises(ValueError):
+        f = Formula("((C)))")
+
+
 def test_lower():
-    f = Formula("c2h5-")
+    f = Formula("c2h5-2")
     assert f['C'] == 2
     assert f['H'] == 5
-    assert f.charge == -1
+    assert f.charge == -2
+    assert f == Formula("C2H5e-2")
+
+
+def test_upper():
+    f = Formula("CuE+2")
+    assert f == Formula("Cu+2")
+    g = Formula("Cu")
+    g.charge = 2
+    assert f == g
+
 
 def test_space():
     f = Formula("c 25 h 36")

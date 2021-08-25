@@ -6,7 +6,7 @@ num_re = re.compile(r"\d*")
 
 
 def get_right_parenthesis_index(s: str, left_index, length: int = None):
-    length = length or len(s)
+    length = (length or len(s)) - 1
     index = left_index
     sum = 1
     while index < length:

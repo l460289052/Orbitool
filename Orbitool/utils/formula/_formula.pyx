@@ -67,6 +67,8 @@ cdef double _elements_isotopes_mass(int_map&elements, ints_map&isotopes):
 cdef int get_right_parenthesis_index(str s,int left_index,int length = -1) except *:
     if length < 0:
         length = len(s)
+    length -= 1
+    cdef str now_c
     cdef int index = left_index, cnt = 1
     while index < length:
         index += 1
@@ -123,12 +125,12 @@ cdef class Formula:
         new_formula = ''.join(new_formula)
         self._parse_str_from(new_formula)
 
-    part_format = re.compile(r"(e?[+-]|([A-Za-z][a-z]{0,2})(\[\d+\])?)(\d*)")
+    part_format = re.compile(r"([eE]?[+-]|([A-Za-z][a-z]{0,2})(\[\d+\])?)(\d*)")
     num_format = re.compile(r"\d*")
 
     def _parse_str_from(self, str formula):
         cdef str e, now_c
-        cdef int now, length, m, num
+        cdef int now, length, m, num, right_index
         cdef Formula sub_formula
         now = 0
         length = len(formula)

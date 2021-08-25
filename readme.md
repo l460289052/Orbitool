@@ -373,6 +373,16 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2021.08.25 version 2.0.10**
+
++ bind peaks and plot
++ add jump in peaks
++ support formula like C(H2O)2, SO4e-2 (equal to SO4-2), Cu+2 (equal to CuE+2, uppercase E to split from Cu), c 10 h 20
+
+Bug fix
+
++ recalc noise params error
+
 **2021.08.18 version 2.0.9**
 
 + use another strategy when calc calibration infomation
