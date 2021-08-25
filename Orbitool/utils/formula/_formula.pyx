@@ -102,7 +102,7 @@ cdef class Formula:
                     dic.update(formula)
                 self._parse_dict_from(dic)
         except ValueError as e:
-            raise ValueError('wrong formula,' + str(e))
+            raise ValueError('wrong formula, ' + str(e)) from e
 
     @classmethod
     def parse_str(cls, str formula):
@@ -133,7 +133,7 @@ cdef class Formula:
         now = 0
         length = len(formula)
         while now < length:
-            print(formula[:now], formula[now:])
+            # print(formula[:now], formula[now:])
             now_c = formula[now]
             if now_c == '(':
                 right_index = get_right_parenthesis_index(formula, now, length)

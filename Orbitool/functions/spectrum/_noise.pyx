@@ -107,7 +107,7 @@ def getNoiseLODFromParam(DoubleArray2D params, double n_sigma):
 
 def updateNoiseLODParam(DoubleArray2D params, double n_sigma, double noise, double lod):
     params[0, 0] = noise * (math.sqrt(2*math.pi)*params[0,2])
-    params[1, 0] = (lod-noise)*(math.sqrt(2*math.pi)*params[0,2]) / n_sigma
+    params[1, 0] = (lod-noise)*(math.sqrt(2*math.pi)*params[1,2]) / n_sigma
     return params
 
 cdef DoubleArray noiseFunc(DoubleArray mass, DoubleArray poly_coef, DoubleArray2D norm_params, double[:] mass_points, int[:] mass_point_deltas):
