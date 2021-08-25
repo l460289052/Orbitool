@@ -103,7 +103,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
     def readSelectedSpectrum(self):
         workspace = self.manager.workspace
-        index = self.manager.fetch_func("spectra list select")()
+        index = self.manager.getters.spectra_list_selected_index.get()
         info_list = workspace.file_tab.info.spectrum_infos
 
         left = index

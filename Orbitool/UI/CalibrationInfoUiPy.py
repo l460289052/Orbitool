@@ -13,7 +13,7 @@ class Widget(QtWidgets.QWidget, CalibrationInfoUi.Ui_Form):
         self.manager = manager
         self.setupUi(self)
 
-        self.manager.register_func("calibration info selected index", self.selected_index)
+        self.manager.getters.calibration_info_selected_index.connect(self.selected_index)
         self.manager.calibrationInfoWidget = self.tableWidget
 
     @property

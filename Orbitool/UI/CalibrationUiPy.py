@@ -174,7 +174,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
     @state_node
     def showSpectrum(self):
-        index = self.manager.fetch_func("spectra list select")()
+        index = self.manager.getters.spectra_list_selected_index.get()
         workspace = self.manager.workspace
         spectrum = workspace.file_tab.raw_spectra[index]
         calibrator = self.calibration.info.calibrators[spectrum.path]
@@ -239,7 +239,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         if self.spectrum_current_ion_index is None:
             return
 
-        index = self.manager.fetch_func("spectra list select")()
+        index = self.manager.getters.spectra_list_selected_index.get()
         infos = self.manager.workspace.file_tab.info.spectrum_infos
         calibrator = self.calibration.info.calibrators[infos[index].path]
 
@@ -266,7 +266,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             showInfo(
                 "please show all info first\nthen choose a file from calibration info window")
             return
-        index = self.manager.fetch_func("calibration info selected index")()
+        index = self.manager.getters.calibration_info_selected_index.get()
 
         table = self.manager.calibrationInfoWidget
         table.clear()

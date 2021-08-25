@@ -54,6 +54,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.actionRmPushButton.clicked.connect(self.removeFromPeaks)
 
         self.plot = Plot(self.widget)
+        self.manager.bind.peak_fit_left_index.connect("peakfit", self.move_plot_to_index)
 
         self.scaleToSpectrumPushButton.clicked.connect(self.scale_spectrum)
         self.yLogcheckBox.toggled.connect(self.ylog_toggle)
@@ -82,7 +83,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     @state_node
     def showSelect(self):
         workspace = self.manager.workspace
-        selected_index = self.manager.fetch_func("spectra list select")()
+        selected_index = self.manager.getters.spectra_list_selected_index.get()
 
         def read():
             spectrum = workspace.calibration_tab.calibrated_spectra[
@@ -245,22 +246,50 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         self.plot.canvas.draw()
 
+    def move_plot_to_index(self, index):
+        peaks = self.peakfit.info.peaks
+        indexes = self.peakfit.info.shown_indexes
+        ax = self.plot.ax
+
+        peak = peaks[indexes[index]]
+        new_x_min = peak.mz.min()
+        x_min, x_max = ax.get_xlim()
+        new_x_max = new_x_min + (x_max - x_min)
+        ax.set_xlim(new_x_min, new_x_max)
+
+        self.plot_moved()
+
     def timer_timeout(self):
         ax = self.plot.ax
         now_lim = (ax.get_xlim(), ax.get_ylim())
         if self.plot_lim is not None and abs(np.array(now_lim) / np.array(self.plot_lim) - 1).max() < 1e-3:
             return
-        self.plot_lim = now_lim
+
         (x_min, x_max), (y_min, y_max) = now_lim
+        peaks = self.peakfit.info.peaks
+        indexes = self.peakfit.info.shown_indexes
+
+        index = binary_search.indexFirstBiggerThan(
+            indexes, x_min, method=lambda indexes, ind: peaks[indexes[ind]].peak_position)
+
+        self.manager.bind.peak_fit_left_index.emit_except("peakfit", index)
+        self.plot_moved()
+
+    def plot_moved(self):
+        ax = self.plot.ax
+
+        now_lim = (ax.get_xlim(), ax.get_ylim())
+        self.plot_lim = now_lim
 
         raw_peaks = self.peakfit.info.raw_peaks
         original_indexes = self.peakfit.info.original_indexes
         peaks = self.peakfit.info.peaks
         indexes = self.peakfit.info.shown_indexes
 
+        (x_min, x_max), (y_min, y_max) = now_lim
+
         s = binary_search.indexBetween(
             indexes, (x_min, x_max), method=lambda indexes, ind: peaks[indexes[ind]].peak_position)
-        self.peaklist_left.emit(s.start)
         indexes = indexes[s]
         index_peaks_pair = [(index, peak) for index in indexes if y_min < (
             peak := peaks[index]).peak_intensity < y_max]

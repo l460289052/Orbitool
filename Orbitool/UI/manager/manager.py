@@ -1,15 +1,96 @@
+from __future__ import annotations
 from functools import wraps
 from datetime import datetime
-from typing import Callable, Dict, Iterable, overload, TypeVar, Generic, Iterator
+from typing import Callable, Dict, Iterable, overload, TypeVar, Generic, Iterator, Type
 import random
 
 
 from PyQt5.QtCore import QThread, pyqtSignal, QObject, QTimer
 from PyQt5.QtWidgets import QTableWidget, QMainWindow
+import numpy as np
 
 from ...workspace import WorkSpace
 from ..utils import showInfo
 from ..component import Plot
+
+
+class BindData:
+    def __init__(self) -> None:
+        self.peak_fit_left_index = DataBindSignal(int)
+
+
+class Values:
+    def __init__(self) -> None:
+        self.calibration_info_selected_index = ValueGetter(int)
+        self.mass_list_selected_indexes = ValueGetter(np.ndarray)
+        self.spectra_list_selected_index = ValueGetter(int)
+
+
+class Manager(QObject):
+    """
+    storage common resources
+    """
+    inited_or_restored = pyqtSignal()
+    save = pyqtSignal()
+    busy_signal = pyqtSignal(bool)
+    msg = pyqtSignal(str)
+    tqdm_signal = pyqtSignal(int, int, str)  # label, percent, msg
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.running_thread: QThread = None
+        self.workspace: WorkSpace = None
+        self._busy: bool = True
+        self.progress_cnt = 0
+
+        self.calibrationInfoWidget: QTableWidget = None
+        self.formulas_result_win: QMainWindow = None
+
+        self.bind = BindData()
+        self.getters = Values()
+
+    @overload
+    def tqdm(self, iter: Iterable[T], msg: str = "") -> TQDM[T]:
+        pass
+
+    @overload
+    def tqdm(self, iter: Iterable[T], msg: str = "", *, length: int = 0, immediate=False) -> TQDM[T]:
+        pass
+
+    @overload
+    def tqdm(self, *, msg: str = "", length: int = 0) -> TQDM:
+        pass
+
+    @overload
+    def tqdm(self, *, msg: str = "") -> TQDM:
+        pass
+
+    def tqdm(self, iter: Iterable = None, msg: str = "", *, length=None, immediate=False):
+        if iter is not None:
+            if length is None:
+                try:
+                    length = len(iter)
+                except TypeError:
+                    length = 0
+        label = self.progress_cnt
+        tqdm = TQDM((lambda percent, msg: self.tqdm_signal.emit(label, percent, msg)),
+                    iter, length, msg)
+        if immediate:
+            tqdm.showMsg()
+        self.progress_cnt += 1
+        return tqdm
+
+    def set_busy(self, busy: bool):
+        if busy ^ self._busy:
+            self._busy = busy
+            self.busy_signal.emit(busy)
+            if not busy:
+                self.progress_cnt = 0
+
+    @property
+    def busy(self):
+        return self._busy
+
 
 T = TypeVar("T")
 
@@ -60,71 +141,35 @@ class TQDM(Generic[T]):
             yield x
 
 
-class Manager(QObject):
-    """
-    storage common resources
-    """
-    inited_or_restored = pyqtSignal()
-    save = pyqtSignal()
-    busy_signal = pyqtSignal(bool)
-    msg = pyqtSignal(str)
-    tqdm_signal = pyqtSignal(int, int, str)  # label, percent, msg
+class DataBindSignal(Generic[T]):
+    def __init__(self, date_typ: Type[T]) -> None:
+        self.handlers: dict = {}
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.running_thread: QThread = None
-        self.workspace: WorkSpace = None
-        self._busy: bool = True
-        self._func: Dict[str, Callable[[], int]] = {}
-        self.progress_cnt = 0
-
-        self.calibrationInfoWidget: QTableWidget = None
-        self.formulas_result_win: QMainWindow = None
+    def connect(self, label: str, handler: Callable):
+        self.handlers[label] = handler
 
     @overload
-    def tqdm(self, iter: Iterable[T], msg: str = "") -> TQDM[T]:
+    def emit_except(self, except_label, arg: T):
         pass
 
     @overload
-    def tqdm(self, iter: Iterable[T], msg: str = "", *, length: int = 0, immediate=False) -> TQDM[T]:
+    def emit_except(self, except_label, *args, **kwargs):
         pass
 
-    @overload
-    def tqdm(self, *, msg: str = "", length: int = 0) -> TQDM:
-        pass
+    def emit_except(self, except_label, *args, **kwargs):
+        for label, handler in self.handlers.items():
+            if except_label != label:
+                handler(*args, **kwargs)
 
-    @overload
-    def tqdm(self, *, msg: str = "") -> TQDM:
-        pass
 
-    def tqdm(self, iter: Iterable = None, msg: str = "", *, length=None, immediate=False):
-        if iter is not None:
-            if length is None:
-                try:
-                    length = len(iter)
-                except TypeError:
-                    length = 0
-        label = self.progress_cnt
-        tqdm = TQDM((lambda percent, msg: self.tqdm_signal.emit(label, percent, msg)),
-                    iter, length, msg)
-        if immediate:
-            tqdm.showMsg()
-        self.progress_cnt += 1
-        return tqdm
+class ValueGetter(Generic[T]):
+    def __init__(self, value_typ: Type[T]) -> None:
+        self.getter = None
 
-    def set_busy(self, busy: bool):
-        if busy ^ self._busy:
-            self._busy = busy
-            self.busy_signal.emit(busy)
-            if not busy:
-                self.progress_cnt = 0
+    def connect(self, getter):
+        self.getter = getter
 
-    def register_func(self, key: str, func: Callable):
-        self._func[key] = func
-
-    def fetch_func(self, key: str):
-        return self._func.get(key, lambda: x)
-
-    @property
-    def busy(self):
-        return self._busy
+    def get(self) -> T:
+        if self.getter is None:
+            raise RuntimeError("Haven't connect to a value getter")
+        return self.getter()

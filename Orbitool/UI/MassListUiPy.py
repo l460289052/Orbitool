@@ -17,7 +17,7 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
         super().__init__()
         self.manager = manager
         self.setupUi(self)
-        self.manager.register_func("mass list select", self.get_selected_index)
+        manager.getters.mass_list_selected_indexes.connect(self.get_selected_index)
         self.manager.inited_or_restored.connect(self.restore)
 
     def setupUi(self, Form):

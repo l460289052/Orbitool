@@ -107,7 +107,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
                     TimeSeries.FactoryPositionRtol(position, rtol, tag))
         else:
             if self.selectedMassListRadioButton.isChecked():
-                indexes = self.manager.fetch_func("mass list select")()
+                indexes = self.manager.getters.mass_list_selected_indexes.get()
                 masslist = self.manager.workspace.masslist_docker.info.masslist
                 masslist: List[MassListItem] = [masslist[index]
                                                 for index in indexes]

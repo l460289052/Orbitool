@@ -1,9 +1,10 @@
 import csv
-from typing import Optional, Union, Dict, Tuple, List
+from typing import Dict, List, Optional, Tuple, Union
 
 from PyQt5 import QtCore, QtWidgets
 
 from ..config import exportTimeFormat
+from ..functions import binary_search
 from ..structures.spectrum import FittedPeak
 from ..utils.formula import Formula
 from . import PeakListUi
@@ -23,7 +24,15 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
     def setupUi(self, Form):
         super().setupUi(Form)
 
+        self.doubleSpinBox.setKeyboardTracking(False)
+        self.doubleSpinBox.valueChanged.connect(self.goto_mass)
+        self.gotoToolButton.clicked.connect(self.goto_mass)
         self.tableWidget.itemDoubleClicked.connect(self.openPeakFloatWin)
+        self.tableWidget.verticalScrollBar().valueChanged.connect(self.scrolled)
+
+        self.manager.bind.peak_fit_left_index.connect(
+            "peaklist", self.scroll_to_index)
+
         self.peak_float: PeakFloatWin = None
 
         self.exportSpectrumPushButton.clicked.connect(self.exportSpectrum)
@@ -75,8 +84,23 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
             for index in reversed(selectedindex):
                 indexes.pop(index)
 
-    def scrollToIndex(self, index):
-        if self.autoScrollCheckBox.isChecked():
+    @state_node
+    def goto_mass(self):
+        mass = self.doubleSpinBox.value()
+        peaks = self.peaks_info.peaks
+        indexes = self.peaks_info.shown_indexes
+        index = binary_search.indexNearest(
+            indexes, mass, method=lambda indexes, ind: peaks[indexes[ind]].peak_position)
+        self.scroll_to_index(index)
+        self.manager.bind.peak_fit_left_index.emit_except("peaklist", index)
+
+    def scrolled(self, index):
+        if self.bindPlotCheckBox.isChecked():
+            self.manager.bind.peak_fit_left_index.emit_except(
+                "peaklist", index)
+
+    def scroll_to_index(self, index):
+        if self.bindPlotCheckBox.isChecked():
             self.tableWidget.verticalScrollBar().setSliderPosition(index)
 
     @state_node(withArgs=True)

@@ -74,8 +74,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.masslist = MassListUiPy.Widget(manager)
         self.massListDw = self.add_dockerwidget(
             "Mass List", self.masslist, self.formulaDw)
-        manager.register_func("mass list select",
-                              self.masslist.get_selected_index)
+        
         self.peakFitTab.show_masslist.connect(self.masslist.showMasslist)
 
         self.calibrationInfo = CalibrationInfoUiPy.Widget(manager)
@@ -95,7 +94,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             "Peak List", self.peakList, self.spectrumDw)
         self.peakList.peak_refit_finish.connect(self.peakFitTab.peak_refit_finish)
         self.peakFitTab.filter_selected.connect(self.peakList.filterSelected)
-        self.peakFitTab.peaklist_left.connect(self.peakList.scrollToIndex)
+        self.peakFitTab.peaklist_left.connect(self.peakList.scroll_to_index)
 
         self.timeseries = TimeseriesUiPy.Widget(manager)
         self.timeseriesDw = self.add_dockerwidget(
