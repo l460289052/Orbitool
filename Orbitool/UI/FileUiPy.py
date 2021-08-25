@@ -22,7 +22,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         self.manager = manager
         self.setupUi(self)
 
-        manager.inited_or_restored.connect(self.init_or_restore)
+        manager.init_or_restored.connect(self.init_or_restore)
         manager.save.connect(self.updateState)
 
     def setupUi(self, Form):

@@ -30,5 +30,5 @@ def test_export_load():
         window.manager.save.emit()
         window.manager.workspace.close_as(tmppath)
         window.manager.workspace = WorkSpace(tmppath)
-        window.manager.inited_or_restored.emit()
+        window.manager.init_or_restored.emit()
         window.close()

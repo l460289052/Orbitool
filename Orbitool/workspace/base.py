@@ -64,7 +64,11 @@ class UiState:
         for key in keys:
             if hasattr(widget, key):
                 o = getattr(widget, key)
-                states[key] = state_handlers[type(o)].get(o)
+                typ = type(o)
+                handler = state_handlers.get(typ, None)
+                if not handler:
+                    continue
+                states[key] = handler.get(o)
         self.states = states
 
     def set_state(self, widget):
@@ -110,8 +114,9 @@ state_handlers: Dict[Type, BaseStateHandler] = {}
 
 def init_handlers():
     global state_handlers
-    from PyQt5.QtWidgets import (QCheckBox, QDateTimeEdit, QDoubleSpinBox,
-                                 QLineEdit, QSpinBox, QRadioButton)
+    from PyQt5.QtWidgets import (
+        QCheckBox, QDateTimeEdit, QDoubleSpinBox, QLineEdit,
+        QSpinBox, QRadioButton, QComboBox, QSlider)
 
     class CheckBoxHandler(BaseStateHandler):
         @staticmethod
@@ -162,6 +167,26 @@ def init_handlers():
         def set(obj: QLineEdit, value: str):
             obj.setText(value)
     state_handlers[QLineEdit] = LineEditHandler
+
+    class ComboBoxHandler(BaseStateHandler):
+        @staticmethod
+        def get(obj: QComboBox) -> str:
+            return obj.currentText()
+
+        @staticmethod
+        def set(obj: QComboBox, value: str):
+            obj.setCurrentText(value)
+    state_handlers[QComboBox] = ComboBoxHandler
+
+    class SliderHandler(BaseStateHandler):
+        @staticmethod
+        def get(obj: QSlider) -> str:
+            return obj.value()
+
+        @staticmethod
+        def set(obj: QSlider, value: str):
+            obj.setValue(int(value))
+    state_handlers[QSlider] = SliderHandler
 
 
 init_handlers()

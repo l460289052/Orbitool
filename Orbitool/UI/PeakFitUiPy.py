@@ -26,7 +26,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         super().__init__()
         self.manager = manager
         self.setupUi(self)
-        manager.inited_or_restored.connect(self.restore)
+        manager.init_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
 
         self.timer = QtCore.QTimer(self)
@@ -54,7 +54,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.actionRmPushButton.clicked.connect(self.removeFromPeaks)
 
         self.plot = Plot(self.widget)
-        self.manager.bind.peak_fit_left_index.connect("peakfit", self.move_plot_to_index)
+        self.manager.bind.peak_fit_left_index.connect(
+            "peakfit", self.move_plot_to_index)
 
         self.scaleToSpectrumPushButton.clicked.connect(self.scale_spectrum)
         self.yLogcheckBox.toggled.connect(self.ylog_toggle)
@@ -69,7 +70,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.peakfit.ui_state.set_state(self)
 
     def updateState(self):
-        self.peakfit.ui_state.fromComponents(self, [])
+        self.peakfit.ui_state.fromComponents(self, [
+            self.yLogcheckBox])
 
     def show_and_plot(self):
         self.show_peaklist.emit()

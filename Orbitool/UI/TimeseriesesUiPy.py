@@ -31,7 +31,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         super().__init__()
         self.manager = manager
         self.setupUi(self)
-        manager.inited_or_restored.connect(self.restore)
+        manager.init_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
 
         self.shown_series: Dict[int, matplotlib.lines.Line2D] = {}

@@ -34,7 +34,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         super().__init__()
         self.manager: Manager = manager
         self.setupUi(self)
-        manager.inited_or_restored.connect(self.restore)
+        manager.init_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
 
         self.spectrum_inner_index: int = None

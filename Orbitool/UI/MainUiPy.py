@@ -115,7 +115,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.manager.busy_signal.connect(self.set_busy)
 
         self.progress_bars: Dict[int, QtWidgets.QProgressBar] = {}
-        self.manager.inited_or_restored.emit()
+        self.manager.init_or_restored.emit()
         self.manager.msg.connect(self.showMsg)
         self.manager.tqdm_signal.connect(self.showBarLabelMessage)
         self.manager.set_busy(False)
@@ -159,7 +159,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         if not ret:
             return
         self.manager.workspace = WorkSpace(f)
-        self.manager.inited_or_restored.emit()
+        self.manager.init_or_restored.emit()
 
     @state_node
     def save(self):
@@ -184,7 +184,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             return
 
         self.manager.workspace.load_config(WorkSpace(f))
-        self.manager.inited_or_restored.emit()
+        self.manager.init_or_restored.emit()
 
     @state_node
     def saveConfig(self):

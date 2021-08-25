@@ -30,8 +30,6 @@ class Manager(QObject):
     """
     storage common resources
     """
-    inited_or_restored = pyqtSignal()
-    save = pyqtSignal()
     busy_signal = pyqtSignal(bool)
     msg = pyqtSignal(str)
     tqdm_signal = pyqtSignal(int, int, str)  # label, percent, msg
@@ -45,6 +43,9 @@ class Manager(QObject):
 
         self.calibrationInfoWidget: QTableWidget = None
         self.formulas_result_win: QMainWindow = None
+
+        self.init_or_restored = MySignal() # for exception catch
+        self.save = MySignal() # for exception catch
 
         self.bind = BindData()
         self.getters = Values()
@@ -141,8 +142,20 @@ class TQDM(Generic[T]):
             yield x
 
 
+class MySignal:
+    def __init__(self) -> None:
+        self.handlers: set = set()
+
+    def connect(self, handler:Callable):
+        self.handlers.add(handler)
+    
+    def emit(self):
+        for handler in self.handlers:
+            handler()
+
+
 class DataBindSignal(Generic[T]):
-    def __init__(self, date_typ: Type[T]) -> None:
+    def __init__(self, data_typ: Type[T]) -> None:
         self.handlers: dict = {}
 
     def connect(self, label: str, handler: Callable):

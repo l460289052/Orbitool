@@ -17,8 +17,9 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
         super().__init__()
         self.manager = manager
         self.setupUi(self)
-        manager.getters.mass_list_selected_indexes.connect(self.get_selected_index)
-        self.manager.inited_or_restored.connect(self.restore)
+        manager.getters.mass_list_selected_indexes.connect(
+            self.get_selected_index)
+        self.manager.init_or_restored.connect(self.restore)
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -41,6 +42,13 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
 
     def restore(self):
         self.showMasslist()
+        self.manager.workspace.masslist_docker.ui_state.set_state(self)
+
+    def updateState(self):
+        self.manager.workspace.masslist_docker.ui_state.fromComponents(self, [
+            self.addItemLineEdit,
+            self.groupLineEdit,
+            self.splitFormulaCheckBox])
 
     def showMasslist(self):
         self.doubleSpinBox.setValue(self.masslist.rtol * 1e6)

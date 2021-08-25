@@ -15,7 +15,7 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         super().__init__()
         self.manager = manager
         self.setupUi(self)
-        self.manager.inited_or_restored.connect(self.show_or_restore)
+        self.manager.init_or_restored.connect(self.show_or_restore)
 
     def setupUi(self, Form):
         super().setupUi(Form)

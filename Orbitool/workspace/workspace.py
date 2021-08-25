@@ -57,6 +57,8 @@ class WorkSpace(H5File):
             "formula docker", FormulaInfo)
         self.masslist_docker = self.visit_or_create_widget(
             "masslist docker", MassListInfo)
+        self.peaklist_docker = self.visit_or_create_widget(
+            "peaklist docker", BaseStructure)
 
     def save(self):
         self.write("info", self.info)

@@ -31,7 +31,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         self.manager = manager
         self.setupUi(self)
 
-        manager.inited_or_restored.connect(self.restore)
+        manager.init_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
 
     def setupUi(self, Form):

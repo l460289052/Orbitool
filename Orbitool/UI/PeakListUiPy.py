@@ -19,6 +19,8 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager = manager
+        self.manager.init_or_restored.connect(self.restore)
+        self.manager.save.connect(self.updateState)
         self.setupUi(self)
 
     def setupUi(self, Form):
@@ -38,6 +40,14 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         self.exportSpectrumPushButton.clicked.connect(self.exportSpectrum)
         self.exportPeaksPushButton.clicked.connect(self.exportPeaks)
         self.exportIsotopePushButton.clicked.connect(self.exportIsotopes)
+
+    def restore(self):
+        self.manager.workspace.peaklist_docker.ui_state.set_state(self)
+
+    def updateState(self):
+        self.manager.workspace.peaklist_docker.ui_state.fromComponents(self, [
+            self.bindPlotCheckBox,
+            self.doubleSpinBox])
 
     @property
     def peaks_info(self):

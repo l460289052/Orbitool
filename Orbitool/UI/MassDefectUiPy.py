@@ -21,7 +21,8 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         self.setupUi(self)
         self.plot = Plot(self.widget)
 
-        manager.inited_or_restored.connect(self.plotMassDefect)
+        manager.init_or_restored.connect(self.restore)
+        manager.save.connect(self.updateState)
 
     def setupUi(self, Form):
         super().setupUi(Form)
@@ -34,6 +35,21 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         self.showGreyCheckBox.toggled.connect(self.replot)
         self.minSizeHorizontalSlider.valueChanged.connect(self.replot)
         self.maxSizeHorizontalSlider.valueChanged.connect(self.replot)
+
+    def restore(self):
+        self.manager.workspace.massdefect_tab.ui_state.set_state(self)
+        self.plotMassDefect()
+
+    def updateState(self):
+        self.manager.workspace.massdefect_tab.ui_state.fromComponents(self, [
+            self.dbeRadioButton,
+            self.elementRadioButton,
+            self.elementLineEdit,
+            self.showGreyCheckBox,
+            self.logCheckBox,
+            self.transparencyDoubleSpinBox,
+            self.minSizeHorizontalSlider,
+            self.maxSizeHorizontalSlider])
 
     @property
     def massdefect(self):

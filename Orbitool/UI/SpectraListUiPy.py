@@ -21,7 +21,9 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
         self.manager = manager
         self.setupUi(self)
 
-        manager.getters.spectra_list_selected_index.connect(self.get_selected_index)
+        manager.getters.spectra_list_selected_index.connect(
+            self.get_selected_index)
+        manager.init_or_restored.connect(self.restore)
 
         self.comboBox.currentIndexChanged.connect(self.comboBox_changed)
         self.comboBox_position = {}
@@ -34,8 +36,24 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
         self.show_combobox_selection()
         self.exportPushButton.clicked.connect(self.export)
 
+    def restore(self):
+        try:
+            self.comboBox.currentIndexChanged.disconnect(self.comboBox_changed)
+        except TypeError:
+            pass
+        self.spectra_list.ui_state.set_state(self)
+        self._comboBox_changed()
+        self.comboBox.currentIndexChanged.connect(self.comboBox_changed)
+
+    def updateState(self):
+        self.spectra_list.ui_state.fromComponents(self, [
+            self.comboBox])
+
     @state_node(mode='x')
     def comboBox_changed(self):
+        self._comboBox_changed()
+
+    def _comboBox_changed(self):
         current = self.comboBox.currentData()
         if self.former_index == current:
             return

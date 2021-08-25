@@ -42,7 +42,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
         self.setupUi(self)
 
         self.animation = LineAnimation()
-        self.manager.inited_or_restored.connect(self.restore)
+        self.manager.init_or_restored.connect(self.restore)
         self.manager.save.connect(self.updateState)
 
     def setupUi(self, Form):
@@ -65,7 +65,9 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
         self.peak_shape.ui_state.set_state(self)
 
     def updateState(self):
-        self.peak_shape.ui_state.fromComponents(self, [self.spinBox])
+        self.peak_shape.ui_state.fromComponents(self, [
+            self.spinBox,
+            self.comboBox])
 
     @property
     def peak_shape(self):
