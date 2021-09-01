@@ -10,7 +10,7 @@ from .base import Widget as BaseWidget
 
 
 def default_ions():
-    return list(map(Ion.FactoryFromText,
+    return list(map(Ion.fromText,
                     ["HNO3NO3-", "C6H3O2NNO3-", "C6H5O3NNO3-",
                      "C6H4O5N2NO3-", "C8H12O10N2NO3-", "C10H17O10N3NO3-"]))
 
@@ -30,10 +30,11 @@ class CalibratorInfo(BaseStructure):
     def add_ions(self, ions: List[str]):
         s = {ion.formula for ion in self.ions}
         for ion in ions:
-            i = Ion.FactoryFromText(ion)
+            i = Ion.fromText(ion)
             if i.formula in s:
                 continue
             self.ions.append(i)
+        self.ions.sort(key=lambda ion: ion.formula.mass())
 
 
 class Widget(BaseWidget[CalibratorInfo]):

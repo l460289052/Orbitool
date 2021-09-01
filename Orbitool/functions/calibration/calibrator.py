@@ -18,7 +18,7 @@ class Ion(BaseTableItem):
     formula: Formula
 
     @classmethod
-    def FactoryFromText(cls, text):
+    def fromText(cls, text):
         return Ion(shown_text=text, formula=Formula(text))
 
 
@@ -43,7 +43,7 @@ class Calibrator(BaseStructure):
     max_indexes: np.ndarray
 
     @classmethod
-    def FactoryFromMzInt(cls, time: datetime, ions: List[Ion], ions_raw_position: np.ndarray, ions_raw_intensity: np.ndarray, rtol: float = 5e-6, use_N_ions=None):
+    def fromMzInt(cls, time: datetime, ions: List[Ion], ions_raw_position: np.ndarray, ions_raw_intensity: np.ndarray, rtol: float = 5e-6, use_N_ions=None):
         """
         ions_raw_position: shape (len(spectrum), len(ions))
         ions_raw_intensity: shape (len(spectrum), len(ions))
@@ -75,4 +75,4 @@ class Calibrator(BaseStructure):
                           ions_rtol=ions_rtol, min_indexes=min_indexes, max_indexes=max_indexes)
 
     def regeneratCalibrator(self, rtol: float = 5e-6, use_N_ions=None) -> Calibrator:
-        return self.FactoryFromMzInt(self.time, self.ions, self.ions_raw_position, self.ions_raw_intensity, rtol, use_N_ions)
+        return self.fromMzInt(self.time, self.ions, self.ions_raw_position, self.ions_raw_intensity, rtol, use_N_ions)

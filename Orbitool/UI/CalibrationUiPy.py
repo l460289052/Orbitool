@@ -5,7 +5,7 @@ from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 from itertools import chain
 
 import numpy as np
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 import matplotlib.ticker
 
 from ..functions import spectrum as spectrum_func, binary_search, peakfit as peakfit_func
@@ -148,7 +148,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
                     ions_peak = np.array(ions_peak, dtype=float)
                     ions_position = ions_peak[:, :, 0]
                     ions_intensity = ions_peak[:, :, 1]
-                    path_calibrators[path] = Calibrator.FactoryFromMzInt(
+                    path_calibrators[path] = Calibrator.fromMzInt(
                         path_time[path], info.ions, ions_position, ions_intensity, rtol, use_N_ions)
 
                 return path_calibrators
@@ -201,15 +201,22 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         table.setVerticalHeaderLabels(
             [ion.shown_text for ion in calibrator.ions])
 
+        min_indexes = set(calibrator.min_indexes)
+        color = QtGui.QColor(0xB6EEA6)
         for index, (ion, mz, intensity) in enumerate(zip(calibrator.ions, ions_position, ions_intensity)):
-            table.setItem(
-                index, 0, QtWidgets.QTableWidgetItem(format(mz, '.5f')))
-            table.setItem(
-                index, 1, QtWidgets.QTableWidgetItem(
-                    format((1 - ion.formula.mass() / mz) * 1e6, '.5f')))
-            table.setItem(
-                index, 2, QtWidgets.QTableWidgetItem(
-                    format(intensity, '.3e')))
+            if index in min_indexes:
+                def setItem(column, text):
+                    item = QtWidgets.QTableWidgetItem(text)
+                    item.setBackground(color)
+                    table.setItem(index, column, item)
+            else:
+                def setItem(column, text):
+                    item = QtWidgets.QTableWidgetItem(text)
+                    table.setItem(index, column, item)
+
+            setItem(0, format(mz, '.5f'))
+            setItem(1, format((1 - ion.formula.mass() / mz) * 1e6, '.5f'))
+            setItem(2, format(intensity, '.3e'))
 
         plot = self.plot
         ax = plot.ax
@@ -217,11 +224,14 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         ax.axhline(color='black', linewidth=0.5)
         ax.plot(spectrum.mz, spectrum.intensity, color='black')
 
-        for ion, x, y in zip(calibrator.ions, ions_position, ions_intensity):
+        for index, (ion, x, y) in enumerate(zip(calibrator.ions, ions_position, ions_intensity)):
             if math.isnan(x):
                 continue
-            ax.plot([x, x], [0, y], color='red')
-            ax.annotate(ion.shown_text, (x, y))
+            ax.plot([x, x], [0, y], color='r')
+            if index in min_indexes:
+                ax.annotate(ion.shown_text, (x, y), color='g')
+            else:
+                ax.annotate(ion.shown_text, (x, y))
         ax.xaxis.set_tick_params(rotation=15)
         ax.yaxis.set_tick_params(rotation=60)
         ax.yaxis.set_major_formatter(
@@ -283,9 +293,18 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         table.setRowCount(len(calibrator.ions_position))
         table.setVerticalHeaderLabels(
             [ion.shown_text for ion in calibrator.ions])
+        min_indexes = calibrator.min_indexes
+        color = QtGui.QColor(0xB6EEA6)
         for i in range(len(calibrator.ions_position)):
-            def setValue(column, s):
-                table.setItem(i, column, QtWidgets.QTableWidgetItem(str(s)))
+            if i in min_indexes:
+                def setValue(column, s):
+                    item = QtWidgets.QTableWidgetItem(str(s))
+                    item.setBackground(color)
+                    table.setItem(i, column, item)
+            else:
+                def setValue(column, s):
+                    table.setItem(
+                        i, column, QtWidgets.QTableWidgetItem(str(s)))
             setValue(0, format(calibrator.ions[i].formula.mass(), '.5f'))
             setValue(1, format(calibrator.ions_position[i], '.5f'))
             setValue(2, format(calibrator.ions_rtol[i] * 1e6, '.5f'))
@@ -308,7 +327,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         max_index = calibrator.max_indexes
         x = ions_position[min_index]
         y = ions_rtol[min_index] * 1e6
-        ax.scatter(x, y, c='black')
+        ax.scatter(x, y, c='green')
         x = ions_position[max_index]
         y = ions_rtol[max_index] * 1e6
         ax.scatter(x, y, c='red')
@@ -344,12 +363,16 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         times = []
         devitions = []
+        color = QtGui.QColor(0xB6EEA6)
         for row, calibrator in enumerate(calibrators):
             times.append(calibrator.time)
 
+            min_indexes = calibrator.min_indexes
             for column, rtol in enumerate(calibrator.ions_rtol):
-                table.setItem(row, column, QtWidgets.QTableWidgetItem(
-                    format(rtol * 1e6, ".5f")))
+                item = QtWidgets.QTableWidgetItem(format(rtol * 1e6, ".5f"))
+                if column in min_indexes:
+                    item.setBackground(color)
+                table.setItem(row, column, item)
             devitions.append(calibrator.ions_rtol)
         vlabels = [time.replace(microsecond=0).isoformat(
             sep=' ')[:-3] for time in times]
@@ -448,7 +471,7 @@ class SplitAndFitPeak(MultiProcess):
                     target_peaks = fit_func.splitPeak(peak)
 
                     index = np.argmax(
-                        peak.peak_intensity for peak in target_peaks)
+                        [peak.peak_intensity for peak in target_peaks])
                     peak = target_peaks[index]
                     if abs(peak.peak_position / ion - 1) < rtol:
                         ions_peak.append(
