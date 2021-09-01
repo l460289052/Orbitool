@@ -2,7 +2,7 @@ from typing import List, Optional
 
 import numpy as np
 
-from .. import config
+from .. import get_config
 from ..utils.formula import Formula
 from ..structures.base import BaseStructure, BaseTableItem, Field
 from ..structures.HDF5 import Ndarray
@@ -22,7 +22,7 @@ class NoiseFormulaParameter(BaseTableItem):
 
 def default_formula_parameter():
     return [NoiseFormulaParameter(
-            formula=Formula(f)) for f in config.noise_formulas]
+            formula=Formula(f)) for f in get_config().noise_formulas]
 
 
 class NoiseGeneralSetting(BaseStructure):

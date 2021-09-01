@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Any, Callable, Generator, overload
 from PyQt5 import QtCore
 
-from ... import config
+from ... import get_config
 from ..utils import showInfo, sleep
 from .manager import Manager
 from .thread import MultiProcess, Thread, threadtype
@@ -98,10 +98,10 @@ class node:
                                 thread = Thread(to_be_finished)
                             else:
                                 thread = to_be_finished
-                            thread.manager = manager
+                            thread.set_tqdmer(manager.tqdm)
                             thread.finished.connect(run_send)
                             manager.running_thread = thread
-                            if config.DEBUG:
+                            if get_config().DEBUG:
                                 thread.run()
                             else:
                                 thread.start()

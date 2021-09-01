@@ -3,7 +3,6 @@ from datetime import datetime
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from .. import config
 from ..workspace import WorkSpace
 
 from .manager import Manager, state_node, MultiProcess
@@ -117,7 +116,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.progress_bars: Dict[int, QtWidgets.QProgressBar] = {}
         self.manager.init_or_restored.emit()
         self.manager.msg.connect(self.showMsg)
-        self.manager.tqdm_signal.connect(self.showBarLabelMessage)
+        self.manager.tqdm.tqdm_signal.connect(self.showBarLabelMessage)
         self.manager.set_busy(False)
 
     @property

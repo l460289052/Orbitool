@@ -23,7 +23,8 @@ try:
         parser.add_argument("--no_multiprocess", action="store_true")
         parser.add_argument("--to_step")
 
-        from Orbitool import config
+        from Orbitool.config import get_config
+        config = get_config()
         args = parser.parse_args()
         config.DEBUG = args.debug
         config.NO_MULTIPROCESS = args.no_multiprocess

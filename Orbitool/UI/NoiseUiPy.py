@@ -8,7 +8,7 @@ import numpy as np
 from numpy.polynomial.polynomial import polyval
 from PyQt5 import QtCore, QtWidgets
 
-from .. import config, workspace
+from .. import get_config, workspace
 from ..functions import spectrum as spectrum_func, binary_search
 from ..structures.file import FileSpectrumInfo
 from ..structures.HDF5 import StructureListView
@@ -334,8 +334,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         setting = info.general_setting
 
         ret, f = savefile("Save Denoise Spectrum", "CSV file(*.csv)",
-                          f"denoise_spectrum {spectrum.start_time.strftime(config.exportTimeFormat)}"
-                          f"-{spectrum.end_time.strftime(config.exportTimeFormat)}.csv")
+                          f"denoise_spectrum {spectrum.start_time.strftime(get_config().exportTimeFormat)}"
+                          f"-{spectrum.end_time.strftime(get_config().exportTimeFormat)}.csv")
         if not ret:
             return
 
@@ -367,8 +367,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         spectrum = info.current_spectrum
         setting = info.general_setting
         ret, f = savefile("Save Noise Peak", "CSV file(*.csv)",
-                          f"noise_peak {spectrum.start_time.strftime(config.exportTimeFormat)}"
-                          f"-{spectrum.end_time.strftime(config.exportTimeFormat)}.csv")
+                          f"noise_peak {spectrum.start_time.strftime(get_config().exportTimeFormat)}"
+                          f"-{spectrum.end_time.strftime(get_config().exportTimeFormat)}.csv")
         if not ret:
             return
 

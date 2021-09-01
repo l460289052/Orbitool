@@ -1,6 +1,5 @@
 from . import HDF5
 from .converters import register, convert, _BaseConverter, ConvertVersionCheckError, _converter
-from .file import PathList
 
 from . import h5converters
 

@@ -1,17 +1,21 @@
+import logging
+import os
 from abc import ABC, abstractmethod
 from collections import deque
 from enum import Enum
 from multiprocessing import Pool
 from multiprocessing.pool import AsyncResult
-import os
 from queue import Queue
-from typing import List, Tuple, final, Deque, Iterable, Generator, TypeVar, Generic, Any
+from typing import (Any, Deque, Generator, Generic, Iterable, List, Tuple,
+                    TypeVar, final)
 
 from PyQt5 import QtCore
 
-from ...config import logger, multi_cores, NO_MULTIPROCESS
+from ... import get_config
 from ..utils import sleep
 from . import manager
+
+logger = logging.getLogger("Orbitool")
 
 
 class threadtype(Enum):
@@ -38,6 +42,9 @@ class Thread(QtCore.QThread):
             self.result = e
             self.finished.emit((e, ))
 
+    def set_tqdmer(self, tqdmer: manager.TQDMER):
+        pass
+
 
 Data = TypeVar("Data")
 Result = TypeVar("Result")
@@ -54,17 +61,29 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
         self.func_kwargs = func_kwargs or {}
         self.write_kwargs = write_kwargs or {}
         self.aborted = False
-        self.manager: manager.Manager = None
+        self.tqdm: manager.TQDMER = None
+        self.result = None
+
+    @final
+    def finished_emit(self, t: tuple):
+        self.result = t
+        self.finished.emit(t)
+
+    @final
+    def set_tqdmer(self, tqdmer: manager.TQDMER):
+        self.tqdm = tqdmer
 
     @final
     def run(self):
         try:
-            if NO_MULTIPROCESS:
+            if self.tqdm is None:
+                self.tqdm = manager.TQDMER()
+            if get_config().NO_MULTIPROCESS:
                 self._single_run_memory()
             else:
                 self._run()
         except Exception as e:
-            self.finished.emit((e,))
+            self.finished_emit((e,))
 
     @final
     def _run(self):
@@ -74,7 +93,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
         length = self.read_len(file, **self.read_kwargs)
 
         def iter_queue():
-            tqdm = self.manager.tqdm(msg="write", length=length)
+            tqdm = self.tqdm(msg="write", length=length)
             while True:
                 tqdm.update()
                 result = queue.get()
@@ -85,6 +104,8 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
         write_thread = Thread(
             self.write, (file, iter_queue()), self.write_kwargs)
         write_thread.start()
+
+        multi_cores = get_config().multi_cores
 
         with Pool(multi_cores) as pool:
             def abort():
@@ -109,13 +130,13 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                 while len(results) > 0 and results[0].ready():
                     ret = results.popleft().get()
                     if isinstance(ret, Exception):
-                        self.finished.emit(
+                        self.finished_emit(
                             (ret, (self.func, self.file)))
                         self.abort()
                         return
                     queue.put(ret)
 
-            for i, input_data in self.manager.tqdm(
+            for i, input_data in self.tqdm(
                     enumerate(self.read(file, **self.read_kwargs)),
                     length=length, msg="read",
                     immediate=True):
@@ -134,16 +155,17 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
             queue.put(None)
 
         write_thread.wait()
-        self.finished.emit((write_thread.result,))
+        self.finished_emit((write_thread.result,))
 
     @final
     def _single_run_memory(self):
         file = self.file
-        rets = []
-        for i, data in enumerate(self.manager.tqdm(self.read(file, **self.read_kwargs), "read")):
-            rets.append(self.process(i, self.func, data, self.func_kwargs))
-        ret = self.write(file, rets, **self.write_kwargs)
-        self.finished.emit((ret,))
+
+        def read_process():
+            for i, data in enumerate(self.tqdm(self.read(file, **self.read_kwargs), "process")):
+                yield self.process(i, self.func, data, self.func_kwargs)
+        ret = self.write(file, read_process(), **self.write_kwargs)
+        self.finished_emit((ret,))
 
     @final
     def abort(self, send=True):

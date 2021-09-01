@@ -1,17 +1,18 @@
 from __future__ import annotations
-from functools import wraps
-from datetime import datetime
-from typing import Callable, Dict, Iterable, overload, TypeVar, Generic, Iterator, Type
+
 import random
+from datetime import datetime
+from functools import wraps
+from typing import (Callable, Dict, Generic, Iterable, Iterator, Type, TypeVar,
+                    overload)
 
-
-from PyQt5.QtCore import QThread, pyqtSignal, QObject, QTimer
-from PyQt5.QtWidgets import QTableWidget, QMainWindow
 import numpy as np
+from PyQt5.QtCore import QObject, QThread, QTimer, pyqtSignal
+from PyQt5.QtWidgets import QMainWindow, QTableWidget
 
 from ...workspace import WorkSpace
-from ..utils import showInfo
 from ..component import Plot
+from ..utils import showInfo
 
 
 class BindData:
@@ -32,61 +33,29 @@ class Manager(QObject):
     """
     busy_signal = pyqtSignal(bool)
     msg = pyqtSignal(str)
-    tqdm_signal = pyqtSignal(int, int, str)  # label, percent, msg
 
     def __init__(self) -> None:
         super().__init__()
         self.running_thread: QThread = None
         self.workspace: WorkSpace = None
         self._busy: bool = True
-        self.progress_cnt = 0
 
         self.calibrationInfoWidget: QTableWidget = None
         self.formulas_result_win: QMainWindow = None
 
-        self.init_or_restored = MySignal() # for exception catch
-        self.save = MySignal() # for exception catch
+        self.tqdm = TQDMER()
+        self.busy_signal.connect(self.tqdm.reinit)
+
+        self.init_or_restored = MySignal()  # for exception catch
+        self.save = MySignal()  # for exception catch
 
         self.bind = BindData()
         self.getters = Values()
-
-    @overload
-    def tqdm(self, iter: Iterable[T], msg: str = "") -> TQDM[T]:
-        pass
-
-    @overload
-    def tqdm(self, iter: Iterable[T], msg: str = "", *, length: int = 0, immediate=False) -> TQDM[T]:
-        pass
-
-    @overload
-    def tqdm(self, *, msg: str = "", length: int = 0) -> TQDM:
-        pass
-
-    @overload
-    def tqdm(self, *, msg: str = "") -> TQDM:
-        pass
-
-    def tqdm(self, iter: Iterable = None, msg: str = "", *, length=None, immediate=False):
-        if iter is not None:
-            if length is None:
-                try:
-                    length = len(iter)
-                except TypeError:
-                    length = 0
-        label = self.progress_cnt
-        tqdm = TQDM((lambda percent, msg: self.tqdm_signal.emit(label, percent, msg)),
-                    iter, length, msg)
-        if immediate:
-            tqdm.showMsg()
-        self.progress_cnt += 1
-        return tqdm
 
     def set_busy(self, busy: bool):
         if busy ^ self._busy:
             self._busy = busy
             self.busy_signal.emit(busy)
-            if not busy:
-                self.progress_cnt = 0
 
     @property
     def busy(self):
@@ -142,13 +111,56 @@ class TQDM(Generic[T]):
             yield x
 
 
+class TQDMER(QObject):
+    tqdm_signal = pyqtSignal(int, int, str)  # label, percent, msg
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.progress_cnt = 0
+
+    @overload
+    def __call__(self, iter: Iterable[T], msg: str = "") -> TQDM[T]:
+        pass
+
+    @overload
+    def __call__(self, iter: Iterable[T], msg: str = "", *, length: int = 0, immediate=False) -> TQDM[T]:
+        pass
+
+    @overload
+    def __call__(self, *, msg: str = "", length: int = 0) -> TQDM:
+        pass
+
+    @overload
+    def __call__(self, *, msg: str = "") -> TQDM:
+        pass
+
+    def __call__(self, iter: Iterable = None, msg: str = "", *, length=None, immediate=False):
+        if iter is not None:
+            if length is None:
+                try:
+                    length = len(iter)
+                except TypeError:
+                    length = 0
+        label = self.progress_cnt
+        tqdm = TQDM((lambda percent, msg: self.tqdm_signal.emit(label, percent, msg)),
+                    iter, length, msg)
+        if immediate:
+            tqdm.showMsg()
+        self.progress_cnt += 1
+        return tqdm
+
+    def reinit(self, reinit: bool = True):
+        if reinit:
+            self.progress_cnt = 0
+
+
 class MySignal:
     def __init__(self) -> None:
         self.handlers: set = set()
 
-    def connect(self, handler:Callable):
+    def connect(self, handler: Callable):
         self.handlers.add(handler)
-    
+
     def emit(self):
         for handler in self.handlers:
             handler()

@@ -11,7 +11,7 @@ import matplotlib.ticker
 import numpy as np
 from PyQt5 import QtCore, QtWidgets
 
-from ..config import exportTimeFormat
+from .. import get_config
 from ..functions import peakfit as peakfit_func
 from ..functions import spectrum as spectrum_func
 from ..structures.spectrum import FittedPeak
@@ -212,8 +212,8 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
     def export(self):
         spectrum = self.peak_shape.info.spectrum
         ret, f = savefile("Save Peak Shape Info", "CSV file(*.csv)",
-                          f"peak_shape_info {spectrum.start_time.strftime(exportTimeFormat)}"
-                          f"-{spectrum.end_time.strftime(exportTimeFormat)}")
+                          f"peak_shape_info {spectrum.start_time.strftime(get_config().format_export_time)}"
+                          f"-{spectrum.end_time.strftime(get_config().format_export_time)}")
         if not ret:
             return
 

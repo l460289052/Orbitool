@@ -6938,7 +6938,7 @@ static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_40getNoiseParam
 /* … */
     goto __pyx_L5;
   }
-</pre><pre class="cython line score-48" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">150</span>:         <span class="n">poly_coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mf">2</span> <span class="k">if</span> <span class="n">mass_dependent</span> <span class="k">else</span> <span class="mf">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">npdouble</span><span class="p">)</span></pre>
+</pre><pre class="cython line score-48" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">150</span>:         <span class="n">poly_coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mf">2</span> <span class="k">if</span> <span class="n">mass_dependent</span> <span class="k">else</span> <span class="mf">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">npdouble</span><span class="p">)</span></pre>
 <pre class='cython code score-48 '>    <span class='pyx_c_api'>__Pyx_GetModuleGlobalName</span>(__pyx_t_11, __pyx_n_s_np);<span class='error_goto'> if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 150, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_11);
     __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(__pyx_t_11, __pyx_n_s_zeros);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 150, __pyx_L1_error)</span>
@@ -6948,8 +6948,8 @@ static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_40getNoiseParam
       <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_int_2);
       __pyx_t_11 = __pyx_int_2;
     } else {
-      <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_int_0);
-      __pyx_t_11 = __pyx_int_0;
+      <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_int_1);
+      __pyx_t_11 = __pyx_int_1;
     }
     __pyx_t_6 = <span class='py_c_api'>PyTuple_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 150, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
@@ -7221,7 +7221,7 @@ static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_40getNoiseParam
       }
       <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_8); __pyx_t_8 = 0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">160</span>:         <span class="k">else</span><span class="p">:</span></pre>
-<pre class="cython line score-42" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">161</span>:             <span class="n">poly_coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mf">2</span> <span class="k">if</span> <span class="n">mass_dependent</span> <span class="k">else</span> <span class="mf">0</span><span class="p">)</span></pre>
+<pre class="cython line score-42" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">161</span>:             <span class="n">poly_coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mf">2</span> <span class="k">if</span> <span class="n">mass_dependent</span> <span class="k">else</span> <span class="mf">1</span><span class="p">)</span></pre>
 <pre class='cython code score-42 '>    /*else*/ {
       <span class='pyx_c_api'>__Pyx_GetModuleGlobalName</span>(__pyx_t_8, __pyx_n_s_np);<span class='error_goto'> if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 161, __pyx_L1_error)</span>
       <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_8);
@@ -7232,8 +7232,8 @@ static PyObject *__pyx_pf_8Orbitool_9functions_8spectrum_6_noise_40getNoiseParam
         <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_int_2);
         __pyx_t_8 = __pyx_int_2;
       } else {
-        <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_int_0);
-        __pyx_t_8 = __pyx_int_0;
+        <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_int_1);
+        __pyx_t_8 = __pyx_int_1;
       }
       __pyx_t_6 = NULL;
       if (CYTHON_UNPACK_METHODS &amp;&amp; unlikely(<span class='py_c_api'>PyMethod_Check</span>(__pyx_t_1))) {

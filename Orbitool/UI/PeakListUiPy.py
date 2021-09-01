@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from PyQt5 import QtCore, QtWidgets
 
-from ..config import exportTimeFormat
+from .. import get_config
 from ..functions import binary_search
 from ..structures.spectrum import FittedPeak
 from ..utils.formula import Formula
@@ -128,8 +128,8 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
     def exportSpectrum(self):
         spectrum = self.peaks_info.spectrum
         ret, f = savefile("Save Spectrum", "CSV file(*.csv)",
-                          f"fitted_spectrum {spectrum.start_time.strftime(exportTimeFormat)}-"
-                          f"{spectrum.end_time.strftime(exportTimeFormat)}")
+                          f"fitted_spectrum {spectrum.start_time.strftime(get_config().format_export_time)}-"
+                          f"{spectrum.end_time.strftime(get_config().format_export_time)}")
 
         if not ret:
             return
@@ -144,8 +144,8 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         spectrum = self.peaks_info.spectrum
 
         ret, f = savefile("Save Peak List", "CSV file(*.csv)",
-                          f"peak_list {spectrum.start_time.strftime(exportTimeFormat)}"
-                          f"-{spectrum.end_time.strftime(exportTimeFormat)}")
+                          f"peak_list {spectrum.start_time.strftime(get_config().format_export_time)}"
+                          f"-{spectrum.end_time.strftime(get_config().format_export_time)}")
         if not ret:
             return
 
@@ -177,8 +177,8 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         spectrum = self.peaks_info.spectrum
 
         ret, f = savefile("Save Isotopes", "CSV file(*.csv)",
-                          f"isotope {spectrum.start_time.strftime(exportTimeFormat)}"
-                          f"-{spectrum.end_time.strftime(exportTimeFormat)}")
+                          f"isotope {spectrum.start_time.strftime(get_config().format_export_time)}"
+                          f"-{spectrum.end_time.strftime(get_config().format_export_time)}")
         if not ret:
             return
 

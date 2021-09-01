@@ -2,15 +2,9 @@ import logging
 import os
 from datetime import timedelta
 from multiprocessing import cpu_count
+from typing import List
 
-from pydantic import BaseModel
-
-
-DEBUG = False
-NO_MULTIPROCESS = False
-
-timeFormat = r"%Y-%m-%d %H:%M:%S"
-exportTimeFormat = r"%Y%m%d_%H%M%S"
+from pydantic import BaseModel, Field
 
 
 class TempFile:
@@ -22,7 +16,7 @@ rootPath = os.path.dirname(os.path.dirname(__file__))
 
 logPath = os.path.join(rootPath, 'log.txt')
 
-logLevel = "DEBUG" if DEBUG else "WARNING"
+logLevel = "DEBUG"
 
 formatter = logging.Formatter(
     "\n%(asctime)s - %(filename)s - %(levelname)s \n %(message)s")
@@ -33,16 +27,32 @@ logger.setLevel(logLevel)
 logger.addHandler(log_file_handler)
 
 
-multi_cores = cpu_count()
-if multi_cores <= 0:
-    multi_cores = 1
+class _Config(BaseModel):
+    DEBUG: bool = False
+    NO_MULTIPROCESS: bool = False
 
-test_timeout = 0.1  # second
+    format_time: str = r"%Y-%m-%d %H:%M:%S"
+    format_export_time: str = r"%Y%m%d_%H%M%S"
 
-time_delta = timedelta(seconds=1)
+    multi_cores: int = Field(default_factory=cpu_count)
 
-default_select = True  # if True, will select first row
+    test_timeout: float = .1
+    time_delta: timedelta = timedelta(seconds=1)
 
-noise_formulas = ["NO3-", "HN2O6-"]
+    default_select: bool = True
 
-plot_refresh_interval = timedelta(seconds=1)
+    noise_formulas: List[str] = ["NO3-", "HNO3NO3-"]
+
+    plot_refresh_interval: float = Field(1, description="second")
+
+
+_config = _Config()
+
+
+def get_config() -> _Config:
+    return _config
+
+
+def set_config(config):
+    global _config
+    _config = config

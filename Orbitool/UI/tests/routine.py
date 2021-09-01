@@ -1,7 +1,7 @@
 import os
 
 from PyQt5 import QtWidgets, QtCore
-from ... import config
+from ... import get_config, config
 from .. import MainUiPy, FileUiPy
 
 from ..utils import test
@@ -11,13 +11,13 @@ loop: QtCore.QEventLoop = None
 
 
 def wait_not_busy():
-    if not config.DEBUG:
+    if not get_config().DEBUG:
         loop.exec_()
 
 
 def sleep(timeout=None):
     if not timeout:
-        timeout = config.test_timeout
+        timeout = get_config().test_timeout
     if timeout > 0:
         timer = QtCore.QTimer()
         timer.timeout.connect(loop.quit)
@@ -47,7 +47,7 @@ def fileui(window: MainUiPy.Window):
     wait_not_busy()
     sleep()
     assert not manager.busy
-    assert len(workspace.file_tab.info.pathlist.paths) == 4
+    assert len(workspace.file_tab.info.pathlist.paths) == 9
 
     test.input([1, 2, 3])
     fileui.processSelected()
