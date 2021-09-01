@@ -1,14 +1,18 @@
 from __future__ import annotations
-from typing import List, TYPE_CHECKING, Iterable
-from .base import BaseStructure, Field, BaseTableItem
-from .HDF5 import Ndarray
-from .HDF5.h5datatable import BaseDatatableType
-from h5py import string_dtype
-from ..utils.formula import Formula
-from ..functions import spectrum
+
 from datetime import datetime
-import numpy as np
+from enum import Enum
 from functools import cached_property
+from typing import TYPE_CHECKING, Iterable, List
+
+import numpy as np
+from h5py import string_dtype
+
+from ..functions import spectrum
+from ..utils.formula import Formula
+from .base import BaseStructure, BaseTableItem, Field
+from .HDF5 import AsciiLimit, Ndarray
+from .HDF5.h5datatable import BaseDatatableType
 
 
 class Peak(BaseTableItem):
@@ -59,6 +63,10 @@ else:
             return [Formula(s) for s in value.split(',') if s.strip()]
 
 
+class PeakTags(str, Enum):
+    fail = 'f'
+    noise = 'n'
+    done = 'd'
 
 
 class FittedPeak(Peak):
@@ -68,6 +76,7 @@ class FittedPeak(Peak):
     peak_intensity: float
     area: float
 
+    tags: str = ""
     formulas: FormulaList = Field(default_factory=list)
 
 

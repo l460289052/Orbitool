@@ -5,7 +5,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from .. import get_config
 from ..functions import binary_search
-from ..structures.spectrum import FittedPeak
+from ..structures.spectrum import FittedPeak, PeakTags
 from ..utils.formula import Formula
 from . import PeakListUi
 from .manager import Manager, state_node
@@ -78,8 +78,9 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
                 setItem(3,
                         format((peak.peak_position / peak.formulas[0].mass() - 1) * 1e6, '.5f'))
             setItem(4, format(peak.area, '.3e'))
+            setItem(5, ','.join(tag.name for tag in map(PeakTags, peak.tags)))
 
-            setItem(5, raw_split_num[original_indexes[indexes[index]]])
+            setItem(6, raw_split_num[original_indexes[indexes[index]]])
 
     def filterSelected(self, select: bool):
         """

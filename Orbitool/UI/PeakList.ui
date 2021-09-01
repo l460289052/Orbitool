@@ -92,6 +92,11 @@
      </column>
      <column>
       <property name="text">
+       <string>tag</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
        <string>peaks num</string>
       </property>
      </column>

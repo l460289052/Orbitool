@@ -91,6 +91,12 @@ class BoolDtype(Dtype):
 class StrDtype(Dtype):
     dtype = string_dtype('utf-8')
 
+    @staticmethod
+    def convert_from_h5(value):
+        if isinstance(value, bytes):
+            return value.decode()
+        return value
+
 
 class DatetimeDtype(IntDtype):
     @staticmethod
@@ -163,6 +169,11 @@ else:
             if isinstance(v, bytes):
                 return v.decode()
             return str(v)
+
+        def convert_from_h5(self, value):
+            if isinstance(value, bytes):
+                return value.decode()
+            return value
 
         def __call__(self, value):
             return np.array(value, dtype=self.dtype)

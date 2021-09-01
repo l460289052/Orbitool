@@ -5,7 +5,7 @@ from typing import List
 import numpy as np
 from scipy.optimize import curve_fit
 
-from ....structures.spectrum import FittedPeak, Peak
+from ....structures.spectrum import FittedPeak, Peak, PeakTags
 from .nd import func, maxFitNum, mergePeaksParam
 from ..base import BaseFunc
 
@@ -74,9 +74,11 @@ class NormalDistributionFunc(BaseFunc):
         peak_position = param[1]
         area = param[0]
         peak_intensity = self._funcFit(peak_position, *param)
+        tags = set(peak1.tags)
+        tags.update(peak2.tags)
         peak = FittedPeak(mz=mz, intensity=intensity, fitted_param=param,
                           peak_position=peak_position, peak_intensity=peak_intensity,
-                          area=area)
+                          area=area, tags=''.join(tags))
         return peak
 
     def normFunc(self, x):
@@ -108,16 +110,20 @@ class NormalDistributionFunc(BaseFunc):
 
         if split_num > 15:
             split_num = 15
-        u: np.ndarray = np.stack(
-            (peak.mz[1:-1][id_peak], peak.intensity[1:-1][id_peak]), axis=1)
+
+        u = np.array([(pint / self._funcFit(pmz, 1, pmz), pmz)
+                      for pmz, pint in zip(peak.mz[1:-1][id_peak],
+                                           peak.intensity[1:-1][id_peak])])
         uu = [(u[-1, 0] + i + 1, 0) for i in range(split_num - u.shape[0])]
         if len(uu) > 0:
-            u = np.concatenate((u, uu), axis=0)
+            uu = np.concatenate((u, uu), axis=0)
+        else:
+            uu = u
 
-        index = np.argsort(u[:, 1])
-        u = u[np.flip(index)]
-        u = u[:split_num]
-        param = np.flip(u, axis=1).reshape(-1)
+        index = uu[:, 1].argsort()
+        uu = uu[index[::-1]]
+        uu = uu[:split_num]
+        param = uu.reshape(-1)
 
         mz = peak.mz
         intensity = peak.intensity
@@ -134,37 +140,50 @@ class NormalDistributionFunc(BaseFunc):
                 if m.min() < mz_min or m.max() > mz_max:
                     raise RuntimeError()
 
-                peaks: List[FittedPeak] = []
-                for p in params:
-                    peak_intensity = self._funcFit(p[1], *p)
-                    if peak_intensity < 0:
-                        raise RuntimeError()
-                    new_intensity = self._funcFit(mz, *p)
-                    select = new_intensity > 1e-6
-                    select[:-1] |= select[1:]
-                    select[1:] |= select[:-1]
-                    new_intensity = new_intensity[select]
-                    if len(new_intensity) == 0:
-                        raise RuntimeError()
-                    new_intensity[-1] = 0
-                    new_intensity[0] = 0
-                    new_peak = FittedPeak(
-                        mz=mz[select], intensity=new_intensity, fitted_param=p,
-                        peak_position=p[1], peak_intensity=peak_intensity, area=p[0])
-                    peaks.append(new_peak)
-                    if len(peaks) > 1:
-                        peaks.sort(key=lambda peak: peak.peak_position)
-                return peaks
+                return self.generate_peak_from_param(mz, params)
 
             except RuntimeError:
                 if force:
                     raise ValueError(
                         "can't fit use peaks num as " + str(split_num))
             param = param[:-2]
-        peakstr = [f'sigma={self.peak_fit_sigma}']
-        peakstr.append(','.join(['mz', 'intensity']))
-        for row in np.stack((mz, intensity), 1):
-            peakstr.append(','.join([str(r) for r in row]))
-        peakstr = '\n'.join(peakstr)
-        raise ValueError("can't fit peak in (%.5f,%.5f) \nIf this peak is small, larger LOD may solve it\n%s" % (
-            mz[0], mz[-1], peakstr))
+        # peakstr = [f'sigma={self.peak_fit_sigma}']
+        # peakstr.append(','.join(['mz', 'intensity']))
+        # for row in np.stack((mz, intensity), 1):
+        #     peakstr.append(','.join([str(r) for r in row]))
+        # peakstr = '\n'.join(peakstr)
+        # raise ValueError("can't fit peak in (%.5f,%.5f) \nIf this peak is small, larger LOD may solve it\n%s" % (
+        #     mz[0], mz[-1], peakstr))
+        index = u[:, 1].argsort()
+        u = u[index[::-1]]
+        u = u[:split_num]
+        u = u
+        return self.generate_peak_from_param(mz, u, PeakTags.fail.value)
+
+    def generate_peak_from_param(self, mz: np.ndarray, params: np.ndarray, tag=""):
+        peaks: List[FittedPeak] = []
+        for p in params:
+            peak_intensity = self._funcFit(p[1], *p)
+            if peak_intensity < 0:
+                if tag == PeakTags.fail.value:
+                    continue
+                raise RuntimeError()
+            new_intensity = self._funcFit(mz, *p)
+            select = new_intensity > 1e-6
+            select[:-1] |= select[1:]
+            select[1:] |= select[:-1]
+            new_intensity = new_intensity[select]
+            if len(new_intensity) == 0:
+                if tag == PeakTags.fail.value:
+                    continue
+                raise RuntimeError()
+            new_intensity[-1] = 0
+            new_intensity[0] = 0
+            new_peak = FittedPeak(
+                mz=mz[select], intensity=new_intensity, fitted_param=p,
+                peak_position=p[1], peak_intensity=peak_intensity, area=p[0],
+                tags=tag)
+            peaks.append(new_peak)
+        if len(peaks) > 1:
+            peaks.sort(key=lambda peak: peak.peak_position)
+        return peaks

@@ -9,7 +9,7 @@ import numpy as np
 from ..functions import formula as formula_func, peakfit as peakfit_func, binary_search
 from ..functions.peakfit import masslist as masslist_func
 from ..functions import spectrum as spectrum_func
-from ..structures.spectrum import FittedPeak, Peak, Spectrum, MassListItem
+from ..structures.spectrum import FittedPeak, Peak, Spectrum, MassListItem, PeakTags
 from . import PeakFitUi
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
