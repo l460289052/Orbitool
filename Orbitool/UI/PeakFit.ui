@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>679</width>
-    <height>383</height>
+    <width>735</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,55 +37,165 @@
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="1">
-           <widget class="QPushButton" name="filterUnselectedPushButton">
-            <property name="toolTip">
-             <string>Alt+U</string>
-            </property>
+          <item row="3" column="2">
+           <widget class="QToolButton" name="filterTagYToolButton">
             <property name="text">
-             <string>&amp;unselect</string>
-            </property>
-            <property name="shortcut">
-             <string>Alt+U</string>
+             <string>Y</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="filterSelectedPushButton">
-            <property name="toolTip">
-             <string>Alt+S</string>
-            </property>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>&amp;selected</string>
-            </property>
-            <property name="shortcut">
-             <string>Alt+S</string>
+             <string>Tag</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="filterFormulaWithPushButton">
-            <property name="toolTip">
-             <string>Alt+F</string>
-            </property>
+          <item row="1" column="3">
+           <widget class="QToolButton" name="filterFormulaNToolButton">
             <property name="text">
-             <string>with &amp;formula</string>
-            </property>
-            <property name="shortcut">
-             <string>Alt+F</string>
+             <string>N</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="filterFormulaWithoutPushButton">
-            <property name="toolTip">
-             <string>Alt+W</string>
-            </property>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="filterSelectYToolButton">
             <property name="text">
-             <string>&amp;without</string>
+             <string>Y</string>
             </property>
-            <property name="shortcut">
-             <string>Alt+W</string>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QToolButton" name="filterFormulaYToolButton">
+            <property name="text">
+             <string>Y</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QToolButton" name="filterSelectNToolButton">
+            <property name="text">
+             <string>N</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="3">
+           <widget class="QToolButton" name="filterGroupToolButton">
+            <property name="text">
+             <string>Y</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="filterTagComboBox"/>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Formula</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3">
+           <widget class="QToolButton" name="filterTagNToolButton">
+            <property name="text">
+             <string>N</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1" colspan="2">
+           <widget class="QDoubleSpinBox" name="filterIntensityMinDoubleSpinBox">
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <double>1000000000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>100000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Selected</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>larger than</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="3">
+           <widget class="QToolButton" name="filterIntensityMaxToolButton">
+            <property name="text">
+             <string>Y</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1" colspan="2">
+           <widget class="QDoubleSpinBox" name="filterIntensityMaxDoubleSpinBox">
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <double>1000000000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>100.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Stable isotope</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="3">
+           <widget class="QToolButton" name="filterIntensityMinToolButton">
+            <property name="text">
+             <string>Y</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>less than</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QToolButton" name="filterStableIsotopeYToolButton">
+            <property name="text">
+             <string>Y</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QToolButton" name="filterStableIsotopeNToolButton">
+            <property name="text">
+             <string>N</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1" colspan="2">
+           <widget class="QLineEdit" name="filterGroupLineEdit">
+            <property name="text">
+             <string>NO3-</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Has group</string>
             </property>
            </widget>
           </item>
@@ -137,56 +247,55 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>fit use</string>
+             <string>Use</string>
             </property>
            </widget>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_5">
-            <item>
-             <widget class="QPushButton" name="actionFit_FormulaPushButton">
-              <property name="toolTip">
-               <string>standard calculator</string>
-              </property>
-              <property name="text">
-               <string>standard calc</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="actionFit_ForceFormulaPushButton">
-              <property name="toolTip">
-               <string>unrestricted calculator</string>
-              </property>
-              <property name="text">
-               <string>unrestricted calc</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="actionFit_MassListPushButton">
-              <property name="toolTip">
-               <string>Alt+M</string>
-              </property>
-              <property name="text">
-               <string>&amp;mass list</string>
-              </property>
-              <property name="shortcut">
-               <string>Alt+M</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QComboBox" name="fitComboBox"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="fitPushButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Fit</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="actionRmPushButton">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QComboBox" name="addTagComboBox"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="addTagPushButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Add tag</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="actionRmTagPushButton">
           <property name="toolTip">
            <string>Alt+R</string>
           </property>
           <property name="text">
-           <string>&amp;remove</string>
+           <string>remove tag</string>
           </property>
           <property name="shortcut">
            <string>Alt+R</string>

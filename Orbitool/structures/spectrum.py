@@ -64,9 +64,9 @@ else:
 
 
 class PeakTags(str, Enum):
-    fail = 'f'
-    noise = 'n'
-    done = 'd'
+    Noise = 'N'
+    Done = 'D'
+    Fail = 'F'
 
 
 class FittedPeak(Peak):

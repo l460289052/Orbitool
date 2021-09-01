@@ -1,18 +1,29 @@
+from enum import Enum
 from itertools import chain
 from typing import Callable, List, Optional, Tuple, cast
 
-from PyQt5 import QtCore, QtWidgets
-import matplotlib.ticker
 import matplotlib.text
+import matplotlib.ticker
 import numpy as np
+from PyQt5 import QtCore, QtWidgets
 
-from ..functions import formula as formula_func, peakfit as peakfit_func, binary_search
-from ..functions.peakfit import masslist as masslist_func
+from ..functions import binary_search
+from ..functions import formula as formula_func
+from ..functions import peakfit as peakfit_func
 from ..functions import spectrum as spectrum_func
-from ..structures.spectrum import FittedPeak, Peak, Spectrum, MassListItem, PeakTags
+from ..functions.peakfit import masslist as masslist_func
+from ..structures.spectrum import (FittedPeak, MassListItem, Peak, PeakTags,
+                                   Spectrum)
+from ..utils.formula import Formula
 from . import PeakFitUi
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
+
+
+class FitMethod(str, Enum):
+    restricted_calc = "restricted calc"
+    force_calc = "force calc"
+    mass_list = "mass list"
 
 
 class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
@@ -38,20 +49,40 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     def setupUi(self, Form):
         super().setupUi(Form)
 
+        self.filterTagComboBox.addItems([tag.name for tag in PeakTags])
+        self.addTagComboBox.addItems([tag.name for tag in PeakTags])
+        self.fitComboBox.addItem("standard calc", FitMethod.restricted_calc)
+        self.fitComboBox.addItem("unrestricted calc", FitMethod.force_calc)
+        self.fitComboBox.addItem("mass list", FitMethod.mass_list)
+
         self.showSelectedPushButton.clicked.connect(self.showSelect)
-        self.filterSelectedPushButton.clicked.connect(self.filterSelected)
-        self.filterUnselectedPushButton.clicked.connect(self.filterUnselected)
-        self.filterFormulaWithPushButton.clicked.connect(self.filterFormula)
-        self.filterFormulaWithoutPushButton.clicked.connect(
-            self.filterFormulaWithout)
+        self.filterSelectYToolButton.clicked.connect(self.filterSelected)
+        self.filterSelectNToolButton.clicked.connect(self.filterUnselected)
+        self.filterFormulaYToolButton.clicked.connect(
+            lambda: self.filterGeneral(filter_formula_y))
+        self.filterFormulaNToolButton.clicked.connect(
+            lambda: self.filterGeneral(filter_formula_n))
+        self.filterStableIsotopeYToolButton.clicked.connect(
+            lambda: self.filterGeneral(filter_stable_y))
+        self.filterStableIsotopeNToolButton.clicked.connect(
+            lambda: self.filterGeneral(filter_stable_n))
+        self.filterTagYToolButton.clicked.connect(
+            lambda: self.filter_tag(True))
+        self.filterTagNToolButton.clicked.connect(
+            lambda: self.filter_tag(False))
+        self.filterIntensityMaxToolButton.clicked.connect(
+            self.filter_intensity_max)
+        self.filterIntensityMinToolButton.clicked.connect(
+            self.filter_intensity_min)
+        self.filterGroupToolButton.clicked.connect(
+            self.filter_group)
+
         self.filterClearPushButton.clicked.connect(self.filterClear)
 
-        self.actionFit_FormulaPushButton.clicked.connect(self.fitFormula)
-        self.actionFit_ForceFormulaPushButton.clicked.connect(
-            self.fitForceFormula)
-        self.actionFit_MassListPushButton.clicked.connect(self.fitMassList)
+        self.fitPushButton.clicked.connect(self.fit)
+        self.addTagPushButton.clicked.connect(self.add_tag)
         self.actionAddToMassListPushButton.clicked.connect(self.addToMassList)
-        self.actionRmPushButton.clicked.connect(self.removeFromPeaks)
+        self.actionRmTagPushButton.clicked.connect(self.remove_tag)
 
         self.plot = Plot(self.widget)
         self.manager.bind.peak_fit_left_index.connect(
@@ -253,6 +284,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         indexes = self.peakfit.info.shown_indexes
         ax = self.plot.ax
 
+        if not indexes:
+            return
         peak = peaks[indexes[index]]
         new_x_min = peak.mz.min()
         x_min, x_max = ax.get_xlim()
@@ -331,22 +364,6 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.show_peaklist.emit()
 
     @state_node
-    def filterFormula(self):
-        info = self.peakfit.info
-        peaks = info.peaks
-        info.shown_indexes = [
-            index for index in info.shown_indexes if len(peaks[index].formulas) > 0]
-        self.show_peaklist.emit()
-
-    @state_node
-    def filterFormulaWithout(self):
-        info = self.peakfit.info
-        peaks = info.peaks
-        info.shown_indexes = [
-            index for index in info.shown_indexes if len(peaks[index].formulas) == 0]
-        self.show_peaklist.emit()
-
-    @state_node
     def filterSelected(self):
         self.filter_selected.emit(True)
         self.show_peaklist.emit()
@@ -356,8 +373,73 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.filter_selected.emit(False)
         self.show_peaklist.emit()
 
+    @state_node(withArgs=True)
+    def filterGeneral(self, filter: Callable[[FittedPeak], bool]):
+        self._filter_general(filter)
+
+    def _filter_general(self, filter: Callable[[FittedPeak], bool]):
+        info = self.peakfit.info
+        peaks = info.peaks
+        info.shown_indexes = [
+            index for index in info.shown_indexes if filter(peaks[index])]
+        self.show_peaklist.emit()
+
+    @state_node(withArgs=True)
+    def filter_tag(self, y: bool):
+        tag = self.filterTagComboBox.currentText()
+        tag: PeakTags = getattr(PeakTags, tag)
+        if y:
+            self._filter_general(lambda fp: tag.value in fp.tags)
+        else:
+            self._filter_general(lambda fp: tag.value not in fp.tags)
+
     @state_node
-    def fitFormula(self):
+    def filter_intensity_max(self):
+        value = self.filterIntensityMaxDoubleSpinBox.value()
+        self._filter_general(lambda fp: fp.peak_intensity < value)
+
+    @state_node
+    def filter_intensity_min(self):
+        value = self.filterIntensityMinDoubleSpinBox.value()
+        self._filter_general(lambda fp: fp.peak_intensity > value)
+
+    @state_node
+    def filter_group(self):
+        group = self.filterGroupLineEdit.text()
+        group = Formula(group)
+        self._filter_general(lambda fp: any(group in f for f in fp.formulas))
+
+    @state_node(withArgs=True)
+    def generalAction(self, action: Callable[[FittedPeak], None], msg: str):
+        yield from self._general_action(action, msg)
+
+    def _general_action(self, action: Callable[[FittedPeak], None], msg: str):
+        info = self.peakfit.info
+
+        peaks = info.peaks
+        indexes = info.shown_indexes
+
+        manager = self.manager
+
+        def func():
+            for index in manager.tqdm(indexes):
+                action(peaks[index])
+
+        yield func, msg
+
+        self.show_peaklist.emit()
+
+    @state_node
+    def fit(self):
+        method: FitMethod = self.fitComboBox.currentData()
+        if method == FitMethod.restricted_calc:
+            yield from self.fit_formula()
+        elif method == FitMethod.force_calc:
+            yield from self.fit_force_formula()
+        elif method == FitMethod.mass_list:
+            yield from self.fit_mass_list()
+
+    def fit_formula(self):
         info = self.peakfit.info
 
         calc = self.manager.workspace.formula_docker.info.restricted_calc
@@ -378,84 +460,47 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         self.show_peaklist.emit()
 
-    @state_node
-    def fitForceFormula(self):
-        info = self.peakfit.info
-
+    def fit_force_formula(self):
         calc = self.manager.workspace.formula_docker.info.force_calc
-        peaks = info.peaks
-        indexes = info.shown_indexes
 
-        manager = self.manager
+        def proc(fp: FittedPeak):
+            fp.formulas = calc.get(fp.peak_position)
+        yield from self._general_action(proc, "fit use unrestricted calc")
 
-        def func():
-            for index in manager.tqdm(indexes):
-                peak = peaks[index]
-                peak.formulas = calc.get(peak.peak_position)
-
-        yield func, "fit use unrestricted calc"
-
-        self.show_peaklist.emit()
-
-    @state_node
-    def fitMassList(self):
-        info = self.peakfit.info
-
+    def fit_mass_list(self):
         rtol = self.manager.workspace.masslist_docker.info.rtol
         masslist = self.manager.workspace.masslist_docker.info.masslist
-        peaks = info.peaks
-        indexes = info.shown_indexes
 
-        def func():
-            for index in indexes:
-                peak = peaks[index]
-                peak.formulas = masslist_func.fitUseMassList(
-                    peak.peak_position, masslist, rtol)
+        def proc(fp: FittedPeak):
+            fp.formulas = masslist_func.fitUseMassList(
+                fp.peak_position, masslist, rtol)
 
-        yield func, "fit use mass list"
+        yield from self._general_action(proc, "fit use mass list")
 
-        self.show_peaklist.emit()
+    @state_node
+    def add_tag(self):
+        tag = self.addTagComboBox.currentText()
+        tag: PeakTags = getattr(PeakTags, tag)
+
+        def proc(fp: FittedPeak):
+            fp.tags = tag.value
+        yield from self._general_action(proc, "add tag")
 
     @state_node
     def addToMassList(self):
-        info = self.peakfit.info
-
         masslist = self.manager.workspace.masslist_docker.info.masslist
         rtol = self.manager.workspace.masslist_docker.info.rtol
-        peaks = info.peaks
-        indexes = info.shown_indexes
 
-        def func():
-            for index in indexes:
-                peak = peaks[index]
-                masslist_func.addMassTo(
-                    masslist,
-                    MassListItem(position=peak.peak_position,
-                                 formulas=peak.formulas),
-                    rtol=rtol)
-
-        yield func, "add to mass list"
+        yield from self._general_action(lambda fp: masslist_func.addMassTo(
+            masslist, MassListItem(position=fp.peak_position, formulas=fp.formulas), rtol=rtol), "add to mass list")
 
         self.show_masslist.emit()
 
     @state_node
-    def removeFromPeaks(self):
-        info = self.peakfit.info
-
-        peaks = info.peaks
-        original_indexes = info.original_indexes
-        indexes = info.shown_indexes
-
-        def func():
-            indexes.reverse()
-            for index in indexes:
-                peaks.pop(index)
-                original_indexes.pop(index)
-            info.shown_indexes = list(range(len(peaks)))
-
-        yield func, "remove"
-
-        self.show_peaklist
+    def remove_tag(self):
+        def proc(fp: FittedPeak):
+            fp.tags = ""
+        yield from self._general_action(proc, "add tag")
 
 
 class SplitPeaks(MultiProcess):
@@ -487,3 +532,19 @@ class SplitPeaks(MultiProcess):
     @staticmethod
     def exception(file, **kwargs):
         pass
+
+
+def filter_formula_y(fp: FittedPeak):
+    return len(fp.formulas) > 0
+
+
+def filter_formula_n(fp: FittedPeak):
+    return len(fp.formulas) == 0
+
+
+def filter_stable_y(fp: FittedPeak):
+    return any(not f.isIsotope for f in fp.formulas)
+
+
+def filter_stable_n(fp: FittedPeak):
+    return any(f.isIsotope for f in fp.formulas)

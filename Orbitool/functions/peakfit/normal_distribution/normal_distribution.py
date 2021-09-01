@@ -158,14 +158,14 @@ class NormalDistributionFunc(BaseFunc):
         u = u[index[::-1]]
         u = u[:split_num]
         u = u
-        return self.generate_peak_from_param(mz, u, PeakTags.fail.value)
+        return self.generate_peak_from_param(mz, u, PeakTags.Fail.value)
 
     def generate_peak_from_param(self, mz: np.ndarray, params: np.ndarray, tag=""):
         peaks: List[FittedPeak] = []
         for p in params:
             peak_intensity = self._funcFit(p[1], *p)
             if peak_intensity < 0:
-                if tag == PeakTags.fail.value:
+                if tag == PeakTags.Fail.value:
                     continue
                 raise RuntimeError()
             new_intensity = self._funcFit(mz, *p)
@@ -174,7 +174,7 @@ class NormalDistributionFunc(BaseFunc):
             select[1:] |= select[:-1]
             new_intensity = new_intensity[select]
             if len(new_intensity) == 0:
-                if tag == PeakTags.fail.value:
+                if tag == PeakTags.Fail.value:
                     continue
                 raise RuntimeError()
             new_intensity[-1] = 0
