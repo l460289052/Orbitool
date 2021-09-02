@@ -1,7 +1,7 @@
 import csv
 from typing import Dict, List, Optional, Tuple, Union
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .. import get_config
 from ..functions import binary_search
@@ -11,6 +11,11 @@ from . import PeakListUi
 from .manager import Manager, state_node
 from .PeakFitFloatUiPy import Window as PeakFloatWin
 from .utils import get_tablewidget_selected_row, savefile
+
+colors = {
+    PeakTags.Done: QtGui.QColor(0xD9FFC9),
+    PeakTags.Noise: QtGui.QColor(0xC6C6C6),
+    PeakTags.Fail: QtGui.QColor(0xFFBBB1)}
 
 
 class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
@@ -68,15 +73,23 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         table.setVerticalHeaderLabels(map(str, indexes))
 
         for index, peak in enumerate(peaks):
+            tag = peak.tags
+            if tag:
+                tag = PeakTags(tag[0])
+            c = colors.get(tag, None)
+
             def setItem(column, msg):
+                item = QtWidgets.QTableWidgetItem(str(msg))
+                if c is not None:
+                    item.setBackground(c)
                 table.setItem(
-                    index, column, QtWidgets.QTableWidgetItem(str(msg)))
+                    index, column, item)
+
             setItem(0, format(peak.peak_position, '.5f'))
             setItem(1, ', '.join(str(f) for f in peak.formulas))
             setItem(2, format(peak.peak_intensity, '.3e'))
-            if len(peak.formulas) == 1:
-                setItem(3,
-                        format((peak.peak_position / peak.formulas[0].mass() - 1) * 1e6, '.5f'))
+            setItem(3,
+                    format((peak.peak_position / peak.formulas[0].mass() - 1) * 1e6, '.5f') if len(peak.formulas) == 1 else "")
             setItem(4, format(peak.area, '.3e'))
             setItem(5, ','.join(tag.name for tag in map(PeakTags, peak.tags)))
 
@@ -105,6 +118,7 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         self.scroll_to_index(index)
         self.manager.bind.peak_fit_left_index.emit_except("peaklist", index)
 
+    @state_node(mode='n', withArgs=True)
     def scrolled(self, index):
         if self.bindPlotCheckBox.isChecked():
             self.manager.bind.peak_fit_left_index.emit_except(

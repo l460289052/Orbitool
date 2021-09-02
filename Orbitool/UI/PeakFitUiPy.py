@@ -221,14 +221,14 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.rescale()
         self.plot.canvas.draw()
 
-    @state_node(withArgs=True)
+    @state_node(mode='n', withArgs=True)
     def moveRight(self, step):
         plot = self.plot
         x_min, x_max = plot.ax.get_xlim()
         plot.ax.set_xlim(x_min + step, x_max + step)
         self.plot.canvas.draw()
 
-    @state_node(withArgs=True)
+    @state_node(mode='n', withArgs=True)
     def y_times(self, times):
         plot = self.plot
         y_min, y_max = plot.ax.get_ylim()
@@ -294,6 +294,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         self.plot_moved()
 
+    @state_node(mode='n')
     def timer_timeout(self):
         ax = self.plot.ax
         now_lim = (ax.get_xlim(), ax.get_ylim())

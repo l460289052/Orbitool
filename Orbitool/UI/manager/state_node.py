@@ -15,7 +15,8 @@ class NodeType(Enum):
     Except = 1
     ThreadEnd = 2
 
-
+# w x a n
+# n: no set and no reset
 _busy_check = {'w'}
 _busy_set = {'w', 'x'}
 _busy_reset = {'w', 'x', 'a'}
@@ -65,7 +66,7 @@ class node:
             if not manager.busy:
                 if self._mode in _busy_set:
                     manager.set_busy(True)
-                sleep(.05)
+                    sleep(.05)
             elif self._mode in _busy_check:
                 # if manager.process_pool.
                 # showInfo("Wait for process or abort", 'busy')
