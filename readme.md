@@ -373,6 +373,28 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2021.09.02 version 2.0.11**
+
++ optimize single thread running
++ calibration
+  + sort by mass after add ions
+  + add background color to used ions
++ tag
+  + add tag to peak
+  + add background color to peak list accord to tag
+  + when peak fit failed, a 'Fail' tag will be added to peak instead of crash
++ add filters
+  + according to tag
+  + according to intensity
+  + according to isotope
+  + according to contains group
+  + according to mass defect
+
+
+Bug fix
++ denoise: error ploy coef 
++ calibration: couldn't find peak 
+
 **2021.08.25 version 2.0.10**
 
 + bind peaks and plot

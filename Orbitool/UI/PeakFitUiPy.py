@@ -74,6 +74,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
             self.filter_intensity_max)
         self.filterIntensityMinToolButton.clicked.connect(
             self.filter_intensity_min)
+        self.filterMassDefectToolButton.clicked.connect(
+            self.filter_mass_defect)
         self.filterGroupToolButton.clicked.connect(
             self.filter_group)
 
@@ -403,6 +405,13 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     def filter_intensity_min(self):
         value = self.filterIntensityMinDoubleSpinBox.value()
         self._filter_general(lambda fp: fp.peak_intensity > value)
+
+    @state_node
+    def filter_mass_defect(self):
+        mi = self.filterMassDefectMinDoubleSpinBox.value()
+        ma = self.filterMassDefectMaxDoubleSpinBox.value()
+        self._filter_general(
+            lambda fp: mi < fp.peak_position - round(fp.peak_position) < ma)
 
     @state_node
     def filter_group(self):

@@ -37,10 +37,10 @@
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="3" column="2">
-           <widget class="QToolButton" name="filterTagYToolButton">
+          <item row="1" column="3">
+           <widget class="QToolButton" name="filterFormulaNToolButton">
             <property name="text">
-             <string>Y</string>
+             <string>N</string>
             </property>
            </widget>
           </item>
@@ -51,19 +51,22 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="3">
-           <widget class="QToolButton" name="filterFormulaNToolButton">
-            <property name="text">
-             <string>N</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QToolButton" name="filterSelectYToolButton">
+          <item row="3" column="2">
+           <widget class="QToolButton" name="filterTagYToolButton">
             <property name="text">
              <string>Y</string>
             </property>
            </widget>
+          </item>
+          <item row="7" column="3">
+           <widget class="QToolButton" name="filterGroupToolButton">
+            <property name="text">
+             <string>Y</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="filterTagComboBox"/>
           </item>
           <item row="1" column="2">
            <widget class="QToolButton" name="filterFormulaYToolButton">
@@ -79,27 +82,10 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="3">
-           <widget class="QToolButton" name="filterGroupToolButton">
+          <item row="0" column="2">
+           <widget class="QToolButton" name="filterSelectYToolButton">
             <property name="text">
              <string>Y</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="filterTagComboBox"/>
-          </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Formula</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="3">
-           <widget class="QToolButton" name="filterTagNToolButton">
-            <property name="text">
-             <string>N</string>
             </property>
            </widget>
           </item>
@@ -123,6 +109,13 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Formula</string>
+            </property>
+           </widget>
+          </item>
           <item row="5" column="0">
            <widget class="QLabel" name="label_7">
             <property name="text">
@@ -130,8 +123,29 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="3">
+           <widget class="QToolButton" name="filterTagNToolButton">
+            <property name="text">
+             <string>N</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Stable isotope</string>
+            </property>
+           </widget>
+          </item>
           <item row="4" column="3">
            <widget class="QToolButton" name="filterIntensityMaxToolButton">
+            <property name="text">
+             <string>Y</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="3">
+           <widget class="QToolButton" name="filterIntensityMinToolButton">
             <property name="text">
              <string>Y</string>
             </property>
@@ -150,24 +164,17 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Stable isotope</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="3">
-           <widget class="QToolButton" name="filterIntensityMinToolButton">
-            <property name="text">
-             <string>Y</string>
-            </property>
-           </widget>
-          </item>
           <item row="4" column="0">
            <widget class="QLabel" name="label_6">
             <property name="text">
              <string>less than</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1" colspan="2">
+           <widget class="QLineEdit" name="filterGroupLineEdit">
+            <property name="text">
+             <string>NO3-</string>
             </property>
            </widget>
           </item>
@@ -185,17 +192,62 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="1" colspan="2">
-           <widget class="QLineEdit" name="filterGroupLineEdit">
+          <item row="7" column="0">
+           <widget class="QLabel" name="label_10">
             <property name="text">
-             <string>NO3-</string>
+             <string>Has group</string>
             </property>
            </widget>
           </item>
           <item row="6" column="0">
-           <widget class="QLabel" name="label_10">
+           <widget class="QLabel" name="label_9">
             <property name="text">
-             <string>Has group</string>
+             <string>Mass defect</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QDoubleSpinBox" name="filterMassDefectMinDoubleSpinBox">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-0.500000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>0.500000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>-0.500000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="2">
+           <widget class="QDoubleSpinBox" name="filterMassDefectMaxDoubleSpinBox">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-0.500000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>0.500000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.500000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="3">
+           <widget class="QToolButton" name="filterMassDefectToolButton">
+            <property name="text">
+             <string>Y</string>
             </property>
            </widget>
           </item>
