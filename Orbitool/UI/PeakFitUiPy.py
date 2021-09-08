@@ -137,11 +137,12 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         def formula_and_residual():
             calc = workspace.formula_docker.info.restricted_calc
+            calc_get = workspace.formula_docker.info.restricted_calc_get
             for peak in manager.tqdm(peaks, msg="init formula"):
-                calc.get(peak.peak_position)
+                calc_get(peak.peak_position)
 
             for peak in manager.tqdm(peaks):
-                peak.formulas = calc.get(peak.peak_position)
+                peak.formulas = calc_get(peak.peak_position)
                 peak.formulas = formula_func.correct(peak, peaks, calc.rtol)
 
             mz, residual = peakfit_func.calculateResidual(
@@ -453,6 +454,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         info = self.peakfit.info
 
         calc = self.manager.workspace.formula_docker.info.restricted_calc
+        calc_get = self.manager.workspace.formula_docker.info.restricted_calc_get
         peaks = info.peaks
         indexes = info.shown_indexes
 
@@ -460,10 +462,10 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         def func():
             for peak in manager.tqdm(peaks, msg="init formula"):
-                calc.get(peak.peak_position)  # init
+                calc_get(peak.peak_position)  # init
             for index in manager.tqdm(indexes):
                 peak = peaks[index]
-                peak.formulas = calc.get(peak.peak_position)
+                peak.formulas = calc_get(peak.peak_position)
                 peak.formulas = formula_func.correct(peak, peaks, calc.rtol)
 
         yield func, "fit use restricted calc"
@@ -471,10 +473,10 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.show_peaklist.emit()
 
     def fit_force_formula(self):
-        calc = self.manager.workspace.formula_docker.info.force_calc
+        calc_get = self.manager.workspace.formula_docker.info.force_calc_get
 
         def proc(fp: FittedPeak):
-            fp.formulas = calc.get(fp.peak_position)
+            fp.formulas = calc_get(fp.peak_position)
         yield from self._general_action(proc, "fit use unrestricted calc")
 
     def fit_mass_list(self):

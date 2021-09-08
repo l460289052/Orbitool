@@ -95,7 +95,7 @@ class node:
 
                             manager.msg.emit(msg)
 
-                            if not issubclass(type(to_be_finished), QtCore.QThread):
+                            if not isinstance(to_be_finished, QtCore.QThread):
                                 thread = Thread(to_be_finished)
                             else:
                                 thread = to_be_finished

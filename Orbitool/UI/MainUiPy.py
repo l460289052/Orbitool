@@ -247,7 +247,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
     def abort_process(self):
         thread: MultiProcess = self.manager.running_thread
-        if issubclass(type(thread), MultiProcess):
+        if isinstance(thread, MultiProcess):
             thread.abort()
 
     def tab_changed(self, index):

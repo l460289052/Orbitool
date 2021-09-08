@@ -161,7 +161,7 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
 
         plot.canvas.draw()
 
-    @state_node(mode='x')
+    @state_node(mode='n')
     def replot(self):
         ax = self.plot.ax
         x = ax.get_xlim()

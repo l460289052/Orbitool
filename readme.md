@@ -91,6 +91,10 @@ Orbitool will use provided ions calibrate files. Different files will use differ
 + Actions
 
   Actions will done for all shown peaks in peak list docker.
+  
++ Plot
+
+  Position of plot will bind with the peak list. (Can unbind with checking box)
 
 > Shortcuts: Arrow keys for plot.
 
@@ -178,7 +182,7 @@ Import/Export
 
 ### 5.Peak List
 
-Double click at peaks could refit this peak.
+Double click at peaks could refit this peak. Input a mass could jump to the nearest peak.
 
 ## III. Toolbar
 
@@ -245,7 +249,14 @@ After calibration:
 
 ## 4.Spectra&Peak fit
 
-...
+### Tag
+
++ A peak could be assigned with a Tag
++ Available tags are
+  + Noise: this peak is a noise peak
+  + Done: this peak is handled
+  + Fail: this peak is failed to fit, Orbitool will automatically add this tag to peak when fail to fit peak.
+
 
 ## 5.Mass defect
 
@@ -263,11 +274,37 @@ you can choose what rainbow stand for, DBE or certain element's num. And you can
 
 this part is for formula guessing when fitting peaks in 'Spectra&Peak fit' tab using 'default' button.
 
+### Formula Format
+
+#### Input
+
+some examples to indicate what format of formula could be understand by Orbitool
+
++ H2O
++ HH\[2\]O
++ NO3-
++ NH4+
++ SO4-2 or SO4e-2
++ Ca+2
++ C6(H2O)6
++ na2 s2 o 3
+
+#### Output
+
+some examples to help you understand the format of formula of Orbitool
+
++ H2O
++ HH\[2\]O
++ NO3-
++ NH4+
++ SO4-2 (Won't use SO4e-2 because of Ne-3)
+
+
 ### Settings
 
 You can change the formula's settings used in formula guessing.
 
-+ Charge
++ base group
 + mz range
 + DBE
 + ppm
@@ -372,6 +409,10 @@ If you meet any bugs, please let me know. You can send me the 'log.txt' file whi
 mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huang"\<<huangc@saes.sh.cn>\>
 
 ## log
+
+**2021.09.08 version 2.0.12**
+
++ use group instead of positive/negative when calculate formula
 
 **2021.09.02 version 2.0.11**
 

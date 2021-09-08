@@ -53,7 +53,6 @@ class RestrictedCalcStructure(BaseStructure):
     h5_type = "restricted calc"
 
     rtol: float = 1e-6
-    charge: int = -1
     DBEMin: float = 0
     DBEMax: float = 8
     MMin: float = 50
@@ -73,7 +72,7 @@ class RestrictedCalcConverter(BaseSingleConverter):
         elements = ','.join(value.getElements())
         isotopes = ','.join(value.getIsotopes())
         struct = RestrictedCalcStructure(
-            rtol=value.rtol, charge=value.charge, DBEMin=value.DBEMin, DBEMax=value.DBEMax,
+            rtol=value.rtol, DBEMin=value.DBEMin, DBEMax=value.DBEMax,
             MMin=value.MMin, MMax=value.MMax, nitrogenRule=value.nitrogenRule,
             params=parameters, elements=elements, isotopes=isotopes)
         StructureConverter.write_to_h5(h5group, key, struct)
@@ -85,7 +84,6 @@ class RestrictedCalcConverter(BaseSingleConverter):
         calc = RestrictedCalc()
 
         calc.rtol = struct.rtol
-        calc.charge = struct.charge
         calc.DBEMin = struct.DBEMin
         calc.DBEMax = struct.DBEMax
         calc.MMin = struct.MMin
@@ -121,7 +119,6 @@ class ForceElementNumItem(BaseTableItem):
 class ForceCalcStructure(BaseStructure):
     h5_type = "force calc"
     rtol: float
-    charge: int
     ei_list: List[ForceElementNumItem]
 
 
@@ -131,7 +128,7 @@ class ForceCalcConverter(BaseSingleConverter):
         ei_list = [ForceElementNumItem(ei_name=e, max_num=value[e])
                    for e in value.getEIList()]
         struct = ForceCalcStructure(
-            rtol=value.rtol, charge=value.charge, ei_list=ei_list)
+            rtol=value.rtol, ei_list=ei_list)
         StructureConverter.write_to_h5(h5group, key, struct)
 
     @staticmethod
@@ -142,7 +139,6 @@ class ForceCalcConverter(BaseSingleConverter):
         for ei in calc.getEIList():
             calc[ei] = 0
         calc.rtol = struct.rtol
-        calc.charge = struct.charge
         for ei in struct.ei_list:
             calc[ei.ei_name] = ei.max_num
         return calc

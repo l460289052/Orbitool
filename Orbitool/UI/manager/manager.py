@@ -186,6 +186,10 @@ class DataBindSignal(Generic[T]):
             if except_label != label:
                 handler(*args, **kwargs)
 
+    def emit(self, *args, **kwargs):
+        for handler in self.handlers.values():
+            handler(*args, **kwargs)
+
 
 class ValueGetter(Generic[T]):
     def __init__(self, value_typ: Type[T]) -> None:

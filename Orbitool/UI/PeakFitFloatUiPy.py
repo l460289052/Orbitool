@@ -211,9 +211,9 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
         fittedpeaks = func.splitPeak(
             info.raw_peaks[self.original_index], num, True)
 
-        calc = self.manager.workspace.formula_docker.info.restricted_calc
+        calc_get = self.manager.workspace.formula_docker.info.restricted_calc_get
         for peak in fittedpeaks:
-            peak.formulas = calc.get(peak.peak_position)
+            peak.formulas = calc_get(peak.peak_position)
             peak.formulas = formula_func.correct(peak, info.peaks)
 
         self.peaks = fittedpeaks

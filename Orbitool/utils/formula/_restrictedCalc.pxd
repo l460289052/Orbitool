@@ -9,7 +9,7 @@ from libcpp.set cimport set
 from libcpp.pair cimport pair
 from libcpp cimport bool
 
-from ._formula cimport int_map, ints_map
+from ._formula cimport int_map, ints_map, Formula
 
 ctypedef map[double, map[int32_t, int32_t]] d_ii_map_map
 ctypedef pair[double, map[int32_t, int32_t]] d_ii_map_pair
@@ -25,7 +25,6 @@ cdef:
 
     class Calculator:
         cdef public double rtol
-        cdef public int32_t charge
 
         cdef map[double, map[int32_t, int32_t]] formulas
         # isotopes -> (formulas mass, Dict[(index, m) -> num])
@@ -64,7 +63,7 @@ cdef:
         
         cdef setStateForFormula(self, State&state, int_map&elements)
 
-        cpdef void calc(self, double MMin=*, double MMax=*)except*
+        cpdef void calc(self, Formula base_group, double MMin=*, double MMax=*)except*
         cpdef clear(self)
         cdef pair[bool, map[double, map[int32_t, int32_t]].iterator] getFormula(self, double&mass)
         cdef void insertElements(self, int_map&elements, double mass=*)

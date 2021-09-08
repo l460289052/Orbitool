@@ -16,7 +16,6 @@ cdef:
     
     class Calculator:
         cdef public double rtol
-        cdef public int32_t charge
 
         cdef map[double, pair[int32_t, int32_t]] calcedIsotopes
         cdef ints_map isotopeMaximum

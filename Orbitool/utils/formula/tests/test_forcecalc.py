@@ -4,7 +4,7 @@ from .. import ForceCalc, Formula
 def test_forcecalc1():
     calc = ForceCalc()
     f = Formula('C3HO3-')
-    assert f in calc.get(f.mass())
+    assert f in calc.get(f.mass(), base_group=Formula("-"))
 
     calc['H[2]'] = 100
     calc['H'] = 0
@@ -13,7 +13,7 @@ def test_forcecalc1():
     assert calc['H'] == 0
     assert calc['O[18]'] == 100
     f = Formula('C10H[2]O[18]-')
-    assert f in calc.get(f.mass())
+    assert f in calc.get(f.mass(), base_group=Formula("-"))
 
 
 def test_forcecalc2():
@@ -22,7 +22,7 @@ def test_forcecalc2():
     calc['O[18]'] = 100
     # f = Formula('C10H[2]O[18]-')
     f = Formula('C10H[2]O[18]-')
-    assert f in calc.get(f.mass())
+    assert f in calc.get(f.mass(), base_group=Formula("-"))
 
 
 def test_forcecalc3():
@@ -39,7 +39,7 @@ def test_forcecalc3():
     samples = [Formula(sample) for sample in samples]
 
     for f in samples:
-        ret = calc.get(f.mass())
+        ret = calc.get(f.mass(), base_group=Formula("-"))
         assert f in ret
         assert len(ret) < 25
         for r in ret:
@@ -47,8 +47,30 @@ def test_forcecalc3():
 
 
 def test_forcecalc4():
-    calc = ForceCalc()  
-    calc.charge = 1
+    calc = ForceCalc()
     calc['N'] = 999
     f = Formula('CH4+')  # +
+    assert f in calc.get(f.mass(), base_group=Formula("+"))
+
+
+def test_basegroup():
+    calc = ForceCalc()
+    calc['N'] = 10
+    calc['O'] = 10
+    calc['H'] = 10
+    calc['N[15]'] = 10
+    calc['O[18]'] = 10
+    f = Formula("HNO3")
+    assert f in calc.get(f.mass(), base_group=Formula("NO3"))
+    f = Formula("HNO2O[18]")
+    assert f in calc.get(f.mass(), base_group=Formula("NO3"))
+    f = Formula("HNO3")
+    assert f in calc.get(f.mass(), base_group=Formula("HNO3"))
+
+def test_basegroup_nonisotope():
+    calc = ForceCalc()
+    calc['N'] = 10
+    calc['O[18]'] = 0
+    calc['N[15]'] = 0
+    f = Formula("HNO3")
     assert f in calc.get(f.mass())

@@ -301,9 +301,9 @@ cdef class Formula:
             elif index==-1:
                 return ''.join(rets) +'+'
             elif index > 0:
-                return ''.join(rets)+ f'e-{index}'
+                return ''.join(rets)+ f'-{index}'
             elif index < 0:
-                return ''.join(rets)+ f'e+{-index}'
+                return ''.join(rets)+ f'+{-index}'
         return ''.join(rets)
 
     cpdef double absoluteAbundance(self):

@@ -29,7 +29,6 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
 
         self.applyPushButton.clicked.connect(self.applyChange)
 
-        self.negativeRadioButton.setChecked(True)
         self.calcPushButton.clicked.connect(lambda: self.calc(False))
         self.forcePushButton.clicked.connect(lambda: self.calc(True))
 
@@ -45,10 +44,7 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
     def showUnify(self):
         info = self.formula.info
 
-        if info.polarity == -1:
-            self.negativeRadioButton.setChecked(True)
-        elif info.polarity == 1:
-            self.positiveRadioButton.setChecked(True)
+        self.baseGroupLineEdit.setText(str(info.base_group))
 
         self.mzMinDoubleSpinBox.setValue(info.mz_min)
         self.mzMaxDoubleSpinBox.setValue(info.mz_max)
@@ -200,10 +196,7 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         info = self.formula.info
         calc = info.restricted_calc
         force_calc = info.force_calc
-        if self.negativeRadioButton.isChecked():
-            force_calc.charge = calc.charge = info.polarity = -1
-        else:
-            force_calc.charge = calc.charge = info.polarity = 1
+        info.base_group = Formula(self.baseGroupLineEdit.text())
 
         calc.MMin = info.mz_min = self.mzMinDoubleSpinBox.value()
         calc.MMax = info.mz_max = self.mzMaxDoubleSpinBox.value()

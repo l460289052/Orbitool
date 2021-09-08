@@ -324,6 +324,19 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
+           <widget class="QPushButton" name="actionRmTagPushButton">
+            <property name="toolTip">
+             <string>Alt+R</string>
+            </property>
+            <property name="text">
+             <string>Remove tag</string>
+            </property>
+            <property name="shortcut">
+             <string>Alt+R</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QComboBox" name="addTagComboBox"/>
           </item>
           <item>
@@ -340,19 +353,6 @@
            </widget>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="actionRmTagPushButton">
-          <property name="toolTip">
-           <string>Alt+R</string>
-          </property>
-          <property name="text">
-           <string>remove tag</string>
-          </property>
-          <property name="shortcut">
-           <string>Alt+R</string>
-          </property>
-         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="actionAddToMassListPushButton">

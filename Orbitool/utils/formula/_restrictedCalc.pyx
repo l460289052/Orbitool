@@ -87,7 +87,6 @@ cdef class Calculator:
             ('Si', 0, 5, 2, 0, 2, 0, 3)]
         for row in init_params:
             self[row[0]] = {"Min":row[1], "Max":row[2], "DBE2":row[3], "HMin":row[4], "HMax":row[5], "OMin":row[6], "OMax":row[7]}
-        self.charge = -1
         
     cdef double OMin(self, int_map& elements):
         return _elements_sum(self.ElementOMin, elements, 0)
@@ -213,11 +212,12 @@ cdef class Calculator:
         return _elements_sum(self.ElementDbe2, formula.elements, 2.0)
 
     
-    cpdef void calc(self, double MMin = -1, double MMax = -1) except*:
+    cpdef void calc(self, Formula base_group, double MMin = -1, double MMax = -1) except*:
         if self.checkParameters() < 0:
             raise ValueError(f"Please check element {e_elements[int(-self.checkParameters())]}")
         cdef double ML = self.MMin
         cdef double MR = self.MMax
+        cdef double base_mass = base_group.mass()
         if MMin>0 and MMax>0:
             ML = MMin
             MR = MMax
@@ -225,11 +225,13 @@ cdef class Calculator:
             self.clear()
         if self.isCovered(ML, MR):
             return
+        ML -= base_mass
+        MR -= base_mass
         cdef double DBE2Min = self.DBEMin*2
         cdef double DBE2Max = self.DBEMax*2
+        cdef double DBE2Base = base_group.dbe()*2
 
-        cdef Formula f = Formula.__new__(Formula)
-        f.charge = self.charge
+        cdef Formula f = Formula.__new__(Formula), g
 
         cdef int32_t CNum, ONum, HNum, num, index, CMin, CMax, OMax, HMax, numMax, step
         cdef cpplist[int32_t] elements
@@ -262,12 +264,16 @@ cdef class Calculator:
                 # print(str(f), elementNum)
                 if elementNum.top() > elementMax.top():
                     index = deref(eit)
-                    _state_add(state, self.ElementState[index], -elementNum.top())
+                    num = -elementNum.top()
                     elementNum.pop()
                     elementMax.pop()
                     emass.pop()
 
-                    f.setE(deref(postdec(eit)),0) # *eit--
+                    _state_add(state, self.ElementState[index], num)
+                    f.setE(index, 0)
+
+                    # f.setE(deref(postdec(eit)),0) # *eit--
+                    predec(eit)
                 elif preinc(eit)!=elements.end():
                     index = deref(eit)
                     num = self.ElementNumMin[index]
@@ -276,10 +282,10 @@ cdef class Calculator:
                     elementMax.push(numMax)
                     if num>0:
                         _state_add(state, self.ElementState[index], num)
+                        f.setE(index, num)
                         emass.push(emass.top()+elementMass[index]*num)
                     else:
                         emass.push(emass.top())
-                    f.setE(index, num)
                     continue
                 else:
                     mass=emass.top()
@@ -294,17 +300,18 @@ cdef class Calculator:
                             # O can't affect DBE and HNum, so don't change state 
                             HNum=max(self.ElementNumMin[HIndex], <int>ceil(max(state.HMin, (ML-mass)/elementMass[HIndex], (DBE2Max-state.DBE2)/self.ElementDbe2[HIndex])))
                             HMax=min(self.ElementNumMax[HIndex], <int>min(state.HMax, (MR-mass)/elementMass[HIndex], (DBE2Min-state.DBE2)/self.ElementDbe2[HIndex]))
-                            if nitrogenRule and fabs(remainder(state.DBE2+HNum*self.ElementDbe2[HIndex], 2.0))>eps:
+                            if nitrogenRule and fabs(remainder(state.DBE2+HNum*self.ElementDbe2[HIndex], DBE2Base))>eps:
                                 preinc(HNum)
                             
                             while HNum<=HMax:
                                 f.setE(HIndex,HNum)
-                                mass = _elements_mass(f.elements)
+                                g = f + base_group
+                                mass = _elements_mass(g.elements)
                                 
-                                # print(f"insert {f}")
+                                # print(f"insert {g} from {f}")
 
-                                self.insertElements(f.elements, mass)
-                                self.insertIsotopes(f.elements, mass)
+                                self.insertElements(g.elements, mass)
+                                self.insertIsotopes(g.elements, mass)
                                 HNum+=step
                             preinc(ONum)
                             mass+=elementMass[OIndex]
@@ -336,13 +343,13 @@ cdef class Calculator:
         self.isotopes.clear()
         self.mCover.clear()
         
-    def get(self, double M):
+    def get(self, double M, Formula base_group=Formula.__new__(Formula)):
         cdef double ML,MR,delta
         delta = self.rtol*M
         ML=M-delta
         MR=M+delta
         if not self.isCovered(ML,MR):
-            self.calc(ML,MR)
+            self.calc(base_group,ML,MR)
         
         cdef list ret = list()
         if self.formulas.empty():

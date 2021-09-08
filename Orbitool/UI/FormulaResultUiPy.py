@@ -215,9 +215,9 @@ def calc(manager: Manager, input: str, force: bool):
         info = manager.workspace.formula_docker.info
         mass = float(input)
         if force:
-            formulas = info.force_calc.get(mass)
+            formulas = info.force_calc_get(mass)
         else:
-            formulas = info.restricted_calc.get(mass)
+            formulas = info.restricted_calc_get(mass)
     except ValueError:
         formula = Formula(input)
         formulas = [formula]
