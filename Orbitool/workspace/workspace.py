@@ -26,7 +26,7 @@ LAST_SUPPORT_VERSION = "2.0.2"
 class WorkspaceInfo(BaseStructure):
     h5_type = "workspace info"
 
-    version: str = "2.0.12"
+    version: str = "2.0.13"
 
 
 class WorkSpace(H5File):

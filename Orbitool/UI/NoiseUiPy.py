@@ -299,6 +299,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     def plotNoise(self):
         info = self.noise.info
         spectrum = info.current_spectrum
+        if spectrum is None:
+            return
         result = info.general_result
 
         is_log = self.yLogCheckBox.isChecked()

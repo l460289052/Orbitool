@@ -120,7 +120,7 @@ class NormalDistributionFunc(BaseFunc):
         else:
             uu = u
 
-        index = uu[:, 1].argsort()
+        index = uu[:, 0].argsort()
         uu = uu[index[::-1]]
         uu = uu[:split_num]
         param = uu.reshape(-1)
@@ -137,7 +137,7 @@ class NormalDistributionFunc(BaseFunc):
                     funcFit, mz, intensity, p0=param, maxfev=maxFitNum(num))[0]
                 params = np.stack((fittedParam[::2], fittedParam[1::2]), 1)
                 m = params[:, 1]
-                if m.min() < mz_min or m.max() > mz_max:
+                if m.min() < mz_min or m.max() > mz_max or any(m[1:] - m[:-1] < 1e-6):
                     raise RuntimeError()
 
                 return self.generate_peak_from_param(mz, params)

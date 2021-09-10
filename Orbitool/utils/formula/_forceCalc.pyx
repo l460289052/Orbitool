@@ -83,9 +83,9 @@ cdef class Calculator:
         """
         if base_group contains an unstable isotope like O[18], calc won't provide any more O
         """
-        M -= base_group.mass()
         cdef double ML, MR, delta
         delta = self.rtol*M
+        M -= base_group.mass()
         ML = M-delta
         MR = M+delta
 

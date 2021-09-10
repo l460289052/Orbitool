@@ -88,7 +88,10 @@ cdef tuple getMassPointParams(DoubleArray mass, DoubleArray intensity,
 
 def getGlobalShownNoise(DoubleArray poly_coef, double n_sigma, double std):
     cdef double noise, lod
-    noise = polynomial.polyval(200, poly_coef)
+    if poly_coef is None:
+        noise = 0
+    else:
+        noise = polynomial.polyval(200, poly_coef)
     lod = noise + n_sigma * std
     return noise, lod
 

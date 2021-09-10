@@ -410,6 +410,11 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2021.09.10 version 2.0.13**
+
++ Bug fix
+  + Nested peaks may not pick highest peaks
+
 **2021.09.08 version 2.0.12**
 
 + use group instead of positive/negative when calculate formula
