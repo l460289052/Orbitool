@@ -1,7 +1,7 @@
 from typing import TypeVar, Type, Generic, List, Iterable, Generator, Any, Iterator
 import h5py
 from .h5obj import H5Obj
-from .h5types import StructureConverter
+from .h5type_converters import StructureConverter
 
 T = TypeVar('T')
 

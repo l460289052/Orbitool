@@ -1,3 +1,4 @@
+from array import array
 from typing import List
 from datetime import datetime
 from .base import BaseStructure, Field
@@ -10,7 +11,7 @@ class TimeSeries(BaseStructure):
     position_max: float
 
     times: List[datetime] = Field(default_factory=list)
-    intensity: List[float] = Field(default_factory=list)
+    intensity = array('i')
 
     tag: str
 

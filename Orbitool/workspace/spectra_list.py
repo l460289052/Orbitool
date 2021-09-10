@@ -1,3 +1,4 @@
+from array import array
 from datetime import datetime
 from typing import List, Optional
 
@@ -11,6 +12,7 @@ class SpectraListInfo(BaseStructure):
     h5_type = "spectra list info"
 
     shown_indexes: List[int] = Field(default_factory=list)
+    shown_indexes = array('i')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

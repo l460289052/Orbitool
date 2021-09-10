@@ -7,7 +7,7 @@ import h5py
 
 from ..base import BaseStructure
 from .h5datatable import TableConverter
-from .h5types import StructureConverter
+from .h5type_converters import StructureConverter
 
 T = TypeVar("T")
 
