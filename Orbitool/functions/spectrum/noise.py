@@ -13,7 +13,7 @@ def getNoiseParams(mass: np.ndarray, intensity: np.ndarray, quantile: float,
     """
     poly_coef, std, mass_point_rets = _getNoiseParams(mass, intensity, quantile, mass_dependent,
                                                       mass_points, mass_point_deltas)
-    slt: List[bool] = np.array([ret[0] for ret in mass_point_rets])
+    slt: List[bool] = np.array([ret[0] for ret in mass_point_rets], dtype=bool)
     mass_point_params = [ret[1] for ret in mass_point_rets if ret[0]]
     if len(mass_point_params) > 0:
         mass_point_params = np.stack(mass_point_params)
