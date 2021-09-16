@@ -20,3 +20,7 @@ class PeakFitInfo(BaseStructure):
     residual_intensity: Optional[np.ndarray] = None
 
     shown_indexes = array('i')
+
+    shown_mz: Optional[np.ndarray] = None
+    shown_intensity: Optional[np.ndarray] = None
+    shown_residual: Optional[np.ndarray] = None

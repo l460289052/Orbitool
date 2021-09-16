@@ -48,12 +48,14 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     def setupUi(self, Form):
         super().setupUi(Form)
 
+        # combox
         self.filterTagComboBox.addItems([tag.name for tag in PeakTags])
         self.addTagComboBox.addItems([tag.name for tag in PeakTags])
         self.fitComboBox.addItem("standard calc", FitMethod.restricted_calc)
         self.fitComboBox.addItem("unrestricted calc", FitMethod.force_calc)
         self.fitComboBox.addItem("mass list", FitMethod.mass_list)
 
+        # filters
         self.showSelectedPushButton.clicked.connect(self.showSelect)
         self.filterSelectYToolButton.clicked.connect(self.filterSelected)
         self.filterSelectNToolButton.clicked.connect(self.filterUnselected)
@@ -80,11 +82,14 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         self.filterClearPushButton.clicked.connect(self.filterClear)
 
+        # actions
+        self.replotPushButton.clicked.connect(self.replot_within_peaks)
         self.fitPushButton.clicked.connect(self.fit)
         self.addTagPushButton.clicked.connect(self.add_tag)
         self.actionAddToMassListPushButton.clicked.connect(self.addToMassList)
         self.actionRmTagPushButton.clicked.connect(self.remove_tag)
 
+        # plots
         self.plot = Plot(self.widget)
         self.manager.bind.peak_fit_left_index.connect(
             "peakfit", self.move_plot_to_index)
@@ -156,8 +161,10 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         info.raw_split_num = raw_split_num
         info.original_indexes = original_indexes
         info.peaks = peaks
-        info.residual_mz, info.residual_intensity = mz, residual
+        info.shown_mz, info.shown_residual = info.residual_mz, info.residual_intensity = mz, residual
         info.shown_indexes = list(range(len(info.peaks)))
+        info.shown_intensity = np.concatenate(
+            [peak.intensity for peak in raw_peaks])
 
         self.show_spectrum.emit(info.spectrum)
         self.show_and_plot()
@@ -180,9 +187,9 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
             ax.yaxis.set_major_formatter(
                 matplotlib.ticker.FormatStrFormatter(r"%.1e"))
 
-        ax.plot(info.spectrum.mz, info.spectrum.intensity,
+        ax.plot(info.shown_mz, info.shown_intensity,
                 color='k', linewidth=1, label="spectrum")
-        ax.plot(info.residual_mz, info.residual_intensity,
+        ax.plot(info.shown_mz, info.shown_residual,
                 color='r', linewidth=.5, label="residual")
         ax.legend()
 
@@ -228,17 +235,19 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.plot.canvas.draw()
 
     def rescale(self):
-        spectrum = self.peakfit.info.spectrum
-        if spectrum is None:
+        info = self.peakfit.info
+        mz = info.shown_mz
+        intensity = info.shown_intensity
+        if mz is None:
             return
 
         plot = self.plot
         x_min, x_max = plot.ax.get_xlim()
         id_min, id_max = binary_search.indexBetween_np(
-            spectrum.mz, (x_min, x_max))
+            mz, (x_min, x_max))
         if id_min >= id_max:
             return
-        y_max = spectrum.intensity[id_min:id_max].max()
+        y_max = intensity[id_min:id_max].max()
 
         if self.yLogcheckBox.isChecked():
             y_min = .1
@@ -420,6 +429,32 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         yield func, msg
 
         self.manager.signals.peak_list_show.emit()
+
+    @state_node
+    def replot_within_peaks(self):
+        info = self.peakfit.info
+        raw_peaks = info.raw_peaks
+        o_peaks = info.peaks
+        original_indexes = info.original_indexes
+        indexes = info.shown_indexes
+        func = self.manager.workspace.peak_shape_tab.info.func
+
+        def residual():
+            o_indexes = set(original_indexes[index] for index in indexes)
+            peaks = [(index, peak) for index, peak in enumerate(
+                o_peaks) if original_indexes[index] in o_indexes]
+            o_indexes = sorted(o_indexes)
+            r_peaks = [raw_peaks[index] for index in o_indexes]
+            o_indexes = [original_indexes[index] for index, _ in peaks]
+            peaks = [peak for _, peak in peaks]
+            mz, residual = peakfit_func.calculateResidual(
+                raw_peaks, o_indexes, peaks, func)
+
+            intensity = np.concatenate([peak.intensity for peak in r_peaks])
+            return mz, intensity, residual
+        info.shown_mz, info.shown_intensity, info.shown_residual = yield residual, "calc residual"
+
+        self.plot_peaks()
 
     @state_node
     def fit(self):
