@@ -410,6 +410,19 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2021.09.16 version 2.0.14**
+
++ You can open 'peak float window' in 'formula result window' to determine targeted peak's formula
++ Slider will keep its position when filtering
++ Replot within peak list
+
++ Bug fix
+  + No high-intensity noise point available will report bug
+  + Plot move after moving plot
+
++ Code
+  + Refactor: create signals using weakref
+
 **2021.09.10 version 2.0.13**
 
 + Bug fix

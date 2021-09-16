@@ -3,7 +3,7 @@ from datetime import datetime
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from ..workspace import WorkSpace
+from ..workspace import WorkSpace, update as workspace_update, need_update
 
 from .manager import Manager, state_node, MultiProcess
 from . import utils as UiUtils
@@ -155,6 +155,10 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         if not ret:
             return
         self.manager.workspace = WorkSpace(f)
+        if need_update(self.manager.workspace):
+            UiUtils.showInfo(
+                f"will update file from {self.manager.workspace.info.version} to {self.manager.workspace.info.__fields__['version'].get_default()}")
+            workspace_update(self.manager.workspace)
         self.manager.init_or_restored.emit()
 
     @state_node
