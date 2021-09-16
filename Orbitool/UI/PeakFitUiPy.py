@@ -39,6 +39,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.setupUi(self)
         manager.init_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
+        manager.signals.peak_refit_finish.connect(self.peak_refit_finish)
 
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(1000)
@@ -163,7 +164,6 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.show_spectrum.emit(info.spectrum)
         self.show_and_plot()
 
-    @state_node(mode='x')
     def peak_refit_finish(self):
         info = self.peakfit.info
         func = self.manager.workspace.peak_shape_tab.info.func

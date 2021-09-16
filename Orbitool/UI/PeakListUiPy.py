@@ -19,7 +19,6 @@ colors = {
 
 
 class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
-    peak_refit_finish = QtCore.pyqtSignal()
 
     def __init__(self, manager: Manager) -> None:
         super().__init__()
@@ -135,7 +134,7 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
             self.peak_float.close()
         widget = PeakFloatWin(
             self.manager, self.peaks_info.shown_indexes[row])
-        widget.callback.connect(self.peak_refit_finish.emit)
+        widget.callback.connect(self.manager.signals.peak_refit_finish.emit)
         self.peak_float = widget
         widget.show()
 

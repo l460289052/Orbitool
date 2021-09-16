@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import random
+import weakref
 from datetime import datetime
 from functools import wraps
-from typing import (Callable, Dict, Generic, Iterable, Iterator, Type, TypeVar,
-                    overload)
+from typing import (
+    Callable, Dict, Generic, Iterable, Iterator, Type, TypeVar,
+    List, overload, Set)
+from types import MethodType
 
 import numpy as np
 from PyQt5.QtCore import QObject, QThread, QTimer, pyqtSignal
@@ -17,14 +20,20 @@ from ..utils import showInfo
 
 class BindData:
     def __init__(self) -> None:
-        self.peak_fit_left_index = DataBindSignal(int)
+        self.peak_fit_left_index: DataBindSignal[int] = DataBindSignal()
 
 
 class Values:
     def __init__(self) -> None:
-        self.calibration_info_selected_index = ValueGetter(int)
-        self.mass_list_selected_indexes = ValueGetter(np.ndarray)
-        self.spectra_list_selected_index = ValueGetter(int)
+        self.calibration_info_selected_index: ValueGetter[int] = ValueGetter()
+        self.mass_list_selected_indexes: ValueGetter[np.ndarray] = ValueGetter(
+        )
+        self.spectra_list_selected_index: ValueGetter[int] = ValueGetter()
+
+
+class Signals:
+    def __init__(self) -> None:
+        self.peak_refit_finish = MySignal()
 
 
 class Manager(QObject):
@@ -42,12 +51,14 @@ class Manager(QObject):
 
         self.calibrationInfoWidget: QTableWidget = None
         self.formulas_result_win: QMainWindow = None
+        self.peak_float_wins: Dict[int, QMainWindow] = {}
 
         self.tqdm = TQDMER()
         self.busy_signal.connect(self.tqdm.reinit)
 
         self.init_or_restored = MySignal()  # for exception catch
         self.save = MySignal()  # for exception catch
+        self.signals = Signals()
 
         self.bind = BindData()
         self.getters = Values()
@@ -154,24 +165,48 @@ class TQDMER(QObject):
             self.progress_cnt = 0
 
 
-class MySignal:
+def get_callable_weak_ref(handler, callback=None):
+    if isinstance(handler, MethodType):
+        return weakref.WeakMethod(handler, callback)
+    else:
+        return weakref.ref(handler, callback)
+
+
+class MySignal(Generic[T]):
     def __init__(self) -> None:
-        self.handlers: set = set()
+        self.handlers: Set[weakref.ReferenceType] = set()
 
     def connect(self, handler: Callable):
-        self.handlers.add(handler)
+        self.handlers.add(get_callable_weak_ref(handler, self.remove_ref))
 
-    def emit(self):
+    def disconnect(self, handler: Callable):
+        ref = get_callable_weak_ref(handler)
+        self.remove_ref(ref)
+
+    def remove_ref(self, handler_ref):
+        self.handlers.discard(handler_ref)
+
+    @overload
+    def emit(self, args: T): ...
+    @overload
+    def emit(self, *args, **kwargs): ...
+
+    def emit(self, *args, **kwargs):
+        # emit
         for handler in self.handlers:
-            handler()
+            handler()(*args, **kwargs)
 
 
 class DataBindSignal(Generic[T]):
-    def __init__(self, data_typ: Type[T]) -> None:
-        self.handlers: dict = {}
+    def __init__(self) -> None:
+        self.handlers: Dict[str, weakref.ReferenceType] = {}
 
     def connect(self, label: str, handler: Callable):
-        self.handlers[label] = handler
+        self.handlers[label] = get_callable_weak_ref(
+            handler, lambda x: self.remove_label(label))
+
+    def remove_label(self, label):
+        self.handlers.pop(label, None)
 
     @overload
     def emit_except(self, except_label, arg: T):
@@ -184,15 +219,15 @@ class DataBindSignal(Generic[T]):
     def emit_except(self, except_label, *args, **kwargs):
         for label, handler in self.handlers.items():
             if except_label != label:
-                handler(*args, **kwargs)
+                handler()(*args, **kwargs)
 
     def emit(self, *args, **kwargs):
         for handler in self.handlers.values():
-            handler(*args, **kwargs)
+            handler()(*args, **kwargs)
 
 
 class ValueGetter(Generic[T]):
-    def __init__(self, value_typ: Type[T]) -> None:
+    def __init__(self) -> None:
         self.getter = None
 
     def connect(self, getter):

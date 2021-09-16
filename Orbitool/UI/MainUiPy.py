@@ -91,7 +91,6 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.peakList = PeakListUiPy.Widget(manager)
         self.peakListDw = self.add_dockerwidget(
             "Peak List", self.peakList, self.spectrumDw)
-        self.peakList.peak_refit_finish.connect(self.peakFitTab.peak_refit_finish)
         self.peakFitTab.filter_selected.connect(self.peakList.filterSelected)
         self.peakFitTab.peaklist_left.connect(self.peakList.scroll_to_index)
 
