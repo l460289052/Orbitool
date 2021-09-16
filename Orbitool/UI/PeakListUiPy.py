@@ -1,5 +1,6 @@
 import csv
 from typing import Dict, List, Optional, Tuple, Union
+import contextlib
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
@@ -23,8 +24,10 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager = manager
-        self.manager.init_or_restored.connect(self.restore)
-        self.manager.save.connect(self.updateState)
+        manager.init_or_restored.connect(self.restore)
+        manager.save.connect(self.updateState)
+
+        manager.signals.peak_list_show.connect(self.showPeaks)
         self.setupUi(self)
 
     def setupUi(self, Form):
@@ -38,8 +41,6 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
 
         self.manager.bind.peak_fit_left_index.connect(
             "peaklist", self.scroll_to_index)
-
-        self.peak_float: PeakFloatWin = None
 
         self.exportSpectrumPushButton.clicked.connect(self.exportSpectrum)
         self.exportPeaksPushButton.clicked.connect(self.exportPeaks)
@@ -66,10 +67,21 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
 
         peaks = [peaks[index] for index in indexes]
 
-        table.clearContents()
-        table.setRowCount(0)
-        table.setRowCount(len(peaks))
-        table.setVerticalHeaderLabels(map(str, indexes))
+        bar = table.verticalScrollBar()
+        item = table.verticalHeaderItem(bar.value())
+        if item:
+            current_index = int(item.text())
+        else:
+            current_index = 0
+
+        with self.no_send_slider():
+            table.clearContents()
+            table.setRowCount(0)
+            table.setRowCount(len(peaks))
+            table.setVerticalHeaderLabels(map(str, indexes))
+            ind = binary_search.indexNearest(indexes, current_index)
+            bar.setRange(0, len(indexes))
+            bar.setSliderPosition(ind)
 
         for index, peak in enumerate(peaks):
             tag = peak.tags
@@ -93,6 +105,15 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
             setItem(5, ','.join(tag.name for tag in map(PeakTags, peak.tags)))
 
             setItem(6, raw_split_num[original_indexes[indexes[index]]])
+
+    @contextlib.contextmanager
+    def no_send_slider(self):
+        bar = self.tableWidget.verticalScrollBar()
+        box = self.bindPlotCheckBox
+        value = box.isChecked()
+        box.setChecked(False)
+        yield
+        box.setChecked(value)
 
     def filterSelected(self, select: bool):
         """
@@ -125,18 +146,16 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
 
     def scroll_to_index(self, index):
         if self.bindPlotCheckBox.isChecked():
-            self.tableWidget.verticalScrollBar().setSliderPosition(index)
+            with self.no_send_slider():
+                self.tableWidget.verticalScrollBar().setSliderPosition(index)
 
     @state_node(withArgs=True)
     def openPeakFloatWin(self, item: QtWidgets.QTableWidgetItem):
         row = item.row()
-        if self.peak_float is not None and not self.peak_float.isHidden():
-            self.peak_float.close()
-        widget = PeakFloatWin(
+        win = PeakFloatWin.get_or_create(
             self.manager, self.peaks_info.shown_indexes[row])
-        widget.callback.connect(self.manager.signals.peak_refit_finish.emit)
-        self.peak_float = widget
-        widget.show()
+        win.show()
+        win.raise_()
 
     @state_node
     def exportSpectrum(self):

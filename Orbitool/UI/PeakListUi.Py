@@ -101,6 +101,7 @@ class Ui_Form(object):
         Form.setWindowTitle(_translate("Form", "Form"))
         self.bindPlotCheckBox.setText(_translate("Form", "bind to plot"))
         self.gotoToolButton.setText(_translate("Form", "goto"))
+        self.tableWidget.setToolTip(_translate("Form", "Double click to edit peak"))
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("Form", "position"))
         item = self.tableWidget.horizontalHeaderItem(1)

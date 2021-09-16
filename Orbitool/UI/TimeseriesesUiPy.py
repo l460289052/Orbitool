@@ -181,7 +181,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
 
     @state_node(withArgs=True)
     def seriesClicked(self, item: QtWidgets.QTableWidgetItem):
-        row = self.tableWidget.row(item)
+        row = item.row()
         self.timeseries.info.show_index = row
 
         self.click_series.emit()

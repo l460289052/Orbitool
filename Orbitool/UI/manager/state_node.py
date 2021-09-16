@@ -48,6 +48,7 @@ class node:
         self._mode = mode
         self._nodeType = nodeType
         self._father: node = father
+        self._cached = None
         if isinstance(root, node) or root is None:
             self._root: node = self if root is None else root
         else:
@@ -138,6 +139,7 @@ class node:
         if func is None:
             return
         self._func = func
+        self._cached = None
         self.except_node = node(
             self._root, self, NodeType.Except, mode='a' if self._mode != 'e' else 'e')
 
@@ -148,4 +150,6 @@ class node:
     def __get__(self, obj, objtype=None):
         if obj is None or isinstance(obj, node):
             return self
-        return functools.partial(self.func, obj)
+        if self._cached is None:
+            self._cached = functools.partial(self.func, obj)
+        return self._cached

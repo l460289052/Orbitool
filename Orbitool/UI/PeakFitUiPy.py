@@ -28,8 +28,6 @@ class FitMethod(str, Enum):
 
 class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     show_spectrum = QtCore.pyqtSignal(Spectrum)
-    show_peaklist = QtCore.pyqtSignal()
-    peaklist_left = QtCore.pyqtSignal(float)
     show_masslist = QtCore.pyqtSignal()
     filter_selected = QtCore.pyqtSignal(bool)  # selected or unselected
 
@@ -108,7 +106,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
             self.yLogcheckBox])
 
     def show_and_plot(self):
-        self.show_peaklist.emit()
+        self.manager.signals.peak_list_show.emit()
         if self.peakfit.info.spectrum:
             self.plot_peaks()
 
@@ -165,24 +163,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.show_and_plot()
 
     def peak_refit_finish(self):
-        info = self.peakfit.info
-        func = self.manager.workspace.peak_shape_tab.info.func
-
-        def calc():
-            mz, residual = peakfit_func.calculateResidual(
-                info.raw_peaks, info.original_indexes, info.peaks, func)
-            return mz, residual
-
-        info = self.peakfit.info
-        info.residual_mz, info.residual_intensity = yield calc, "calculate residual"
-
-        ax = self.plot.ax
-        xlim = ax.get_xlim()
-        ylim = ax.get_ylim()
-        self.show_and_plot()
-        ax = self.plot.ax
-        ax.set_xlim(*xlim)
-        ax.set_ylim(*ylim)
+        self.manager.signals.peak_list_show.emit()
 
     def plot_peaks(self):
         info = self.peakfit.info
@@ -365,17 +346,17 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     def filterClear(self):
         info = self.peakfit.info
         info.shown_indexes = list(range(len(info.peaks)))
-        self.show_peaklist.emit()
+        self.manager.signals.peak_list_show.emit()
 
     @state_node
     def filterSelected(self):
         self.filter_selected.emit(True)
-        self.show_peaklist.emit()
+        self.manager.signals.peak_list_show.emit()
 
     @state_node
     def filterUnselected(self):
         self.filter_selected.emit(False)
-        self.show_peaklist.emit()
+        self.manager.signals.peak_list_show.emit()
 
     @state_node(withArgs=True)
     def filterGeneral(self, filter: Callable[[FittedPeak], bool]):
@@ -386,7 +367,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         peaks = info.peaks
         info.shown_indexes = [
             index for index in info.shown_indexes if filter(peaks[index])]
-        self.show_peaklist.emit()
+        self.manager.signals.peak_list_show.emit()
 
     @state_node(withArgs=True)
     def filter_tag(self, y: bool):
@@ -438,7 +419,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         yield func, msg
 
-        self.show_peaklist.emit()
+        self.manager.signals.peak_list_show.emit()
 
     @state_node
     def fit(self):
@@ -470,7 +451,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         yield func, "fit use restricted calc"
 
-        self.show_peaklist.emit()
+        self.manager.signals.peak_list_show.emit()
 
     def fit_force_formula(self):
         calc_get = self.manager.workspace.formula_docker.info.force_calc_get

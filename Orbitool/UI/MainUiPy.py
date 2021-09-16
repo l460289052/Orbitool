@@ -56,7 +56,6 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
         self.peakFitTab = self.add_tab(PeakFitUiPy.Widget(manager), "Peak Fit")
         self.peakFitTab.show_spectrum.connect(self.show_spectrum)
-        self.peakFitTab.show_peaklist.connect(self.peaklist_show)
 
         self.massDefectTab = self.add_tab(
             MassDefectUiPy.Widget(manager), "Mass Defect")
@@ -73,7 +72,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.masslist = MassListUiPy.Widget(manager)
         self.massListDw = self.add_dockerwidget(
             "Mass List", self.masslist, self.formulaDw)
-        
+
         self.peakFitTab.show_masslist.connect(self.masslist.showMasslist)
 
         self.calibrationInfo = CalibrationInfoUiPy.Widget(manager)
@@ -92,7 +91,6 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.peakListDw = self.add_dockerwidget(
             "Peak List", self.peakList, self.spectrumDw)
         self.peakFitTab.filter_selected.connect(self.peakList.filterSelected)
-        self.peakFitTab.peaklist_left.connect(self.peakList.scroll_to_index)
 
         self.timeseries = TimeseriesUiPy.Widget(manager)
         self.timeseriesDw = self.add_dockerwidget(
@@ -239,10 +237,6 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.tabWidget.setCurrentWidget(self.peakFitTab)
         self.spectraList.comboBox.setCurrentIndex(1)
         self.spectraListDw.raise_()
-
-    @state_node(mode='x')
-    def peaklist_show(self):
-        self.peakList.showPeaks()
 
     def abort_process(self):
         thread: MultiProcess = self.manager.running_thread

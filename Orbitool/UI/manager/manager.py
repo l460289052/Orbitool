@@ -34,6 +34,7 @@ class Values:
 class Signals:
     def __init__(self) -> None:
         self.peak_refit_finish = MySignal()
+        self.peak_list_show = MySignal()
 
 
 class Manager(QObject):

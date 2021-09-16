@@ -432,7 +432,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
 
     @state_node(withArgs=True)
     def moveToTableClickedNoise(self, item: QtWidgets.QTableWidgetItem):
-        row = self.paramTableWidget.row(item)
+        row = item.row()
         info = self.noise.info
         if info.current_spectrum is None:
             return

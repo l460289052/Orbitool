@@ -6,6 +6,7 @@ import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ..functions import binary_search
+from ..functions.peakfit import get_peak_position
 from ..functions import formula as formula_func
 from ..structures.spectrum import FittedPeak
 from ..utils.formula import Formula
@@ -19,25 +20,30 @@ from . import FormulaResultUiPy
 class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
     callback = QtCore.pyqtSignal()
 
-    def __init__(self, manager: Manager, peak_index: int) -> None:
+    @classmethod
+    def get_or_create(cls, manager: Manager, peak_index: int):
+        info = manager.workspace.peakfit_tab.info
+        original_index = info.original_indexes[peak_index]
+        wins = manager.peak_float_wins
+        if original_index in wins:
+            win = wins[original_index]
+        else:
+            win = cls(manager, original_index)
+            wins[original_index] = win
+        return win
+
+    def __init__(self, manager: Manager, original_index: int) -> None:
         super().__init__()
         self.manager = manager
         self.setupUi(self)
 
         info = self.peakfit_info
-        original_indexes = info.original_indexes
-        self.original_index = original_indexes[peak_index]
+        self.original_index = original_index
 
-        start = peak_index - 1
-        while self.original_index == original_indexes[start]:
-            start -= 1
-        start += 1
-        length = len(original_indexes)
-        end = start + 1
-        while end < length and self.original_index == original_indexes[end]:
-            end += 1
-        self.original_slice = slice(start, end)
-        self.peaks: List[FittedPeak] = deepcopy(info.peaks[start:end])
+        self.original_slice = binary_search.indexBetween(
+            info.original_indexes, (original_index, original_index))
+        self.original_peaks = info.peaks[self.original_slice]
+        self.peaks: List[FittedPeak] = deepcopy(self.original_peaks)
 
         self.showPeak()
         self.plotPeak()
@@ -59,13 +65,17 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
 
         self.peaksTableWidget.itemDoubleClicked.connect(self.finetuneFormula)
 
+    def set_formulas(self, peak_index: int, formulas: List[Formula]):
+        self.peaks[peak_index - self.original_slice.start].formulas = formulas
+        self.showPeak()
+
     @property
     def peakfit_info(self):
         return self.manager.workspace.peakfit_tab.info
 
     @state_node(withArgs=True)
     def finetuneFormula(self, item: QtWidgets.QTableWidgetItem):
-        row = self.peaksTableWidget.row(item)
+        row = item.row()
         peak_index = self.original_slice.start + row
 
         manager = self.manager
@@ -102,11 +112,13 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
                     index, column, QtWidgets.QTableWidgetItem(str(msg)))
 
             setText(0, format(peak.peak_position, '.5f'))
-            setText(1, ', '.join(str(f) for f in peak.formulas))
-            setText(2, format(peak.peak_intensity, '.3e'))
-            setText(4, format(peak.area, '.3e'))
+            setText(1, ', '.join(str(f) for f in self.original_peaks[binary_search.indexNearest(
+                self.original_peaks, peak.peak_position, method=get_peak_position)].formulas))
+            setText(2, ', '.join(str(f) for f in peak.formulas))
+            setText(3, format(peak.peak_intensity, '.3e'))
+            setText(5, format(peak.area, '.3e'))
             if len(peak.formulas) == 1:
-                setText(3,
+                setText(4,
                         format((peak.peak_position / peak.formulas[0].mass() - 1) * 1e6, '.5f'))
                 formula = peak.formulas[0]
                 if formula.isIsotope:
@@ -118,10 +130,10 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
                     for p in peaks[s]:
                         for f in p.formulas:
                             if f == origin:
-                                setText(5, format(peak.peak_intensity /
+                                setText(6, format(peak.peak_intensity /
                                                   p.peak_intensity, '5f'))
                                 setText(
-                                    6, format(formula.relativeAbundance(), '.5f'))
+                                    7, format(formula.relativeAbundance(), '.5f'))
                                 break
                         else:
                             continue
@@ -252,5 +264,9 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
         for j in range(i + len(new_peaks), len(shown_indexes)):
             shown_indexes[j] += delta
 
-        self.callback.emit()
+        self.manager.signals.peak_refit_finish.emit()
         self.close()
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        self.manager.peak_float_wins.pop(self.original_index, None)
+        a0.accept()

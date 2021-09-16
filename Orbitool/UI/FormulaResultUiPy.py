@@ -10,6 +10,7 @@ from . import FormulaResultUi
 from .manager import Manager, state_node
 from .component import Plot
 from .utils import get_tablewidget_selected_row
+from . import PeakFitFloatUiPy
 
 
 class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
@@ -38,6 +39,7 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
         self.calcPushButton.clicked.connect(lambda: self.calc(False))
         self.forceCalcPushButton.clicked.connect(lambda: self.calc(True))
         self.resultTableWidget.itemDoubleClicked.connect(self.plot_row)
+        self.isotopesTableWidget.itemDoubleClicked.connect(self.edit_peak)
         self.showAllToolButton.clicked.connect(self.showResult)
         self.closeToolButton.clicked.connect(self.close)
         self.acceptToolButton.clicked.connect(self.accept)
@@ -109,7 +111,7 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
 
     @state_node(withArgs=True)
     def plot_row(self, item: QtWidgets.QTableWidgetItem):
-        row = self.resultTableWidget.row(item)
+        row = item.row()
         formula = self.formulas[row].findOrigin()
         origin = formula.absoluteAbundance()
         isotopes = [(Formula(isotope), abundance) for isotope, abundance in isotopologues(formula=str(formula.toStr(
@@ -177,6 +179,20 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
                     peak.peak_intensity, '.4f'))
 
         self.plot.canvas.draw()
+
+    @state_node(withArgs=True)
+    def edit_peak(self, item: QtWidgets.QTableWidgetItem):
+        table = self.isotopesTableWidget
+        row = item.row()
+        formula = Formula(table.item(row, 0).text())
+        it = table.item(row, 2)
+        if it and it.text():
+            index = self.find_peak_index(formula.mass())
+            win = PeakFitFloatUiPy.Window.get_or_create(self.manager, index)
+            win.set_formulas(index, [formula])
+            win.raise_()
+            win.show()
+            win.raise_()
 
     @state_node
     def accept(self):

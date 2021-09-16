@@ -54,6 +54,9 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Double to show isotopes for this formula</string>
+          </property>
           <property name="editTriggers">
            <set>QAbstractItemView::NoEditTriggers</set>
           </property>
@@ -98,6 +101,9 @@
             <width>800</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>Double click to save formula for peaks</string>
           </property>
           <property name="editTriggers">
            <set>QAbstractItemView::NoEditTriggers</set>

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>937</width>
     <height>1000</height>
    </rect>
   </property>
@@ -236,6 +236,11 @@
            </column>
            <column>
             <property name="text">
+             <string>original formula</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
              <string>formula</string>
             </property>
            </column>
@@ -308,7 +313,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>937</width>
      <height>20</height>
     </rect>
    </property>
