@@ -11,7 +11,7 @@ class TimeSeries(BaseStructure):
     position_max: float
 
     times: List[datetime] = Field(default_factory=list)
-    intensity = array('i')
+    intensity = array('d')
 
     tag: str
 

@@ -68,12 +68,24 @@ str_dtypes = {
     "float64": "d"
 }
 
+py_dtypes = {
+    int: "i",
+    float: "d"
+}
+
 
 class ArrayConverter(BaseSingleConverter):
     @staticmethod
     def write_to_h5(h5group: Group, key: str, value: array.ArrayType):
         if key in h5group:
             del h5group[key]
+        if isinstance(value, list):
+            if len(value) == 0:
+                value = array.array("i")
+            elif isinstance(value[0], int):
+                value = array.array("i", value)
+            else:
+                value = array.array("d", value)
         h5group.create_dataset(
             key, data=value, dtype=array_dtypes[value.typecode], compression="gzip", compression_opts=1)
 

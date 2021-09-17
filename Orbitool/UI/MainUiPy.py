@@ -154,11 +154,13 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             "Load workspace", "Orbitool Workspace file(*.Orbitool)")
         if not ret:
             return
-        self.manager.workspace = WorkSpace(f)
+        workspace = WorkSpace(f)
         if need_update(self.manager.workspace):
             UiUtils.showInfo(
-                f"will update file from {self.manager.workspace.info.version} to {self.manager.workspace.info.__fields__['version'].get_default()}")
-            workspace_update(self.manager.workspace)
+                f"will update file from {workspace.info.version} to {workspace.info.__fields__['version'].get_default()}")
+            workspace_update(workspace)
+        workspace.info.version = workspace.info.__fields__["version"].get_default()
+        self.manager.workspace = workspace
         self.manager.init_or_restored.emit()
 
     @state_node

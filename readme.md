@@ -410,6 +410,11 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2021.09.17 version 2.0.15**
+
++ Bug fix
+  + Array error when save
+
 **2021.09.16 version 2.0.14**
 
 + You can open 'peak float window' in 'formula result window' to determine targeted peak's formula
