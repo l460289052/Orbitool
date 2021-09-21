@@ -1,13 +1,16 @@
+from dataclasses import dataclass
 from array import array, ArrayType
-from ...base import BaseStructure
+from ...base import BaseStructure, field
 from ...HDF5 import H5File
+from ..h5type_handlers import Array
 
 
+@dataclass
 class SomeArray(BaseStructure):
     h5_type = "test some array"
-    array_a = array("i")
-    array_b: ArrayType = array("b")
-    array_c = array("d")
+    array_a: Array[int] = field(lambda: array("i"))
+    array_b: Array['b'] = field(lambda: array("b"))
+    array_c: Array[float] = field(lambda: array("d"))
 
 
 def test_array():

@@ -1,16 +1,15 @@
 from datetime import datetime
 
-import h5py
 import numpy as np
 
-from ... import HDF5
-from ...base import BaseStructure
+from ...base import BaseStructure, dataclass, name_field
+from dataclasses import field as ff
 
 type_name = 'testSpectrum'
 
 
 class Spectrum(BaseStructure):
     h5_type = type_name
-    mz: np.ndarray
-    intensity: np.ndarray
-    time: datetime
+    mz: np.ndarray = None
+    intensity: np.ndarray = None
+    time: datetime = None

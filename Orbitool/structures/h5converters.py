@@ -7,7 +7,7 @@ from itertools import chain
 
 from ..utils.formula import Formula, ForceCalc, RestrictedCalc
 from . import HDF5
-from .HDF5 import BaseSingleConverter, TableConverter, StructureConverter, h5datatable
+from .HDF5 import BaseSingleConverter, TableConverter, StructureHandler, h5datatable
 from .base import BaseStructure, BaseTableItem
 
 
@@ -75,11 +75,11 @@ class RestrictedCalcConverter(BaseSingleConverter):
             rtol=value.rtol, DBEMin=value.DBEMin, DBEMax=value.DBEMax,
             MMin=value.MMin, MMax=value.MMax, nitrogenRule=value.nitrogenRule,
             params=parameters, elements=elements, isotopes=isotopes)
-        StructureConverter.write_to_h5(h5group, key, struct)
+        StructureHandler.write_to_h5(h5group, key, struct)
 
     @staticmethod
     def read_from_h5(h5group: Group, key: str):
-        struct: RestrictedCalcStructure = StructureConverter.read_from_h5(
+        struct: RestrictedCalcStructure = StructureHandler.read_from_h5(
             h5group, key)
         calc = RestrictedCalc()
 
@@ -129,11 +129,11 @@ class ForceCalcConverter(BaseSingleConverter):
                    for e in value.getEIList()]
         struct = ForceCalcStructure(
             rtol=value.rtol, ei_list=ei_list)
-        StructureConverter.write_to_h5(h5group, key, struct)
+        StructureHandler.write_to_h5(h5group, key, struct)
 
     @staticmethod
     def read_from_h5(h5group: Group, key: str):
-        struct: ForceCalcStructure = StructureConverter.read_from_h5(
+        struct: ForceCalcStructure = StructureHandler.read_from_h5(
             h5group, key)
         calc = ForceCalc()
         for ei in calc.getEIList():

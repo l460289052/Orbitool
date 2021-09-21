@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Dict, List, Tuple, Type, TypeVar
 
 import numpy as np
 from h5py import Group, string_dtype, vlen_dtype
-from pydantic.fields import ModelField
 
 from ..base import BaseTableItem, items
 

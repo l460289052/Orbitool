@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from numpy import testing as nptest
 
-from ...base import BaseStructure
+from ...base import BaseStructure, field
 from ...HDF5 import H5File
 from .spectrum import Spectrum
 
@@ -17,7 +17,7 @@ def test_group():
     intensity = np.arange(10) + 1
     time = datetime(2000, 1, 1, 1, 1, 1)
 
-    a = Spectrum(mz=mz, intensity=intensity, time=time)
+    a = Spectrum(mz, intensity, time)
     f.write("spectrum", a)
 
     b: Spectrum = f.read("spectrum")
@@ -41,9 +41,9 @@ def test_structure():
 
     f = H5File()
 
-    c1 = Child(value=1)
+    c1 = Child(1)
     c2 = Child(value=2)
-    father = Father(value=3, c1=c1, c2=c2)
+    father = Father(3, c1, c2)
     f.write("father", father)
 
     t: Father = f.read("father")
@@ -55,9 +55,9 @@ def test_structure():
 
 class SomeList(BaseStructure):
     h5_type = "test some list"
-    value_a: List[int] = []
-    value_b: List[float] = []
-    value_c: List[Spectrum] = []
+    value_a: List[int] = field(list)
+    value_b: List[float] = field(list)
+    value_c: List[Spectrum] = field(list)
 
 
 def test_some_list_a():

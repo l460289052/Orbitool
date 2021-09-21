@@ -34,11 +34,11 @@ class Conveter(HDF5.BaseSingleConverter):
     @staticmethod
     def write_to_h5(h5group, key: str, value: PeaksManager):
         struct = PeaksManagerStructure(peaks=value.peaks)
-        HDF5.StructureConverter.write_to_h5(h5group, key, struct)
+        HDF5.StructureHandler.write_to_h5(h5group, key, struct)
 
     @staticmethod
     def read_from_h5(h5group, key: str):
-        struct: PeaksManagerStructure = HDF5.StructureConverter.read_from_h5(
+        struct: PeaksManagerStructure = HDF5.StructureHandler.read_from_h5(
             h5group, key)
         manager = PeaksManager(struct.peaks)
         return manager

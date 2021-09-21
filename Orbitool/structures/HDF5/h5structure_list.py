@@ -1,7 +1,11 @@
-from typing import TypeVar, Type, Generic, List, Iterable, Generator, Any, Iterator
+from typing import (Any, Generator, Generic, Iterable, Iterator, List, Type,
+                    TypeVar)
+
 import h5py
+
+from ..base import get_handler_args, BaseStructure
 from .h5obj import H5Obj
-from .h5type_converters import StructureConverter
+
 
 T = TypeVar('T')
 
@@ -22,25 +26,30 @@ class StructureListView(Generic[T]):
 
     def h5_append(self, value: T):
         index = len(self.obj)
-        StructureConverter.write_to_h5(self.obj, str(index), value)
+        handler, args = get_handler_args(BaseStructure)
+        handler.write_to_h5(args, self.obj, str(index), value)
 
     def h5_extend(self, values: Iterable[T]):
+        handler, args = get_handler_args(BaseStructure)
         for index, value in enumerate(values, len(self.obj)):
-            StructureConverter.write_to_h5(self.obj, str(index), value)
+            handler.write_to_h5(args, self.obj, str(index), value)
 
     def __getitem__(self, index) -> T:
         if isinstance(index, Iterable):
             raise NotImplementedError()
-        return StructureConverter.read_from_h5(self.obj, str(index))
+        handler, args = get_handler_args(BaseStructure)
+        return handler.read_from_h5(args, self.obj, str(index))
 
     def __setitem__(self, index, value: T):
         if isinstance(index, Iterable):
             raise NotImplementedError()
-        StructureConverter.write_to_h5(self.obj, str(index), value)
+        handler, args = get_handler_args(BaseStructure)
+        handler.write_to_h5(args, self.obj, str(index), value)
 
     def __iter__(self) -> Generator[T, Any, Any]:
+        handler, args = get_handler_args(BaseStructure)
         for index in range(len(self.obj)):
-            yield StructureConverter.read_from_h5(self.obj, str(index))
+            yield handler.read_from_h5(args, self.obj, str(index))
 
     def __len__(self):
         return len(self.obj)

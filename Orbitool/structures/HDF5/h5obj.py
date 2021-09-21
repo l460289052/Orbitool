@@ -5,9 +5,8 @@ from typing import List, Type, TypeVar
 
 import h5py
 
-from ..base import BaseStructure
+from ..base import BaseStructure, get_handler_args
 from .h5datatable import TableConverter
-from .h5type_converters import StructureConverter
 
 T = TypeVar("T")
 
@@ -23,10 +22,12 @@ class H5Obj:
         return TableConverter.read_from_h5(self._obj, path, item_type)
 
     def write(self, path: str, value: BaseStructure):
-        StructureConverter.write_to_h5(self._obj, path, value)
+        handler, handler_args = get_handler_args(BaseStructure)
+        handler.write_to_h5(handler_args, self._obj, path, value)
 
     def read(self, path: str):
-        return StructureConverter.read_from_h5(self._obj, path)
+        handler, handler_args = get_handler_args(BaseStructure)
+        return handler.read_from_h5(handler_args, self._obj, path)
 
     def __contains__(self, path: str) -> bool:
         return path in self._obj
