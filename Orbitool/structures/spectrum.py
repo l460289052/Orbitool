@@ -10,12 +10,12 @@ from h5py import string_dtype
 
 from ..functions import spectrum
 from ..utils.formula import Formula
-from .base import BaseStructure, BaseTableItem, Field
+from .base import BaseStructure, BaseRowItem, Field
 from .HDF5 import AsciiLimit, Ndarray
 from .HDF5.h5datatable import BaseDatatableType
 
 
-class Peak(BaseTableItem):
+class Peak(BaseRowItem):
     item_name = "Peak"
     mz: Ndarray[float, -1]
     intensity: Ndarray[float, -1]
@@ -90,14 +90,14 @@ class Spectrum(BaseStructure):
     end_time: datetime
 
 
-class SpectrumInfo(BaseTableItem):
+class SpectrumInfo(BaseRowItem):
     item_name = "spectrum info"
 
     start_time: datetime
     end_time: datetime
 
 
-class MassListItem(BaseTableItem):
+class MassListItem(BaseRowItem):
     item_name = "MassList"
     position: float
     formulas: FormulaList = Field(default_factory=FormulaList)

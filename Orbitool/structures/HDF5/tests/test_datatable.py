@@ -4,12 +4,12 @@ from datetime import datetime
 import numpy as np
 from numpy import testing as nptest
 
-from ...base import BaseTableItem
+from ...base import BaseRowItem
 from ...HDF5 import H5File
 from ..h5datatable import TableConverter, AsciiLimit, Int32, Ndarray
 
 
-class TableItem(BaseTableItem):
+class TableItem(BaseRowItem):
     item_name = "test_item_name"
 
     int_test: int
@@ -36,7 +36,7 @@ def test_dt():
     assert item.dt_test == dt
 
 
-class AsciiItem(BaseTableItem):
+class AsciiItem(BaseRowItem):
     item_name = "test_ascii_item"
 
     int32: Int32
@@ -58,7 +58,7 @@ def test_ascii():
     assert item.ascii == "123321"
 
 
-class Ndarray1DItem(BaseTableItem):
+class Ndarray1DItem(BaseRowItem):
     item_name = "test_ndarray_1d"
 
     value: Ndarray[int, 10]
@@ -77,7 +77,7 @@ def test_ndarray_1d():
     nptest.assert_array_equal(range(10), item.value)
 
 
-class Ndarray1DLongItem(BaseTableItem):
+class Ndarray1DLongItem(BaseRowItem):
     item_name = "test_ndarray_1d_long"
 
     value: Ndarray[int, -1]
@@ -104,7 +104,7 @@ def test_ndarray_long():
     nptest.assert_array_equal(range(10000), item.value)
 
 
-class NdarrayHDItem(BaseTableItem):
+class NdarrayHDItem(BaseRowItem):
     item_name = "test_ndarray_hd"
 
     value: Ndarray[float, (50, 10, 2, 2, 1)]
@@ -123,7 +123,7 @@ def test_ndarray_hd():
     assert item.value.shape == (50, 10, 2, 2, 1)
 
 
-class NdarrayHDLongItem(BaseTableItem):
+class NdarrayHDLongItem(BaseRowItem):
     item_name = "test_ndarray_hd_long"
 
     value: Ndarray[float, (5, 10, 2, 2, -1)]

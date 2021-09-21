@@ -8,10 +8,10 @@ import numpy as np
 from ..functions.file import part_by_time_interval
 from ..utils.readers import ThermoFile
 from . import spectrum
-from .base import BaseStructure, BaseTableItem, Field
+from .base import BaseStructure, BaseRowItem, Field
 
 
-class Path(BaseTableItem):
+class Path(BaseRowItem):
     item_name = "Path"
 
     path: str

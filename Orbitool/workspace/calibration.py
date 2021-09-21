@@ -3,7 +3,7 @@ import math
 
 from ..functions.calibration import Ion, Calibrator, PolynomialRegressionFunc
 from ..utils.formula import Formula
-from ..structures.base import BaseStructure, BaseTableItem, Field
+from ..structures.base import BaseStructure, BaseRowItem, Field
 from ..structures.spectrum import Spectrum, SpectrumInfo
 from ..structures.HDF5 import StructureList
 from .base import Widget as BaseWidget

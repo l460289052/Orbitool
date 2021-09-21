@@ -5,7 +5,7 @@ from typing import Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
-from ..structures.base import BaseStructure, BaseTableItem
+from ..structures.base import BaseStructure, BaseRowItem
 from ..structures.HDF5 import H5File, H5Obj, Ndarray
 from .base import Widget
 from .calibration import Widget as CalibrationWidget

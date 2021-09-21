@@ -3,7 +3,7 @@ from datetime import date, datetime
 from ...base import *
 
 
-class AttrHandler(TypeHandler):
+class AttrHandler(StructureTypeHandler):
     @classmethod
     def write_to_h5(cls, args, h5group: Group, key: str, value):
         h5group.attrs[key] = value

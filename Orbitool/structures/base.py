@@ -5,6 +5,19 @@ from functools import lru_cache
 from h5py import Group
 
 
+@dataclass
+class Base:
+    def __setattr__(self, name: str, value) -> None:
+        typ = self.__dataclass_fields__[name].type
+
+        handler, args = get_handler_args(typ)
+        value = handler.validate(value, args)
+        super().__setattr__(name, value)
+
+    def __init_subclass__(cls) -> None:
+        return dataclass(cls)
+
+
 class TypeHandler:
     def __init__(self, args) -> None:
         if not isinstance(args, tuple):
@@ -23,6 +36,23 @@ class TypeHandler:
     def __hash__(self) -> int:
         return hash((type(self), self.args))
 
+
+# dataclass
+
+def get_default(field: Field):
+    if field.default is not MISSING:
+        return field.default
+    return field.default_factory()
+
+
+def field(default_factory=MISSING, default=MISSING):
+    assert (default is MISSING) ^ (default_factory is MISSING)
+    return Field(default, default_factory, True, True, None, True, None)
+
+# Base Structure
+
+
+class StructureTypeHandler(TypeHandler):
     @classmethod
     def validate(cls, value, args: tuple):
         return value
@@ -33,10 +63,10 @@ class TypeHandler:
     def read_from_h5(cls, args: tuple, h5group: Group, key: str): ...
 
 
-_type_handlers: Dict[Type, TypeHandler] = {}
+_type_handlers: Dict[Type, StructureTypeHandler] = {}
 
 
-def register_handler(typ, handler: Type[TypeHandler]):
+def register_handler(typ, handler: Type[StructureTypeHandler]):
     _type_handlers[typ] = handler
 
 
@@ -50,25 +80,6 @@ def get_handler_args(typ):
     elif isinstance(typ, TypeHandler):
         return type(typ), typ.args
     return _type_handlers.get(get_origin(typ) or typ, TypeHandler), get_args(typ)
-
-
-def get_default(field: Field):
-    if field.default is not MISSING:
-        return field.default
-    return field.default_factory()
-
-
-@dataclass
-class Base:
-    def __setattr__(self, name: str, value) -> None:
-        typ = self.__dataclass_fields__[name].type
-
-        handler, args = get_handler_args(typ)
-        value = handler.validate(value, args)
-        super().__setattr__(name, value)
-
-    def __init_subclass__(cls) -> None:
-        return dataclass(cls)
 
 
 class ChildTypeManager:
@@ -93,15 +104,6 @@ class ChildTypeManager:
 structures = ChildTypeManager()
 
 
-def name_field(name):
-    return Field(name, MISSING, False, True, None, True, None)
-
-
-def field(default_factory=MISSING, default=MISSING):
-    assert (default is MISSING) ^ (default_factory is MISSING)
-    return Field(default, default_factory, True, True, None, True, None)
-
-
 class BaseStructure(Base):
     h5_type = "Base"
 
@@ -111,13 +113,41 @@ class BaseStructure(Base):
         return cls
 
 
-items = ChildTypeManager()
+# Base Row Item
+row_items = ChildTypeManager()
 
 
-class BaseTableItem(Base):
-    item_name = "BaseItem"
+class BaseRowItem(Base):
+    item_name = "BaseRowItem"
 
     def __init_subclass__(cls) -> None:
         cls = super().__init_subclass__()
-        items.add_type(cls.item_name, cls)
+        row_items.add_type(cls.item_name, cls)
         return cls
+
+
+class RowDTypeHandler(TypeHandler):
+    @classmethod
+    def dtype(cls, args):
+        pass
+
+    @classmethod
+    def convert_to_h5(cls, args, value):
+        pass
+
+    @classmethod
+    def convert_from_h5(cls, args, value):
+        pass
+
+
+# # Base Column Item
+# col_items = ChildTypeManager()
+
+
+# class BaseColumn(Base):
+#     item_name = "BaseColumnItem"
+
+#     def __init_subclass__(cls) -> None:
+#         cls = super().__init_subclass__()
+#         col_items.add_type(cls.item_name, cls)
+#         return cls

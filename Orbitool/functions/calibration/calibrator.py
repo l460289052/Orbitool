@@ -6,12 +6,12 @@ from typing import List
 
 import numpy as np
 
-from ...structures.base import BaseStructure, BaseTableItem
+from ...structures.base import BaseStructure, BaseRowItem
 from ...structures.spectrum import Spectrum
 from ...utils.formula import Formula
 
 
-class Ion(BaseTableItem):
+class Ion(BaseRowItem):
     item_name = "calibration ion"
 
     shown_text: str

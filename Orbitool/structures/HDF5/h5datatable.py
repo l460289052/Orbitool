@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, Dict, List, Tuple, Type, TypeVar
 import numpy as np
 from h5py import Group, string_dtype, vlen_dtype
 
-from ..base import BaseTableItem, items
+from ..base import BaseRowItem, row_items
 
 
 @lru_cache(None)
-def get_dtype(item_type: BaseTableItem) -> Tuple[list, Dict[str, Type[Dtype]]]:
+def get_dtype(item_type: BaseRowItem) -> Tuple[list, Dict[str, Type[Dtype]]]:
     dtypes = []
     converter = {}
     for key, field in item_type.__fields__.items():

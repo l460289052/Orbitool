@@ -3,7 +3,7 @@ import numpy as np
 from .base import *
 
 
-class NdArray(TypeHandler, np.ndarray):
+class NdArray(StructureTypeHandler, np.ndarray):
     """
     NdArray[int]
     NdArray[int, (2, 3, -1)]

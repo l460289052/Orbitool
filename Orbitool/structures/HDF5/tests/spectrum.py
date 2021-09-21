@@ -2,7 +2,7 @@ from datetime import datetime
 
 import numpy as np
 
-from ...base import BaseStructure, dataclass, name_field
+from ...base import BaseStructure, dataclass
 from dataclasses import field as ff
 
 type_name = 'testSpectrum'

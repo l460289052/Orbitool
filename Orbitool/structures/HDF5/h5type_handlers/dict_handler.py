@@ -4,7 +4,7 @@ import numpy as np
 from .base import *
 
 
-class DictHandler(TypeHandler):
+class DictHandler(StructureTypeHandler):
     @classmethod
     def write_to_h5(cls, args: tuple, h5group: Group, key: str, value: dict):
         if key in h5group:

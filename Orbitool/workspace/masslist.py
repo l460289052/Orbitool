@@ -1,6 +1,6 @@
 from typing import List
 
-from ..structures.base import BaseStructure, BaseTableItem, Field
+from ..structures.base import BaseStructure, BaseRowItem, Field
 from ..structures.spectrum import MassListItem
 
 

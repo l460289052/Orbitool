@@ -41,7 +41,7 @@ py_dtypes = {
 T = TypeVar("T", Type[int], Type[float])
 
 
-class Array(TypeHandler, array.array):
+class Array(StructureTypeHandler, array.array):
     @overload
     def __class_getitem__(
         cls, typecode: str): ...

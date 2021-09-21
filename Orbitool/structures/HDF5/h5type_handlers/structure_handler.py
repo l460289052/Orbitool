@@ -5,7 +5,7 @@ from .attr_handler import AttrHandler
 H5_TYPE = "h5_type"
 
 
-class StructureHandler(TypeHandler):
+class StructureHandler(StructureTypeHandler):
     @classmethod
     def write_to_h5(cls, args, h5group: Group, key: str, value: BaseStructure):
         if key not in h5group:

@@ -4,12 +4,12 @@ import numpy as np
 
 from .. import get_config
 from ..utils.formula import Formula
-from ..structures.base import BaseStructure, BaseTableItem, Field
+from ..structures.base import BaseStructure, BaseRowItem, Field
 from ..structures.HDF5 import Ndarray
 from ..structures.spectrum import Spectrum
 
 
-class NoiseFormulaParameter(BaseTableItem):
+class NoiseFormulaParameter(BaseRowItem):
     item_name = "noise formula parameter"
     formula: Formula
     delta: float = 5

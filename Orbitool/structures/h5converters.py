@@ -8,7 +8,7 @@ from itertools import chain
 from ..utils.formula import Formula, ForceCalc, RestrictedCalc
 from . import HDF5
 from .HDF5 import BaseSingleConverter, TableConverter, StructureHandler, h5datatable
-from .base import BaseStructure, BaseTableItem
+from .base import BaseStructure, BaseRowItem
 
 
 class FormulaConverter(BaseSingleConverter):
@@ -33,7 +33,7 @@ class FormulaDatatableConverter(TableConverter):
         return Formula(value.decode('ascii'))
 
 
-class RestrictedCalcElementNumItem(BaseTableItem):
+class RestrictedCalcElementNumItem(BaseRowItem):
     item_name = "restriced cac formula num"
 
     element: h5datatable.AsciiLimit[10]
@@ -110,7 +110,7 @@ class RestrictedCalcConverter(BaseSingleConverter):
         return calc
 
 
-class ForceElementNumItem(BaseTableItem):
+class ForceElementNumItem(BaseRowItem):
     item_name = "force calc element num"
     ei_name: h5datatable.AsciiLimit[10]
     max_num: int

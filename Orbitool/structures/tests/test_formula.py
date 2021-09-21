@@ -4,7 +4,7 @@ import pytest
 from numpy import testing as nptest
 
 from .. import HDF5
-from ..base import BaseTableItem
+from ..base import BaseRowItem
 from ..spectrum import FormulaList
 
 from ...utils.formula import Formula
@@ -13,7 +13,7 @@ from ...utils.formula import Formula
 formula_list = [Formula('C7H8O2'), Formula('C3H3Ti-'), Formula('CC[13]H[2]')]
 
 
-class FormulaItem(BaseTableItem):
+class FormulaItem(BaseRowItem):
     item_name = "test_formula_item"
 
     formula: Formula
@@ -30,7 +30,7 @@ def test_formula():
         assert f1.formula == f2
 
 
-class FormulasItem(BaseTableItem):
+class FormulasItem(BaseRowItem):
     item_name = "test formulas item"
     formulas: FormulaList = []
 

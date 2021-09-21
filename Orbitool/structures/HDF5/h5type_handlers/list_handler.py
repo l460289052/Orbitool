@@ -6,7 +6,7 @@ import numpy as np
 from .base import *
 
 
-class ListHandler(TypeHandler, List):
+class ListHandler(StructureTypeHandler, List):
     @classmethod
     def write_to_h5(cls, args: tuple, h5group: Group, key: str, value):
         if key in h5group:
