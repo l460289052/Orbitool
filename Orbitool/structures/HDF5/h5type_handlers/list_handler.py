@@ -2,7 +2,6 @@ from typing import List
 from datetime import datetime
 
 import numpy as np
-from h5py import Group
 
 from .base import *
 

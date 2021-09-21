@@ -5,7 +5,6 @@ from ...HDF5 import H5File
 from ..h5type_handlers import Array
 
 
-@dataclass
 class SomeArray(BaseStructure):
     h5_type = "test some array"
     array_a: Array[int] = field(lambda: array("i"))

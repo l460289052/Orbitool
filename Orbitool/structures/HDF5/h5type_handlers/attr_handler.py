@@ -1,9 +1,6 @@
 from datetime import date, datetime
-from h5py import Group
 
-from ...base import (
-    BaseStructure, TypeHandler, get_handler_args,
-    register_handler, structures)
+from ...base import *
 
 
 class AttrHandler(TypeHandler):

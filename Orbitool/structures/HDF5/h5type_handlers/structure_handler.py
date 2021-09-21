@@ -1,9 +1,6 @@
-from h5py import Group
 
-from .base import (
-    BaseStructure, TypeHandler, get_default, get_handler_args,
-    register_handler, structures)
-from .attr_converter import AttrHandler
+from .base import *
+from .attr_handler import AttrHandler
 
 H5_TYPE = "h5_type"
 

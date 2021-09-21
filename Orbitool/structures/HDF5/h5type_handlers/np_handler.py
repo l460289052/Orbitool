@@ -1,7 +1,6 @@
 import numpy as np
-from h5py import Group
 
-from .base import TypeHandler, register_handler
+from .base import *
 
 
 class NdArray(TypeHandler, np.ndarray):

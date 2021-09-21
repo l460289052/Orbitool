@@ -2,9 +2,8 @@ import array
 from typing import overload, Union, Type, TypeVar
 
 import numpy as np
-from h5py import Group
 
-from .base import TypeHandler, register_handler
+from .base import *
 
 array_dtypes = {
     "b": np.int8,
