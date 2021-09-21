@@ -10,16 +10,20 @@ class Base:
     def __setattr__(self, name: str, value) -> None:
         typ = self.__dataclass_fields__[name].type
 
-        handler, args = get_handler_args(typ)
-        value = handler.validate(value, args)
+        handler = get_handler(typ)
+        value = handler.validate(value)
         super().__setattr__(name, value)
 
     def __init_subclass__(cls) -> None:
         return dataclass(cls)
 
+    @classmethod
+    def get_origin(cls):
+        pass
+
 
 class TypeHandler:
-    def __init__(self, args) -> None:
+    def __init__(self, args=()) -> None:
         if not isinstance(args, tuple):
             args = (args,)
         self.args = args
@@ -36,50 +40,27 @@ class TypeHandler:
     def __hash__(self) -> int:
         return hash((type(self), self.args))
 
-
-# dataclass
-
-def get_default(field: Field):
-    if field.default is not MISSING:
-        return field.default
-    return field.default_factory()
-
-
-def field(default_factory=MISSING, default=MISSING):
-    assert (default is MISSING) ^ (default_factory is MISSING)
-    return Field(default, default_factory, True, True, None, True, None)
-
-# Base Structure
-
-
-class StructureTypeHandler(TypeHandler):
-    @classmethod
-    def validate(cls, value, args: tuple):
+    def validate(self, value):
         return value
 
-    @classmethod
-    def write_to_h5(cls, args: tuple, h5group: Group, key: str, value): ...
-    @classmethod
-    def read_from_h5(cls, args: tuple, h5group: Group, key: str): ...
+
+_type_handlers: Dict[Type, TypeHandler] = {}
 
 
-_type_handlers: Dict[Type, StructureTypeHandler] = {}
-
-
-def register_handler(typ, handler: Type[StructureTypeHandler]):
+def register_handler(typ, handler: Type[TypeHandler]):
     _type_handlers[typ] = handler
 
 
 @lru_cache(None)
-def get_handler_args(typ):
+def get_handler(typ) -> TypeHandler:
     if isinstance(typ, type):
-        if issubclass(typ, BaseStructure):
-            return _type_handlers.get(BaseStructure), ()
+        if issubclass(typ, Base):
+            return _type_handlers.get(typ.get_origin())()
         if issubclass(typ, TypeHandler):
-            return typ, ()
+            return typ()
     elif isinstance(typ, TypeHandler):
-        return type(typ), typ.args
-    return _type_handlers.get(get_origin(typ) or typ, TypeHandler), get_args(typ)
+        return typ
+    return _type_handlers.get(get_origin(typ) or typ, TypeHandler)(get_args(typ))
 
 
 class ChildTypeManager:
@@ -101,43 +82,17 @@ class ChildTypeManager:
         return self.names.get(typ, default)
 
 
-structures = ChildTypeManager()
+def get_default(field: Field):
+    if field.default is not MISSING:
+        return field.default
+    if field.default_factory is not MISSING:
+        return field.default_factory()
+    return field.type()
 
 
-class BaseStructure(Base):
-    h5_type = "Base"
-
-    def __init_subclass__(cls) -> None:
-        cls = super().__init_subclass__()
-        structures.add_type(cls.h5_type, cls)
-        return cls
-
-
-# Base Row Item
-row_items = ChildTypeManager()
-
-
-class BaseRowItem(Base):
-    item_name = "BaseRowItem"
-
-    def __init_subclass__(cls) -> None:
-        cls = super().__init_subclass__()
-        row_items.add_type(cls.item_name, cls)
-        return cls
-
-
-class RowDTypeHandler(TypeHandler):
-    @classmethod
-    def dtype(cls, args):
-        pass
-
-    @classmethod
-    def convert_to_h5(cls, args, value):
-        pass
-
-    @classmethod
-    def convert_from_h5(cls, args, value):
-        pass
+def field(default_factory=MISSING, default=MISSING):
+    assert (default is MISSING) ^ (default_factory is MISSING)
+    return Field(default, default_factory, True, True, None, True, None)
 
 
 # # Base Column Item

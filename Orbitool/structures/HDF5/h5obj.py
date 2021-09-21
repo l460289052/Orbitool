@@ -5,8 +5,9 @@ from typing import List, Type, TypeVar
 
 import h5py
 
-from ..base import BaseStructure, get_handler_args
-from .h5datatable import TableConverter
+from ..base import get_handler
+from ..base_structure import BaseStructure, StructureTypeHandler
+from .h5type_handlers import Row
 
 T = TypeVar("T")
 
@@ -16,18 +17,20 @@ class H5Obj:
         self._obj: h5py.Group = obj
 
     def write_table(self, path: str, item_type: Type[T], values: List[T]):
-        TableConverter.write_to_h5(self._obj, path, item_type, values)
+        handler: StructureTypeHandler = get_handler(Row[item_type])
+        handler.write_to_h5(self._obj, path, values)
 
     def read_table(self, path: str, item_type: Type[T]) -> List[T]:
-        return TableConverter.read_from_h5(self._obj, path, item_type)
+        handler: StructureTypeHandler = get_handler(Row[item_type])
+        return handler.read_from_h5(self._obj, path)
 
     def write(self, path: str, value: BaseStructure):
-        handler, handler_args = get_handler_args(BaseStructure)
-        handler.write_to_h5(handler_args, self._obj, path, value)
+        handler: StructureTypeHandler = get_handler(BaseStructure)
+        handler.write_to_h5(self._obj, path, value)
 
     def read(self, path: str):
-        handler, handler_args = get_handler_args(BaseStructure)
-        return handler.read_from_h5(handler_args, self._obj, path)
+        handler: StructureTypeHandler = get_handler(BaseStructure)
+        return handler.read_from_h5(self._obj, path)
 
     def __contains__(self, path: str) -> bool:
         return path in self._obj

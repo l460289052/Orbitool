@@ -3,7 +3,8 @@ from typing import (Any, Generator, Generic, Iterable, Iterator, List, Type,
 
 import h5py
 
-from ..base import get_handler_args, BaseStructure
+from ..base import get_handler
+from ..base_structure import BaseStructure, StructureTypeHandler
 from .h5obj import H5Obj
 
 
@@ -26,36 +27,40 @@ class StructureListView(Generic[T]):
 
     def h5_append(self, value: T):
         index = len(self.obj)
-        handler, args = get_handler_args(BaseStructure)
-        handler.write_to_h5(args, self.obj, str(index), value)
+        handler: StructureTypeHandler = get_handler(BaseStructure)
+        handler.write_to_h5(self.obj, str(index), value)
 
     def h5_extend(self, values: Iterable[T]):
-        handler, args = get_handler_args(BaseStructure)
+        handler: StructureTypeHandler = get_handler(BaseStructure)
         for index, value in enumerate(values, len(self.obj)):
-            handler.write_to_h5(args, self.obj, str(index), value)
+            handler.write_to_h5(self.obj, str(index), value)
 
     def __getitem__(self, index) -> T:
         if isinstance(index, Iterable):
             raise NotImplementedError()
-        handler, args = get_handler_args(BaseStructure)
-        return handler.read_from_h5(args, self.obj, str(index))
+        handler: StructureTypeHandler = get_handler(BaseStructure)
+        return handler.read_from_h5(self.obj, str(index))
 
     def __setitem__(self, index, value: T):
         if isinstance(index, Iterable):
             raise NotImplementedError()
-        handler, args = get_handler_args(BaseStructure)
-        handler.write_to_h5(args, self.obj, str(index), value)
+        handler: StructureTypeHandler = get_handler(BaseStructure)
+        handler.write_to_h5(self.obj, str(index), value)
 
     def __iter__(self) -> Generator[T, Any, Any]:
-        handler, args = get_handler_args(BaseStructure)
+        handler: StructureTypeHandler = get_handler(BaseStructure)
         for index in range(len(self.obj)):
-            yield handler.read_from_h5(args, self.obj, str(index))
+            yield handler.read_from_h5(self.obj, str(index))
 
     def __len__(self):
         return len(self.obj)
 
 
 class StructureList(Generic[T]):
+    """
+        class FileList(H5File):
+            spectrum_list = StructureList(Spectrum)
+    """
     def __init__(self, item_type: Type[T]):
         self.item_type = item_type
 

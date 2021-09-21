@@ -1,53 +1,61 @@
-from typing import Tuple, Dict, Type
+from __future__ import annotations
+from typing import Tuple, Dict, Type, List, TypeVar,TYPE_CHECKING
 from functools import lru_cache
 from .base import *
 
 
 @lru_cache(None)
-def get_dtype(item_type: BaseTableItem) -> Tuple[list, Dict[str, Type[Dtype]]]:
+def get_dtype(item_type: BaseRowItem) -> Tuple[list, Dict[str, RowDTypeHandler]]:
     dtypes = []
-    converter = {}
-    for key, field in item_type.__fields__.items():
-        if key != "item_name":
-            dtype = type_dtype.get(field.outer_type_, field.outer_type_)
+    handlers = {}
+    for key, field in item_type.__dataclass_fields__.items():
+        handler: RowDTypeHandler = get_handler(field.type)
+        assert isinstance(handler, RowDTypeHandler)
+        dtype = handler.dtype()
 
-            if not issubclass(dtype if isinstance(dtype, type) else type(dtype), Dtype):
-                raise TypeError(
-                    f'{items.get_name(item_type)} member "{key}" type "{dtype}" should be registered or as a subclass of Dtype')
-            if not hasattr(dtype, "dtype"):
-                raise TypeError(
-                    f"Maybe you should use {dtype}[some argument] instead of {dtype}")
-            if isinstance(dtype.dtype, tuple):
-                dtypes.append((key, *dtype.dtype))  # name, dtype, shape
-            else:
-                dtypes.append((key, dtype.dtype))  # name, dtype
-            converter[key] = dtype
-    return dtypes, converter
+        if isinstance(dtype, tuple):
+            dtypes.append((key, *dtype))  # name, dtype, shape
+        else:
+            dtypes.append((key, dtype))  # name, dtype
+        handlers[key] = handler
+    return dtypes, handlers
 
 
-class RowHandler(TypeHandler):
-    @classmethod
-    def write_to_h5(cls, args: tuple, h5group: Group, key: str, value):
-        if key in h5group:
-            del h5group[key]
-        dtype, converter = get_dtype(item_type)
-        dataset = h5group.create_dataset(
-            key, (len(values),), dtype, compression="gzip", compression_opts=1)
-        rows = [tuple(conv.convert_to_h5(getattr(value, k))
-                      for k, conv in converter.items()) for value in values]
+T = TypeVar("T")
 
-        dataset[:] = rows
-        dataset.attrs["item_name"] = item_type.__fields__["item_name"].default
+if TYPE_CHECKING:
+    class Row(StructureTypeHandler, List[T]):
+        pass
+else:
+    class Row(StructureTypeHandler):
+        def __init__(self, args) -> None:
+            super().__init__(args=args)
+            self.inner_type: BaseRowItem = self.args[0]
 
-    @classmethod
-    def read_from_h5(cls, args: tuple, h5group: Group, key: str):
-        dtype, converter = get_dtype(item_type)
-        dataset = h5group[key]
+        def __call__(self):
+            return []
 
-        rows = dataset[()]
-        keys = rows.dtype.names
-        rets = []
-        for row in rows:
-            rets.append(item_type(**{key: conv.convert_from_h5(value) for value, key in zip(
-                row, keys) if (conv := converter.get(key, None)) is not None}))
-        return rets
+        def write_to_h5(self, h5group: Group, key: str, value):
+            if key in h5group:
+                del h5group[key]
+            inner_type = self.inner_type
+            dtype, handlers = get_dtype(inner_type)
+            dataset = h5group.create_dataset(
+                key, (len(value),), dtype, compression="gzip", compression_opts=1)
+            rows = [tuple(handler.convert_to_h5(getattr(v, k))
+                        for k, handler in handlers.items()) for v in value]
+
+            dataset[:] = rows
+            dataset.attrs["item_name"] = BaseRowItem.item_name
+
+        def read_from_h5(self, h5group: Group, key: str):
+            inner_type = self.inner_type
+            dtype, handlers = get_dtype(inner_type)
+            dataset = h5group[key]
+
+            rows = dataset[()]
+            keys = rows.dtype.names
+            return [inner_type(
+                **{key: handler.convert_from_h5(v) for key, v in zip(keys, row)
+                    if (handler := handlers.get(key, None)) is not None
+                }) for row in rows]

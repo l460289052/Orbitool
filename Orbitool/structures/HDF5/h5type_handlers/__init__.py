@@ -1,14 +1,16 @@
-from .attr_handler import AttrHandler
-from . import list_handler, np_handler, row_handler, structure_handler
+from . import list_handler, np_handler, simple_handler, structure_handler
 from .array_handler import Array
-from ...base import register_handler, BaseStructure
+from .base import BaseStructure, register_handler
+from .row_handler import Row
+from .simple_handler import AsciiLimit, AttrHandler
+from .np_handler import NdArray
 
-register_handler(bool, attr_handler.BoolHandler)
-register_handler(int, attr_handler.IntHandler)
-register_handler(str, attr_handler.StrHandler)
-register_handler(float, attr_handler.FloatHandler)
-register_handler(attr_handler.date, attr_handler.DateConverter)
-register_handler(attr_handler.datetime, attr_handler.DatetimeConverter)
+register_handler(bool, simple_handler.BoolHandler)
+register_handler(int, simple_handler.IntHandler)
+register_handler(str, simple_handler.StrHandler)
+register_handler(float, simple_handler.FloatHandler)
+register_handler(simple_handler.date, simple_handler.DateConverter)
+register_handler(simple_handler.datetime, simple_handler.DatetimeConverter)
 
 register_handler(list, list_handler.ListHandler)
 

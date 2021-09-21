@@ -6,7 +6,8 @@ import numpy as np
 import pytest
 from numpy import testing as nptest
 
-from ...base import BaseStructure, field
+from ...base import  field
+from ...base_structure import BaseStructure
 from ...HDF5 import H5File
 from .spectrum import Spectrum
 

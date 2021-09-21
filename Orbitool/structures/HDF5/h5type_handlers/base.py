@@ -1,5 +1,5 @@
 from h5py import Group
 
-from ...base import (BaseRowItem, BaseStructure, StructureTypeHandler,
-                     RowDTypeHandler, get_default, get_handler_args,
-                     register_handler, structures)
+from ...base import get_default, register_handler, get_handler
+from ...base_row import BaseRowItem, RowDTypeHandler, row_items
+from ...base_structure import BaseStructure, StructureTypeHandler, structures

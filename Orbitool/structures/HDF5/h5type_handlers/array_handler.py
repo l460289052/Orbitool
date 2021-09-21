@@ -1,5 +1,5 @@
 import array
-from typing import overload, Union, Type, TypeVar
+from typing import overload, Union, Type, TypeVar, TYPE_CHECKING
 
 import numpy as np
 
@@ -41,26 +41,27 @@ py_dtypes = {
 T = TypeVar("T", Type[int], Type[float])
 
 
-class Array(StructureTypeHandler, array.array):
-    @overload
-    def __class_getitem__(
-        cls, typecode: str): ...
+if TYPE_CHECKING:
+    class Array(StructureTypeHandler, array.array):
+        @overload
+        def __class_getitem__(
+            cls, typecode: str): ...
 
-    @overload
-    def __class_getitem__(cls, type: T) -> Type[array.array]: ...
+        @overload
+        def __class_getitem__(cls, type: T) -> Type[array.array[T]]: ...
+else:
+    class Array(StructureTypeHandler):
+        def __init__(self, args) -> None:
+            super().__init__(py_dtypes.get(args, args))
+            self.typecode = self.args[0]
 
-    def __class_getitem__(cls, args):
-        return super().__class_getitem__(py_dtypes.get(args, args))
+        def __call__(self, value):
+            return array.array(self.args[0], value)
 
-    def __call__(self, value):
-        return array.array(self.args[0], value)
+        def write_to_h5(self, h5group: Group, key: str, value):
+            h5group.create_dataset(
+                key, data=value, dtype=array_dtypes[self.typecode], compression="gzip", compression_opts=1)
 
-    @classmethod
-    def write_to_h5(cls, args: tuple, h5group: Group, key: str, value):
-        h5group.create_dataset(
-            key, data=value, dtype=array_dtypes[args[0]], compression="gzip", compression_opts=1)
-
-    @classmethod
-    def read_from_h5(cls, args: tuple, h5group: Group, key: str):
-        h5obj = h5group[key]
-        return array.array(args[0], h5obj[()])
+        def read_from_h5(self, h5group: Group, key: str):
+            h5obj = h5group[key]
+            return array.array(self.typecode, h5obj[()])

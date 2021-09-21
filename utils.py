@@ -8,7 +8,7 @@ if __name__ == "__main__":
     pyuic_parser = subparsers.add_parser('pyuic')
     pyuic_parser.add_argument("--clear", action="store_true")
     count_parser = subparsers.add_parser('count')
-    count_parser.add_argument("root", type=str, default="default")
+    count_parser.add_argument("root", type=str, nargs='?', default="default")
     count_parser.add_argument(
         "--count-blank", action="store_true", dest="count_blank")
     setup_parser = subparsers.add_parser('setup')

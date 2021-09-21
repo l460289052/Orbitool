@@ -5,25 +5,27 @@ from .base import *
 
 
 class DictHandler(StructureTypeHandler):
-    @classmethod
-    def write_to_h5(cls, args: tuple, h5group: Group, key: str, value: dict):
+    def __init__(self, args) -> None:
+        super().__init__(args=args)
+        self.key_type = self.args[0]
+        self.inner_type = self.args[1]
+
+    def write_to_h5(self, h5group: Group, key: str, value):
         if key in h5group:
             del h5group[key]
         group = h5group.create_group(key)
-        inner_type = args[1]
-        handler, handler_args = get_handler_args(inner_type)
+        inner_type = self.inner_type
+        handler: StructureTypeHandler = get_handler(inner_type)
         for index, v in enumerate(value.values()):
-            handler.write_to_h5(handler_args, group, str(index), v)
+            handler.write_to_h5(group, str(index), v)
         group.attrs["indexes"] = list(value.keys())
 
-    @classmethod
-    def read_from_h5(cls, args: tuple, h5group: Group, key: str):
-        rets = {}
-        key_type, inner_type = args
+    def read_from_h5(self, h5group: Group, key: str):
+        key_type, inner_type = self.key_type, self.inner_type
         group: Group = h5group[key]
         keys = group.attrs["indexes"]
-        handler, handler_args = get_handler_args(inner_type)
-        return {key_type(key): handler.read_from_h5(handler_args, group, str(index)) for index, key in enumerate(keys)}
+        handler: StructureTypeHandler = get_handler(inner_type)
+        return {key_type(key): handler.read_from_h5(group, str(index)) for index, key in enumerate(keys)}
 
 
 register_handler(dict, DictHandler)
