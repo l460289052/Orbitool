@@ -5,7 +5,8 @@ from typing import Any, Dict, Generic, Iterable, Type, TypeVar
 
 from h5py import Group
 
-from ..structures.HDF5 import BaseSingleConverter, H5Obj, register_converter
+from ..structures import BaseStructure, register_handler, StructureTypeHandler, get_handler
+from ..structures.HDF5 import H5Obj
 
 T = TypeVar("T")
 
@@ -15,11 +16,13 @@ class Widget(H5Obj, Generic[T]):
         super().__init__(obj)
         self._info_class = info_class
         self.info: T = self.read("info") if "info" in self else info_class()
-        self.ui_state: UiState = UiStateConverter.read_from_h5(obj, "ui_state")
+        handler: StructureTypeHandler = get_handler(UiState)
+        self.ui_state: UiState = handler.read_from_h5(obj, "ui_state")
 
     def save(self):
         self.write("info", self.info)
-        UiStateConverter.write_to_h5(self._obj, "ui_state", self.ui_state)
+        handler: StructureTypeHandler = get_handler(UiState)
+        handler.write_to_h5(self._obj, "ui_state", self.ui_state)
 
 
 class UiNameGetter:
@@ -78,17 +81,15 @@ class UiState:
                 state_handlers[type(o)].set(o, state)
 
 
-class UiStateConverter(BaseSingleConverter):
-    @staticmethod
-    def read_from_h5(h5group: Group, key: str):
+class UiStateHandler(StructureTypeHandler):
+    def read_from_h5(self, h5group: Group, key: str):
         if key in h5group:
             states = dict(h5group[key].attrs.items())
         else:
             states = {}
         return UiState(states)
 
-    @staticmethod
-    def write_to_h5(h5group: Group, key: str, value: UiState):
+    def write_to_h5(self, h5group: Group, key: str, value: UiState):
         if key in h5group:
             del h5group[key]
         group = h5group.create_group(key)
@@ -96,7 +97,7 @@ class UiStateConverter(BaseSingleConverter):
             group.attrs[key] = state
 
 
-register_converter(UiState, UiStateConverter)
+register_handler(UiState, UiStateHandler)
 
 
 class BaseStateHandler:

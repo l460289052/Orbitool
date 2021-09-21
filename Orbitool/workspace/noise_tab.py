@@ -4,8 +4,8 @@ import numpy as np
 
 from .. import get_config
 from ..utils.formula import Formula
-from ..structures.base import BaseStructure, BaseRowItem, Field
-from ..structures.HDF5 import Ndarray
+from ..structures import BaseStructure, BaseRowItem, field, Row
+from ..structures.HDF5 import NdArray
 from ..structures.spectrum import Spectrum
 
 
@@ -16,8 +16,7 @@ class NoiseFormulaParameter(BaseRowItem):
 
     useable: bool = True
     selected: bool = True
-    param: Ndarray[float, (2, 3)] = Field(
-        default_factory=lambda: np.zeros((2, 3), float))
+    param: NdArray[float, (2, 3)] = field(lambda: np.zeros((2, 3), float))
 
 
 def default_formula_parameter():
@@ -33,8 +32,7 @@ class NoiseGeneralSetting(BaseStructure):
     n_sigma: float = 0
     subtract: float = True
 
-    noise_formulas: List[NoiseFormulaParameter] = Field(
-        default_factory=default_formula_parameter)
+    noise_formulas: Row[NoiseFormulaParameter] = field(list)
     params_inited: bool = False
 
     spectrum_dependent: bool = True
@@ -73,10 +71,8 @@ class NoiseTabInfo(BaseStructure):
     h5_type = "noise tab"
 
     skip: bool = False
-    current_spectrum: Optional[Spectrum] = None
+    current_spectrum: Spectrum = None
 
-    general_setting: NoiseGeneralSetting = Field(
-        default_factory=NoiseGeneralSetting)
+    general_setting: NoiseGeneralSetting = field(NoiseGeneralSetting)
 
-    general_result: NoiseGeneralResult = Field(
-        default_factory=NoiseGeneralResult)
+    general_result: NoiseGeneralResult = field(NoiseGeneralResult)

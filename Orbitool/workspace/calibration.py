@@ -3,7 +3,7 @@ import math
 
 from ..functions.calibration import Ion, Calibrator, PolynomialRegressionFunc
 from ..utils.formula import Formula
-from ..structures.base import BaseStructure, BaseRowItem, Field
+from ..structures import BaseStructure, BaseRowItem, field, Row
 from ..structures.spectrum import Spectrum, SpectrumInfo
 from ..structures.HDF5 import StructureList
 from .base import Widget as BaseWidget
@@ -21,11 +21,10 @@ class CalibratorInfo(BaseStructure):
     skip: bool = False
 
     rtol: float = math.inf
-    ions: List[Ion] = Field(default_factory=default_ions)
-    calibrators: Dict[str, Calibrator] = Field(default_factory=dict)
-    poly_funcs: Dict[str, PolynomialRegressionFunc] = Field(
-        default_factory=dict)
-    calibrated_spectrum_infos: List[SpectrumInfo] = Field(default_factory=list)
+    ions: Row[Ion] = field(default_ions)
+    calibrators: Dict[str, Calibrator] = field(dict)
+    poly_funcs: Dict[str, PolynomialRegressionFunc] = field(dict)
+    calibrated_spectrum_infos: Row[SpectrumInfo] = field(list)
 
     def add_ions(self, ions: List[str]):
         s = {ion.formula for ion in self.ions}

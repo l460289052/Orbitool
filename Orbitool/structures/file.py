@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from datetime import datetime, timedelta
 from typing import Dict, Iterable, List, Tuple, Union
 
@@ -8,7 +6,10 @@ import numpy as np
 from ..functions.file import part_by_time_interval
 from ..utils.readers import ThermoFile
 from . import spectrum
-from .base import BaseStructure, BaseRowItem, Field
+from .base import field
+from .base_structure import BaseStructure
+from .base_row import BaseRowItem
+from .HDF5 import Row
 
 
 class Path(BaseRowItem):
@@ -26,7 +27,7 @@ PATH_HDF5 = "HDF5"
 
 class PathList(BaseStructure):
     h5_type = "PathList"
-    paths: List[Path] = Field(default_factory=list)
+    paths: Row[Path] = field(list)
 
     def _crossed(self, start: datetime, end: datetime) -> Tuple[bool, str]:
         for path in self.paths:
@@ -73,7 +74,7 @@ class PathList(BaseStructure):
         for index in indexes:
             del self.paths[index]
 
-    def subList(self, indexes: Union[int, Iterable[int]]) -> PathList:
+    def subList(self, indexes: Union[int, Iterable[int]]):
         if isinstance(indexes, int):
             indexes = (indexes,)
         indexes = np.unique(indexes)

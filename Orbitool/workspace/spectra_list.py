@@ -1,18 +1,9 @@
 from array import array
-from datetime import datetime
-from typing import List, Optional
-
-import numpy as np
-
-from ..structures.base import BaseStructure, Field
-from ..structures.file import FileSpectrumInfo
+from ..structures import BaseStructure, field
+from ..structures.HDF5 import Array
 
 
 class SpectraListInfo(BaseStructure):
     h5_type = "spectra list info"
 
-    shown_indexes: List[int] = Field(default_factory=list)
-    shown_indexes = array('i')
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    shown_indexes: Array(int) = field(default_factory=lambda: array('i'))

@@ -1,24 +1,24 @@
-from __future__ import annotations
-
 from datetime import datetime
 from enum import Enum
 from functools import cached_property
 from typing import TYPE_CHECKING, Iterable, List
 
 import numpy as np
-from h5py import string_dtype
+from h5py import Group
 
 from ..functions import spectrum
-from ..utils.formula import Formula
-from .base import BaseStructure, BaseRowItem, Field
-from .HDF5 import AsciiLimit, Ndarray
-from .HDF5.h5datatable import BaseDatatableType
+from ..utils.formula import Formula, FormulaList
+from .base import field
+from .base_row import BaseRowItem, RowDTypeHandler
+from .base_structure import BaseStructure
+from .HDF5 import AsciiLimit, NdArray
+from .HDF5.h5type_handlers.simple_handler import StrHandler
 
 
 class Peak(BaseRowItem):
     item_name = "Peak"
-    mz: Ndarray[float, -1]
-    intensity: Ndarray[float, -1]
+    mz: NdArray[float, -1]
+    intensity: NdArray[float, -1]
 
     @cached_property
     def maxIntensity(self):
@@ -33,36 +33,6 @@ class Peak(BaseRowItem):
         return np.where(self.isPeak)[0]
 
 
-if TYPE_CHECKING:
-    class FormulaList(List[Formula], BaseDatatableType):
-        dtype = string_dtype('utf-8')
-else:
-    class FormulaList(list, BaseDatatableType):
-        dtype = string_dtype('utf-8')
-
-        def __init__(self, value: Iterable = None):
-            if value is None:
-                super().__init__()
-            else:
-                value = [s if isinstance(s, Formula) else Formula(s)
-                         for s in value]
-                super().__init__(value)
-
-        @classmethod
-        def validate(cls, v):
-            return v
-
-        @staticmethod
-        def convert_to_h5(value: FormulaList):
-            return ','.join(str(f) for f in value)
-
-        @staticmethod
-        def convert_from_h5(value: str):
-            if isinstance(value, bytes):
-                value = value.decode()
-            return [Formula(s) for s in value.split(',') if s.strip()]
-
-
 class PeakTags(str, Enum):
     Noise = 'N'
     Done = 'D'
@@ -71,13 +41,13 @@ class PeakTags(str, Enum):
 
 class FittedPeak(Peak):
     item_name = "FittedPeak"
-    fitted_param: Ndarray[float, -1]
+    fitted_param: NdArray[float, -1]
     peak_position: float
     peak_intensity: float
     area: float
 
-    tags: str = ""
-    formulas: FormulaList = Field(default_factory=list)
+    tags: str
+    formulas: FormulaList = field(list)
 
 
 class Spectrum(BaseStructure):
@@ -100,4 +70,4 @@ class SpectrumInfo(BaseRowItem):
 class MassListItem(BaseRowItem):
     item_name = "MassList"
     position: float
-    formulas: FormulaList = Field(default_factory=FormulaList)
+    formulas: FormulaList = field(list)

@@ -28,7 +28,7 @@ if TYPE_CHECKING:
         pass
 else:
     class Row(StructureTypeHandler):
-        def __init__(self, args) -> None:
+        def __init__(self, args=()) -> None:
             super().__init__(args=args)
             self.inner_type: BaseRowItem = self.args[0]
 

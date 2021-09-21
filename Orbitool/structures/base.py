@@ -11,7 +11,8 @@ class Base:
         typ = self.__dataclass_fields__[name].type
 
         handler = get_handler(typ)
-        value = handler.validate(value)
+        if value is not None:
+            value = handler.validate(value)
         super().__setattr__(name, value)
 
     def __init_subclass__(cls) -> None:
@@ -31,14 +32,15 @@ class TypeHandler:
     def __class_getitem__(cls, args):
         return cls(args)
 
-    def __call__(self, *args, **kwds):
-        pass
-
     def __eq__(self, o: object) -> bool:
         return type(self) == type(o) and self.args == o.args
 
     def __hash__(self) -> int:
         return hash((type(self), self.args))
+
+    # need to implement
+    def __call__(self, *args, **kwds):
+        pass
 
     def validate(self, value):
         return value
@@ -55,12 +57,15 @@ def register_handler(typ, handler: Type[TypeHandler]):
 def get_handler(typ) -> TypeHandler:
     if isinstance(typ, type):
         if issubclass(typ, Base):
-            return _type_handlers.get(typ.get_origin())()
+            return _type_handlers.get(typ.get_origin())(typ)
         if issubclass(typ, TypeHandler):
             return typ()
     elif isinstance(typ, TypeHandler):
         return typ
-    return _type_handlers.get(get_origin(typ) or typ, TypeHandler)(get_args(typ))
+    _typ = get_origin(typ) or typ
+    handler = _type_handlers.get(_typ, None)
+    assert handler is not None, f"Please register {str(typ)}"
+    return handler(get_args(typ))
 
 
 class ChildTypeManager:

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from numpy import testing as nptest
 
-from ...base import  field
+from ...base import field
 from ...base_structure import BaseStructure
 from ...HDF5 import H5File
 from .spectrum import Spectrum
@@ -72,3 +72,14 @@ def test_some_list_a():
     some_list: SomeList = f.read("list")
     assert some_list.value_a == list(range(1000))
     assert some_list.value_b == [i / 10. for i in range(5)]
+
+
+def test_validator():
+    class Item(BaseStructure):
+        h5_type = "tttest"
+        value: int
+
+    f = H5File()
+    f.write("item", Item("123"))
+    item: Item = f.read("item")
+    assert item.value == 123

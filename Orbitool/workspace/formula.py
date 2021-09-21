@@ -1,6 +1,5 @@
-
 from ..utils.formula import Formula, ForceCalc, RestrictedCalc
-from ..structures.base import BaseStructure, Field
+from ..structures import BaseStructure, field
 
 
 def RestrictedCalcFactory():
@@ -29,9 +28,8 @@ class FormulaInfo(BaseStructure):
     mz_max: float = 750
     rtol: float = 1e-6
 
-    restricted_calc: RestrictedCalc = Field(
-        default_factory=RestrictedCalcFactory)
-    force_calc: ForceCalc = Field(default_factory=ForceCalcFactory)
+    restricted_calc: RestrictedCalc = field(RestrictedCalcFactory)
+    force_calc: ForceCalc = field(ForceCalcFactory)
 
     def restricted_calc_get(self, M: float):
         return self.restricted_calc.get(M, self.base_group)

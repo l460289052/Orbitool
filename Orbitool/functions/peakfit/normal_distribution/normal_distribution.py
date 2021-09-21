@@ -1,4 +1,3 @@
-from __future__ import annotations
 import math
 from typing import List
 
@@ -51,7 +50,7 @@ class NormalDistributionFunc(BaseFunc):
         self.peak_fit_res = res
 
     @classmethod
-    def Factory_FromParams(cls, params: List[tuple]) -> NormalDistributionFunc:
+    def Factory_FromParams(cls, params: List[tuple]):
         params = np.array(params, dtype=np.float)
         peak_position = params[:, 1]
         peak_sigma = params[:, 2]

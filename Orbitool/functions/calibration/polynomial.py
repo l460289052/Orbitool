@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.polynomial import polynomial
-from ...structures.base import BaseStructure
+from ...structures import BaseStructure
 
 
 class PolynomialRegressionFunc(BaseStructure):

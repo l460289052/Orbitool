@@ -11,6 +11,9 @@ class BaseRowItem(Base):
         row_items.add_type(cls.item_name, cls)
         return cls
 
+    @classmethod
+    def get_origin(cls):
+        return BaseRowItem
 
 class RowDTypeHandler(TypeHandler):
     def dtype(self):

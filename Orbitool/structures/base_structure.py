@@ -14,7 +14,7 @@ structures = ChildTypeManager()
 
 
 class BaseStructure(Base):
-    h5_type = "Base"
+    h5_type = "base"
 
     def __init_subclass__(cls) -> None:
         cls = super().__init_subclass__()
@@ -24,3 +24,5 @@ class BaseStructure(Base):
     @classmethod
     def get_origin(cls):
         return BaseStructure
+
+BaseStructure.__init_subclass__()

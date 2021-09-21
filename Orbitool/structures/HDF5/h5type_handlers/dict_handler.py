@@ -26,6 +26,3 @@ class DictHandler(StructureTypeHandler):
         keys = group.attrs["indexes"]
         handler: StructureTypeHandler = get_handler(inner_type)
         return {key_type(key): handler.read_from_h5(group, str(index)) for index, key in enumerate(keys)}
-
-
-register_handler(dict, DictHandler)

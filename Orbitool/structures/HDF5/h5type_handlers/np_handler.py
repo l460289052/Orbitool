@@ -46,7 +46,7 @@ else:
 
             if isinstance(value, np.ndarray):
                 return value
-            if typ:
+            if typ and typ is not ...:
                 return np.array(value, typ)
             else:
                 return np.array(value)

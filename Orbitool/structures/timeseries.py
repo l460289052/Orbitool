@@ -1,7 +1,7 @@
-from array import array
 from typing import List
 from datetime import datetime
-from .base import BaseStructure, Field
+from .base_structure import BaseStructure
+from .HDF5 import Array
 
 
 class TimeSeries(BaseStructure):
@@ -10,8 +10,8 @@ class TimeSeries(BaseStructure):
     position_min: float
     position_max: float
 
-    times: List[datetime] = Field(default_factory=list)
-    intensity = array('d')
+    times: List[datetime]
+    intensity: Array[float]
 
     tag: str
 

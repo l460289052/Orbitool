@@ -3,8 +3,7 @@ import os
 from datetime import timedelta
 from multiprocessing import cpu_count
 from typing import List
-
-from pydantic import BaseModel, Field
+from dataclasses import dataclass, field
 
 
 class TempFile:
@@ -27,23 +26,25 @@ logger.setLevel(logLevel)
 logger.addHandler(log_file_handler)
 
 
-class _Config(BaseModel):
+@dataclass
+class _Config:
     DEBUG: bool = False
     NO_MULTIPROCESS: bool = False
 
     format_time: str = r"%Y-%m-%d %H:%M:%S"
     format_export_time: str = r"%Y%m%d_%H%M%S"
 
-    multi_cores: int = Field(default_factory=cpu_count)
+    multi_cores: int = field(default_factory=cpu_count)
 
     test_timeout: float = .1
     time_delta: timedelta = timedelta(seconds=1)
 
     default_select: bool = True
 
-    noise_formulas: List[str] = ["NO3-", "HNO3NO3-"]
+    noise_formulas: List[str] = field(
+        default_factory=lambda: ["NO3-", "HNO3NO3-"])
 
-    plot_refresh_interval: float = Field(1, description="second")
+    plot_refresh_interval: float = 1
 
 
 _config = _Config()

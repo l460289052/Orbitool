@@ -1,12 +1,10 @@
-from __future__ import annotations
-
 import heapq
 from datetime import datetime
 from typing import List
 
 import numpy as np
 
-from ...structures.base import BaseStructure, BaseRowItem
+from ...structures import BaseStructure, BaseRowItem, Row
 from ...structures.spectrum import Spectrum
 from ...utils.formula import Formula
 
@@ -33,7 +31,7 @@ class Calibrator(BaseStructure):
     h5_type = "calibrator"
 
     time: datetime
-    ions: List[Ion]
+    ions: Row[Ion]
     ions_raw_position: np.ndarray
     ions_raw_intensity: np.ndarray
 
@@ -71,8 +69,8 @@ class Calibrator(BaseStructure):
         min_indexes = abs_rtol_minarg[:use_N_ions]
         max_indexes = abs_rtol_minarg[use_N_ions:][::-1]
 
-        return Calibrator(time=time, ions=ions, ions_raw_position=ions_raw_position, ions_raw_intensity=ions_raw_intensity, ions_position=ions_position,
-                          ions_rtol=ions_rtol, min_indexes=min_indexes, max_indexes=max_indexes)
+        return Calibrator(time, ions, ions_raw_position, ions_raw_intensity, ions_position,
+                          ions_rtol, min_indexes, max_indexes)
 
-    def regeneratCalibrator(self, rtol: float = 5e-6, use_N_ions=None) -> Calibrator:
+    def regeneratCalibrator(self, rtol: float = 5e-6, use_N_ions=None):
         return self.fromMzInt(self.time, self.ions, self.ions_raw_position, self.ions_raw_intensity, rtol, use_N_ions)

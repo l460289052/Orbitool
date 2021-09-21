@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 
-from ..structures.base import BaseStructure
+from ..structures import BaseStructure
 
 
 class MassDefectInfo(BaseStructure):

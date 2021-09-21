@@ -1,5 +1,5 @@
 from typing import List, Union, Iterable
-from ...structures import spectrum, HDF5, base
+from ...structures import spectrum, HDF5, base, StructureTypeHandler, BaseStructure, Row
 import numpy as np
 
 
@@ -25,23 +25,22 @@ class PeaksManager:
         return removed
 
 
-class PeaksManagerStructure(base.BaseStructure):
+class PeaksManagerStructure(BaseStructure):
     h5_type = "peaks manager structure"
-    peaks: List[spectrum.FittedPeak]
+    peaks: Row[spectrum.FittedPeak]
 
 
-class Conveter(HDF5.BaseSingleConverter):
-    @staticmethod
-    def write_to_h5(h5group, key: str, value: PeaksManager):
+class Handler(StructureTypeHandler):
+    def write_to_h5(self, h5group, key: str, value: PeaksManager):
         struct = PeaksManagerStructure(peaks=value.peaks)
-        HDF5.StructureHandler.write_to_h5(h5group, key, struct)
+        handler: StructureTypeHandler = base.get_handler(PeaksManagerStructure)
+        handler.write_to_h5(h5group, key, struct)
 
-    @staticmethod
-    def read_from_h5(h5group, key: str):
-        struct: PeaksManagerStructure = HDF5.StructureHandler.read_from_h5(
-            h5group, key)
+    def read_from_h5(self, h5group, key: str):
+        handler: StructureTypeHandler = base.get_handler(PeaksManagerStructure)
+        struct: PeaksManagerStructure = handler.read_from_h5(h5group, key)
         manager = PeaksManager(struct.peaks)
         return manager
 
 
-HDF5.register_converter(PeaksManager, Conveter)
+base.register_handler(PeaksManager, Handler)

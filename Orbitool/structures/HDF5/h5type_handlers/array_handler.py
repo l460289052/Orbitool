@@ -59,6 +59,8 @@ else:
             return array.array(self.args[0], value)
 
         def write_to_h5(self, h5group: Group, key: str, value):
+            if key in h5group:
+                del h5group[key]
             h5group.create_dataset(
                 key, data=value, dtype=array_dtypes[self.typecode], compression="gzip", compression_opts=1)
 

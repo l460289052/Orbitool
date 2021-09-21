@@ -3,12 +3,9 @@ import h5py
 import pytest
 from numpy import testing as nptest
 
-from .. import HDF5
-from ..base import BaseRowItem
-from ..spectrum import FormulaList
-
-from ...utils.formula import Formula
-
+from ..h5handlers import *
+from ..formula_list import *
+from ....structures import HDF5, field
 
 formula_list = [Formula('C7H8O2'), Formula('C3H3Ti-'), Formula('CC[13]H[2]')]
 
@@ -32,7 +29,7 @@ def test_formula():
 
 class FormulasItem(BaseRowItem):
     item_name = "test formulas item"
-    formulas: FormulaList = []
+    formulas: FormulaList = field(list)
 
 
 def test_formulas():

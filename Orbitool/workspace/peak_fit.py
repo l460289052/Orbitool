@@ -2,25 +2,28 @@ from typing import Optional, List
 from array import array
 import numpy as np
 
-from ..structures.base import BaseStructure, Field
+from ..structures import BaseStructure, field, Row
+from ..structures.HDF5 import Array
 from ..structures.spectrum import Spectrum, FittedPeak, Peak
 
+def array_int():
+    return array('i')
 
 class PeakFitInfo(BaseStructure):
     h5_type = "peak fit tab"
-    spectrum: Optional[Spectrum] = None
+    spectrum: Spectrum = None
 
-    raw_peaks: List[Peak] = Field(default_factory=list)
-    raw_split_num = array('i')
+    raw_peaks: Row[Peak] = field(list)
+    raw_split_num :Array[int]= field(array_int)
 
-    original_indexes = array('i')
-    peaks: List[FittedPeak] = Field(default_factory=list)
+    original_indexes :Array[int]= field(array_int)
+    peaks: Row[FittedPeak] = field(list)
 
-    residual_mz: Optional[np.ndarray] = None
-    residual_intensity: Optional[np.ndarray] = None
+    residual_mz: np.ndarray = None
+    residual_intensity: np.ndarray = None
 
-    shown_indexes = array('i')
+    shown_indexes :Array[int]= field(array_int)
 
-    shown_mz: Optional[np.ndarray] = None
-    shown_intensity: Optional[np.ndarray] = None
-    shown_residual: Optional[np.ndarray] = None
+    shown_mz: np.ndarray = None
+    shown_intensity: np.ndarray = None
+    shown_residual: np.ndarray = None

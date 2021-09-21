@@ -1,12 +1,9 @@
-from __future__ import annotations
 
 import shutil
 from typing import Dict, Generic, List, Optional, Type, TypeVar, Union
 
-from pydantic import BaseModel, Field
-
-from ..structures.base import BaseStructure, BaseRowItem
-from ..structures.HDF5 import H5File, H5Obj, Ndarray
+from ..structures import BaseStructure, BaseRowItem
+from ..structures.HDF5 import H5File
 from .base import Widget
 from .calibration import Widget as CalibrationWidget
 from .file_tab import Widget as FileWidget
@@ -23,10 +20,12 @@ T = TypeVar("T")
 
 
 LAST_SUPPORT_VERSION = "2.0.2"
+VERSION = "2.0.16"
+
 class WorkspaceInfo(BaseStructure):
     h5_type = "workspace info"
 
-    version: str = "2.0.15"
+    version: str = VERSION
 
 
 class WorkSpace(H5File):
@@ -93,7 +92,7 @@ class WorkSpace(H5File):
         self.widgets[path] = widget
         return widget
 
-    def load_config(self, another: WorkSpace):
+    def load_config(self, another: 'WorkSpace'):
         for key, widget in self.widgets.items():
             widget.ui_state = another.widgets[key].ui_state
 

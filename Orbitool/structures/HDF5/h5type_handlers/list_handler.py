@@ -23,6 +23,9 @@ class ListHandler(StructureTypeHandler, List):
         else:
             group = h5group.create_group(key)
             handler: StructureTypeHandler = get_handler(inner_type)
+            if isinstance(inner_type, type):
+                assert not issubclass(inner_type, BaseRowItem), "Please use Row[{0}] instead of List[{0}] in {1}".format(
+                    inner_type, h5group.name + key)
             for i, v in enumerate(value):
                 handler.write_to_h5(group, str(i), v)
 
