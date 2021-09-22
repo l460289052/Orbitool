@@ -32,7 +32,7 @@ class PeaksManagerStructure(BaseStructure):
 
 class Handler(StructureTypeHandler):
     def write_to_h5(self, h5group, key: str, value: PeaksManager):
-        struct = PeaksManagerStructure(peaks=value.peaks)
+        struct = PeaksManagerStructure(value.peaks)
         handler: StructureTypeHandler = base.get_handler(PeaksManagerStructure)
         handler.write_to_h5(h5group, key, struct)
 

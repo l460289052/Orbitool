@@ -11,7 +11,7 @@ class PolynomialRegressionFunc(BaseStructure):
     @classmethod
     def FactoryFit(cls, mz: np.ndarray, rtol: np.ndarray, degree):
         poly_coef = polynomial.polyfit(mz, rtol, degree)
-        return cls(poly_coef=poly_coef)
+        return cls(poly_coef)
 
     def predictRtol(self, mz: np.ndarray):
         return polynomial.polyval(mz, self.poly_coef)

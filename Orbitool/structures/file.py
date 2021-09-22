@@ -57,8 +57,8 @@ class PathList(BaseStructure):
             raise ValueError(
                 f'file "{f.path}" and "{crossed_file}" have crossed scan time')
 
-        path = Path(path=f"{PATH_THERMOFILE}:{f.path}", createDatetime=f.creationDatetime, startDatetime=f.creationDatetime +
-                    f.startTimedelta, endDatetime=f.creationDatetime + f.endTimedelta)
+        path = Path(f"{PATH_THERMOFILE}:{f.path}", f.creationDatetime,
+                    f.creationDatetime + f.startTimedelta, f.creationDatetime + f.endTimedelta)
         self.paths.append(path)
 
     def addCsv(self, *args):
@@ -165,8 +165,8 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
                 for i in range(*f.timeRange2NumRange((timeRange[0] - creationTime, timeRange[1] - creationTime))):
                     if f.getSpectrumPolarity(i) == polarity:
                         time = creationTime + f.getSpectrumRetentionTime(i)
-                        info = FileSpectrumInfo(path=path.path, start_time=time - delta_time, end_time=time + delta_time,
-                                                polarity=polarity, average_index=0)
+                        info = FileSpectrumInfo(
+                            time - delta_time, time + delta_time, path.path, polarity, 0)
                         info_list.append(info)
         return info_list
 

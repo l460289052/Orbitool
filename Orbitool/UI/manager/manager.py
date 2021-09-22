@@ -6,7 +6,7 @@ from datetime import datetime
 from functools import wraps
 from typing import (
     Callable, Dict, Generic, Iterable, Iterator, Type, TypeVar,
-    List, overload, Set)
+    List, overload, Set, Sized)
 from types import MethodType
 
 import numpy as np
@@ -149,9 +149,9 @@ class TQDMER(QObject):
     def __call__(self, iter: Iterable = None, msg: str = "", *, length=None, immediate=False):
         if iter is not None:
             if length is None:
-                try:
+                if isinstance(iter, Sized):
                     length = len(iter)
-                except TypeError:
+                else:
                     length = 0
         label = self.progress_cnt
         tqdm = TQDM((lambda percent, msg: self.tqdm_signal.emit(label, percent, msg)),

@@ -46,7 +46,7 @@ class FittedPeak(Peak):
     peak_intensity: float
     area: float
 
-    tags: str
+    tags: str = ""
     formulas: FormulaList = field(list)
 
 

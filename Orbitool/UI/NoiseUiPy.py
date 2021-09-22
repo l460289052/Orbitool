@@ -127,8 +127,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
                     spectrum[0], spectrum[1]), spectrum[2]) for spectrum in spectra]
                 mz, intensity = spectrum_func.averageSpectra(
                     spectra, rtol, True)
-                spectrum = Spectrum(path='none:', mz=mz, intensity=intensity,
-                                    start_time=infos[0].start_time, end_time=infos[-1].end_time)
+                spectrum = Spectrum('none:', mz, intensity,
+                                    infos[0].start_time, infos[-1].end_time)
                 return True, spectrum
             else:
                 return False, None
@@ -155,7 +155,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
     def addFormula(self):
         formula = Formula(self.lineEdit.text())
         self.noise.info.general_setting.noise_formulas.append(
-            workspace.noise_tab.NoiseFormulaParameter(formula=formula))
+            workspace.noise_tab.NoiseFormulaParameter(formula))
         self.showNoiseFormula()
 
     addFormula.except_node(showNoiseFormula)
@@ -347,8 +347,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
                 spectrum.mz, spectrum.intensity, info.general_result.poly_coef,
                 params, points, deltas, setting.n_sigma, subtract)
 
-            s = Spectrum(path=spectrum.path, mz=mz, intensity=intensity,
-                         start_time=spectrum.start_time, end_time=spectrum.end_time)
+            s = Spectrum(spectrum.path, mz, intensity,
+                         spectrum.start_time, spectrum.end_time)
 
             return s
 
@@ -404,8 +404,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
                 spectrum.mz, spectrum.intensity, info.general_result.poly_coef,
                 params, points, deltas, setting.n_sigma, subtract)
 
-            s = Spectrum(path=spectrum.path, mz=mz, intensity=intensity,
-                         start_time=spectrum.start_time, end_time=spectrum.end_time)
+            s = Spectrum(spectrum.path, mz, intensity,
+                         spectrum.start_time, spectrum.end_time)
 
             return s
 
@@ -566,8 +566,7 @@ class ReadFromFile(MultiProcess):
     def func(data: Tuple[FileSpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
         info, (mz, intensity) = data
         mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
-        spectrum = Spectrum(path=info.path, mz=mz, intensity=intensity,
-                            start_time=info.start_time, end_time=info.end_time)
+        spectrum = Spectrum(info.path, mz, intensity, info.start_time, info.end_time)
         return spectrum
 
     @staticmethod

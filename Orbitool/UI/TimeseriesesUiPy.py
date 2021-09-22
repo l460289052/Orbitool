@@ -90,8 +90,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         elif self.mzRangeRadioButton.isChecked():
             l = self.mzMinDoubleSpinBox.value()
             r = self.mzMaxDoubleSpinBox.value()
-            series.append(TimeSeries(
-                position_min=l, position_max=r, tag="%.5f - %.5f" % (l, r)))
+            series.append(TimeSeries(l, r, "%.5f - %.5f" % (l, r)))
         elif self.peakListRadioButton.isChecked():
             peaklist = self.manager.workspace.peakfit_tab.info
             for index in peaklist.shown_indexes:

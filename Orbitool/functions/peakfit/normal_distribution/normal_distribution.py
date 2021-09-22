@@ -34,13 +34,7 @@ def getNormalizedPeak(peak: Peak, param=None) -> FittedPeak:
     # move to 0 and change peak width
     mz_new = (mz / mu - 1) / math.sqrt(mu / 200)
     intensity_new = intensity / peakHeight
-    peak = FittedPeak(
-        mz=mz_new,
-        intensity=intensity_new,
-        fitted_param=param,
-        peak_position=0,
-        peak_intensity=1,
-        area=1)
+    peak = FittedPeak(mz_new, intensity_new, param, 0, 1, 1)
     return peak
 
 
@@ -75,9 +69,8 @@ class NormalDistributionFunc(BaseFunc):
         peak_intensity = self._funcFit(peak_position, *param)
         tags = set(peak1.tags)
         tags.update(peak2.tags)
-        peak = FittedPeak(mz=mz, intensity=intensity, fitted_param=param,
-                          peak_position=peak_position, peak_intensity=peak_intensity,
-                          area=area, tags=''.join(tags))
+        peak = FittedPeak(mz, intensity, param, peak_position, peak_intensity,
+                          area, ''.join(tags))
         return peak
 
     def normFunc(self, x):
@@ -179,9 +172,7 @@ class NormalDistributionFunc(BaseFunc):
             new_intensity[-1] = 0
             new_intensity[0] = 0
             new_peak = FittedPeak(
-                mz=mz[select], intensity=new_intensity, fitted_param=p,
-                peak_position=p[1], peak_intensity=peak_intensity, area=p[0],
-                tags=tag)
+                mz[select], new_intensity, p, p[1], peak_intensity, p[0], tag)
             peaks.append(new_peak)
         if len(peaks) > 1:
             peaks.sort(key=lambda peak: peak.peak_position)

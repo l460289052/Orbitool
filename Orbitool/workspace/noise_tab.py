@@ -20,8 +20,7 @@ class NoiseFormulaParameter(BaseRowItem):
 
 
 def default_formula_parameter():
-    return [NoiseFormulaParameter(
-            formula=Formula(f)) for f in get_config().noise_formulas]
+    return [NoiseFormulaParameter(Formula(f)) for f in get_config().noise_formulas]
 
 
 class NoiseGeneralSetting(BaseStructure):
@@ -32,7 +31,7 @@ class NoiseGeneralSetting(BaseStructure):
     n_sigma: float = 0
     subtract: float = True
 
-    noise_formulas: Row[NoiseFormulaParameter] = field(list)
+    noise_formulas: Row[NoiseFormulaParameter] = field(default_formula_parameter)
     params_inited: bool = False
 
     spectrum_dependent: bool = True

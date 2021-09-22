@@ -410,6 +410,11 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2021.09.22 version 2.0.16**
+
++ Rewrite structures with built-in module `dataclasses` instead of `pydantic`
++ Reduce fit number because of 'fail' tag
+
 **2021.09.17 version 2.0.15**
 
 + Bug fix

@@ -155,7 +155,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             info.calibrators = yield get_calibrator, "calculate calibrator"
         else:  # get info directly
             def get_calibrator_from_calibrator():
-                return {path: calibrator.regeneratCalibrator(rtol=rtol, use_N_ions=use_N_ions) for path, calibrator in info.calibrators.items()}
+                return {path: calibrator.regeneratCalibrator(rtol, use_N_ions) for path, calibrator in info.calibrators.items()}
 
             info.calibrators = yield get_calibrator_from_calibrator, "generate calibrator from former calibrator"
 
@@ -552,8 +552,7 @@ class CalibrateMergeDenoise(MultiProcess):
 
         start_time = min(start_times)
         end_time = max(end_times)
-        spectrum = Spectrum(path=path, mz=mz, intensity=intensity,
-                            start_time=start_time, end_time=end_time)
+        spectrum = Spectrum(path, mz, intensity, start_time, end_time)
         return spectrum
 
     @staticmethod
@@ -563,8 +562,7 @@ class CalibrateMergeDenoise(MultiProcess):
         infos.clear()
         for ret in rets:
             tmp.h5_append(ret)
-            infos.append(SpectrumInfo(
-                start_time=ret.start_time, end_time=ret.end_time))
+            infos.append(SpectrumInfo(ret.start_time, ret.end_time))
 
         target = file.calibration_tab.calibrated_spectra
         path = target.h5_path

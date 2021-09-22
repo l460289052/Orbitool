@@ -1,5 +1,7 @@
+from array import array
 from typing import List
 from datetime import datetime
+from .base import field
 from .base_structure import BaseStructure
 from .HDF5 import Array
 
@@ -10,10 +12,10 @@ class TimeSeries(BaseStructure):
     position_min: float
     position_max: float
 
-    times: List[datetime]
-    intensity: Array[float]
-
     tag: str
+
+    times: List[datetime] = field(list)
+    intensity: Array[float] = field(lambda: array('d'))
 
     def append(self, time, intensity):
         self.times.append(time)
@@ -22,4 +24,4 @@ class TimeSeries(BaseStructure):
     @classmethod
     def FactoryPositionRtol(cls, position: float, rtol: float, tag: str):
         delta = position * rtol
-        return cls(position_min=position - delta, position_max=position + delta, tag=tag)
+        return cls(position - delta, position + delta, tag)

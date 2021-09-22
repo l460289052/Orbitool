@@ -15,9 +15,9 @@ def test_formula():
     f = Formula('CH4')
     masslist = []
 
-    addMassTo(masslist, MassListItem(position=f.mass()), 1e-6)
+    addMassTo(masslist, MassListItem(f.mass()), 1e-6)
 
-    addMassTo(masslist, MassListItem(position=f.mass(), formulas=[f]), 1e-6)
+    addMassTo(masslist, MassListItem(f.mass(), formulas=[f]), 1e-6)
     addMassTo(masslist, MassListItem(position=1), 1e-6)
     addMassTo(masslist, MassListItem(position=1000), 1e-6)
     assert len(masslist) == 3

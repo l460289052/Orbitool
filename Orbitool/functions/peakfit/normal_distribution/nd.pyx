@@ -13,7 +13,7 @@ ctypedef fused p_or_np:
     np.ndarray[double]
 
 def maxFitNum(int num)->int:
-    return <int>(math.atan((num-5)/20)*20000+4050)
+    return <int>(math.atan((num-6)/20)*4000+1100)
 
 def func(p_or_np mz, double a, double mu, double sigma)->double:
     return a/(math.sqrt(2*math.pi)*sigma)*np.exp(-0.5*np.power((mz-mu)/sigma,2))

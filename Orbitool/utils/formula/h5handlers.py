@@ -69,7 +69,7 @@ class RestrictedCalcStructure(BaseStructure):
 
 class RestrictedCalcHandler(StructureTypeHandler):
     def write_to_h5(self, h5group: Group, key: str, value: RestrictedCalc):
-        parameters = [RestrictedCalcElementNumItem(element=e, **value[e])
+        parameters = [RestrictedCalcElementNumItem(e, **value[e])
                       for e in value.getInitedElements()]
         elements = ','.join(value.getElements())
         isotopes = ','.join(value.getIsotopes())
@@ -128,8 +128,7 @@ class ForceCalcHandler(StructureTypeHandler):
     def write_to_h5(self, h5group: Group, key: str, value: ForceCalc):
         ei_list = [ForceElementNumItem(ei_name=e, max_num=value[e])
                    for e in value.getEIList()]
-        struct = ForceCalcStructure(
-            value.rtol, ei_list)
+        struct = ForceCalcStructure(value.rtol, ei_list)
         handler: StructureTypeHandler = get_handler(BaseStructure)
         handler.write_to_h5(h5group, key, struct)
 
