@@ -62,6 +62,8 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
 
     def calculateMassDefect(self):
         is_dbe = self.dbeRadioButton.isChecked()
+        is_ele = self.elementRadioButton.isChecked()
+        is_atom = self.atomsRadioButton.isChecked()
 
         calc = self.manager.workspace.formula_docker.info.restricted_calc
         peaks = self.manager.workspace.peakfit_tab.info.peaks
@@ -72,10 +74,20 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         if is_dbe:
             clr_color = [calc.getFormulaDBE(f) for f in clr_formula]
             clr_color = np.array(clr_color, dtype=float)
-        else:
+            clr_labels = None
+        elif is_ele:
             element = self.elementLineEdit.text()
             clr_color = [f[element] for f in clr_formula]
             clr_color = np.array(clr_color, dtype=int)
+            clr_labels = None
+        elif is_atom:
+            atoms = {f.atoms() for f in clr_formula}
+            atoms = list(atoms)
+            atoms.sort(key=lambda f: (len(f), f.mass()))
+            atoms_index = {atom: ind for ind, atom in enumerate(atoms)}
+            clr_color = [atoms_index[f.atoms()] for f in clr_formula]
+            clr_color = np.array(clr_color, dtype=int)
+            clr_labels = list(map(str, atoms))
 
         clr_x = [peak.peak_position for peak in clr_peaks]
         clr_x = np.array(clr_x, dtype=float)
@@ -91,10 +103,13 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         info = self.massdefect
         info.is_dbe = is_dbe
         if is_dbe:
-            info.element = ""
-        else:
-            info.element = element
-        info.clr_x, info.clr_y, info.clr_size, info.clr_color = clr_x, clr_y, clr_size, clr_color
+            info.clr_title = "DBE"
+        elif is_ele:
+            info.clr_title = element
+        elif is_atom:
+            info.clr_title = "atoms"
+
+        info.clr_x, info.clr_y, info.clr_size, info.clr_color, info.clr_labels = clr_x, clr_y, clr_size, clr_color, clr_labels
         info.gry_x, info.gry_y, info.gry_size = gry_x, gry_y, gry_size
 
     def plotMassDefect(self):
@@ -120,7 +135,7 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         is_log = self.logCheckBox.isChecked()
         alpha = 1 - self.transparencyDoubleSpinBox.value()
 
-        clr_x, clr_y, clr_size, clr_color = info.clr_x, info.clr_y, info.clr_size, info.clr_color
+        clr_x, clr_y, clr_size, clr_color, clr_labels = info.clr_x, info.clr_y, info.clr_size, info.clr_color, info.clr_labels
         gry_x, gry_y, gry_size = info.gry_x, info.gry_y, info.gry_size
 
         if is_log:
@@ -153,8 +168,9 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         sc = ax.scatter(clr_x, clr_y, s=clr_size, c=clr_color,
                         cmap=rainbow_color_map, linewidths=0.5, edgecolors='k', alpha=alpha)
         clrb = plot.fig.colorbar(sc)
-        element = info.element
-        clrb.ax.set_title('DBE' if is_dbe else f'Element {element}')
+        clrb.ax.set_title(info.clr_title)
+        if clr_labels is not None:
+            clrb.ax.set_yticklabels(clr_labels)
 
         ax.autoscale(True)
         plot.fig.tight_layout()
@@ -175,18 +191,26 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
     @state_node
     def export(self):
         info = self.massdefect
-        prefer = "dbe" if info.is_dbe else f"element {info.element}"
-        ret, f = savefile("Mass Defect", "CSV file(*.csv)", prefer)
+        ret, f = savefile("Mass Defect", "CSV file(*.csv)", info.clr_title)
 
         if not ret:
             return
+
+        if info.clr_title == "atoms":
+            atoms = info.clr_labels
+
+            def conv(value):
+                return atoms[value]
+        else:
+            def conv(value):
+                return value
 
         with open(f, 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(['x', 'mass defect', 'intensity', 'color'])
 
             writer.writerows(zip(info.clr_x, info.clr_y,
-                                 info.clr_size, info.clr_color))
+                                 info.clr_size, map(conv, info.clr_color)))
             writer.writerows(zip(info.gry_x, info.gry_y, info.gry_size))
 
 
