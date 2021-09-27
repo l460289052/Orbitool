@@ -15,6 +15,12 @@ def test_formula1():
     assert f['N'] == 1
     assert f.charge == -1
     assert f.dbe() == 1.
+    assert len(f) == 3
+    assert dict(f.items()) == {
+        "N[15]": 1,
+        "O": 3,
+        "e": 1}
+    assert f.atoms() == Formula("NO-")
 
 
 def formula2():
@@ -42,6 +48,7 @@ def test_formula2():
 def test_mass():
     f = Formula("CH4-")
     e = Formula(charge=-1)
+    assert len(f) == 3
     assert (
         f.mass() - pyteomass.calculate_mass(f.toStr(withCharge=False)) - e.mass()) < 1e-6
 
@@ -69,6 +76,7 @@ def test_isotopes():
     assert Formula.from_numpy(f.to_numpy()) == f
 
     assert g.findOrigin() == f.findOrigin()
+    assert g.atoms() == f.atoms() == Formula("C")
 
 
 def test_to_dict():
@@ -125,3 +133,7 @@ def test_space():
     f = Formula("c 25 h 36")
     assert f['C'] == 25
     assert f['H'] == 36
+
+def test_atoms():
+    f = Formula("SO4-2")
+    assert f.atoms() == Formula("SO-")

@@ -510,6 +510,30 @@ cdef class Formula:
                 f.setI(data[i,0],data[i,1],data[i,2])
         return f
 
+    def keys(self):
+        cdef str e
+        cdef int32_t num
+        for e, num in self.items():
+            yield e
+
+    def items(self):
+        cdef int32_t num
+        cdef pair[int32_t, int32_t] e
+        cdef pair[pair[int32_t, int32_t], int32_t] i
+        for e in self.elements:
+            num = e.second - self.getI(e.first, 0)
+            if num > 0:
+                yield elements[e.first], num
+        for i in self.isotopes:
+            yield f"{elements[i.first.first]}[{i.first.second}]", i.second
+
+    def atoms(self):
+        cdef Formula ret = Formula.__new__(Formula)
+        cdef pair[int32_t, int32_t] it
+        for it in self.elements:
+            ret.elements.insert(ret.elements.end(), pair[int32_t,int32_t](it.first, 1))
+        return ret
+
     def __setitem__(self, str key, int32_t num):
         cdef int_pair e = str2element(key)
         if e.second==0:
@@ -530,12 +554,14 @@ cdef class Formula:
         else:
             return self.getI(p.first, p.second)
 
+    def __len__(self):
+        return self.elements.size()
 
     def __str__(self):
         return self.toStr(False, True)
     
     def __repr__(self):
-        return self.toStr(False, True)
+        return f"Formula({self.toStr(False, True)})"
 
     def __copy__(self):
         return self.copy()

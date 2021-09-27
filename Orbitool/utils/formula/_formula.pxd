@@ -25,7 +25,10 @@ cdef:
     double _elements_isotopes_mass(map[int32_t, int32_t]&elements, map[pair[int32_t, int32_t], int32_t]&isotopes)
 
     class Formula:
+        # atomic number -> number
         cdef map[int32_t, int32_t] elements
+        # (atomic number, atomic mass) -> number
+        # elements also contains isotopes
         cdef map[pair[int32_t, int32_t], int32_t] isotopes
         cpdef double mass(self)
         cpdef double dbe(self)except *
