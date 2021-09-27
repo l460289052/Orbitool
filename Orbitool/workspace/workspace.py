@@ -20,7 +20,7 @@ T = TypeVar("T")
 
 
 LAST_SUPPORT_VERSION = "2.0.2"
-VERSION = "2.0.16"
+VERSION = "2.1.1"
 
 class WorkspaceInfo(BaseStructure):
     h5_type = "workspace info"

@@ -410,7 +410,19 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
-**2021.09.22 version 2.0.16**
+**2021.09.27 version 2.1.1**
+
++ Add atoms type for mass defect, like
+
+  CHO, CHON, CHONS, etc.
+
++ Add group step in filters
+
+  + Step range
+  + Group to add
+  + Group to minus
+
+**2021.09.22 version 2.0.16 (rename to 2.1.0)**
 
 + Rewrite structures with built-in module `dataclasses` instead of `pydantic`
 + Reduce fit number because of 'fail' tag
