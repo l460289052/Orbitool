@@ -1,6 +1,6 @@
 from enum import Enum
 from itertools import chain
-from typing import Callable, List, Optional, Tuple, cast
+from typing import Callable, List, Optional, Tuple, cast, Set
 
 import matplotlib.text
 import matplotlib.ticker
@@ -14,7 +14,7 @@ from ..functions import spectrum as spectrum_func
 from ..functions.peakfit import masslist as masslist_func
 from ..structures.spectrum import (FittedPeak, MassListItem, Peak, PeakTags,
                                    Spectrum)
-from ..utils.formula import Formula
+from ..utils.formula import Formula, formula_range
 from . import PeakFitUi
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
@@ -77,9 +77,16 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
             self.filter_intensity_min)
         self.filterMassDefectToolButton.clicked.connect(
             self.filter_mass_defect)
-        self.filterGroupToolButton.clicked.connect(
-            self.filter_group)
+        self.filterGroupYToolButton.clicked.connect(
+            self.filter_group_y)
+        self.filterGroupNToolButton.clicked.connect(
+            self.filter_group_n)
 
+        # step
+        self.stepAccordToMassCheckBox.toggled.connect(self.step_accord_toggled)
+        self.stepPushButton.clicked.connect(self.do_step)
+
+        # clear
         self.filterClearPushButton.clicked.connect(self.filterClear)
 
         # actions
@@ -108,6 +115,19 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
     def updateState(self):
         self.peakfit.ui_state.fromComponents(self, [
+            self.filterIntensityMaxDoubleSpinBox,
+            self.filterIntensityMinDoubleSpinBox,
+            self.filterMassDefectMinDoubleSpinBox,
+            self.filterMassDefectMaxDoubleSpinBox,
+            self.filterGroupLineEdit,
+
+            self.stepMinSpinBox,
+            self.stepMaxSpinBox,
+            self.stepMinusLineEdit,
+            self.stepPlusLineEdit,
+            self.stepAccordToMassCheckBox,
+            self.stepRtolDoubleSpinBox,
+
             self.yLogcheckBox])
 
     def show_and_plot(self):
@@ -405,10 +425,17 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
             lambda fp: mi < fp.peak_position - round(fp.peak_position) < ma)
 
     @state_node
-    def filter_group(self):
+    def filter_group_y(self):
         group = self.filterGroupLineEdit.text()
         group = Formula(group)
         self._filter_general(lambda fp: any(group in f for f in fp.formulas))
+
+    @state_node
+    def filter_group_n(self):
+        group = self.filterGroupLineEdit.text()
+        group = Formula(group)
+        self._filter_general(lambda fp: any(
+            group not in f for f in fp.formulas))
 
     @state_node(withArgs=True)
     def generalAction(self, action: Callable[[FittedPeak], None], msg: str):
@@ -428,6 +455,60 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         yield func, msg
 
+        self.manager.signals.peak_list_show.emit()
+
+    @state_node(mode='n', withArgs=True)
+    def step_accord_toggled(self, value: bool):
+        self.stepRtolDoubleSpinBox.setEnabled(value)
+
+    @state_node
+    def do_step(self):
+        group_p = Formula(self.stepPlusLineEdit.text())
+        group_m = Formula(self.stepMinusLineEdit.text())
+        step_mi = self.stepMinSpinBox.value()
+        step_ma = self.stepMaxSpinBox.value()
+        mass = self.stepAccordToMassCheckBox.isChecked()
+        rtol = self.stepRtolDoubleSpinBox.value() * 1e-6
+
+        info = self.peakfit.info
+        peaks = info.peaks
+        indexes = info.shown_indexes
+
+        manager = self.manager
+
+        if mass:
+            def func():
+                masses = []
+                for index in indexes:
+                    peak = peaks[index]
+                    for f in peak.formulas:
+                        masses.append(f.mass())
+                masses = np.array(masses)
+                rets = []
+                mass_delta = group_p.mass() - group_m.mass()
+                for index, peak in manager.tqdm(enumerate(peaks), "checking mass"):
+                    for times in range(step_mi, step_ma + 1):
+                        mass = peak.peak_position + mass_delta * times
+                        if abs(mass / masses[binary_search.indexNearest_np(masses, mass)] - 1) < rtol:
+                            rets.append(index)
+                return rets
+        else:
+            def func():
+                shown_sets: Set[Formula] = set()
+                for index in indexes:
+                    peak = peaks[index]
+                    for f in peak.formulas:
+                        shown_sets.add(f)
+                rets = []
+                for index, peak in manager.tqdm(enumerate(peaks), "checking formula"):
+                    for f in peak.formulas:
+                        for ff in formula_range(f, group_p, group_m, step_mi, step_ma):
+                            if ff in shown_sets:
+                                rets.append(index)
+                                break
+                return rets
+        rets: List[int] = yield func, "step"
+        info.shown_indexes = rets
         self.manager.signals.peak_list_show.emit()
 
     @state_node

@@ -561,7 +561,7 @@ cdef class Formula:
         return self.toStr(False, True)
     
     def __repr__(self):
-        return f"Formula({self.toStr(False, True)})"
+        return f'Formula("{self.toStr(False, True)}")'
 
     def __copy__(self):
         return self.copy()

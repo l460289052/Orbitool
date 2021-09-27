@@ -134,6 +134,18 @@ def test_space():
     assert f['C'] == 25
     assert f['H'] == 36
 
+
 def test_atoms():
     f = Formula("SO4-2")
     assert f.atoms() == Formula("SO-")
+
+
+def test_sub_in():
+    f = Formula("H2O[18]")
+    g = f.findOrigin()
+    assert g not in f
+    assert f not in g
+    with pytest.raises(ValueError):
+        f - g
+    with pytest.raises(ValueError):
+        g - f
