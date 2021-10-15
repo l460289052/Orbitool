@@ -1,12 +1,14 @@
 import os
+import csv
 from datetime import datetime, timedelta
 from functools import partial
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Iterable
 
 from PyQt5 import QtCore, QtWidgets
 
 from .. import utils
-from ..structures.file import Path, PathList, FileSpectrumInfo
+from ..structures.file import Path, PathList, FileSpectrumInfo, PeriodItem
+from ..functions.file import generage_periods
 from ..workspace import UiNameGetter, UiState
 from . import FileUi
 from . import utils as UiUtils
@@ -33,6 +35,16 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         self.addFilePushButton.clicked.connect(self.addThermoFile)
         self.addFolderPushButton.clicked.connect(self.addFolder)
         self.removeFilePushButton.clicked.connect(self.removePath)
+
+        self.timeAdjustPushButton.clicked.connect(self.adjust_time)
+
+        self.nSpectraRadioButton.clicked.connect(self.radioButtonChanged)
+        self.nMinutesRadioButton.clicked.connect(self.radioButtonChanged)
+        self.periodRadioButton.clicked.connect(self.radioButtonChanged)
+
+        self.periodImportToolButton.clicked.connect(self.importPeriod)
+        self.exportPeriodPushButton.clicked.connect(self.exportPeriod)
+
         self.selectedPushButton.clicked.connect(self.processSelected)
         self.allPushButton.clicked.connect(self.processAll)
 
@@ -53,6 +65,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             self.recursionCheckBox,
             self.nSpectraRadioButton,
             self.nMinutesRadioButton,
+            self.periodRadioButton,
             self.nSpectraSpinBox,
             self.nMinutesDoubleSpinBox,
             self.autoTimeCheckBox,
@@ -62,6 +75,68 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             self.positiveRadioButton,
             self.negativeRadioButton,
             self.averageCheckBox])
+
+    @state_node(mode='n')
+    def radioButtonChanged(self):
+        if self.nSpectraRadioButton.isChecked():
+            self.exportPeriodPushButton.setEnabled(False)
+        elif self.nMinutesRadioButton.isChecked():
+            self.exportPeriodPushButton.setEnabled(True)
+        elif self.periodRadioButton.isChecked():
+            self.exportPeriodPushButton.setEnabled(
+                self.file.info.periods is not None)
+
+    @state_node
+    def importPeriod(self):
+        success, file = UiUtils.openfile(
+            "Select one period file", "CSV files(*.csv)")
+        if not success:
+            return
+
+        def func():
+            ret = []
+            with open(file, 'r') as f:
+                reader = csv.reader(f)
+                it = iter(reader)
+                next(it)  # skip row
+                for row in it:
+                    item = PeriodItem(datetime.fromisoformat(
+                        row[0].replace('/', '-')), datetime.fromisoformat(row[1].replace('/', '-')))
+                    ret.append(item)
+            return ret
+        self.file.info.periods = yield func, "Read periods"
+        if not self.exportPeriodPushButton.isEnabled():
+            self.exportPeriodPushButton.setEnabled(True)
+
+    @state_node
+    def exportPeriod(self):
+        success, file = UiUtils.savefile("Save to", "CSV files(*.csv)")
+        if not success:
+            return
+
+        period_checked = self.periodRadioButton.isChecked()
+        minutes_checked = self.nMinutesRadioButton.isChecked()
+        start_point = self.startDateTimeEdit.dateTime().toPyDateTime()
+        end_point = self.endDateTimeEdit.dateTime().toPyDateTime()
+        interval = timedelta(minutes=self.nMinutesDoubleSpinBox.value())
+
+        def func():
+            if period_checked:
+                periods = self.file.info.periods
+            elif minutes_checked:
+                def generator():
+                    for s, e in generage_periods(start_point, end_point, interval):
+                        yield PeriodItem(s, e)
+                periods = generator()
+            else:
+                periods: List[PeriodItem] = []
+            with open(file, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(('start time', 'end time'))
+                for p in periods:
+                    writer.writerow((str(p.start_time), str(p.end_time)))
+
+        yield func, "exporting periods"
 
     @state_node
     def addThermoFile(self):
@@ -135,6 +210,16 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             self.endDateTimeEdit.setDateTime(time_end)
 
     @state_node
+    def adjust_time(self):
+        slt = UiUtils.get_tablewidget_selected_row(self.tableWidget)
+        paths = self.pathlist.subList(slt)
+        start, end = paths.timeRange
+        if start is None:
+            return
+        self.startDateTimeEdit.setDateTime(start)
+        self.endDateTimeEdit.setDateTime(end)
+
+    @state_node
     def processSelected(self):
         indexes = UiUtils.get_tablewidget_selected_row(self.tableWidget)
         if len(indexes) == 0:
@@ -157,7 +242,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
 
         paths = self.manager.tqdm(paths)
 
-        rtol = self.rtolDoubleSpinBox.value() * 1e-6
+        self.file.info.rtol = self.rtolDoubleSpinBox.value() * 1e-6
         if self.positiveRadioButton.isChecked():
             polarity = 1
         elif self.negativeRadioButton.isChecked():
@@ -175,6 +260,9 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
                     minutes=self.nMinutesDoubleSpinBox.value())
                 func = partial(FileSpectrumInfo.generate_infos_from_paths_by_time_interval,
                                paths, interval, polarity, time_range)
+            elif self.periodRadioButton.isChecked():
+                func = partial(FileSpectrumInfo.generate_infos_from_paths_by_periods,
+                               paths, polarity, [(p.start_time, p.end_time)for p in self.file.info.periods])
         else:
             func = partial(FileSpectrumInfo.generate_infos_from_paths,
                            paths, polarity, time_range)

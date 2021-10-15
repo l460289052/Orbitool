@@ -3,7 +3,7 @@ from typing import Dict, Iterable, List, Tuple, Union
 
 import numpy as np
 
-from ..functions.file import part_by_time_interval
+from ..functions.file import part_by_periods, generage_periods
 from ..utils.readers import ThermoFile
 from . import spectrum
 from .base import field
@@ -96,12 +96,19 @@ class PathList(BaseStructure):
         return len(self.paths)
 
 
+class PeriodItem(BaseRowItem):
+    item_name = "spectrum period item"
+    start_time: datetime
+    end_time: datetime
+
+
 class FileSpectrumInfo(spectrum.SpectrumInfo):
     item_name = "file spectrum info"
 
     path: str  # "type:path"
     polarity: int
 
+    # index from 0, 1, 2, 3... with different times together to make up a whole spectrum
     average_index: int
 
     @classmethod
@@ -143,11 +150,15 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
 
     @classmethod
     def generate_infos_from_paths_by_time_interval(cls, paths: List[Path], interval: timedelta, polarity, timeRange):
+        periods = generage_periods(timeRange[0], timeRange[1], interval)
+        return cls.generate_infos_from_paths_by_periods(paths, polarity, periods)
+
+    @classmethod
+    def generate_infos_from_paths_by_periods(cls, paths: List[Path], polarity, periods: Iterable[Tuple[datetime, datetime]]):
         start_times, end_times = zip(
             *((p.startDatetime, p.endDatetime) for p in paths))
         paths_str = [path.path for path in paths]
-        rets = part_by_time_interval(
-            paths_str, start_times, end_times, timeRange[0], timeRange[1], interval)
+        rets = part_by_periods(paths_str, start_times, end_times, periods)
         ret = [cls(
             path=path, start_time=start, end_time=end, polarity=polarity,
             average_index=index) for path, start, end, index in rets]

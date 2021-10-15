@@ -1,1 +1,1 @@
-from .part import part_by_time_interval
+from .part import generage_periods, part_by_periods
