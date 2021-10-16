@@ -99,9 +99,9 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
                 reader = csv.reader(f)
                 it = iter(reader)
                 next(it)  # skip row
+                time_parser = utils.TimeParser()
                 for row in it:
-                    item = PeriodItem(datetime.fromisoformat(
-                        row[0].replace('/', '-')), datetime.fromisoformat(row[1].replace('/', '-')))
+                    item = PeriodItem(time_parser.parse(row[0]), time_parser.parse(row[1]))
                     ret.append(item)
             return ret
         self.file.info.periods = yield func, "Read periods"

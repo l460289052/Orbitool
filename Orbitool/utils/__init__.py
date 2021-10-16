@@ -1,3 +1,3 @@
 from . import files
-from . import time_convert
+from .time_format import time_convert, TimeParser
 from .iterator import iterator

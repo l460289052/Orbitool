@@ -1,6 +1,6 @@
 import numpy as np
 from datetime import datetime, timedelta
-from .. import part_by_time_interval
+from .. import generage_periods, part_by_periods
 
 delta = timedelta(seconds=1)
 
@@ -34,7 +34,8 @@ def continuous_time_check(start, end, file_interval, interval):
     ends = to_dt(ends)
     ids = range(len(starts))
     id_times = {id: (start, end) for id, start, end in zip(ids, starts, ends)}
-    rets = part_by_time_interval(ids, starts, ends, start, end, interval)
+    periods = generage_periods(start, end, interval)
+    rets = part_by_periods(ids, starts, ends, periods)
     now_time = start
 
     cnt = eval(rets, id_times, now_time, ends[-1], interval)
@@ -73,7 +74,8 @@ def test_file_interval():
     id_times = {id: (start, end) for id, start, end in zip(ids, starts, ends)}
 
     interval = timedelta(hours=10)
-    rets = part_by_time_interval(ids, starts, ends, datetime(
-        2000, 1, 1), datetime(2000, 1, 11), interval)
+    periods = generage_periods(
+        datetime(2000, 1, 1), datetime(2000, 1, 11), interval)
+    rets = part_by_periods(ids, starts, ends, periods)
 
     cnt = eval(rets, id_times, starts[0], ends[-1], interval)

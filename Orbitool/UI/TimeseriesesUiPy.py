@@ -17,7 +17,7 @@ from ..structures.HDF5 import StructureListView
 from ..structures.spectrum import MassListItem, Spectrum
 from ..structures.timeseries import TimeSeries
 from ..utils.formula import Formula
-from ..utils.time_convert import getTimesExactToS
+from ..utils.time_format.time_convert import getTimesExactToS
 from . import TimeseriesesUi
 from .component import Plot, factory
 from .manager import Manager, MultiProcess, state_node

@@ -3,7 +3,7 @@ from typing import Optional
 
 from PyQt5 import QtWidgets
 
-from ..utils.time_convert import getTimesExactToS
+from ..utils.time_format.time_convert import getTimesExactToS
 from . import TimeseriesUi
 from .manager import Manager, state_node
 from .utils import savefile

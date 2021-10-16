@@ -410,6 +410,14 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2021.10.15 version 2.1.2**
+
++ Add period average
++ change read datetime method, auto determine time format
+
++ Bug fix
+  + file rtol is omit by mistake after ver 2.0.2
+
 **2021.09.27 version 2.1.1**
 
 + Add atoms type for mass defect, like
