@@ -10,6 +10,8 @@ class PolynomialRegressionFunc(BaseStructure):
 
     @classmethod
     def FactoryFit(cls, mz: np.ndarray, rtol: np.ndarray, degree):
+        if len(mz) < degree:
+            raise ValueError(f"need more point to fit, have {len(mz)} points")
         poly_coef = polynomial.polyfit(mz, rtol, degree)
         return cls(poly_coef)
 

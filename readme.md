@@ -9,9 +9,22 @@
 
 ## Run by python
 
-please view requirements.txt
++ install python 3.8.10
++ please view requirements.txt
++ copy those dlls to Orbitool/utils/readers
+  + ThermoFisher.CommonCore.BackgroundSubtraction.dll
+  + ThermoFisher.CommonCore.Data.dll
+  + ThermoFisher.CommonCore.MassPrecisionEstimator.dll
+  + ThermoFisher.CommonCore.RawFileReader.dll
++ python Main.py
 
 # Try
+
+## Download
+
+[download link](https://orbitrap.catalyse.cnrs.fr/download-link/)
+
+## Procedure
 
 Open "Orbitool.exe"
 
@@ -409,6 +422,11 @@ If you meet any bugs, please let me know. You can send me the 'log.txt' file whi
 mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huang"\<<huangc@saes.sh.cn>\>
 
 ## log
+
+**2021.11.08 version 2.1.3**
+
++ Bug fix
+  + while mass resolution is float number
 
 **2021.10.15 version 2.1.2**
 

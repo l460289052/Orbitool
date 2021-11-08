@@ -48,7 +48,8 @@ class File:
         self.name = os.path.split(fullname)[1]
         self.rawfile = initRawFile(fullname)
 
-        time = self.rawfile.FileHeader.CreationDate # time doesn't contain time zone info
+        # time doesn't contain time zone info
+        time = self.rawfile.FileHeader.CreationDate
         self.creationDatetime = datetime(year=time.Year, month=time.Month, day=time.Day, hour=time.Hour,
                                          minute=time.Minute, second=time.Second, microsecond=time.Millisecond * 1000)
         self.startTimedelta = timedelta(
@@ -57,7 +58,7 @@ class File:
             minutes=self.rawfile.RunHeader.EndTime)
         self.firstScanNumber = self.rawfile.RunHeader.FirstSpectrum
         self.lastScanNumber = self.rawfile.RunHeader.LastSpectrum
-        self.massResolution = int(
+        self.massResolution = float(
             self.rawfile.GetTrailerExtraInformation(1).Values[11])
 
     @property
