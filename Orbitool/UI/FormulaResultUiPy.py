@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import List
 
 from PyQt5 import QtWidgets, QtCore
@@ -23,7 +24,7 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
 
         self.lineEdit.setText(input)
         self.mass = mass
-        self.formulas = formulas
+        self.formulas = deepcopy(formulas)
         self.peak_index = peak_index
 
         self.showResult()

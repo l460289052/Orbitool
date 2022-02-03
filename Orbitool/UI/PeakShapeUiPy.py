@@ -61,7 +61,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
         self.plot.canvas.mpl_connect('motion_notify_event', self.mouseMove)
 
     def restore(self):
-        self.showNormPeaks()
+        self.showNormedPeaks()
         self.peak_shape.ui_state.set_state(self)
 
     def updateState(self):
@@ -81,7 +81,7 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
     def cancel(self):
         self.peak_shape.info.peaks_manager.cancel()
 
-        self.showNormPeaks()
+        self.showNormedPeaks()
 
     def showPeak(self):
         info = self.peak_shape.info
@@ -111,9 +111,9 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
 
         info.peaks_manager, info.func = yield generate_peak_manager, "manage peaks"
 
-        self.showNormPeaks()
+        self.showNormedPeaks()
 
-    def showNormPeaks(self):
+    def showNormedPeaks(self):
         ax = self.plot.ax
         ax.clear()
         if self.peak_shape.info.peaks_manager is None:

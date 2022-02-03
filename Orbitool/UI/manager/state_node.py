@@ -139,7 +139,6 @@ class node:
         if func is None:
             return
         self._func = func
-        self._cached = None
         self.except_node = node(
             self._root, self, NodeType.Except, mode='a' if self._mode != 'e' else 'e')
 
@@ -147,9 +146,8 @@ class node:
         self.func = func
         return self._root
 
+    @functools.lru_cache()
     def __get__(self, obj, objtype=None):
         if obj is None or isinstance(obj, node):
             return self
-        if self._cached is None:
-            self._cached = functools.partial(self.func, obj)
-        return self._cached
+        return functools.partial(self.func, obj)
