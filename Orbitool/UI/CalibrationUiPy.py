@@ -457,9 +457,9 @@ class SplitAndFitPeak(MultiProcess):
             peaks = spectrum_func.splitPeaks(mz_, intensity_)
 
             # intensity filter for noise
-            # don't fit noise
             peaks = [peak for peak in peaks if peak.maxIntensity > 100]
 
+            # find highest peak within rtol
             find = False
             if len(peaks) > 0:
                 indexes = np.argsort(peak.maxIntensity for peak in peaks)

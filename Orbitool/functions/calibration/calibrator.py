@@ -54,8 +54,9 @@ class Calibrator(BaseStructure):
             select: np.ndarray = abs(ion / position - 1) < rtol
             select &= ~np.isnan(position)
             if select.sum():
-                position = position[select]
-            ions_position.append(position.mean())
+                ions_position.append(position[select].mean())
+            else:
+                ions_position.append(np.nan)
 
         ions_position = np.array(ions_position, dtype=float)
 
@@ -68,6 +69,12 @@ class Calibrator(BaseStructure):
         abs_rtol_minarg = abs(ions_rtol).argsort()
         min_indexes = abs_rtol_minarg[:use_N_ions]
         max_indexes = abs_rtol_minarg[use_N_ions:][::-1]
+
+        if np.isnan(ions_rtol[min_indexes]).sum():
+            missing = [ion.shown_text for ion, slt in zip(
+                ions, np.isnan(ions_rtol)) if slt]
+            raise ValueError(
+                f"Cannot find enough ions to fit, missing ions: {missing}")
 
         return Calibrator(time, ions, ions_raw_position, ions_raw_intensity, ions_position,
                           ions_rtol, min_indexes, max_indexes)

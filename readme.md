@@ -423,6 +423,14 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2022.02.03 version 2.1.4**
+
++ Bug fix
+  + re-calculate norm peak after removing lines from peak shape tab
+  + some problems about mass calculator
++ Refine
+  + will report missing ions when failed to fit
+
 **2021.11.08 version 2.1.3**
 
 + Bug fix

@@ -48,15 +48,9 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     def setupUi(self, Form):
         super().setupUi(Form)
 
-        # combox
-        self.filterTagComboBox.addItems([tag.name for tag in PeakTags])
-        self.addTagComboBox.addItems([tag.name for tag in PeakTags])
-        self.fitComboBox.addItem("standard calc", FitMethod.restricted_calc)
-        self.fitComboBox.addItem("unrestricted calc", FitMethod.force_calc)
-        self.fitComboBox.addItem("mass list", FitMethod.mass_list)
+        self.showSelectedPushButton.clicked.connect(self.showSelect)
 
         # filters
-        self.showSelectedPushButton.clicked.connect(self.showSelect)
         self.filterSelectYToolButton.clicked.connect(self.filterSelected)
         self.filterSelectNToolButton.clicked.connect(self.filterUnselected)
         self.filterFormulaYToolButton.clicked.connect(
@@ -88,6 +82,13 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         # clear
         self.filterClearPushButton.clicked.connect(self.filterClear)
+
+        # combox
+        self.filterTagComboBox.addItems([tag.name for tag in PeakTags])
+        self.addTagComboBox.addItems([tag.name for tag in PeakTags])
+        self.fitComboBox.addItem("standard calc", FitMethod.restricted_calc)
+        self.fitComboBox.addItem("unrestricted calc", FitMethod.force_calc)
+        self.fitComboBox.addItem("mass list", FitMethod.mass_list)
 
         # actions
         self.replotPushButton.clicked.connect(self.replot_within_peaks)
