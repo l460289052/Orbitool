@@ -105,8 +105,8 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
                 except:
                     pass
             manager = peakfit_func.PeaksManager(norm_peaks)
-            func = peakfit_func.normal_distribution.NormalDistributionFunc.Factory_FromParams(
-                [peak.fitted_param for peak in norm_peaks])
+            func = peakfit_func.normal_distribution.NormalDistributionFunc.FromNormPeaks(
+                norm_peaks)
             return manager, func
 
         info.peaks_manager, info.func = yield generate_peak_manager, "manage peaks"
@@ -178,6 +178,8 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
                         for index in indexes:
                             line = ax.lines.pop(index)
                             del line
+                        info.func = peakfit_func.normal_distribution.NormalDistributionFunc.FromNormPeaks(
+                            info.peaks_manager.peaks)
                         self.plotNormPeak()
 
                 animation.animation._stop()

@@ -44,7 +44,7 @@ class NormalDistributionFunc(BaseFunc):
         self.peak_fit_res = res
 
     @classmethod
-    def Factory_FromParams(cls, params: List[tuple]):
+    def FromParams(cls, params: List[tuple]):
         params = np.array(params, dtype=np.float)
         peak_position = params[:, 1]
         peak_sigma = params[:, 2]
@@ -54,6 +54,10 @@ class NormalDistributionFunc(BaseFunc):
         peak_fit_res = 1 / \
             (2 * math.sqrt(2 * math.log(2)) * peak_fit_sigma)
         return cls(peak_fit_sigma, peak_fit_res)
+
+    @classmethod
+    def FromNormPeaks(cls, peaks: List[FittedPeak]):
+        return cls.FromParams([peak.fitted_param for peak in peaks])
 
     def mergePeaks(self, peak1: FittedPeak, peak2: FittedPeak) -> FittedPeak:
         param = mergePeaksParam(peak1.fitted_param, peak2.fitted_param)
