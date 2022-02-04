@@ -1,4 +1,5 @@
 from __future__ import annotations
+from contextlib import contextmanager
 
 import random
 import weakref
@@ -72,6 +73,17 @@ class Manager(QObject):
     @property
     def busy(self):
         return self._busy
+
+    @contextmanager
+    def not_check(self):
+        busy = self.busy
+        self.set_busy(False)
+        try:
+            yield
+        except:
+            raise
+        finally:
+            self.set_busy(busy)
 
 
 T = TypeVar("T")

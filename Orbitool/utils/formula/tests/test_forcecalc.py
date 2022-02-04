@@ -1,4 +1,5 @@
 from .. import ForceCalc, Formula
+from Orbitool.utils import formula
 
 
 def test_forcecalc1():
@@ -48,6 +49,19 @@ def test_forcecalc3():
 
 def test_forcecalc4():
     calc = ForceCalc()
+    calc['C'] = 20
+    calc['H'] = 40
+    calc['C[13]'] = 3
+    calc['N'] = 5
+    calc['O'] = 999
+    calc['O[18]'] = 3
+    calc['H[2]'] = 10
+    ret = calc.get(242.158, Formula("-"))
+    assert Formula('C10H6H[2]10O6-') in ret
+
+
+def test_forcecalc5():
+    calc = ForceCalc()
     calc['N'] = 999
     f = Formula('CH4+')  # +
     assert f in calc.get(f.mass(), base_group=Formula("+"))
@@ -66,6 +80,7 @@ def test_basegroup():
     assert f in calc.get(f.mass(), base_group=Formula("NO3"))
     f = Formula("HNO3")
     assert f in calc.get(f.mass(), base_group=Formula("HNO3"))
+
 
 def test_basegroup_nonisotope():
     calc = ForceCalc()

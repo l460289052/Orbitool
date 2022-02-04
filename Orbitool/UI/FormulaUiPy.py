@@ -116,9 +116,12 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
 
     @state_node(withArgs=True)
     def calc(self, force: bool):
+        manager = self.manager
+        with manager.not_check():
+            self.applyChange()
+
         text = self.inputLineEdit.text()
 
-        manager = self.manager
         if manager.formulas_result_win is not None:
             manager.formulas_result_win.close()
             del manager.formulas_result_win
