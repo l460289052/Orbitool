@@ -15,6 +15,7 @@ class NodeType(Enum):
     Except = 1
     ThreadEnd = 2
 
+
 # w x a n
 # n: no set and no reset
 _busy_check = {'w'}
@@ -146,7 +147,7 @@ class node:
         self.func = func
         return self._root
 
-    @functools.lru_cache()
+    @functools.lru_cache(None)
     def __get__(self, obj, objtype=None):
         if obj is None or isinstance(obj, node):
             return self
