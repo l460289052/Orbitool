@@ -1,6 +1,6 @@
+from functools import partial
 import math
 from enum import Enum
-from datetime import datetime
 from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 from itertools import chain
 
@@ -45,16 +45,16 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         self.plot = Plot(self.widget)
 
+        self.separatorListWidget.itemDoubleClicked.connect(self.changeSegment)
+        self.separatorListWidget.mouseReleaseEvent = self.mouseRelease
+        self.separatorAddPushButton.clicked.connect(self.addSegment)
+
         self.addIonToolButton.clicked.connect(self.addIon)
         self.delIonToolButton.clicked.connect(self.removeIon)
         self.calcInfoPushButton.clicked.connect(self.calcInfo)
         self.finishPushButton.clicked.connect(
             lambda: self.calibrate(skip=False))
         self.skipPushButton.clicked.connect(lambda: self.calibrate(skip=True))
-
-        self.showSpectrumPushButton.clicked.connect(self.showSpectrum)
-        self.showSelectedPushButton.clicked.connect(self.showSelected)
-        self.showAllPushButton.clicked.connect(self.showAllInfoClicked)
 
         self.previousIonsShortCut = QtWidgets.QShortcut("Left", self)
         self.previousIonsShortCut.activated.connect(lambda: self.next_ion(-1))
@@ -66,7 +66,8 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         return self.manager.workspace.calibration_tab
 
     def restore(self):
-        self.showIons()
+        self.showSegments()
+        self.showCurrentSegment()
         self.calibration.ui_state.set_state(self)
 
     def updateState(self):
@@ -75,20 +76,98 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             self.degreeSpinBox,
             self.nIonsSpinBox])
 
-    def showIons(self):
+    def showSegments(self):
+        workspace = self.manager.workspace
+        begin_point = workspace.formula_docker.info.mz_min
+        end_point = workspace.formula_docker.info.mz_max
+
+        listwidget = self.separatorListWidget
+        listwidget.clear()
+        points = [
+            seg.end_point for seg in self.calibration.info.calibrator_segments]
+        points.pop()
+        for begin, end in zip([begin_point, *points], [*points, end_point]):
+            listwidget.addItem("{:.2f}-{:.2f}".format(begin, end))
+
+    def showCurrentSegment(self):
         info = self.calibration.info
+        ind = info.current_segment_index
+        self.separatorListWidget.setCurrentRow(ind)
+        seg = info.calibrator_segments[ind]
         table = self.tableWidget
         table.clearContents()
-        table.setRowCount(len(info.ions))
-        for index, ion in enumerate(info.ions):
+        table.setRowCount(len(seg.ions))
+        for index, ion in enumerate(seg.ions):
             table.setItem(index, 0, QtWidgets.QTableWidgetItem(ion.shown_text))
             table.setItem(
                 index, 1, QtWidgets.QTableWidgetItem(format(ion.formula.mass(), ".4f")))
 
+        self.rtolDoubleSpinBox.setValue(seg.rtol * 1e6)
+        self.degreeSpinBox.setValue(seg.degree)
+        self.nIonsSpinBox.setValue(seg.n_ions)
+
+    def saveCurrentSegment(self):
+        info = self.calibration.info
+        seg = info.calibrator_segments[info.current_segment_index]
+        seg.rtol = self.rtolDoubleSpinBox.value() * 1e-6
+        seg.degree = self.degreeSpinBox.value()
+        seg.n_ions = self.nIonsSpinBox.value()
+
+    @state_node
+    def addSegment(self):
+        separator = self.separatorDoubleSpinBox.value()
+        formula_info = self.manager.workspace.formula_docker.info
+        assert formula_info.mz_min < separator < formula_info.mz_max, "please check mz range in formula docker"
+        self.calibration.info.add_segment(separator)
+        self.showSegments()
+        self.showCurrentSegment()
+
+    @state_node(mode='n', withArgs=True)
+    def mouseRelease(self, e: QtGui.QMouseEvent):
+        indexes = [ind.row()
+                   for ind in self.separatorListWidget.selectedIndexes()]
+        if len(indexes) > 1:
+            menu = QtWidgets.QMenu(self)
+
+            merge = QtWidgets.QAction('merge', menu)
+
+            func = partial(self.mergeSegment, indexes)
+            merge.triggered.connect(lambda: func())
+            menu.addAction(merge)
+            menu.popup(e.globalPos())
+        return QtWidgets.QListWidget.mouseReleaseEvent(self.separatorListWidget, e)
+
+    @state_node(withArgs=True)
+    def mergeSegment(self, indexes: List[int]):
+        ma = max(indexes)
+        mi = min(indexes)
+        assert ma - mi == len(indexes) - \
+            1, "cannot merge unjoined segments"
+        info = self.calibration.info
+        info.merge_segment(mi, ma + 1)
+        if mi < info.current_segment_index:
+            if info.current_segment_index <= ma:
+                info.current_segment_index = mi
+            else:
+                info.current_segment_index -= ma - mi
+
+        self.showSegments()
+        self.showCurrentSegment()
+
+    @state_node(withArgs=True)
+    def changeSegment(self, item: QtWidgets.QListWidgetItem):
+        # save
+
+        ind = self.separatorListWidget.row(item)
+        self.calibration.info.current_segment_index = ind
+
+        self.showCurrentSegment()
+
     @state_node
     def addIon(self):
+        # check range
         self.calibration.info.add_ions(self.ionLineEdit.text().split(','))
-        self.showIons()
+        self.showCurrentSegment()
 
     @state_node
     def removeIon(self):
@@ -96,7 +175,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         ions = self.calibration.info.ions
         for index in reversed(indexes):
             ions.pop(index)
-        self.showIons()
+        self.showCurrentSegment()
 
     @state_node
     def calcInfo(self):
@@ -105,6 +184,9 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         info = calibration_tab.info
 
         intensity_filter = 100
+        self.saveCurrentSegment()
+
+        # 需要为每个校准器都使用以下的步骤！
         rtol = self.rtolDoubleSpinBox.value() * 1e-6
         degree = self.degreeSpinBox.value()
         use_N_ions = self.nIonsSpinBox.value()
