@@ -5,6 +5,7 @@ from typing import List, Tuple
 import numpy as np
 from numpy.polynomial import polynomial
 
+from ...structures.HDF5 import NdArray
 from ...structures import BaseStructure, BaseRowItem, Row
 from ...structures.spectrum import Spectrum
 from ...utils.formula import Formula
@@ -25,6 +26,17 @@ class Ion(BaseRowItem):
         return self.formula == other.formula
 
 
+class SpectrumIonInfo(BaseRowItem):
+    item_name = "calibration spectrum ion info"
+    formula: Formula
+
+    raw_position: NdArray[float, -1]
+    raw_intensity: NdArray[float, -1]
+
+    position: float
+    rtol: float
+
+
 class Calibrator(BaseStructure):
     """
         ions_raw_position: shape (len(spectrum), len(ions))
@@ -36,12 +48,6 @@ class Calibrator(BaseStructure):
     h5_type = "calibrator"
 
     time: datetime
-    ions: Row[Ion]
-    ions_raw_position: np.ndarray
-    ions_raw_intensity: np.ndarray
-
-    ions_position: np.ndarray
-    ions_rtol: np.ndarray
 
     used_indexes: np.ndarray = None
     unused_indexes: np.ndarray = None
@@ -93,7 +99,7 @@ class Calibrator(BaseStructure):
         self.unused_indexes = unused_indexes
 
         raise NotImplementedError()
-        self.poly_coef = ...  
+        self.poly_coef = ...
 
     def predict_rtol(self, mz: np.ndarray):
         assert self.poly_coef is not None
