@@ -6,7 +6,7 @@ import itertools
 import numpy as np
 
 
-from ..functions.calibration import Ion, SpectrumIonInfo, Calibrator, PolynomialRegressionFunc
+from ..functions.calibration import Ion, SpectrumIonInfo, Calibrator
 from ..utils.formula import Formula
 from ..structures import BaseStructure, BaseRowItem, field, Row
 from ..structures.spectrum import Spectrum, SpectrumInfo
@@ -38,11 +38,12 @@ class CalibratorInfo(BaseStructure):
 
     rtol: float = 2e-6
     ions: Row[Ion] = field(default_ions)
+    last_ions: Row[Ion] = field(list)
 
-    spectrum_ion_infos: Row[SpectrumIonInfo] = field(list)
     calibrate_info_segments: List[CalibratorInfoSegment] = field(
         lambda: [CalibratorInfoSegment()])
-    last_calibrate_info_segments: List[CalibratorInfoSegment] = field(list)
+
+    spectrum_ion_infos: Dict[str, Dict[Formula, SpectrumIonInfo]] = field(dict)
     calibrator_segments: Dict[str, List[Calibrator]] = field(
         dict)  # path -> [calibrator for each segments]
     calibrated_spectrum_infos: Row[SpectrumInfo] = field(
@@ -90,20 +91,24 @@ class CalibratorInfo(BaseStructure):
         """
             return [formula for each ion need to be split]
         """
-
-        pass
+        need_split = [
+            ion.formula for ion in self.ions if ion.formula not in self.last_ions]
+        return need_split
 
     def done_split(self, path_ions_peak: Dict[str, List[List[Tuple[float, float]]]]):
         """
             path_ions_peak: {path: [[(position, intensity) for each ion] for each spectrum in path]}
         """
-        pass
-
-    def need_calibrate(self):
-        pass
-
-    def done_calibrate(self):
-        pass
+        formulas = self.need_split()
+        for path, ions_peak in path_ions_peak.items():
+            ion_infos = self.spectrum_ion_infos.setdefault(path, {})
+            # shape: (len(spectra), len(ions), 2)
+            ions_peak = np.array(ions_peak, dtype=np.float64)
+            for index, formula in enumerate(formulas):
+                ion_infos[formula] = SpectrumIonInfo.fromRaw(
+                    formula,
+                    ions_peak[:, index, 0],
+                    ions_peak[:, index, 1])
 
 
 class Widget(BaseWidget[CalibratorInfo]):

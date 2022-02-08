@@ -11,7 +11,7 @@ import matplotlib.ticker
 from Orbitool.workspace import file_tab
 
 from ..functions import spectrum as spectrum_func, binary_search, peakfit as peakfit_func
-from ..functions.calibration import Calibrator, PolynomialRegressionFunc
+from ..functions.calibration import Calibrator
 from ..functions.peakfit.normal_distribution import NormalDistributionFunc
 from ..structures.HDF5 import StructureListView
 from ..structures.spectrum import Spectrum, SpectrumInfo
@@ -187,56 +187,28 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         intensity_filter = 100
         self.saveCurrentSegment()
 
+        rtol = self.rtolDoubleSpinBox.value() * 1e-6
+        if abs(info.rtol / rtol - 1) > 1e-6:
+            formulas = [ion.formula for ion in info.ions]
+        else:
+            formulas = info.need_split()
+
         raw_spectra = workspace.file_tab.raw_spectra
 
-        need_split_index = [index
-                            for index, cali_info in enumerate(info.calibrate_info_segments)
-                            if cali_info.need_split()]
-
-        if need_split_index:
-            ion_indexes = []
-            ion_rtol_pairs: List[Tuple[float, float]] = []
-
-            for index in need_split_index:
-                cali_info = info.calibrate_info_segments[index]
-                ion_indexes.extend([index] * len(cali_info.ions))
-                ion_rtol_pairs.extend(
-                    (ion.formula.mass(), cali_info.rtol) for ion in cali_info.ions)
-            ion_indexes = np.array(ion_indexes)
-
+        if formulas:
             func = SplitAndFitPeak(
                 raw_spectra,
                 func_kwargs=dict(
                     fit_func=workspace.peak_shape_tab.info.func,
-                    ion_rtol_pairs=ion_rtol_pairs,
+                    ions=[formula.mass() for formula in formulas],
+                    rtol=rtol,
                     intensity_filter=intensity_filter))
 
             path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = yield func, "split and fit target peaks"
 
-            path_time = {
-                path.path: path.createDatetime for path in workspace.file_tab.info.pathlist}
-            for path, ions_peak in path_ions_peak.items():
-                t = path_time[path]
-                # shape: (len(spectra), len(ions), 2)
-                ions_peak = np.array(ions_peak, dtype=np.float64)
-                calibrators = info.calibrator_segments.setdefault(path, [])
-                if calibrators:
-                    pass
-                    # for
-                else:  # all
-                    for index, cali_info in enumerate(info.calibrate_info_segments):
-                        slt = ion_indexes == index
-                        ions_position = ions_peak[:, slt, 0]
-                        ions_intensity = ions_peak[:, slt, 1]
-                        calibrators.append(Calibrator.fromMzInt(
-                            t,
-                            cali_info.ions,
-                            ions_position,
-                            ions_intensity))
-
-        for index in need_split_index:
-            cali_info = info.calibrate_info_segments[index]
-            cali_info.done_split()
+            def func():
+                info.done_split(path_ions_peak)
+            yield func, "calculate ions points"
 
         need_calibrate_index = [index
                                 for index, cali_info in enumerate(info.calibrate_info_segments)
@@ -525,11 +497,11 @@ class SplitAndFitPeak(MultiProcess):
         return len(h5_spectra)
 
     @staticmethod
-    def func(data: Spectrum, fit_func: NormalDistributionFunc, ion_rtol_pairs: List[Tuple[float, float]], intensity_filter: float, **kwargs):
+    def func(data: Spectrum, fit_func: NormalDistributionFunc, ions: List[float], rtol: float, intensity_filter: float, **kwargs):
         ions_peak: List[Tuple[float, float]] = []
         mz = data.mz
         intensity = data.intensity
-        for ion, rtol in ion_rtol_pairs:
+        for ion, rtol in ions:
             delta = ion * rtol
             mz_, intensity_ = spectrum_func.safeCutSpectrum(
                 mz, intensity, ion - delta, ion + delta)
@@ -578,7 +550,7 @@ class SplitAndFitPeak(MultiProcess):
 
 class CalibrateMergeDenoise(MultiProcess):
     @staticmethod
-    def read(file: WorkSpace, **kwargs) -> Generator[List[Tuple[Spectrum, PolynomialRegressionFunc]], Any, Any]:
+    def read(file: WorkSpace, **kwargs) -> Generator[List[Tuple[Spectrum, Calibrator]], Any, Any]:
         batch = []
         file_tab = file.file_tab
         funcs = file.calibration_tab.info.poly_funcs
@@ -600,7 +572,7 @@ class CalibrateMergeDenoise(MultiProcess):
         return cnt
 
     @staticmethod
-    def func(data: List[Tuple[Spectrum, PolynomialRegressionFunc]],
+    def func(data: List[Tuple[Spectrum, Calibrator]],
              noise_skip: bool, calibrate_skip: bool, rtol: float,
              quantile: float, mass_dependent: bool, n_sigma: bool,
              dependent: bool, points: np.ndarray, deltas: np.ndarray,
