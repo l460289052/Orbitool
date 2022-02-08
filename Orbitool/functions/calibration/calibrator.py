@@ -1,8 +1,9 @@
 import heapq
 from datetime import datetime
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
+from numpy.polynomial import polynomial
 
 from ...structures import BaseStructure, BaseRowItem, Row
 from ...structures.spectrum import Spectrum
@@ -17,7 +18,11 @@ class Ion(BaseRowItem):
 
     @classmethod
     def fromText(cls, text):
-        return Ion(shown_text=text, formula=Formula(text))
+        return Ion(text, Formula(text))
+
+    def __eq__(self, other):
+        assert isinstance(other, Ion)
+        return self.formula == other.formula
 
 
 class Calibrator(BaseStructure):
@@ -37,11 +42,13 @@ class Calibrator(BaseStructure):
 
     ions_position: np.ndarray
     ions_rtol: np.ndarray
-    min_indexes: np.ndarray
-    max_indexes: np.ndarray
+
+    used_indexes: np.ndarray = None
+    unused_indexes: np.ndarray = None
+    poly_coef: np.ndarray = None
 
     @classmethod
-    def fromMzInt(cls, time: datetime, ions: List[Ion], ions_raw_position: np.ndarray, ions_raw_intensity: np.ndarray, rtol: float = 5e-6, use_N_ions=None):
+    def fromMzInt(cls, time: datetime, ions: List[Ion], ions_raw_position: np.ndarray, ions_raw_intensity: np.ndarray):
         """
         ions_raw_position: shape (len(spectrum), len(ions))
         ions_raw_intensity: shape (len(spectrum), len(ions))
@@ -51,8 +58,7 @@ class Calibrator(BaseStructure):
         ions_position = []
         for index, ion in enumerate(ions_mz):
             position: np.ndarray = ions_raw_position[:, index]
-            select: np.ndarray = abs(ion / position - 1) < rtol
-            select &= ~np.isnan(position)
+            select = ~np.isnan(position)
             if select.sum():
                 ions_position.append(position[select].mean())
             else:
@@ -62,22 +68,37 @@ class Calibrator(BaseStructure):
 
         ions_rtol: np.ndarray = 1 - ions_mz / ions_position
 
+        return Calibrator(time, ions, ions_raw_position, ions_raw_intensity, ions_position,
+                          ions_rtol)
+
+    def regeneratCalibrator(self, use_N_ions=None):
+        return self.fromMzInt(self.time, self.ions, self.ions_raw_position, self.ions_raw_intensity, rtol, use_N_ions)
+
+    def fit(self, use_N_ions: int, degree: int, last_point: Tuple[float, float]):
+        ions_rtol = self.ions_rtol
         length = len(ions_rtol)
-        if use_N_ions is None or length < use_N_ions:
+        if length < use_N_ions:
             use_N_ions = length
 
         abs_rtol_minarg = abs(ions_rtol).argsort()
-        min_indexes = abs_rtol_minarg[:use_N_ions]
-        max_indexes = abs_rtol_minarg[use_N_ions:][::-1]
+        used_indexes = abs_rtol_minarg[:use_N_ions]
+        unused_indexes = abs_rtol_minarg[use_N_ions:]
 
-        if np.isnan(ions_rtol[min_indexes]).sum():
+        if any(np.isnan(ions_rtol[used_indexes])):
             missing = [ion.shown_text for ion, slt in zip(
-                ions, np.isnan(ions_rtol)) if slt]
+                self.ions, np.isnan(ions_rtol)) if slt]
             raise ValueError(
                 f"Cannot find enough ions to fit, missing ions: {missing}")
+        self.used_indexes = used_indexes
+        self.unused_indexes = unused_indexes
 
-        return Calibrator(time, ions, ions_raw_position, ions_raw_intensity, ions_position,
-                          ions_rtol, min_indexes, max_indexes)
+        raise NotImplementedError()
+        self.poly_coef = ...  
 
-    def regeneratCalibrator(self, rtol: float = 5e-6, use_N_ions=None):
-        return self.fromMzInt(self.time, self.ions, self.ions_raw_position, self.ions_raw_intensity, rtol, use_N_ions)
+    def predict_rtol(self, mz: np.ndarray):
+        assert self.poly_coef is not None
+        return polynomial.polyval(mz, self.poly_coef)
+
+    def calibrate_mz(self, mz: np.ndarray):
+        assert self.poly_coef is not None
+        return mz * (1 - polynomial.polyval(mz, self.poly_coef))

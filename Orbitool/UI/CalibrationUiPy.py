@@ -84,7 +84,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         listwidget = self.separatorListWidget
         listwidget.clear()
         points = [
-            seg.end_point for seg in self.calibration.info.calibrator_segments]
+            seg.end_point for seg in self.calibration.info.calibrate_info_segments]
         points.pop()
         for begin, end in zip([begin_point, *points], [*points, end_point]):
             listwidget.addItem("{:.2f}-{:.2f}".format(begin, end))
@@ -93,25 +93,25 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         info = self.calibration.info
         ind = info.current_segment_index
         self.separatorListWidget.setCurrentRow(ind)
-        seg = info.calibrator_segments[ind]
+        seg = info.calibrate_info_segments[ind]
         table = self.tableWidget
         table.clearContents()
-        table.setRowCount(len(seg.ions))
-        for index, ion in enumerate(seg.ions):
+        table.setRowCount(len(seg.shown_ions))
+        for index, ion in enumerate(seg.shown_ions):
             table.setItem(index, 0, QtWidgets.QTableWidgetItem(ion.shown_text))
             table.setItem(
                 index, 1, QtWidgets.QTableWidgetItem(format(ion.formula.mass(), ".4f")))
 
-        self.rtolDoubleSpinBox.setValue(seg.rtol * 1e6)
-        self.degreeSpinBox.setValue(seg.degree)
-        self.nIonsSpinBox.setValue(seg.n_ions)
+        self.rtolDoubleSpinBox.setValue(seg.shown_rtol * 1e6)
+        self.degreeSpinBox.setValue(seg.shown_degree)
+        self.nIonsSpinBox.setValue(seg.shown_n_ions)
 
     def saveCurrentSegment(self):
         info = self.calibration.info
-        seg = info.calibrator_segments[info.current_segment_index]
-        seg.rtol = self.rtolDoubleSpinBox.value() * 1e-6
-        seg.degree = self.degreeSpinBox.value()
-        seg.n_ions = self.nIonsSpinBox.value()
+        seg = info.calibrate_info_segments[info.current_segment_index]
+        seg.shown_rtol = self.rtolDoubleSpinBox.value() * 1e-6
+        seg.shown_degree = self.degreeSpinBox.value()
+        seg.shown_n_ions = self.nIonsSpinBox.value()
 
     @state_node
     def addSegment(self):
@@ -172,7 +172,9 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
     @state_node
     def removeIon(self):
         indexes = get_tablewidget_selected_row(self.tableWidget)
-        ions = self.calibration.info.ions
+        info = self.calibration.info
+        seg = info.calibrate_info_segments[info.current_segment_index]
+        ions = seg.shown_ions
         for index in reversed(indexes):
             ions.pop(index)
         self.showCurrentSegment()
@@ -186,70 +188,19 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         intensity_filter = 100
         self.saveCurrentSegment()
 
-        # 需要为每个校准器都使用以下的步骤！
-        rtol = self.rtolDoubleSpinBox.value() * 1e-6
-        degree = self.degreeSpinBox.value()
-        use_N_ions = self.nIonsSpinBox.value()
+        need_split_index = [index
+                            for index, cali_info in enumerate(info.calibrate_info_segments)
+                            if cali_info.need_split()]
 
-        raw_spectra = workspace.file_tab.raw_spectra
-        fit_func = workspace.peak_shape_tab.info.func
+        if need_split_index:
+            pass
 
-        # use ions to decide whether to split
-        need_to_split = True
-        if abs(info.rtol / rtol - 1) < 1e-6 and len(info.calibrators) > 0:
-            calculator = next(iter(info.calibrators.values()))
-            calculated_ions = {ion.formula for ion in calculator.ions}
-            now_ions = {ion.formula for ion in info.ions}
-            if now_ions == calculated_ions:
-                need_to_split = False
+        need_calibrate_index = [index
+                                for index, cali_info in enumerate(info.calibrate_info_segments)
+                                if cali_info.need_calibrate()]
 
-            for spectrum_info in workspace.file_tab.info.spectrum_infos:
-                if spectrum_info.path not in info.calibrators:
-                    need_to_split = True
-                    break
-        info.rtol = rtol
-
-        if need_to_split:  # read ions from spectrum
-            path_time = {
-                path.path: path.createDatetime for path in workspace.file_tab.info.pathlist}
-            ions = [ion.formula.mass() for ion in info.ions]
-            split_and_fit = SplitAndFitPeak(
-                raw_spectra,
-                func_kwargs=dict(
-                    fit_func=fit_func, ions=ions, intensity_filter=intensity_filter, rtol=rtol))
-
-            path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = yield split_and_fit, "split and fit target peaks"
-            # file path -> info of a file
-            # shape : len(spectrum of file), len(ions), 2 # position, intensity
-
-            def get_calibrator():
-                path_calibrators: Dict[str, Calibrator] = {}
-
-                for path, ions_peak in path_ions_peak.items():
-                    ions_peak = np.array(ions_peak, dtype=float)
-                    ions_position = ions_peak[:, :, 0]
-                    ions_intensity = ions_peak[:, :, 1]
-                    path_calibrators[path] = Calibrator.fromMzInt(
-                        path_time[path], info.ions, ions_position, ions_intensity, rtol, use_N_ions)
-
-                return path_calibrators
-
-            info.calibrators = yield get_calibrator, "calculate calibrator"
-        else:  # get info directly
-            def get_calibrator_from_calibrator():
-                return {path: calibrator.regeneratCalibrator(rtol, use_N_ions) for path, calibrator in info.calibrators.items()}
-
-            info.calibrators = yield get_calibrator_from_calibrator, "generate calibrator from former calibrator"
-
-        def generate_func_from_calibrator():
-            ret = {}
-            for path, calibrator in info.calibrators.items():
-                min_index = calibrator.min_indexes
-                func = PolynomialRegressionFunc.FactoryFit(
-                    calibrator.ions_position[min_index], calibrator.ions_rtol[min_index], degree)
-                ret[path] = func
-            return ret
-        info.poly_funcs = yield generate_func_from_calibrator, "calculate function from calibrator"
+        if need_calibrate_index:
+            pass
 
         self.showAllInfo()
 
