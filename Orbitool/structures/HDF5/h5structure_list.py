@@ -60,6 +60,7 @@ class StructureList(Generic[T]):
     """
         class FileList(H5File):
             spectrum_list = StructureList(Spectrum)
+        StructureList is storaged in disk, while list storaged in memory.
     """
     def __init__(self, item_type: Type[T]):
         self.item_type = item_type

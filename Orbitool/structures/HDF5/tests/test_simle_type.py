@@ -1,6 +1,6 @@
-import io
+from array import array
 from datetime import datetime
-from typing import List
+from typing import Dict, List
 
 import numpy as np
 import pytest
@@ -9,6 +9,7 @@ from numpy import testing as nptest
 from ...base import field
 from ...base_structure import BaseStructure
 from ...HDF5 import H5File
+from ..h5type_handlers import Array
 from .spectrum import Spectrum
 
 
@@ -72,6 +73,32 @@ def test_some_list_a():
     some_list: SomeList = f.read("list")
     assert some_list.value_a == list(range(1000))
     assert some_list.value_b == [i / 10. for i in range(5)]
+
+
+class DictList(BaseStructure):
+    h5_type = "test dict list"
+    value_a: Dict[str, List[int]] = field(dict)
+    value_b: Dict[str, List[Spectrum]] = field(dict)
+    value_c: Dict[str, Array[float]] = field(dict)
+
+
+def test_dict_list():
+    f = H5File()
+
+    dict_list = DictList()
+
+    dict_list.value_a = {str(i): list(range(i)) for i in range(10)}
+    dict_list.value_b = {str(i): [Spectrum(mz=np.arange(i), intensity=np.arange(
+        i), time=datetime(2000, 1, i + 1))] * i for i in range(10)}
+    dict_list.value_c = {str(i): list(range(i)) for i in range(10)}
+
+    f.write("dict list", dict_list)
+    read_dict_list: DictList = f.read("dict list")
+    assert dict_list.value_a == read_dict_list.value_a
+    assert dict_list.value_b == read_dict_list.value_b
+    for k, v in dict_list.value_c.items():
+        v2 = read_dict_list.value_c[k]
+        assert array('f', v) == v2
 
 
 def test_validator():
