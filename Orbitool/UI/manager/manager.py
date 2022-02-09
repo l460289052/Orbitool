@@ -102,12 +102,17 @@ class TQDM(Generic[T]):
 
     def showMsg(self):
         now = datetime.now()
-        if (now - self.last_show_time).total_seconds() > .1:
+        if (now - self.last_show_time).total_seconds() > .01 or self.length < 1000:
             passed_time = now - self.begin_time
             if self.length > self.now:
-                left_time = passed_time * (self.length - self.now) / self.now
-                minute = int(left_time.total_seconds() / 60)
-                second = format(left_time.total_seconds() % 60, '.2f')
+                if self.now:
+                    left_time = passed_time * \
+                        (self.length - self.now) / self.now
+                    minute = int(left_time.total_seconds() / 60)
+                    second = format(left_time.total_seconds() % 60, '.2f')
+                else:
+                    minute = "inf"
+                    second = "inf"
                 text = f"{self.msg} {self.now}/{self.length} ~{minute}:{second}"
                 percent = 100 * self.now // self.length
             else:

@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING, List
+
 from ...structures import RowDTypeHandler
-from ...structures.HDF5.h5type_handlers import StrHandler
+from ...structures.HDF5.h5type_handlers import StrHandler, AttrHandler
 from ._formula import Formula
 
 if TYPE_CHECKING:
-    class FormulaList(RowDTypeHandler, List[Formula]):
+    class FormulaList(RowDTypeHandler, AttrHandler, List[Formula]):
         pass
 else:
     class FormulaList(StrHandler):
