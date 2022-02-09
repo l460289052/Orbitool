@@ -6,6 +6,7 @@ import numpy as np
 cimport numpy as np
 from Orbitool.functions cimport _binary_search
 import cython
+from libc cimport math
 
 ctypedef np.int32_t int32
 cdef fused floats:
@@ -64,3 +65,26 @@ def safeCutSpectrum(np.ndarray[floats, ndim=1] mz, np.ndarray[floats, ndim=1] in
     return mz[l:r], intensity[l:r]
     
     
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def safeSplitSpectrum(np.ndarray[floats, ndim=1] mz, np.ndarray[floats, ndim=1] intensity, np.ndarray[floats, ndim=1] points):
+    cdef int l, r, length
+    cdef floats point
+    cdef double delta = 1e-9
+    l = 0
+    r = 0
+    length = len(mz)
+    cdef list rets = []
+
+    for point in points:
+        if point == math.INFINITY:
+            break
+        r = _binary_search.indexNearest(mz, point)
+        while r and intensity[r] > delta:
+            r -= 1
+        if r+1 < length and intensity[r+1] < delta:
+            r += 1
+        rets.append(mz[l:r])
+        l = r
+    rets.append(mz[r:])
+    return rets

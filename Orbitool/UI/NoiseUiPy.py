@@ -1,3 +1,4 @@
+from copy import copy
 import csv
 from collections import deque
 from datetime import datetime
@@ -12,7 +13,7 @@ from .. import get_config, workspace
 from ..functions import spectrum as spectrum_func, binary_search
 from ..structures.file import FileSpectrumInfo
 from ..structures.HDF5 import StructureListView
-from ..structures.spectrum import Spectrum, SpectrumInfo
+from ..structures.spectrum import Spectrum
 from ..utils.formula import Formula
 from ..workspace import WorkSpace
 from . import NoiseUi, component
@@ -568,29 +569,36 @@ class ReadFromFile(MultiProcess):
         mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
         spectrum = Spectrum(info.path, mz, intensity,
                             info.start_time, info.end_time)
-        return SpectrumInfo(info.start_time, info.end_time), spectrum
+        return info, spectrum
 
     @staticmethod
     def read(file: WorkSpace, **kwargs) -> Generator:
         rtol = file.file_tab.info.rtol
+        cnt = 0
         for info in file.file_tab.info.spectrum_infos:
             data = info.get_spectrum_from_info(rtol)
+            if info.average_index and info.average_index != cnt:
+                info = copy(info)
+                info.average_index = cnt
             if data is not None:
                 yield info, data
+                cnt = info.average_index + 1
+            else:
+                cnt = info.average_index
 
     @staticmethod
     def read_len(file: WorkSpace, **kwargs) -> int:
         return len(file.file_tab.info.spectrum_infos)
 
     @staticmethod
-    def write(file: WorkSpace, rets: Iterable[Tuple[SpectrumInfo, Spectrum]], **kwargs):
+    def write(file: WorkSpace, rets: Iterable[Tuple[FileSpectrumInfo, Spectrum]], **kwargs):
         tmp = StructureListView[Spectrum](file._obj, "tmp", True)
         infos = []
         for info, spectrum in rets:
             infos.append(info)
             tmp.h5_append(spectrum)
 
-        h5path = file.file_tab.raw_spectra.h5_path
+        h5path = file.noise_tab.raw_spectra.h5_path
         if h5path in file:
             del file[h5path]
         file._obj.move(tmp.h5_path, h5path)

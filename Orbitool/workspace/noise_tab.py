@@ -1,12 +1,12 @@
-from typing import List, Optional
-
 import numpy as np
 
+from .base import Widget as BaseWidget
 from .. import get_config
-from ..utils.formula import Formula
-from ..structures import BaseStructure, BaseRowItem, field, Row
-from ..structures.HDF5 import NdArray
+from ..structures import BaseRowItem, BaseStructure, Row, field
+from ..structures.file import FileSpectrumInfo
+from ..structures.HDF5 import NdArray, StructureList
 from ..structures.spectrum import Spectrum, SpectrumInfo
+from ..utils.formula import Formula
 
 
 class NoiseFormulaParameter(BaseRowItem):
@@ -77,4 +77,11 @@ class NoiseTabInfo(BaseStructure):
 
     general_result: NoiseGeneralResult = field(NoiseGeneralResult)
 
-    denoised_spectrum_infos: Row[SpectrumInfo] = field(list)
+    denoised_spectrum_infos: Row[FileSpectrumInfo] = field(list)
+
+
+class Widget(BaseWidget[NoiseTabInfo]):
+    raw_spectra = StructureList(Spectrum)
+
+    def __init__(self, obj):
+        super().__init__(obj, NoiseTabInfo)

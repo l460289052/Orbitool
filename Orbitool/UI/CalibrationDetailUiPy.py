@@ -63,7 +63,7 @@ class Widget(QtWidgets.QWidget, CalibrationDetailUi.Ui_Form):
         info = self.info()
         if not info.path_ion_infos:
             return
-        spectrum = self.manager.workspace.file_tab.raw_spectra[index]
+        spectrum = self.manager.workspace.noise_tab.raw_spectra[index]
 
         ion_infos = info.path_ion_infos[spectrum.path]
         calibrators = info.calibrator_segments[spectrum.path]

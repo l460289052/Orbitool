@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List, Tuple
 import numpy as np
 
 
@@ -24,5 +24,12 @@ def splitPeaks(mz: np.ndarray, intensity: np.ndarray) -> np.ndarray:
 def safeCutSpectrum(mz: np.ndarray, intensity: np.ndarray, mzMin: float, mzMax: float) -> Tuple[np.ndarray, np.ndarray]:
     """
     return mz, intensity
+    """
+    pass
+
+
+def safeSplitSpectrum(mz: np.ndarray, intensity: np.ndarray, points: np.ndarray) -> List[np.ndarray]:
+    """
+    return [mz split by points]
     """
     pass

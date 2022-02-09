@@ -134,7 +134,7 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
 
         manager = self.manager
         if data == FILE_TAB:
-            spectra = self.manager.workspace.file_tab.raw_spectra
+            spectra = self.manager.workspace.noise_tab.raw_spectra
         elif data == CALIBRATE_TAB:
             spectra = self.manager.workspace.calibration_tab.calibrated_spectra
 

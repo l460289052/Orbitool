@@ -182,7 +182,7 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
+        Form.setWindowTitle(_translate("Form", "Calibration Detail"))
         self.label.setText(_translate("Form", "Segments"))
         self.label_2.setText(_translate("Form", "Spectra List"))
         item = self.spectraTableWidget.horizontalHeaderItem(0)

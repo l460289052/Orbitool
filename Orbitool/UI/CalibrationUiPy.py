@@ -195,7 +195,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         else:
             formulas = info.need_split()
 
-        raw_spectra = workspace.file_tab.raw_spectra
+        raw_spectra = workspace.noise_tab.raw_spectra
 
         if formulas:
             func = SplitAndFitPeak(
@@ -325,7 +325,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         func_kwargs = {
             "noise_skip": noise_skip,
             "calibrate_skip": skip,
-            "rtol": rtol,
+            "average_rtol": rtol,
             "quantile": setting.quantile,
             "mass_dependent": setting.mass_dependent,
             "n_sigma": setting.n_sigma,
@@ -412,29 +412,34 @@ class SplitAndFitPeak(MultiProcess):
 class CalibrateMergeDenoise(MultiProcess):
     @staticmethod
     def read(file: WorkSpace, **kwargs) -> Generator[List[Tuple[Spectrum, Calibrator]], Any, Any]:
+        noise_tab = file.noise_tab
+        separators = np.array([
+            info.end_point for info in file.calibration_tab.info.last_calibrate_info_segments])
+
         batch = []
-        file_tab = file.file_tab
-        funcs = file.calibration_tab.info.poly_funcs
-        for info, spectrum in zip(file_tab.info.spectrum_infos, file_tab.raw_spectra):
-            if info.average_index > 0:
-                batch.append((spectrum, funcs.get(spectrum.path, None)))
+        calibrators_segments = file.calibration_tab.info.calibrator_segments
+        for info, spectrum in zip(noise_tab.info.denoised_spectrum_infos, noise_tab.raw_spectra):
+            item = (spectrum, separators,
+                    calibrators_segments.get(spectrum.path, None))
+            if info.average_index:
+                batch.append(item)
             else:
                 if batch:
                     yield batch
-                batch = [(spectrum, funcs.get(spectrum.path, None))]
+                batch = [item]
         yield batch
 
     @staticmethod
     def read_len(file: WorkSpace, **read_kwargs) -> int:
         cnt = 0
-        for info in file.file_tab.info.spectrum_infos:
+        for info in file.noise_tab.info.denoised_spectrum_infos:
             if info.average_index == 0:
                 cnt += 1
         return cnt
 
     @staticmethod
-    def func(data: List[Tuple[Spectrum, Calibrator]],
-             noise_skip: bool, calibrate_skip: bool, rtol: float,
+    def func(data: List[Tuple[Spectrum, List[float], List[Calibrator]]],
+             noise_skip: bool, calibrate_skip: bool, average_rtol: float,
              quantile: float, mass_dependent: bool, n_sigma: bool,
              dependent: bool, points: np.ndarray, deltas: np.ndarray,
              params: np.ndarray, subtract: bool, poly_coef: np.ndarray) -> Spectrum:
@@ -442,9 +447,12 @@ class CalibrateMergeDenoise(MultiProcess):
         paths = set()
         start_times = []
         end_times = []
-        for spectrum, func in data:
+        for spectrum, separators, calibrators in data:
             if not calibrate_skip:
-                spectrum.mz = func.predictMz(spectrum.mz)
+                mz = []
+                for mz_part, calibrator in zip(spectrum_func.safeSplitSpectrum(spectrum.mz, spectrum.intensity, separators), calibrators):
+                    mz.append(calibrator.calibrate_mz(mz_part))
+                spectrum.mz = np.concatenate(mz)
             spectra.append((spectrum.mz, spectrum.intensity,
                             (spectrum.end_time - spectrum.start_time).total_seconds()))
             paths.add(spectrum.path)
@@ -453,7 +461,7 @@ class CalibrateMergeDenoise(MultiProcess):
 
         path = paths.pop() if len(paths) == 1 else ""
         mz, intensity = spectrum_func.averageSpectra(
-            spectra, rtol, drop_input=True)
+            spectra, average_rtol, drop_input=True)
 
         if not noise_skip:
             if not dependent:

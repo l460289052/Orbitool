@@ -6,11 +6,11 @@ from ..structures import BaseStructure, BaseRowItem
 from ..structures.HDF5 import H5File
 from .base import Widget
 from .calibration import Widget as CalibrationWidget
-from .file_tab import Widget as FileWidget
+from .file_tab import FileTabInfo
 from .formula import FormulaInfo
 from .massdefect import MassDefectInfo
 from .masslist import MassListInfo
-from .noise_tab import NoiseTabInfo
+from .noise_tab import Widget as NoiseWidget
 from .peak_fit import PeakFitInfo
 from .peak_shape import PeakShapeInfo
 from .spectra_list import SpectraListInfo
@@ -21,6 +21,7 @@ T = TypeVar("T")
 
 LAST_SUPPORT_VERSION = "2.0.2"
 VERSION = "2.1.4"
+
 
 class WorkspaceInfo(BaseStructure):
     h5_type = "workspace info"
@@ -35,11 +36,11 @@ class WorkSpace(H5File):
         )
         self.widgets: Dict[str, Widget] = {}
 
-        self.file_tab = self.visit_or_create_widget_specific(
-            "file tab", FileWidget)
+        self.file_tab = self.visit_or_create_widget("file tab", FileTabInfo)
         self.spectra_list = self.visit_or_create_widget(
             "spectra list", SpectraListInfo)
-        self.noise_tab = self.visit_or_create_widget("noise tab", NoiseTabInfo)
+        self.noise_tab = self.visit_or_create_widget_specific(
+            "noise tab", NoiseWidget)
         self.peak_shape_tab = self.visit_or_create_widget(
             "peak shape tab", PeakShapeInfo)
         self.calibration_tab = self.visit_or_create_widget_specific(
