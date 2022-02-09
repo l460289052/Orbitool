@@ -336,8 +336,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         setting = info.general_setting
 
         ret, f = savefile("Save Denoise Spectrum", "CSV file(*.csv)",
-                          f"denoise_spectrum {spectrum.start_time.strftime(get_config().exportTimeFormat)}"
-                          f"-{spectrum.end_time.strftime(get_config().exportTimeFormat)}.csv")
+                          f"denoise_spectrum {spectrum.start_time.strftime(get_config().format_export_time)}"
+                          f"-{spectrum.end_time.strftime(get_config().format_export_time)}.csv")
         if not ret:
             return
 
@@ -369,8 +369,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         spectrum = info.current_spectrum
         setting = info.general_setting
         ret, f = savefile("Save Noise Peak", "CSV file(*.csv)",
-                          f"noise_peak {spectrum.start_time.strftime(get_config().exportTimeFormat)}"
-                          f"-{spectrum.end_time.strftime(get_config().exportTimeFormat)}.csv")
+                          f"noise_peak {spectrum.start_time.strftime(get_config().format_export_time)}"
+                          f"-{spectrum.end_time.strftime(get_config().format_export_time)}.csv")
         if not ret:
             return
 

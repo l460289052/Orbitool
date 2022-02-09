@@ -1,12 +1,11 @@
 from copy import deepcopy
+from datetime import datetime
 from typing import Iterable, List, Dict, Tuple, Union
 import math
-import itertools
 
 import numpy as np
 
-
-from ..functions.calibration import Ion, SpectrumIonInfo, Calibrator
+from ..functions.calibration import Ion, PathIonInfo, Calibrator
 from ..utils.formula import Formula
 from ..structures import BaseStructure, BaseRowItem, field, Row
 from ..structures.spectrum import Spectrum, SpectrumInfo
@@ -43,9 +42,11 @@ class CalibratorInfo(BaseStructure):
     calibrate_info_segments: List[CalibratorInfoSegment] = field(
         lambda: [CalibratorInfoSegment()])
 
-    spectrum_ion_infos: Dict[str, Dict[Formula, SpectrumIonInfo]] = field(dict)
+    path_times: Dict[str, datetime] = field(dict)
+    path_ion_infos: Dict[str, Dict[Formula, PathIonInfo]] = field(dict)
     calibrator_segments: Dict[str, List[Calibrator]] = field(
         dict)  # path -> [calibrator for each segments]
+
     calibrated_spectrum_infos: Row[SpectrumInfo] = field(
         list)  # [calibrated spectrum info for each spectrum]
 
@@ -78,6 +79,17 @@ class CalibratorInfo(BaseStructure):
             right += 1
         return self.ions[left:right]
 
+    def yield_segment_ions(self):
+        ret_ions: List[Ion] = []
+        ion_right = 0
+        ions = self.ions
+        for seg in self.calibrate_info_segments:
+            while ion_right < len(ions) and ions[ion_right].formula.mass() < seg.end_point:
+                ret_ions.append(ions[ion_right])
+                ion_right += 1
+            yield seg, ret_ions
+            ret_ions = []
+
     def add_ions(self, str_ions: List[str]):
         ions = [Ion.fromText(ion) for ion in str_ions]
         s = {ion.formula for ion in self.ions}
@@ -101,14 +113,35 @@ class CalibratorInfo(BaseStructure):
         """
         formulas = self.need_split()
         for path, ions_peak in path_ions_peak.items():
-            ion_infos = self.spectrum_ion_infos.setdefault(path, {})
+            ion_infos = self.path_ion_infos.setdefault(path, {})
             # shape: (len(spectra), len(ions), 2)
             ions_peak = np.array(ions_peak, dtype=np.float64)
             for index, formula in enumerate(formulas):
-                ion_infos[formula] = SpectrumIonInfo.fromRaw(
+                ion_infos[formula] = PathIonInfo.fromRaw(
                     formula,
                     ions_peak[:, index, 0],
                     ions_peak[:, index, 1])
+        self.last_ions = self.ions.copy()
+
+    def calc_calibrator(self):
+        self.calibrator_segments.clear()
+
+        segment_ions = list(self.yield_segment_ions())
+        for path, ion_infos in self.path_ion_infos.items():
+            calibrators = []
+
+            start_point = None
+            for seg_info, ions in segment_ions:
+                cali = Calibrator.fromIonInfos(
+                    ions,
+                    [ion_infos[ion.formula] for ion in ions],
+                    seg_info.n_ions,
+                    seg_info.degree,
+                    start_point)
+                start_point = (seg_info.end_point,
+                               cali.predict_point(seg_info.end_point))
+                calibrators.append(cali)
+            self.calibrator_segments[path] = calibrators
 
 
 class Widget(BaseWidget[CalibratorInfo]):

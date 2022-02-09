@@ -137,6 +137,12 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
+     <property name="opaqueResize">
+      <bool>true</bool>
+     </property>
+     <property name="handleWidth">
+      <number>5</number>
+     </property>
      <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_10">
        <item>
@@ -147,7 +153,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QTableWidget" name="tableWidget">
+        <widget class="QTableWidget" name="ionsTableWidget">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -393,13 +399,34 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="widget" native="true">
+     <widget class="QTabWidget" name="tabWidget">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="tabPosition">
+       <enum>QTabWidget::West</enum>
+      </property>
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="figureTabWidgetPage" native="true">
+       <attribute name="title">
+        <string>Figure</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tableTabWidgetPage">
+       <attribute name="title">
+        <string>Table</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QTableWidget" name="caliInfoTableWidget1"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </widget>
    </item>

@@ -1,15 +1,14 @@
-import heapq
-from datetime import datetime
 from typing import List, Tuple
 
 import numpy as np
 from numpy.polynomial import polynomial
 
+from Orbitool.structures.base import field
+
 from .polynomial import polyfit_with_fixed_points
 from ...structures.HDF5 import NdArray
 from ...structures import BaseStructure, BaseRowItem, Row
-from ...structures.spectrum import Spectrum
-from ...utils.formula import Formula
+from ...utils.formula import Formula, FormulaList
 
 
 class Ion(BaseRowItem):
@@ -27,8 +26,8 @@ class Ion(BaseRowItem):
         return self.formula == other.formula
 
 
-class SpectrumIonInfo(BaseRowItem):
-    item_name = "calibration spectrum ion info"
+class PathIonInfo(BaseStructure):
+    h5_type = "calibration path ion info"
 
     raw_position: NdArray[float, -1]
     raw_intensity: NdArray[float, -1]
@@ -58,14 +57,13 @@ class Calibrator(BaseStructure):
     """
     h5_type = "calibrator"
 
-    time: datetime
-
+    formulas: FormulaList = field(list)
     used_indexes: np.ndarray = None
     unused_indexes: np.ndarray = None
     poly_coef: np.ndarray = None
 
     @classmethod
-    def fromIonInfos(cls, ions: List[Ion], spectrum_ion_infos: List[SpectrumIonInfo], time: datetime, use_N_ions: int, degree: int, start_point: Tuple[float, float] = None):
+    def fromIonInfos(cls, ions: List[Ion], spectrum_ion_infos: List[PathIonInfo], use_N_ions: int, degree: int, start_point: Tuple[float, float] = None):
         ions_position = np.array(
             [info.position for info in spectrum_ion_infos])
         ions_rtol = np.array([info.rtol for info in spectrum_ion_infos])
@@ -83,17 +81,18 @@ class Calibrator(BaseStructure):
             raise ValueError(
                 f"Cannot find enough ions to fit, missing ions: {missing}")
         if start_point is None:
-            points = []
+            points = np.zeros((0, 2), dtype=np.float64)
         else:
-            points = [start_point]
+            points = np.array([start_point])
         poly_coef = polyfit_with_fixed_points(
-            ions_position, ions_rtol, degree, np.array(points))
-        return cls(time, used_indexes, unused_indexes, poly_coef)
+            ions_position, ions_rtol, degree, points)
+        return cls([ion.formula for ion in ions], used_indexes, unused_indexes, poly_coef)
+
+    def predict_point(self, x: float):
+        return polynomial.polyval(x, self.poly_coef)
 
     def predict_rtol(self, mz: np.ndarray):
-        assert self.poly_coef is not None
         return polynomial.polyval(mz, self.poly_coef)
 
     def calibrate_mz(self, mz: np.ndarray):
-        assert self.poly_coef is not None
         return mz * (1 - polynomial.polyval(mz, self.poly_coef))

@@ -40,12 +40,12 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         self.spectrum_inner_index: int = None
         self.spectrum_current_ion_index: int = None
-        self.shown_state: ShownState = ShownState.all_info
 
     def setupUi(self, Form):
         super().setupUi(Form)
 
-        self.plot = Plot(self.widget)
+        self.plot = Plot(self.figureTabWidgetPage)
+        self.tabWidget.setCurrentIndex(0)
 
         self.separatorListWidget.itemDoubleClicked.connect(self.changeSegment)
         self.separatorListWidget.mouseReleaseEvent = self.mouseRelease
@@ -71,6 +71,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         self.showSegments()
         self.showCurrentSegment()
         self.calibration.ui_state.set_state(self)
+        self.showAllInfo()
 
     def updateState(self):
         self.calibration.ui_state.fromComponents(self, [
@@ -96,7 +97,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         ind = info.current_segment_index
         self.separatorListWidget.setCurrentRow(ind)
         seg = info.calibrate_info_segments[ind]
-        table = self.tableWidget
+        table = self.ionsTableWidget
         table.clearContents()
         ions = info.get_ions_for_segment(ind)
         table.setRowCount(len(ions))
@@ -172,8 +173,8 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
     @state_node
     def removeIon(self):
         remove_ions = set()
-        for index in get_tablewidget_selected_row(self.tableWidget):
-            remove_ions.add(self.tableWidget.item(index, 0).text())
+        for index in get_tablewidget_selected_row(self.ionsTableWidget):
+            remove_ions.add(self.ionsTableWidget.item(index, 0).text())
         self.calibration.info.ions = [
             ion for ion in self.calibration.info.ions if ion.shown_text not in remove_ions]
         self.showCurrentSegment()
@@ -207,19 +208,16 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = yield func, "split and fit target peaks"
 
             def func():
+                info.path_times = {
+                    path.path: path.createDatetime for path in workspace.file_tab.info.pathlist}
                 info.done_split(path_ions_peak)
+                info.rtol = rtol
             yield func, "calculate ions points"
 
-        need_calibrate_index = [index
-                                for index, cali_info in enumerate(info.calibrate_info_segments)
-                                if cali_info.need_calibrate()]
+        def func():
+            info.calc_calibrator()
 
-        if need_calibrate_index:
-            pass
-
-        for index in need_calibrate_index:
-            cali_info = info.calibrate_info_segments[index]
-            cali_info.done_calibrate()
+        yield func, "calculate calibration infos"
 
         self.showAllInfo()
 
@@ -293,7 +291,6 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         ax.autoscale_view(True, True, True)
         plot.canvas.draw()
         self.spectrum_current_ion_index = -1
-        self.shown_state = ShownState.spectrum
 
     @state_node(withArgs=True)
     def next_ion(self, step):
@@ -323,10 +320,6 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
     @state_node
     def showSelected(self):
-        if self.shown_state != ShownState.all_info:
-            showInfo(
-                "please show all info first\nthen choose a file from calibration info window")
-            return
         index = self.manager.getters.calibration_info_selected_index.get()
 
         table = self.manager.calibrationInfoWidget
@@ -388,45 +381,47 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         plot.canvas.draw()
 
         self.spectrum_current_ion_index = None
-        self.shown_state = ShownState.file
-
-    @state_node
-    def showAllInfoClicked(self):
-        self.showAllInfo()
-        self.spectrum_current_ion_index = None
 
     def showAllInfo(self):
-        table = self.manager.calibrationInfoWidget
-        table.clearContents()
-
         info = self.calibration.info
 
+        table = self.caliInfoTableWidget1
+        table.clearContents()
         table.setColumnCount(len(info.ions))
         hlables = [ion.shown_text for ion in info.ions]
         table.setHorizontalHeaderLabels(hlables)
 
-        table.setRowCount(len(info.calibrators))
-        if len(info.calibrators) == 0:
+        path_ion_infos = info.path_ion_infos
+        table.setRowCount(len(path_ion_infos))
+        if len(path_ion_infos) == 0:
             return
 
-        calibrators = sorted(info.calibrators.values(),
-                             key=lambda calibrator: calibrator.time)
+        path_times = [(path, info.path_times[path])
+                      for path in path_ion_infos.keys()]
+        path_times.sort(key=lambda t: t[1])
 
-        times = []
+        segment_ions = list(info.yield_segment_ions())
+        times = [time for _, time in path_times]
         devitions = []
         color = QtGui.QColor(0xB6EEA6)
-        for row, calibrator in enumerate(calibrators):
-            times.append(calibrator.time)
+        for row, (path, time) in enumerate(path_times):
+            ion_infos = path_ion_infos[path]
 
-            min_indexes = calibrator.min_indexes
-            for column, rtol in enumerate(calibrator.ions_rtol):
+            def columns():
+                for calibrator in info.calibrator_segments[path]:
+                    for index, formula in enumerate(calibrator.formulas):
+                        yield ion_infos[formula].rtol, index in calibrator.used_indexes
+
+            devition = []
+            for col, (rtol, used) in enumerate(columns()):
                 item = QtWidgets.QTableWidgetItem(format(rtol * 1e6, ".5f"))
-                if column in min_indexes:
+                if used:
                     item.setBackground(color)
-                table.setItem(row, column, item)
-            devitions.append(calibrator.ions_rtol)
-        vlabels = [time.replace(microsecond=0).isoformat(
-            sep=' ')[:-3] for time in times]
+                table.setItem(row, col, item)
+                devition.append(rtol)
+            devitions.append(devition)
+
+        vlabels = [str(time.replace(microsecond=0))[:-3] for time in times]
 
         table.setVerticalHeaderLabels(vlabels)
 
@@ -449,7 +444,6 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         ax.relim()
         ax.autoscale(True, True, True)
         plot.canvas.draw()
-        self.shown_state = ShownState.all_info
 
     @state_node(withArgs=True)
     def calibrate(self, skip: bool):
@@ -501,7 +495,7 @@ class SplitAndFitPeak(MultiProcess):
         ions_peak: List[Tuple[float, float]] = []
         mz = data.mz
         intensity = data.intensity
-        for ion, rtol in ions:
+        for ion in ions:
             delta = ion * rtol
             mz_, intensity_ = spectrum_func.safeCutSpectrum(
                 mz, intensity, ion - delta, ion + delta)
