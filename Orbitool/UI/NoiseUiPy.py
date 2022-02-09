@@ -12,7 +12,7 @@ from .. import get_config, workspace
 from ..functions import spectrum as spectrum_func, binary_search
 from ..structures.file import FileSpectrumInfo
 from ..structures.HDF5 import StructureListView
-from ..structures.spectrum import Spectrum
+from ..structures.spectrum import Spectrum, SpectrumInfo
 from ..utils.formula import Formula
 from ..workspace import WorkSpace
 from . import NoiseUi, component
@@ -566,8 +566,9 @@ class ReadFromFile(MultiProcess):
     def func(data: Tuple[FileSpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
         info, (mz, intensity) = data
         mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
-        spectrum = Spectrum(info.path, mz, intensity, info.start_time, info.end_time)
-        return spectrum
+        spectrum = Spectrum(info.path, mz, intensity,
+                            info.start_time, info.end_time)
+        return SpectrumInfo(info.start_time, info.end_time), spectrum
 
     @staticmethod
     def read(file: WorkSpace, **kwargs) -> Generator:
@@ -582,14 +583,18 @@ class ReadFromFile(MultiProcess):
         return len(file.file_tab.info.spectrum_infos)
 
     @staticmethod
-    def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
+    def write(file: WorkSpace, rets: Iterable[Tuple[SpectrumInfo, Spectrum]], **kwargs):
         tmp = StructureListView[Spectrum](file._obj, "tmp", True)
-        tmp.h5_extend(rets)
+        infos = []
+        for info, spectrum in rets:
+            infos.append(info)
+            tmp.h5_append(spectrum)
 
         h5path = file.file_tab.raw_spectra.h5_path
         if h5path in file:
             del file[h5path]
         file._obj.move(tmp.h5_path, h5path)
+        file.noise_tab.info.denoised_spectrum_infos = infos
 
     @staticmethod
     def exception(file, **kwargs):

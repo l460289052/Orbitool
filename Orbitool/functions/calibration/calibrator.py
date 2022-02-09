@@ -85,7 +85,7 @@ class Calibrator(BaseStructure):
         else:
             points = np.array([start_point])
         poly_coef = polyfit_with_fixed_points(
-            ions_position, ions_rtol, degree, points)
+            ions_position[used_indexes], ions_rtol[used_indexes], degree, points)
         return cls([ion.formula for ion in ions], used_indexes, unused_indexes, poly_coef)
 
     def predict_point(self, x: float):

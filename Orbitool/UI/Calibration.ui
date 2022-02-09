@@ -19,7 +19,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Calibration Segment</string>
+        <string>Calibration Segments</string>
        </property>
       </widget>
      </item>
@@ -412,7 +412,7 @@
       <property name="currentIndex">
        <number>1</number>
       </property>
-      <widget class="QWidget" name="figureTabWidgetPage" native="true">
+      <widget class="QWidget" name="figureTabWidgetPage">
        <attribute name="title">
         <string>Figure</string>
        </attribute>
@@ -423,7 +423,11 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTableWidget" name="caliInfoTableWidget1"/>
+         <widget class="QTableWidget" name="caliInfoTableWidget1">
+          <property name="horizontalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

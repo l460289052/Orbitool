@@ -41,6 +41,7 @@ class CalibratorInfo(BaseStructure):
 
     calibrate_info_segments: List[CalibratorInfoSegment] = field(
         lambda: [CalibratorInfoSegment()])
+    last_calibrate_info_segments: List[CalibratorInfoSegment] = field(list)
 
     path_times: Dict[str, datetime] = field(dict)
     path_ion_infos: Dict[str, Dict[Formula, PathIonInfo]] = field(dict)
@@ -90,6 +91,13 @@ class CalibratorInfo(BaseStructure):
             yield seg, ret_ions
             ret_ions = []
 
+    def yield_ion_used(self, path: str):
+        calibrators = self.calibrator_segments[path]
+        formula_ions = {ion.formula: ion for ion in self.last_ions}
+        for calibrator in calibrators:
+            for index, formula in enumerate(calibrator.formulas):
+                yield formula_ions[formula], index in calibrator.used_indexes
+
     def add_ions(self, str_ions: List[str]):
         ions = [Ion.fromText(ion) for ion in str_ions]
         s = {ion.formula for ion in self.ions}
@@ -103,8 +111,9 @@ class CalibratorInfo(BaseStructure):
         """
             return [formula for each ion need to be split]
         """
+        last_formulas = {ion.formula for ion in self.last_ions}
         need_split = [
-            ion.formula for ion in self.ions if ion.formula not in self.last_ions]
+            ion.formula for ion in self.ions if ion.formula not in last_formulas]
         return need_split
 
     def done_split(self, path_ions_peak: Dict[str, List[List[Tuple[float, float]]]]):
@@ -142,6 +151,8 @@ class CalibratorInfo(BaseStructure):
                                cali.predict_point(seg_info.end_point))
                 calibrators.append(cali)
             self.calibrator_segments[path] = calibrators
+        self.last_calibrate_info_segments = deepcopy(
+            self.calibrate_info_segments)
 
 
 class Widget(BaseWidget[CalibratorInfo]):

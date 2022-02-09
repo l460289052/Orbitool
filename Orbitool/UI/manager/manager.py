@@ -1,7 +1,6 @@
 from __future__ import annotations
 from contextlib import contextmanager
 
-import random
 import weakref
 from datetime import datetime
 from functools import wraps
@@ -15,8 +14,6 @@ from PyQt5.QtCore import QObject, QThread, QTimer, pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QTableWidget
 
 from ...workspace import WorkSpace
-from ..component import Plot
-from ..utils import showInfo
 
 
 class BindData:
@@ -53,6 +50,7 @@ class Manager(QObject):
 
         self.calibrationInfoWidget: QTableWidget = None
         self.formulas_result_win: QMainWindow = None
+        self.calibration_detail_win: QMainWindow = None
         self.peak_float_wins: Dict[int, QMainWindow] = {}
 
         self.tqdm = TQDMER()

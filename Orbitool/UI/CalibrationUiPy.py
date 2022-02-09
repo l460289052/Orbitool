@@ -8,8 +8,6 @@ import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
 import matplotlib.ticker
 
-from Orbitool.workspace import file_tab
-
 from ..functions import spectrum as spectrum_func, binary_search, peakfit as peakfit_func
 from ..functions.calibration import Calibrator
 from ..functions.peakfit.normal_distribution import NormalDistributionFunc
@@ -20,6 +18,8 @@ from . import CalibrationUi
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
 from .utils import get_tablewidget_selected_row, showInfo
+
+from .CalibrationDetailUiPy import Widget as CalibrationDetailWin
 
 
 class ShownState(int, Enum):
@@ -54,6 +54,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         self.addIonToolButton.clicked.connect(self.addIon)
         self.delIonToolButton.clicked.connect(self.removeIon)
         self.calcInfoPushButton.clicked.connect(self.calcInfo)
+        self.showDetailsPushButton.clicked.connect(self.showDetail)
         self.finishPushButton.clicked.connect(
             lambda: self.calibrate(skip=False))
         self.skipPushButton.clicked.connect(lambda: self.calibrate(skip=True))
@@ -221,77 +222,6 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         self.showAllInfo()
 
-    @state_node
-    def showSpectrum(self):
-        index = self.manager.getters.spectra_list_selected_index.get()
-        workspace = self.manager.workspace
-        spectrum = workspace.file_tab.raw_spectra[index]
-        calibrator = self.calibration.info.calibrators[spectrum.path]
-        inner_index = index
-        for cal in self.calibration.info.calibrators.values():
-            if index < len(cal.ions_raw_position):
-                break
-            inner_index -= len(cal.ions_raw_position)
-
-        self.spectrum_inner_index = inner_index
-        ions_position = calibrator.ions_raw_position[inner_index]
-        ions_intensity = calibrator.ions_raw_intensity[inner_index]
-
-        table = self.manager.calibrationInfoWidget
-
-        table.clear()
-        table.setRowCount(0)
-        table.setColumnCount(0)
-
-        table.setColumnCount(3)
-        table.setHorizontalHeaderLabels(["mz", "rtol", "intensity"])
-
-        table.setRowCount(len(calibrator.ions))
-        table.setVerticalHeaderLabels(
-            [ion.shown_text for ion in calibrator.ions])
-
-        min_indexes = set(calibrator.min_indexes)
-        color = QtGui.QColor(0xB6EEA6)
-        for index, (ion, mz, intensity) in enumerate(zip(calibrator.ions, ions_position, ions_intensity)):
-            if index in min_indexes:
-                def setItem(column, text):
-                    item = QtWidgets.QTableWidgetItem(text)
-                    item.setBackground(color)
-                    table.setItem(index, column, item)
-            else:
-                def setItem(column, text):
-                    item = QtWidgets.QTableWidgetItem(text)
-                    table.setItem(index, column, item)
-
-            setItem(0, format(mz, '.5f'))
-            setItem(1, format((1 - ion.formula.mass() / mz) * 1e6, '.5f'))
-            setItem(2, format(intensity, '.3e'))
-
-        plot = self.plot
-        ax = plot.ax
-        ax.clear()
-        ax.axhline(color='black', linewidth=0.5)
-        ax.plot(spectrum.mz, spectrum.intensity, color='black')
-
-        for index, (ion, x, y) in enumerate(zip(calibrator.ions, ions_position, ions_intensity)):
-            if math.isnan(x):
-                continue
-            ax.plot([x, x], [0, y], color='r')
-            if index in min_indexes:
-                ax.annotate(ion.shown_text, (x, y), color='g')
-            else:
-                ax.annotate(ion.shown_text, (x, y))
-        ax.xaxis.set_tick_params(rotation=15)
-        ax.yaxis.set_tick_params(rotation=60)
-        ax.yaxis.set_major_formatter(
-            matplotlib.ticker.FormatStrFormatter(r"%.1e"))
-
-        ax.legend()
-        ax.relim()
-        ax.autoscale_view(True, True, True)
-        plot.canvas.draw()
-        self.spectrum_current_ion_index = -1
-
     @state_node(withArgs=True)
     def next_ion(self, step):
         if self.spectrum_current_ion_index is None:
@@ -318,77 +248,13 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         ax.set_ylim(y_min, y_max)
         plot.canvas.draw()
 
-    @state_node
-    def showSelected(self):
-        index = self.manager.getters.calibration_info_selected_index.get()
-
-        table = self.manager.calibrationInfoWidget
-        table.clear()
-        table.setRowCount(0)
-        table.setColumnCount(0)
-
-        table.setColumnCount(4)
-        table.setHorizontalHeaderLabels(
-            ['theoretic mz', 'mz', 'ppm', 'use for calibration'])
-
-        calibrator = list(self.calibration.info.calibrators.values())[index]
-        func = list(self.calibration.info.poly_funcs.values())[index]
-
-        table.setRowCount(len(calibrator.ions_position))
-        table.setVerticalHeaderLabels(
-            [ion.shown_text for ion in calibrator.ions])
-        min_indexes = calibrator.min_indexes
-        color = QtGui.QColor(0xB6EEA6)
-        for i in range(len(calibrator.ions_position)):
-            if i in min_indexes:
-                def setValue(column, s):
-                    item = QtWidgets.QTableWidgetItem(str(s))
-                    item.setBackground(color)
-                    table.setItem(i, column, item)
-            else:
-                def setValue(column, s):
-                    table.setItem(
-                        i, column, QtWidgets.QTableWidgetItem(str(s)))
-            setValue(0, format(calibrator.ions[i].formula.mass(), '.5f'))
-            setValue(1, format(calibrator.ions_position[i], '.5f'))
-            setValue(2, format(calibrator.ions_rtol[i] * 1e6, '.5f'))
-            setValue(3, 'True' if i in calibrator.min_indexes else 'False')
-
-        formula_info = self.manager.workspace.formula_docker.info
-
-        x = np.linspace(formula_info.mz_min, formula_info.mz_max, 1000)
-        xx = func.predictRtol(x) * 1e6
-        plot = self.plot
-        ax = plot.ax
-        ax.clear()
-
-        ax.axhline(color='black', linewidth=0.5)
-        ax.plot(x, xx)
-
-        ions_position = calibrator.ions_position
-        ions_rtol = calibrator.ions_rtol
-        min_index = calibrator.min_indexes
-        max_index = calibrator.max_indexes
-        x = ions_position[min_index]
-        y = ions_rtol[min_index] * 1e6
-        ax.scatter(x, y, c='green')
-        x = ions_position[max_index]
-        y = ions_rtol[max_index] * 1e6
-        ax.scatter(x, y, c='red')
-
-        ax.set_ylabel('ppm')
-        ax.set_xlim(formula_info.mz_min, formula_info.mz_max)
-        plot.canvas.draw()
-
-        self.spectrum_current_ion_index = None
-
     def showAllInfo(self):
         info = self.calibration.info
 
         table = self.caliInfoTableWidget1
         table.clearContents()
-        table.setColumnCount(len(info.ions))
-        hlables = [ion.shown_text for ion in info.ions]
+        table.setColumnCount(len(info.last_ions))
+        hlables = [ion.shown_text for ion in info.last_ions]
         table.setHorizontalHeaderLabels(hlables)
 
         path_ion_infos = info.path_ion_infos
@@ -406,14 +272,9 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         color = QtGui.QColor(0xB6EEA6)
         for row, (path, time) in enumerate(path_times):
             ion_infos = path_ion_infos[path]
-
-            def columns():
-                for calibrator in info.calibrator_segments[path]:
-                    for index, formula in enumerate(calibrator.formulas):
-                        yield ion_infos[formula].rtol, index in calibrator.used_indexes
-
             devition = []
-            for col, (rtol, used) in enumerate(columns()):
+            for col, (ion, used) in enumerate(info.yield_ion_used(path)):
+                rtol = ion_infos[ion.formula].rtol
                 item = QtWidgets.QTableWidgetItem(format(rtol * 1e6, ".5f"))
                 if used:
                     item.setBackground(color)
@@ -436,7 +297,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         if len(devitions) > 0:
             for index in range(devitions.shape[1]):
                 ax.plot(times, devitions[:, index],
-                        label=info.ions[index].shown_text)
+                        label=info.last_ions[index].shown_text)
 
         ax.set_xlabel("starting time")
         ax.set_ylabel("Deviation (ppm)")
@@ -444,6 +305,12 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         ax.relim()
         ax.autoscale(True, True, True)
         plot.canvas.draw()
+
+    @state_node
+    def showDetail(self):
+        win = CalibrationDetailWin(self.manager)
+        self.manager.calibration_detail_win = win
+        win.show()
 
     @state_node(withArgs=True)
     def calibrate(self, skip: bool):

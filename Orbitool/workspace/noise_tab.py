@@ -6,7 +6,7 @@ from .. import get_config
 from ..utils.formula import Formula
 from ..structures import BaseStructure, BaseRowItem, field, Row
 from ..structures.HDF5 import NdArray
-from ..structures.spectrum import Spectrum
+from ..structures.spectrum import Spectrum, SpectrumInfo
 
 
 class NoiseFormulaParameter(BaseRowItem):
@@ -31,7 +31,8 @@ class NoiseGeneralSetting(BaseStructure):
     n_sigma: float = 0
     subtract: float = True
 
-    noise_formulas: Row[NoiseFormulaParameter] = field(default_formula_parameter)
+    noise_formulas: Row[NoiseFormulaParameter] = field(
+        default_formula_parameter)
     params_inited: bool = False
 
     spectrum_dependent: bool = True
@@ -75,3 +76,5 @@ class NoiseTabInfo(BaseStructure):
     general_setting: NoiseGeneralSetting = field(NoiseGeneralSetting)
 
     general_result: NoiseGeneralResult = field(NoiseGeneralResult)
+
+    denoised_spectrum_infos: Row[SpectrumInfo] = field(list)

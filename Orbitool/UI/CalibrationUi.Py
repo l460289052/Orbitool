@@ -210,6 +210,7 @@ class Ui_Form(object):
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.tableTabWidgetPage)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.caliInfoTableWidget1 = QtWidgets.QTableWidget(self.tableTabWidgetPage)
+        self.caliInfoTableWidget1.setHorizontalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
         self.caliInfoTableWidget1.setObjectName("caliInfoTableWidget1")
         self.caliInfoTableWidget1.setColumnCount(0)
         self.caliInfoTableWidget1.setRowCount(0)
@@ -254,7 +255,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.label.setText(_translate("Form", "Calibration Segment"))
+        self.label.setText(_translate("Form", "Calibration Segments"))
         self.rtolLabel.setText(_translate("Form", "tolerance(ppm)"))
         self.separatorAddPushButton.setText(_translate("Form", "add separator"))
         self.label_2.setText(_translate("Form", "Calibration Ions"))
