@@ -87,6 +87,9 @@ class Widget(QtWidgets.QWidget, CalibrationDetailUi.Ui_Form):
         ax.clear()
         ax.axhline(color='black', linewidth=.5)
         ax.plot(spectrum.mz, spectrum.intensity, color='black')
+        for cali_info in info.last_calibrate_info_segments:
+            if cali_info.end_point is not math.inf:
+                ax.axvline(cali_info.end_point, color='blue')
 
         for index, (ion, used) in enumerate(info.yield_ion_used(spectrum.path)):
             formula = ion.formula
@@ -163,6 +166,10 @@ class Widget(QtWidgets.QWidget, CalibrationDetailUi.Ui_Form):
         ax = plot.ax
         ax.clear()
         ax.axhline(color='black', linewidth=.5)
+
+        for cali_info in info.last_calibrate_info_segments:
+            if cali_info.end_point is not math.inf:
+                ax.axvline(cali_info.end_point, color='blue')
 
         formula_info = self.manager.workspace.formula_docker.info
         start_point = formula_info.mz_min

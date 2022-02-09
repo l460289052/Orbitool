@@ -603,6 +603,7 @@ class ReadFromFile(MultiProcess):
             del file[h5path]
         file._obj.move(tmp.h5_path, h5path)
         file.noise_tab.info.denoised_spectrum_infos = infos
+        file.noise_tab.info.to_be_calibrate = True
 
     @staticmethod
     def exception(file, **kwargs):

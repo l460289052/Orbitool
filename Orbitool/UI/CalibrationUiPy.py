@@ -190,10 +190,12 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         self.saveCurrentSegment()
 
         rtol = self.rtolDoubleSpinBox.value() * 1e-6
-        if abs(info.rtol / rtol - 1) > 1e-6:
+        if workspace.noise_tab.info.to_be_calibrate or abs(info.rtol / rtol - 1) > 1e-6:
             formulas = [ion.formula for ion in info.ions]
+            all_ions = True
         else:
             formulas = info.need_split()
+            all_ions = False
 
         raw_spectra = workspace.noise_tab.raw_spectra
 
@@ -211,6 +213,9 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             def func():
                 info.path_times = {
                     path.path: path.createDatetime for path in workspace.file_tab.info.pathlist}
+                if all_ions:
+                    info.last_ions.clear()
+                    info.path_ion_infos.clear()
                 info.done_split(path_ions_peak)
                 info.rtol = rtol
             yield func, "calculate ions points"

@@ -78,6 +78,7 @@ class NoiseTabInfo(BaseStructure):
     general_result: NoiseGeneralResult = field(NoiseGeneralResult)
 
     denoised_spectrum_infos: Row[FileSpectrumInfo] = field(list)
+    to_be_calibrate: bool = True
 
 
 class Widget(BaseWidget[NoiseTabInfo]):

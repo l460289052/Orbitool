@@ -1,8 +1,4 @@
-- detail窗口segment删了吧……，然后画图时候画竖线就完事了
-- 在前面文件改变时，校准数据的刷新
 - 校准参数导出
-- 校准docker窗口删除
-  - 包括manager里面tableWidget的删除
 - 新旧workspace文件的转换
   - 校准信息
   - noise窗口的SpectrumInfo

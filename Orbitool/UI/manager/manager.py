@@ -48,7 +48,6 @@ class Manager(QObject):
         self.workspace: WorkSpace = None
         self._busy: bool = True
 
-        self.calibrationInfoWidget: QTableWidget = None
         self.formulas_result_win: QMainWindow = None
         self.calibration_detail_win: QMainWindow = None
         self.peak_float_wins: Dict[int, QMainWindow] = {}
