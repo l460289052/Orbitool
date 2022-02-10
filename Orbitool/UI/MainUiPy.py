@@ -2,8 +2,10 @@ from typing import Union, Dict
 from datetime import datetime
 
 from PyQt5 import QtWidgets, QtCore, QtGui
+from matplotlib.pyplot import get
 
-from ..workspace import WorkSpace, update as workspace_update, need_update, VERSION
+from ..structures.HDF5 import h5_brokens
+from ..workspace import WorkSpace, update as workspace_update, need_update, get_version, VERSION
 
 from .manager import Manager, state_node, MultiProcess
 from . import utils as UiUtils
@@ -14,7 +16,7 @@ from . import FileUiPy, NoiseUiPy, PeakShapeUiPy, CalibrationUiPy, PeakFitUiPy, 
 from . import TimeseriesesUiPy
 
 from . import FormulaUiPy, MassListUiPy, SpectraListUiPy, PeakListUiPy, SpectrumUiPy
-from . import CalibrationInfoUiPy, TimeseriesUiPy
+from . import TimeseriesUiPy
 
 
 class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
@@ -75,13 +77,9 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
         self.peakFitTab.show_masslist.connect(self.masslist.showMasslist)
 
-        self.calibrationInfo = CalibrationInfoUiPy.Widget(manager)
-        self.calibrationInfoDw = self.add_dockerwidget(
-            "Calibration Info", self.calibrationInfo, self.massListDw)
-
         self.spectraList = SpectraListUiPy.Widget(manager)
         self.spectraListDw = self.add_dockerwidget(
-            "Spectra List", self.spectraList, self.calibrationInfoDw)
+            "Spectra List", self.spectraList, self.massListDw)
 
         self.spectrum = SpectrumUiPy.Widget(manager)
         self.spectrumDw = self.add_dockerwidget(
@@ -154,12 +152,16 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             "Load workspace", "Orbitool Workspace file(*.Orbitool)")
         if not ret:
             return
-        workspace = WorkSpace(f)
-        if need_update(self.manager.workspace):
+        version = get_version(f)
+        if need_update(version):
             UiUtils.showInfo(
-                f"will update file from {workspace.info.version} to {VERSION}")
-            workspace_update(workspace)
-        workspace.info.version = VERSION
+                f"will update file from {version} to {VERSION}, make sure you back it up")
+            workspace_update(f)
+        workspace = WorkSpace(f)
+        if h5_brokens:
+            UiUtils.showInfo("I have try to save more data, but below data is lost\n" +
+                             "\n".join(h5_brokens), "file broken, please save as a new file")
+            h5_brokens.clear()
         self.manager.workspace = workspace
         self.manager.init_or_restored.emit()
 
@@ -176,6 +178,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             return
         self.manager.save.emit()
         self.manager.workspace.close_as(f)
+        if h5_brokens:
+            UiUtils.showInfo("\n".join(h5_brokens), "below data was broken")
         self.manager.workspace = WorkSpace(f)
 
     @state_node
@@ -259,29 +263,28 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             if dockerwodget.isHidden():
                 dockerwodget.show()
         if widget == self.fileTab:
-            list(map(hide, [self.massListDw, self.calibrationInfoDw,
-                            self.spectraListDw, self.spectrumDw, self.peakListDw, self.timeseriesDw]))
+            list(map(hide, [self.massListDw, self.spectraListDw,
+                 self.spectrumDw, self.peakListDw, self.timeseriesDw]))
         elif widget == self.noiseTab:
-            list(map(hide, [self.massListDw, self.calibrationInfoDw,
-                            self.peakListDw, self.timeseriesDw]))
+            list(
+                map(hide, [self.massListDw, self.peakListDw, self.timeseriesDw]))
             list(map(show, [self.spectraListDw, self.spectrumDw]))
         elif widget == self.peakShapeTab:
-            list(map(hide, [self.massListDw, self.calibrationInfoDw,
-                            self.spectraListDw, self.spectrumDw, self.peakListDw, self.timeseriesDw]))
+            list(map(hide, [self.massListDw, self.spectraListDw,
+                 self.spectrumDw, self.peakListDw, self.timeseriesDw]))
         elif widget == self.calibrationTab:
             list(
                 map(hide, [self.massListDw, self.peakListDw, self.timeseriesDw]))
-            list(map(show, [self.calibrationInfoDw,
-                            self.spectraListDw, self.spectrumDw]))
+            list(map(show, [self.spectraListDw, self.spectrumDw]))
         elif widget == self.peakFitTab:
-            list(map(hide, [self.calibrationInfoDw, self.timeseriesDw]))
+            list(map(hide, [self.timeseriesDw]))
             list(map(show, [self.massListDw, self.spectraListDw,
                             self.spectrumDw, self.peakListDw]))
         elif widget == self.massDefectTab:
-            list(map(hide, [self.calibrationInfoDw, self.timeseriesDw]))
+            list(map(hide, [self.timeseriesDw]))
             list(map(show, [self.massListDw, self.spectraListDw,
                             self.spectrumDw, self.peakListDw]))
         elif widget == self.timeseriesesTab:
-            list(map(hide, [self.calibrationInfoDw]))
+            list(map(hide, []))
             list(map(show, [self.massListDw, self.spectraListDw,
                             self.spectrumDw, self.peakListDw, self.timeseriesDw]))

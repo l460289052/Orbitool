@@ -1,12 +1,14 @@
-import heapq
-from datetime import datetime
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
+from numpy.polynomial import polynomial
 
+from Orbitool.structures.base import field
+
+from .polynomial import polyfit_with_fixed_points
+from ...structures.HDF5 import NdArray
 from ...structures import BaseStructure, BaseRowItem, Row
-from ...structures.spectrum import Spectrum
-from ...utils.formula import Formula
+from ...utils.formula import Formula, FormulaList
 
 
 class Ion(BaseRowItem):
@@ -17,7 +19,32 @@ class Ion(BaseRowItem):
 
     @classmethod
     def fromText(cls, text):
-        return Ion(shown_text=text, formula=Formula(text))
+        return Ion(text, Formula(text))
+
+    def __eq__(self, other):
+        assert isinstance(other, Ion)
+        return self.formula == other.formula
+
+
+class PathIonInfo(BaseStructure):
+    h5_type = "calibration path ion info"
+
+    raw_position: NdArray[float, -1]
+    raw_intensity: NdArray[float, -1]
+
+    position: float
+    rtol: float
+
+    @classmethod
+    def fromRaw(cls, formula: Formula, raw_position: np.ndarray, raw_intensity: np.ndarray):
+        mass = formula.mass()
+        slt = ~np.isnan(raw_position)
+        if slt.sum():
+            position = raw_position[slt].mean()
+        else:
+            position = np.nan
+        rtol = 1 - mass / position
+        return cls(raw_position, raw_intensity, position, rtol)
 
 
 class Calibrator(BaseStructure):
@@ -30,54 +57,42 @@ class Calibrator(BaseStructure):
     """
     h5_type = "calibrator"
 
-    time: datetime
-    ions: Row[Ion]
-    ions_raw_position: np.ndarray
-    ions_raw_intensity: np.ndarray
-
-    ions_position: np.ndarray
-    ions_rtol: np.ndarray
-    min_indexes: np.ndarray
-    max_indexes: np.ndarray
+    formulas: FormulaList = field(list)
+    used_indexes: np.ndarray = None
+    unused_indexes: np.ndarray = None
+    poly_coef: np.ndarray = None
 
     @classmethod
-    def fromMzInt(cls, time: datetime, ions: List[Ion], ions_raw_position: np.ndarray, ions_raw_intensity: np.ndarray, rtol: float = 5e-6, use_N_ions=None):
-        """
-        ions_raw_position: shape (len(spectrum), len(ions))
-        ions_raw_intensity: shape (len(spectrum), len(ions))
-        """
-        ions_mz = np.fromiter([ion.formula.mass()
-                               for ion in ions], dtype=float)
-        ions_position = []
-        for index, ion in enumerate(ions_mz):
-            position: np.ndarray = ions_raw_position[:, index]
-            select: np.ndarray = abs(ion / position - 1) < rtol
-            select &= ~np.isnan(position)
-            if select.sum():
-                ions_position.append(position[select].mean())
-            else:
-                ions_position.append(np.nan)
-
-        ions_position = np.array(ions_position, dtype=float)
-
-        ions_rtol: np.ndarray = 1 - ions_mz / ions_position
-
+    def fromIonInfos(cls, ions: List[Ion], spectrum_ion_infos: List[PathIonInfo], use_N_ions: int, degree: int, start_point: Tuple[float, float] = None):
+        ions_position = np.array(
+            [info.position for info in spectrum_ion_infos])
+        ions_rtol = np.array([info.rtol for info in spectrum_ion_infos])
         length = len(ions_rtol)
-        if use_N_ions is None or length < use_N_ions:
+        if length < use_N_ions:
             use_N_ions = length
 
         abs_rtol_minarg = abs(ions_rtol).argsort()
-        min_indexes = abs_rtol_minarg[:use_N_ions]
-        max_indexes = abs_rtol_minarg[use_N_ions:][::-1]
+        used_indexes = abs_rtol_minarg[:use_N_ions]
+        unused_indexes = abs_rtol_minarg[use_N_ions:]
 
-        if np.isnan(ions_rtol[min_indexes]).sum():
+        if any(np.isnan(ions_rtol[used_indexes])):
             missing = [ion.shown_text for ion, slt in zip(
                 ions, np.isnan(ions_rtol)) if slt]
             raise ValueError(
                 f"Cannot find enough ions to fit, missing ions: {missing}")
+        if start_point is None:
+            points = np.zeros((0, 2), dtype=np.float64)
+        else:
+            points = np.array([start_point])
+        poly_coef = polyfit_with_fixed_points(
+            ions_position[used_indexes], ions_rtol[used_indexes], degree, points)
+        return cls([ion.formula for ion in ions], used_indexes, unused_indexes, poly_coef)
 
-        return Calibrator(time, ions, ions_raw_position, ions_raw_intensity, ions_position,
-                          ions_rtol, min_indexes, max_indexes)
+    def predict_point(self, x: float):
+        return polynomial.polyval(x, self.poly_coef)
 
-    def regeneratCalibrator(self, rtol: float = 5e-6, use_N_ions=None):
-        return self.fromMzInt(self.time, self.ions, self.ions_raw_position, self.ions_raw_intensity, rtol, use_N_ions)
+    def predict_rtol(self, mz: np.ndarray):
+        return polynomial.polyval(mz, self.poly_coef)
+
+    def calibrate_mz(self, mz: np.ndarray):
+        return mz * (1 - polynomial.polyval(mz, self.poly_coef))

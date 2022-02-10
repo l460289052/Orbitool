@@ -1,3 +1,4 @@
+from copy import copy
 import csv
 from collections import deque
 from datetime import datetime
@@ -336,8 +337,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         setting = info.general_setting
 
         ret, f = savefile("Save Denoise Spectrum", "CSV file(*.csv)",
-                          f"denoise_spectrum {spectrum.start_time.strftime(get_config().exportTimeFormat)}"
-                          f"-{spectrum.end_time.strftime(get_config().exportTimeFormat)}.csv")
+                          f"denoise_spectrum {spectrum.start_time.strftime(get_config().format_export_time)}"
+                          f"-{spectrum.end_time.strftime(get_config().format_export_time)}.csv")
         if not ret:
             return
 
@@ -369,8 +370,8 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         spectrum = info.current_spectrum
         setting = info.general_setting
         ret, f = savefile("Save Noise Peak", "CSV file(*.csv)",
-                          f"noise_peak {spectrum.start_time.strftime(get_config().exportTimeFormat)}"
-                          f"-{spectrum.end_time.strftime(get_config().exportTimeFormat)}.csv")
+                          f"noise_peak {spectrum.start_time.strftime(get_config().format_export_time)}"
+                          f"-{spectrum.end_time.strftime(get_config().format_export_time)}.csv")
         if not ret:
             return
 
@@ -566,30 +567,43 @@ class ReadFromFile(MultiProcess):
     def func(data: Tuple[FileSpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
         info, (mz, intensity) = data
         mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
-        spectrum = Spectrum(info.path, mz, intensity, info.start_time, info.end_time)
-        return spectrum
+        spectrum = Spectrum(info.path, mz, intensity,
+                            info.start_time, info.end_time)
+        return info, spectrum
 
     @staticmethod
     def read(file: WorkSpace, **kwargs) -> Generator:
         rtol = file.file_tab.info.rtol
+        cnt = 0
         for info in file.file_tab.info.spectrum_infos:
             data = info.get_spectrum_from_info(rtol)
+            if info.average_index and info.average_index != cnt:
+                info = copy(info)
+                info.average_index = cnt
             if data is not None:
                 yield info, data
+                cnt = info.average_index + 1
+            else:
+                cnt = info.average_index
 
     @staticmethod
     def read_len(file: WorkSpace, **kwargs) -> int:
         return len(file.file_tab.info.spectrum_infos)
 
     @staticmethod
-    def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
+    def write(file: WorkSpace, rets: Iterable[Tuple[FileSpectrumInfo, Spectrum]], **kwargs):
         tmp = StructureListView[Spectrum](file._obj, "tmp", True)
-        tmp.h5_extend(rets)
+        infos = []
+        for info, spectrum in rets:
+            infos.append(info)
+            tmp.h5_append(spectrum)
 
-        h5path = file.file_tab.raw_spectra.h5_path
+        h5path = file.noise_tab.raw_spectra.h5_path
         if h5path in file:
             del file[h5path]
         file._obj.move(tmp.h5_path, h5path)
+        file.noise_tab.info.denoised_spectrum_infos = infos
+        file.noise_tab.info.to_be_calibrate = True
 
     @staticmethod
     def exception(file, **kwargs):

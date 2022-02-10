@@ -10,7 +10,7 @@ class DictHandler(StructureTypeHandler):
         self.key_type = self.args[0]
         self.inner_type = self.args[1]
 
-    def write_to_h5(self, h5group: Group, key: str, value):
+    def write_to_h5(self, h5group: Group, key: str, value: dict):
         if key in h5group:
             del h5group[key]
         group = h5group.create_group(key)
@@ -18,7 +18,7 @@ class DictHandler(StructureTypeHandler):
         handler: StructureTypeHandler = get_handler(inner_type)
         for index, v in enumerate(value.values()):
             handler.write_to_h5(group, str(index), v)
-        group.attrs["indexes"] = list(value.keys())
+        group.attrs["indexes"] = list(map(str, value.keys()))
 
     def read_from_h5(self, h5group: Group, key: str):
         key_type, inner_type = self.key_type, self.inner_type

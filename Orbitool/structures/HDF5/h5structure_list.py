@@ -60,7 +60,9 @@ class StructureList(Generic[T]):
     """
         class FileList(H5File):
             spectrum_list = StructureList(Spectrum)
+        StructureList is storaged in disk, while list storaged in memory.
     """
+
     def __init__(self, item_type: Type[T]):
         self.item_type = item_type
 
@@ -70,5 +72,6 @@ class StructureList(Generic[T]):
     def __get__(self, instance: H5Obj, owner: Type[H5Obj]) -> StructureListView[T]:
         return StructureListView(instance._obj, self.name)
 
-    def __set__(self, instance: H5Obj, value: List[T]):
-        raise NotImplementedError()
+    def __set__(self, instance: H5Obj, value: Iterable[T]):
+        view = StructureListView(instance._obj, self.name, True)
+        view.h5_extend(value)

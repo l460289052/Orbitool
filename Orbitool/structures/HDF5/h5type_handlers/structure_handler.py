@@ -1,4 +1,5 @@
 
+from typing import Dict, List, Tuple
 from .base import *
 from .simple_handler import AttrHandler
 
@@ -44,5 +45,13 @@ class StructureHandler(StructureTypeHandler):
                 v = get_default(field)
                 values.append(v)
                 continue
-            values.append(handler.read_from_h5(group, key))
+            try:
+                values.append(handler.read_from_h5(group, key))
+            except:
+                brokens.append('/'.join((h5group.name, key)))
+                values.append(get_default(field))
+
         return h5_type(*values)
+
+
+brokens: List[Tuple[str, str]] = []

@@ -1,4 +1,5 @@
 from datetime import datetime
+from statistics import mode
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTimer
 
@@ -12,6 +13,7 @@ from ... import get_config
 class Plot:
     def __init__(self, parentWidget: QtWidgets.QWidget):
         self.parent = parentWidget
+        parentWidget.setMinimumSize(100, 100)
         parentWidget.setLayout(QtWidgets.QVBoxLayout())
         self.canvas = FigureCanvas(
             Figure(figsize=(20, 20)))

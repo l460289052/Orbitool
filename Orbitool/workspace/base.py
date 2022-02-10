@@ -6,7 +6,7 @@ from typing import Any, Dict, Generic, Iterable, Type, TypeVar
 from h5py import Group
 
 from ..structures import BaseStructure, register_handler, StructureTypeHandler, get_handler
-from ..structures.HDF5 import H5Obj
+from ..structures.HDF5 import H5Obj, h5_brokens
 
 T = TypeVar("T")
 
@@ -15,9 +15,18 @@ class Widget(H5Obj, Generic[T]):
     def __init__(self, obj, info_class: Type[T]) -> None:
         super().__init__(obj)
         self._info_class = info_class
-        self.info: T = self.read("info") if "info" in self else info_class()
+        try:
+            self.info: T = self.read(
+                "info") if "info" in self else info_class()
+        except:
+            h5_brokens.append('/'.join((self._obj.name, "info")))
+            self.info = info_class()
         handler: StructureTypeHandler = get_handler(UiState)
-        self.ui_state: UiState = handler.read_from_h5(obj, "ui_state")
+        try:
+            self.ui_state: UiState = handler.read_from_h5(obj, "ui_state")
+        except:
+            h5_brokens.append('/'.join(self._obj.name, "ui_state"))
+            self.ui_state = UiState({})
 
     def save(self):
         self.write("info", self.info)

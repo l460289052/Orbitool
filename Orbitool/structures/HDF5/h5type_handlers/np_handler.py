@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     class NdArray(StructureTypeHandler, RowDTypeHandler, np.ndarray):
         """
         NdArray[int]
+        NdArray[int, -1]
         NdArray[int, 100]
         NdArray[..., (2, 3, -1)]
         NdArray[int, (2, 3, -1)]

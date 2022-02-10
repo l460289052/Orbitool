@@ -1,3 +1,4 @@
+import h5py
 from ...functions import binary_search
 from typing import List, Tuple, Callable
 from packaging.version import Version
@@ -13,17 +14,28 @@ def register(version: str, func: Callable):
     start_versions.insert(posi, (version, func))
 
 
-def update(workspace: WorkSpace):
-    version = Version(workspace.info.version)
-    posi = binary_search.indexFirstNotSmallerThan(
+def update(path: str):
+    version = Version(get_version(path))
+    posi = binary_search.indexFirstBiggerThan(
         start_versions, version, method=lambda a, i: a[i][0])
 
     for version, updater in start_versions[posi:]:
-        updater(workspace)
+        updater(path)
+    set_version(path)
 
-def need_update(workspace:WorkSpace):
-    version = Version(workspace.info.version)
-    posi = binary_search.indexFirstNotSmallerThan(
+
+def need_update(version: str):
+    version = Version(version)
+    posi = binary_search.indexFirstBiggerThan(
         start_versions, version, method=lambda a, i: a[i][0])
     if posi < len(start_versions):
         return True
+
+
+def get_version(path: str):
+    with h5py.File(path, 'r') as f:
+        return f["info"].attrs["version"]
+
+def set_version(path:str):
+    with h5py.File(path, 'r+') as f:
+        f["info"].attrs["version"] = str(start_versions[-1][0])

@@ -14,3 +14,8 @@ class Spectrum(BaseStructure):
     mz: np.ndarray = None
     intensity: np.ndarray = None
     time: datetime = None
+
+    def __eq__(self, another):
+        if isinstance(another, Spectrum):
+            return all(self.mz == another.mz) and all(self.intensity == another.intensity) and self.time == another.time
+        return False

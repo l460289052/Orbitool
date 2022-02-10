@@ -1,7 +1,6 @@
 from __future__ import annotations
 from contextlib import contextmanager
 
-import random
 import weakref
 from datetime import datetime
 from functools import wraps
@@ -15,8 +14,6 @@ from PyQt5.QtCore import QObject, QThread, QTimer, pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QTableWidget
 
 from ...workspace import WorkSpace
-from ..component import Plot
-from ..utils import showInfo
 
 
 class BindData:
@@ -51,8 +48,8 @@ class Manager(QObject):
         self.workspace: WorkSpace = None
         self._busy: bool = True
 
-        self.calibrationInfoWidget: QTableWidget = None
         self.formulas_result_win: QMainWindow = None
+        self.calibration_detail_win: QMainWindow = None
         self.peak_float_wins: Dict[int, QMainWindow] = {}
 
         self.tqdm = TQDMER()
@@ -102,12 +99,17 @@ class TQDM(Generic[T]):
 
     def showMsg(self):
         now = datetime.now()
-        if (now - self.last_show_time).total_seconds() > .1:
+        if (now - self.last_show_time).total_seconds() > .01 or self.length < 1000:
             passed_time = now - self.begin_time
             if self.length > self.now:
-                left_time = passed_time * (self.length - self.now) / self.now
-                minute = int(left_time.total_seconds() / 60)
-                second = format(left_time.total_seconds() % 60, '.2f')
+                if self.now:
+                    left_time = passed_time * \
+                        (self.length - self.now) / self.now
+                    minute = int(left_time.total_seconds() / 60)
+                    second = format(left_time.total_seconds() % 60, '.2f')
+                else:
+                    minute = "inf"
+                    second = "inf"
                 text = f"{self.msg} {self.now}/{self.length} ~{minute}:{second}"
                 percent = 100 * self.now // self.length
             else:
