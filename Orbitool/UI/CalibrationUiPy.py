@@ -264,7 +264,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         path_ion_infos = info.path_ion_infos
         table.setRowCount(len(path_ion_infos))
-        if len(path_ion_infos) == 0:
+        if len(info.calibrator_segments) == 0:
             return
 
         path_times = [(path, info.path_times[path])

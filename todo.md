@@ -1,4 +1,3 @@
 - 校准参数导出
-- 新旧workspace文件的转换
-  - 校准信息
-  - noise窗口的SpectrumInfo
+- 校准时的next ion快捷键
+- broken file

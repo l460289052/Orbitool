@@ -2,8 +2,9 @@ from typing import Union, Dict
 from datetime import datetime
 
 from PyQt5 import QtWidgets, QtCore, QtGui
+from matplotlib.pyplot import get
 
-from ..workspace import WorkSpace, update as workspace_update, need_update, VERSION
+from ..workspace import WorkSpace, update as workspace_update, need_update, get_version, VERSION
 
 from .manager import Manager, state_node, MultiProcess
 from . import utils as UiUtils
@@ -150,12 +151,12 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             "Load workspace", "Orbitool Workspace file(*.Orbitool)")
         if not ret:
             return
-        workspace = WorkSpace(f)
-        if need_update(self.manager.workspace):
+        version = get_version(f)
+        if need_update(version):
             UiUtils.showInfo(
-                f"will update file from {workspace.info.version} to {VERSION}")
-            workspace_update(workspace)
-        workspace.info.version = VERSION
+                f"will update file from {version} to {VERSION}, make sure you back it up")
+            workspace_update(f)
+        workspace = WorkSpace(f)
         self.manager.workspace = workspace
         self.manager.init_or_restored.emit()
 
