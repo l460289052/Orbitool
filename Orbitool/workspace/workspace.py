@@ -1,10 +1,9 @@
-
-import shutil
+import os
 from typing import Dict, Generic, List, Optional, Type, TypeVar, Union
 
-from ..structures import BaseStructure, BaseRowItem
-from ..structures.HDF5 import H5File
-from .base import Widget
+from ..structures import BaseStructure, BaseRowItem, StructureTypeHandler, get_handler
+from ..structures.HDF5 import H5File, H5Obj, h5_brokens
+from .base import UiState, Widget
 from .calibration import Widget as CalibrationWidget
 from .file_tab import FileTabInfo
 from .formula import FormulaInfo
@@ -67,18 +66,37 @@ class WorkSpace(H5File):
         return not self._file
 
     def close_as(self, path: str):
-        self.save()
-        self.close()
+        assert self._io != path, "please choose another destination"
+        if os.path.exists(path):
+            os.remove(path)
+        new_space = WorkSpace(path)
+        new_space.info = self.info
+        for path, widget in self.widgets.items():
+            new_widget = new_space.widgets[path]
+            new_widget.info = widget.info
+            new_widget.ui_state = widget.ui_state
+        new_space.save()
+        try:
+            new_space.calibration_tab.calibrated_spectra = self.calibration_tab.calibrated_spectra
+        except:
+            h5_brokens.append(
+                new_space.calibration_tab.calibrated_spectra.h5_path)
 
-        if self._file:
-            shutil.copy(self._io, path)
-        else:
-            with open(path, 'wb') as f:
-                f.write(self._io.getbuffer())
+        try:
+            new_space.noise_tab.raw_spectra = self.noise_tab.raw_spectra
+        except:
+            h5_brokens.append(new_space.noise_tab.raw_spectra.h5_path)
+        new_space.close()
+        self.close()
 
     def visit_or_create_widget(self, path: str, info_type: Type[T]) -> Widget[T]:
         if path in self:
-            widget = Widget(self._obj[path], info_type)
+            try:
+                widget = Widget(self._obj[path], info_type)
+            except:
+                h5_brokens.append('/'.join((self._obj.name, path)))
+                widget = Widget(self._obj.create_group(
+                    path + "-tmp"), info_type)
         else:
             widget = Widget(self._obj.create_group(path), info_type)
         self.widgets[path] = widget
@@ -86,7 +104,11 @@ class WorkSpace(H5File):
 
     def visit_or_create_widget_specific(self, path: str, widget_type: Type[T]) -> T:
         if path in self:
-            widget = widget_type(self._obj[path])
+            try:
+                widget = widget_type(self._obj[path])
+            except:
+                h5_brokens.append('/'.join((self._obj.name, path)))
+                widget = widget_type(self._obj.create_group(path + "-tmp"))
         else:
             widget = widget_type(self._obj.create_group(path))
         self.widgets[path] = widget

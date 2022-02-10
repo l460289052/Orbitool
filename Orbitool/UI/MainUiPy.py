@@ -4,6 +4,7 @@ from datetime import datetime
 from PyQt5 import QtWidgets, QtCore, QtGui
 from matplotlib.pyplot import get
 
+from ..structures.HDF5 import h5_brokens
 from ..workspace import WorkSpace, update as workspace_update, need_update, get_version, VERSION
 
 from .manager import Manager, state_node, MultiProcess
@@ -157,6 +158,10 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
                 f"will update file from {version} to {VERSION}, make sure you back it up")
             workspace_update(f)
         workspace = WorkSpace(f)
+        if h5_brokens:
+            UiUtils.showInfo("I have try to save more data, but below data is lost\n" +
+                             "\n".join(h5_brokens), "file broken, please save as a new file")
+            h5_brokens.clear()
         self.manager.workspace = workspace
         self.manager.init_or_restored.emit()
 
@@ -173,6 +178,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             return
         self.manager.save.emit()
         self.manager.workspace.close_as(f)
+        if h5_brokens:
+            UiUtils.showInfo("\n".join(h5_brokens), "below data was broken")
         self.manager.workspace = WorkSpace(f)
 
     @state_node

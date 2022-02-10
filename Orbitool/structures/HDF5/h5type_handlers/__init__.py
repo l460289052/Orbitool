@@ -4,6 +4,7 @@ from .base import BaseStructure, register_handler, BaseRowItem
 from .row_handler import Row
 from .simple_handler import AsciiLimit, AttrHandler, StrHandler
 from .np_handler import NdArray
+from .structure_handler import brokens
 
 register_handler(bool, simple_handler.BoolHandler)
 register_handler(int, simple_handler.IntHandler)
