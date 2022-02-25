@@ -246,7 +246,7 @@ def calc(manager: Manager, input: str, force: bool):
         index = binary_search.indexNearest(
             peaks, mass, method=peak_position)
         peak = peaks[index]
-        peak_index = index if abs(
+        peak_index = index if abs(mass) > 1e-6 and abs(
             peak.peak_position / mass - 1) < 3e-8 else None
     else:
         peak_index = None

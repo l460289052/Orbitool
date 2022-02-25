@@ -423,6 +423,19 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2022.02.10 version 2.1.5**
+
+> should be 2.2.0
+
++ Calibration segments support
+   + Add a new window for calibration details
++ Real "save as" instead of copy
++ Broken file read support
++ Change progress bar update interval
++ Bug fix
+   + crash while resize plot
+   + fail to export because of time format
+
 **2022.02.03 version 2.1.4**
 
 + Bug fix

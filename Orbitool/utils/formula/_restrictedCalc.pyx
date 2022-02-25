@@ -175,7 +175,7 @@ cdef class Calculator:
     
     def __setitem__(self, str e, dict v):
         cdef int_pair p = str2element(e)
-        assert p.second == 0
+        assert p.second == 0, "Parameters setting only enable for stable element"
         cdef State state = State(DBE2 = v["DBE2"], OMin = v["OMin"], OMax = v["OMax"], HMin = v["HMin"], HMax = v["HMax"])
         self.ElementState[p.first] = state
         self.ElementNumMin[p.first] = v["Min"]
