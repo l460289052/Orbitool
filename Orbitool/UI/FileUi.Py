@@ -51,6 +51,8 @@ class Ui_Form(object):
         self.horizontalLayout.addLayout(self.verticalLayout_5)
         self.tableWidget = QtWidgets.QTableWidget(Form)
         self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.tableWidget.setDragEnabled(True)
+        self.tableWidget.setDragDropMode(QtWidgets.QAbstractItemView.DropOnly)
         self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectItems)
         self.tableWidget.setTextElideMode(QtCore.Qt.ElideNone)
         self.tableWidget.setHorizontalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)

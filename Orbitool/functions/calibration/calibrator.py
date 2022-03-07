@@ -29,8 +29,8 @@ class Ion(BaseRowItem):
 class PathIonInfo(BaseStructure):
     h5_type = "calibration path ion info"
 
-    raw_position: NdArray[float, -1]
-    raw_intensity: NdArray[float, -1]
+    raw_position: NdArray[float, -1]  # shape len(spectra)
+    raw_intensity: NdArray[float, -1]  # shape len(spectra)
 
     position: float
     rtol: float
@@ -48,13 +48,6 @@ class PathIonInfo(BaseStructure):
 
 
 class Calibrator(BaseStructure):
-    """
-        ions_raw_position: shape (len(spectrum), len(ions))
-        ions_raw_intensity: shape (len(spectrum), len(ions))
-
-        ions_position: shape (len(ions))
-        ions_rtol: shape (len(ions))
-    """
     h5_type = "calibrator"
 
     formulas: FormulaList = field(list)

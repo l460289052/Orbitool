@@ -66,12 +66,15 @@ class Widget(QtWidgets.QWidget, CalibrationDetailUi.Ui_Form):
         spectrum = self.manager.workspace.noise_tab.raw_spectra[index]
 
         ion_infos = info.path_ion_infos[spectrum.path]
-        calibrators = info.calibrator_segments[spectrum.path]
         inner_index = index
-        for cali in info.calibrator_segments.values():
-            if inner_index < len(cali[0].formulas):
+        for ion_info in info.path_ion_infos.values():
+            if ion_info:
+                i = next(iter(ion_info.values()))
+                if inner_index < len(i.raw_position):
+                    break
+                inner_index -= len(i.raw_position)
+            else:
                 break
-            inner_index -= len(cali[0].formulas)
 
         table = self.spectrumIonsTableWidget
         table.clearContents()

@@ -191,6 +191,9 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="placeholderText">
+            <string>HNO3O3-, C6H3O2NNO3, C6H5O3NNO3-</string>
+           </property>
           </widget>
          </item>
          <item>
@@ -410,7 +413,7 @@
        <enum>QTabWidget::West</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="figureTabWidgetPage">
        <attribute name="title">
@@ -423,7 +426,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTableWidget" name="caliInfoTableWidget1">
+         <widget class="QTableWidget" name="caliInfoTableWidget">
           <property name="horizontalScrollMode">
            <enum>QAbstractItemView::ScrollPerPixel</enum>
           </property>

@@ -140,7 +140,7 @@ def getNoiseParams(DoubleArray mass, DoubleArray intensity, double quantile,
     cdef np.ndarray[bool, ndim=2] mass_masks = np.empty((mass_points.size, intensity.size), np.bool)
     cdef DoubleArray masked_mass, masked_intensity, poly_coef
     cdef double mass_point, std
-    other_mask = np.empty(intensity.size, np.bool)
+    other_mask = np.ones(intensity.size, np.bool)
     # generate mask
     cdef int i
     for i, mass_point in enumerate(mass_points):

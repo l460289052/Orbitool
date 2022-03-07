@@ -18,7 +18,7 @@ from .timeseries import TimeseriesInfo
 T = TypeVar("T")
 
 
-VERSION = "2.1.5"
+VERSION = "2.2.1"
 
 
 class WorkspaceInfo(BaseStructure):

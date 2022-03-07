@@ -2,9 +2,10 @@ import os
 import csv
 from datetime import datetime, timedelta
 from functools import partial
+import pathlib
 from typing import List, Optional, Union, Iterable
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .. import utils
 from ..structures.file import Path, PathList, FileSpectrumInfo, PeriodItem
@@ -31,6 +32,10 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         super().setupUi(self)
 
         set_header_sizes(self.tableWidget.horizontalHeader(), [150, 100, 100])
+
+        self.tableWidget.dragEnterEvent = self.tableDragEnterEvent
+        self.tableWidget.dragMoveEvent = self.tableDragMoveEvent
+        self.tableWidget.dropEvent = self.tableDropEvent
 
         self.addFilePushButton.clicked.connect(self.addThermoFile)
         self.addFolderPushButton.clicked.connect(self.addFolder)
@@ -101,7 +106,8 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
                 next(it)  # skip row
                 time_parser = utils.TimeParser()
                 for row in it:
-                    item = PeriodItem(time_parser.parse(row[0]), time_parser.parse(row[1]))
+                    item = PeriodItem(time_parser.parse(
+                        row[0]), time_parser.parse(row[1]))
                     ret.append(item)
             return ret
         self.file.info.periods = yield func, "Read periods"
@@ -178,6 +184,32 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
 
     @addFolder.except_node
     def addFolder(self):
+        self.showPaths()
+
+    def tableDragEnterEvent(self, event: QtGui.QDragEnterEvent):
+        data = event.mimeData()
+        text = data.text().splitlines()
+        if text and text[0].startswith("file:///"):
+            event.setDropAction(QtCore.Qt.LinkAction)
+            event.accept()
+
+    def tableDragMoveEvent(self, event: QtGui.QDragMoveEvent):
+        event.accept()
+
+    @state_node(withArgs=True)
+    def tableDropEvent(self, event: QtGui.QDropEvent):
+        def func():
+            pathlist = self.pathlist
+            for file in event.mimeData().text().splitlines():
+                p = pathlib.Path(file[len("file:///"):])
+                if p.is_dir():
+                    for path in self.manager.tqdm(utils.files.FolderTraveler(str(p), ext=".RAW", recurrent=self.recursionCheckBox.isChecked())):
+                        pathlist.addThermoFile(path)
+                elif p.suffix.lower() == ".raw":
+                    pathlist.addThermoFile(str(p))
+            pathlist.sort()
+        yield func, "read files"
+
         self.showPaths()
 
     @state_node

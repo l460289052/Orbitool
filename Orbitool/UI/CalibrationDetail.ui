@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>797</width>
-    <height>551</height>
+    <width>1000</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,8 +48,8 @@
              </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
-               <height>150</height>
+               <width>200</width>
+               <height>200</height>
               </size>
              </property>
              <property name="editTriggers">
@@ -90,7 +90,7 @@
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>150</height>
+               <height>200</height>
               </size>
              </property>
              <property name="editTriggers">
@@ -158,8 +158,8 @@
              </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
-               <height>150</height>
+               <width>200</width>
+               <height>200</height>
               </size>
              </property>
              <property name="editTriggers">
@@ -205,7 +205,7 @@
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>150</height>
+               <height>200</height>
               </size>
              </property>
              <property name="editTriggers">

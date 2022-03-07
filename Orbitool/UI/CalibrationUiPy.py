@@ -256,7 +256,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
     def showAllInfo(self):
         info = self.calibration.info
 
-        table = self.caliInfoTableWidget1
+        table = self.caliInfoTableWidget
         table.clearContents()
         table.setColumnCount(len(info.last_ions))
         hlables = [ion.shown_text for ion in info.last_ions]

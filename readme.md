@@ -423,6 +423,13 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2022.03.07 version 2.2.1**
+
++ Drag files or folders then drop them to file list
++ improve display when calibrate
++ Bug fix
+  + randomness in calc noise
+
 **2022.02.10 version 2.1.5**
 
 > should be 2.2.0

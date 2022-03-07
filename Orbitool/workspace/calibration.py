@@ -92,11 +92,15 @@ class CalibratorInfo(BaseStructure):
             ret_ions = []
 
     def yield_ion_used(self, path: str):
-        calibrators = self.calibrator_segments[path]
-        formula_ions = {ion.formula: ion for ion in self.last_ions}
-        for calibrator in calibrators:
-            for index, formula in enumerate(calibrator.formulas):
-                yield formula_ions[formula], index in calibrator.used_indexes
+        if path in self.calibrator_segments:
+            calibrators = self.calibrator_segments[path]
+            formula_ions = {ion.formula: ion for ion in self.last_ions}
+            for calibrator in calibrators:
+                for index, formula in enumerate(calibrator.formulas):
+                    yield formula_ions[formula], index in calibrator.used_indexes
+        else:  # fail to calibrate
+            for ion in self.last_ions:
+                yield ion, False
 
     def add_ions(self, str_ions: List[str]):
         ions = [Ion.fromText(ion) for ion in str_ions]
@@ -137,20 +141,23 @@ class CalibratorInfo(BaseStructure):
 
         segment_ions = list(self.yield_segment_ions())
         for path, ion_infos in self.path_ion_infos.items():
-            calibrators = []
+            try:
+                calibrators = []
 
-            start_point = None
-            for seg_info, ions in segment_ions:
-                cali = Calibrator.fromIonInfos(
-                    ions,
-                    [ion_infos[ion.formula] for ion in ions],
-                    seg_info.n_ions,
-                    seg_info.degree,
-                    start_point)
-                start_point = (seg_info.end_point,
-                               cali.predict_point(seg_info.end_point))
-                calibrators.append(cali)
-            self.calibrator_segments[path] = calibrators
+                start_point = None
+                for seg_info, ions in segment_ions:
+                    cali = Calibrator.fromIonInfos(
+                        ions,
+                        [ion_infos[ion.formula] for ion in ions],
+                        seg_info.n_ions,
+                        seg_info.degree,
+                        start_point)
+                    start_point = (seg_info.end_point,
+                                cali.predict_point(seg_info.end_point))
+                    calibrators.append(cali)
+                self.calibrator_segments[path] = calibrators
+            except Exception as e:
+                raise ValueError(f"Error at file {path}") from e
         self.last_calibrate_info_segments = deepcopy(
             self.calibrate_info_segments)
 
