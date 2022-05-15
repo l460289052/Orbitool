@@ -2,7 +2,6 @@ import imp
 from typing import Iterable, Type
 import h5py
 import numpy as np
-from pydantic import TupleError
 
 
 def write_to(h5obj: h5py.Group, name: str, data: np.ndarray):
