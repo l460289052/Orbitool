@@ -3,7 +3,6 @@ __pycache__
 .vs
 TestResults
 *~
-*.dll
 *.RAW
 data
 ref
