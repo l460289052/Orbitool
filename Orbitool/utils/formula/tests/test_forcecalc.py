@@ -89,3 +89,13 @@ def test_basegroup_nonisotope():
     calc['N[15]'] = 0
     f = Formula("HNO3")
     assert f in calc.get(f.mass())
+
+def test_minus():
+    calc = ForceCalc()
+    for ei in calc.getEIList():
+        calc[ei] = 0
+    calc["C"] = 10
+    calc["H"] = 10
+    f = Formula("CH5-")
+    ret = calc.get(f.mass(), Formula("-"))
+    assert f in ret
