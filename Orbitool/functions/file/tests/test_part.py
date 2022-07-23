@@ -1,6 +1,6 @@
 import numpy as np
 from datetime import datetime, timedelta
-from .. import generage_periods, part_by_periods
+from ..part import generage_periods, part_by_periods
 
 delta = timedelta(seconds=1)
 

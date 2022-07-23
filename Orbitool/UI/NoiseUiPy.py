@@ -184,7 +184,7 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         mass_points = np.array([f.formula.mass()
                                 for f in setting.noise_formulas])
         mass_point_deltas = np.array([self.tableWidget.cellWidget(
-            i, 1).value() for i in range(self.tableWidget.rowCount())], dtype=np.int)
+            i, 1).value() for i in range(self.tableWidget.rowCount())], dtype=np.int32)
 
         def func():
             poly, std, slt, params = spectrum_func.getNoiseParams(

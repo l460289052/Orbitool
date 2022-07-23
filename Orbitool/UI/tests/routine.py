@@ -13,6 +13,7 @@ loop: QtCore.QEventLoop = None
 def wait_not_busy():
     if not get_config().DEBUG:
         loop.exec_()
+    sleep()
 
 
 def sleep(timeout=None):
@@ -35,6 +36,10 @@ def init(window: MainUiPy.Window):
     loop = QtCore.QEventLoop()
     window.manager.busy_signal.connect(loop.quit)
 
+def qt_exit(app:QtWidgets.QApplication):
+    timer = QtCore.QTimer()
+    timer.timeout.connect(app.exit)
+    timer.start(get_config().test_timeout)
 
 def fileui(window: MainUiPy.Window):
     fileui = window.fileTab
@@ -45,14 +50,12 @@ def fileui(window: MainUiPy.Window):
     fileui.addFolder()
 
     wait_not_busy()
-    sleep()
     assert not manager.busy
-    assert len(workspace.file_tab.info.pathlist.paths) == 9
+    assert workspace.file_tab.info.pathlist.paths 
 
     test.input([1, 2, 3])
     fileui.processSelected()
     wait_not_busy()
-    sleep()
     assert len(workspace.file_tab.info.spectrum_infos) > 0
 
 
@@ -70,14 +73,13 @@ def noise(window: MainUiPy.Window):
     noiseui.showSelectedSpectrum()
 
     wait_not_busy()
-    sleep()
 
     noiseui.calcNoise()
 
-    sleep()
+    wait_not_busy()
     noiseui.denoise()
 
-    sleep()
+    wait_not_busy()
 
 
 def peak_shape(window: MainUiPy.Window):

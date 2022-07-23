@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Union, List, Iterator
 
 
@@ -11,7 +12,7 @@ class FolderTraveler:
 
     def __init__(self, rootPath: Union[str, List[str]], ext: Union[str, List[str]], recurrent: bool):
 
-        if isinstance(rootPath, str):
+        if isinstance(rootPath, (str, Path)):
             rootPaths = [rootPath]
         else:
             rootPaths = rootPath

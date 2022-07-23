@@ -1,6 +1,7 @@
 import os
 from typing import Dict, Generic, List, Optional, Type, TypeVar, Union
 
+from .. import VERSION
 from ..structures import BaseStructure, BaseRowItem, StructureTypeHandler, get_handler
 from ..structures.HDF5 import H5File, H5Obj, h5_brokens
 from .base import UiState, Widget
@@ -16,9 +17,6 @@ from .spectra_list import SpectraListInfo
 from .timeseries import TimeseriesInfo
 
 T = TypeVar("T")
-
-
-VERSION = "2.2.1"
 
 
 class WorkspaceInfo(BaseStructure):

@@ -1,5 +1,5 @@
 # distutils: language = c++
-# cython: lanuage_level = 3
+# cython: language_level = 3
 
 from libc.stdint cimport int32_t
 from libcpp.list cimport list as cpplist

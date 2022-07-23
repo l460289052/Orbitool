@@ -1,4 +1,3 @@
-import imp
 from typing import Iterable, Type
 import h5py
 import numpy as np

@@ -45,7 +45,7 @@ class NormalDistributionFunc(BaseFunc):
 
     @classmethod
     def FromParams(cls, params: List[tuple]):
-        params = np.array(params, dtype=np.float)
+        params = np.array(params, dtype=np.float64)
         peak_position = params[:, 1]
         peak_sigma = params[:, 2]
         peak_sigma_norm = peak_sigma / \

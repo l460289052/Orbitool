@@ -36,7 +36,7 @@ class _Config:
 
     multi_cores: int = field(default_factory=cpu_count)
 
-    test_timeout: float = .1
+    test_timeout: int = 1
     time_delta: timedelta = timedelta(seconds=1)
 
     default_select: bool = True

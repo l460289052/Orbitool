@@ -2,7 +2,7 @@
 # cython: language_level = 3
 
 from libc cimport math
-from libcpp cimport bool
+from libcpp cimport bool as cbool
 import cython
 from cython.operator cimport preincrement as preinc, predecrement as predec
 
@@ -28,16 +28,16 @@ cpdef double normFuncAt(double x, double a, double mu, double sigma):
 
 # noise
 
-cdef np.ndarray[bool, ndim=1] getGlobalMask(DoubleArray mass):
+cdef np.ndarray[cbool, ndim=1] getGlobalMask(DoubleArray mass):
     cdef DoubleArray mass_defect = mass - np.floor(mass)
     # return (mass_defect>l) & (mass_defect<r)
     return np.abs(mass_defect - bin_mid) < bin_wid
 
-cdef np.ndarray[bool, ndim=1] getMassPointMask(DoubleArray mass, double mass_point,
+cdef np.ndarray[cbool, ndim=1] getMassPointMask(DoubleArray mass, double mass_point,
         int delta):
     return np.abs(mass - math.round(mass_point) - bin_mid) < delta + bin_wid
 
-cdef bool getMassPointMasked(double mass, double mass_point, int delta):
+cdef cbool getMassPointMasked(double mass, double mass_point, int delta):
     return math.fabs(mass - math.round(mass_point) - bin_mid) < delta+bin_wid
 
 cdef tuple getMassPointParams(DoubleArray mass, DoubleArray intensity,
@@ -46,7 +46,7 @@ cdef tuple getMassPointParams(DoubleArray mass, DoubleArray intensity,
         return False, None
     cdef np.ndarray[double, ndim=2] params = np.empty((2, 3), dtype = npdouble)
     cdef DoubleArray mass_bin, std_bin
-    cdef np.ndarray[bool, ndim=1] mask
+    cdef np.ndarray[cbool, ndim=1] mask
 
     mass_bin = np.arange(-delta,delta+1,1,dtype=npdouble) + (np.round(mass_point)+bin_mid)
     std_bin = np.empty_like(mass_bin)
@@ -67,7 +67,7 @@ cdef tuple getMassPointParams(DoubleArray mass, DoubleArray intensity,
     except RuntimeError:
         return False, None
     
-    cdef bool flag = True
+    cdef cbool flag = True
     if len(mass_bin)>3:
         try:
             params[1] = curve_fit(normFunc, mass_bin, std_bin, p0=p0, bounds=bounds)[0]
@@ -115,8 +115,9 @@ def updateNoiseLODParam(DoubleArray2D params, double n_sigma, double noise, doub
 
 cdef DoubleArray noiseFunc(DoubleArray mass, DoubleArray poly_coef, DoubleArray2D norm_params, double[:] mass_points, int[:] mass_point_deltas):
     cdef np.ndarray[double, ndim=1] noise, tmp_noise
-    cdef np.ndarray[bool, ndim=1] mask
+    cdef np.ndarray[cbool, ndim=1] mask
     cdef DoubleArray norm_param
+    cdef int i
     noise = polynomial.polyval(mass, poly_coef)
     for i, norm_param in enumerate(norm_params, 1):
         mask = getMassPointMask(mass, mass_points[i-1], mass_point_deltas[i-1])
@@ -126,8 +127,8 @@ cdef DoubleArray noiseFunc(DoubleArray mass, DoubleArray poly_coef, DoubleArray2
     
 
 def getNoiseParams(DoubleArray mass, DoubleArray intensity, double quantile,
-        bool mass_dependent, double[:] mass_points, int[:] mass_point_deltas):
-    cdef np.ndarray[bool, ndim=1] is_peak, global_mask, other_mask, quantile_mask
+        cbool mass_dependent, double[:] mass_points, int[:] mass_point_deltas):
+    cdef np.ndarray[cbool, ndim=1] is_peak, global_mask, other_mask, quantile_mask
     is_peak = getPeaksPositions(intensity)
     mass = mass[1:-1][is_peak]
     intensity = intensity[1:-1][is_peak]
@@ -137,10 +138,10 @@ def getNoiseParams(DoubleArray mass, DoubleArray intensity, double quantile,
     mass = mass[global_mask]
     intensity = intensity[global_mask]
 
-    cdef np.ndarray[bool, ndim=2] mass_masks = np.empty((mass_points.size, intensity.size), np.bool)
+    cdef np.ndarray[cbool, ndim=2] mass_masks = np.empty((mass_points.size, intensity.size), bool)
     cdef DoubleArray masked_mass, masked_intensity, poly_coef
     cdef double mass_point, std
-    other_mask = np.ones(intensity.size, np.bool)
+    other_mask = np.ones(intensity.size, bool)
     # generate mask
     cdef int i
     for i, mass_point in enumerate(mass_points):
@@ -183,7 +184,7 @@ cpdef tuple noiseLODFunc(DoubleArray mass, DoubleArray poly_coef,
 def getNoisePeaks(DoubleArray mass, DoubleArray intensity, DoubleArray poly_coef,
         DoubleArray3D norm_params, double[:] mass_point, int[:] mass_point_deltas,
         double n_sigma):
-    cdef np.ndarray[bool, ndim=1] is_peak = getPeaksPositions(intensity), mask
+    cdef np.ndarray[cbool, ndim=1] is_peak = getPeaksPositions(intensity), mask
     mass = mass[1:-1][is_peak]
     intensity = intensity[1:-1][is_peak]
 
@@ -194,9 +195,9 @@ def getNoisePeaks(DoubleArray mass, DoubleArray intensity, DoubleArray poly_coef
 
 def denoiseWithParams(DoubleArray mass, DoubleArray intensity, DoubleArray poly_coef,
         DoubleArray3D norm_params, double[:] mass_points, int[:] mass_point_deltas,
-        double n_sigma, bool subtract):
+        double n_sigma, cbool subtract):
     cdef DoubleArray new_intensity, peak_mass, peak_intensity, noise, LOD
-    cdef np.ndarray[bool, ndim=1] is_peak = getPeaksPositions(intensity)
+    cdef np.ndarray[cbool, ndim=1] is_peak = getPeaksPositions(intensity)
     cdef np.ndarray[np.int32_t, ndim=1] ind_peak
     cdef int length = mass.size
 
@@ -225,6 +226,6 @@ def denoiseWithParams(DoubleArray mass, DoubleArray intensity, DoubleArray poly_
             else:
                 new_intensity[l:r+1] = intensity[l:r+1]
     
-    cdef np.ndarray[bool, ndim=1] slt = getNotZeroPositions(new_intensity)
+    cdef np.ndarray[cbool, ndim=1] slt = getNotZeroPositions(new_intensity)
     return mass[slt], new_intensity[slt]
     

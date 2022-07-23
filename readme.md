@@ -423,6 +423,11 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2022.07.23 version 2.2.2**
+
++ reduce size to ~100MB
++ you can set DBE to a minus value ( only valid for unrestricted calculator )
+
 **2022.03.07 version 2.2.1**
 
 + Drag files or folders then drop them to file list

@@ -10,7 +10,7 @@ ctypedef fused floats:
     float
     double
 
-from .._func cimport indexBetween
+from .._binary_search cimport indexBetween
 
 cdef cross(floats x1, floats y1, floats x2, floats y2):
     return x1*y2-x2*y1
