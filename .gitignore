@@ -15,6 +15,7 @@ log.txt
 *.pdf
 .vscode
 build
+/dist
 *.c
 *.cpp
 *.pyd
