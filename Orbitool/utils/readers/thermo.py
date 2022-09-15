@@ -70,6 +70,14 @@ class File:
         return self.creationDatetime + self.endTimedelta
 
     def getSpectrumRetentionTime(self, scanNum):
+        retentionTime = timedelta(
+            minutes=self.rawfile.RetentionTimeFromScanNumber(scanNum))
+        if scanNum == self.lastScanNumber:
+            lastRetentionTime = self.getSpectrumRetentionTime(scanNum - 1)
+            if retentionTime < lastRetentionTime:
+                averageTimeDelta = (self.endTimedelta - self.startTimedelta) / \
+                    (self.lastScanNumber - self.firstScanNumber)
+                retentionTime = lastRetentionTime + averageTimeDelta
         return timedelta(minutes=self.rawfile.RetentionTimeFromScanNumber(scanNum))
 
     def getSpectrumRetentionTimes(self):
@@ -120,7 +128,7 @@ class File:
     def timeRange2NumRange(self, timeRange: Tuple[timedelta, timedelta]):
         s: slice = functions.binary_search.indexBetween(
             self, timeRange, (self.firstScanNumber, self.lastScanNumber + 1),
-            method=(lambda f, i: f.getSpectrumRetentionTime(i)))
+            method=(lambda _, i: self.getSpectrumRetentionTime(i)))
         return (s.start, s.stop)
 
     def numRange2TimeRange(self, numRange: Tuple[int, int]) -> Tuple[timedelta, timedelta]:
@@ -141,12 +149,19 @@ class File:
         return True
 
     def getAveragedSpectrumInTimeRange(self, start: datetime, end: datetime, rtol, polarity):
-        start = (start - self.creationDatetime).total_seconds() / 60
-        end = (end - self.creationDatetime).total_seconds() / 60
-        if (scanfilter := self.getFilterInTimeRange(start, end, polarity)) is None:
+        startFloat = (start - self.creationDatetime).total_seconds() / 60
+        endFloat = (end - self.creationDatetime).total_seconds() / 60
+        if (scanfilter := self.getFilterInTimeRange(startFloat, endFloat, polarity)) is None:
             return
-        if (averaged := Extensions.AverageScansInTimeRange(self.rawfile, start, end, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))) is None:
+        # Due to a bug related to scan time during data acquisition, AverageScansInTimeRange should not be used
+        #averaged = Extensions.AverageScansInTimeRange(self.rawfile, start, end, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
+        startNum, endNum = self.datetimeRange2NumRange((start, end))
+        averaged = Extensions.AverageScansInScanRange(
+            self.rawfile, startNum, endNum, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
+        if averaged is None:
             return
+        # if (averaged := Extensions.AverageScansInTimeRange(self.rawfile, start, end, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))) is None:
+        #    return
         averaged = averaged.SegmentedScan
         mass = np.fromiter(averaged.Positions, np.float64)
         intensity = np.fromiter(averaged.Intensities, np.float64)
