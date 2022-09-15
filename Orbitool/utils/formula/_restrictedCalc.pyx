@@ -212,7 +212,6 @@ cdef class Calculator:
         return _elements_sum(self.ElementDbe2, formula.elements, 2.0)
 
     
-    # TODO: check DBE is minus
     cpdef void calc(self, Formula base_group, double MMin = -1, double MMax = -1) except*:
         if self.checkParameters() < 0:
             raise ValueError(f"Please check element {e_elements[int(-self.checkParameters())]}")
@@ -262,7 +261,7 @@ cdef class Calculator:
             emass.push(f.mass())
             eit = elements.begin()
             while True:
-                # print(str(f), elementNum)
+                # print(str(f))
                 if elementNum.top() > elementMax.top():
                     index = deref(eit)
                     num = -elementNum.top()

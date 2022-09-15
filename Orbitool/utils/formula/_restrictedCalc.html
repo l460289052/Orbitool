@@ -1758,8 +1758,9 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">213</span>: </pre>
 <pre class="cython line score-0">&#xA0;<span class="">214</span>: </pre>
-<pre class="cython line score-120" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">215</span>:     cpdef void calc(self, Formula base_group, double MMin = -1, double MMax = -1) except*:</pre>
-<pre class='cython code score-120 '>static PyObject *__pyx_pw_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_19calc(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+<pre class="cython line score-0">&#xA0;<span class="">215</span>:     # TODO: check DBE is minus</pre>
+<pre class="cython line score-121" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">216</span>:     cpdef void calc(self, Formula base_group, double MMin = -1, double MMax = -1) except*:</pre>
+<pre class='cython code score-121 '>static PyObject *__pyx_pw_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_19calc(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static void __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_calc(struct __pyx_obj_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *__pyx_v_self, struct __pyx_obj_8Orbitool_5utils_7formula_8_formula_Formula *__pyx_v_base_group, int __pyx_skip_dispatch, struct __pyx_opt_args_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_calc *__pyx_optional_args) {
   double __pyx_v_MMin = ((double)-1.0);
   double __pyx_v_MMax = ((double)-1.0);
@@ -1809,12 +1810,12 @@ static void __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_cal
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_type_dict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(((PyObject *)__pyx_v_self), __pyx_n_s_calc);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 215, __pyx_L1_error)</span>
+      __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(((PyObject *)__pyx_v_self), __pyx_n_s_calc);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 216, __pyx_L1_error)</span>
       <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
       if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_19calc)) {
-        __pyx_t_3 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_v_MMin);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 215, __pyx_L1_error)</span>
+        __pyx_t_3 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_v_MMin);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 216, __pyx_L1_error)</span>
         <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
-        __pyx_t_4 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_v_MMax);<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 215, __pyx_L1_error)</span>
+        __pyx_t_4 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_v_MMax);<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 216, __pyx_L1_error)</span>
         <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_4);
         <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_t_1);
         __pyx_t_5 = __pyx_t_1; __pyx_t_6 = NULL;
@@ -1832,7 +1833,7 @@ static void __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_cal
         #if CYTHON_FAST_PYCALL
         if (<span class='py_c_api'>PyFunction_Check</span>(__pyx_t_5)) {
           PyObject *__pyx_temp[4] = {__pyx_t_6, ((PyObject *)__pyx_v_base_group), __pyx_t_3, __pyx_t_4};
-          __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyFunction_FastCall</span>(__pyx_t_5, __pyx_temp+1-__pyx_t_7, 3+__pyx_t_7);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 215, __pyx_L1_error)</span>
+          __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyFunction_FastCall</span>(__pyx_t_5, __pyx_temp+1-__pyx_t_7, 3+__pyx_t_7);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 216, __pyx_L1_error)</span>
           <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_6); __pyx_t_6 = 0;
           <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
           <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_3); __pyx_t_3 = 0;
@@ -1842,7 +1843,7 @@ static void __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_cal
         #if CYTHON_FAST_PYCCALL
         if (<span class='pyx_c_api'>__Pyx_PyFastCFunction_Check</span>(__pyx_t_5)) {
           PyObject *__pyx_temp[4] = {__pyx_t_6, ((PyObject *)__pyx_v_base_group), __pyx_t_3, __pyx_t_4};
-          __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyCFunction_FastCall</span>(__pyx_t_5, __pyx_temp+1-__pyx_t_7, 3+__pyx_t_7);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 215, __pyx_L1_error)</span>
+          __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyCFunction_FastCall</span>(__pyx_t_5, __pyx_temp+1-__pyx_t_7, 3+__pyx_t_7);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 216, __pyx_L1_error)</span>
           <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_6); __pyx_t_6 = 0;
           <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
           <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_3); __pyx_t_3 = 0;
@@ -1850,7 +1851,7 @@ static void __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_cal
         } else
         #endif
         {
-          __pyx_t_8 = <span class='py_c_api'>PyTuple_New</span>(3+__pyx_t_7);<span class='error_goto'> if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 215, __pyx_L1_error)</span>
+          __pyx_t_8 = <span class='py_c_api'>PyTuple_New</span>(3+__pyx_t_7);<span class='error_goto'> if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 216, __pyx_L1_error)</span>
           <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_8);
           if (__pyx_t_6) {
             <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_6); <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_8, 0, __pyx_t_6); __pyx_t_6 = NULL;
@@ -1864,7 +1865,7 @@ static void __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_cal
           <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_8, 2+__pyx_t_7, __pyx_t_4);
           __pyx_t_3 = 0;
           __pyx_t_4 = 0;
-          __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyObject_Call</span>(__pyx_t_5, __pyx_t_8, NULL);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 215, __pyx_L1_error)</span>
+          __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyObject_Call</span>(__pyx_t_5, __pyx_t_8, NULL);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 216, __pyx_L1_error)</span>
           <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
           <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_8); __pyx_t_8 = 0;
         }
@@ -1896,6 +1897,7 @@ static void __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_cal
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_5);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_6);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_8);
+  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_22);
   <span class='pyx_c_api'>__Pyx_AddTraceback</span>("Orbitool.utils.formula._restrictedCalc.Calculator.calc", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_L0:;
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>((PyObject *)__pyx_v_f);
@@ -1947,7 +1949,7 @@ static PyObject *__pyx_pw_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
         }
       }
       if (unlikely(kw_args &gt; 0)) {
-        if (unlikely(<span class='pyx_c_api'>__Pyx_ParseOptionalKeywords</span>(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "calc") &lt; 0)) <span class='error_goto'>__PYX_ERR(0, 215, __pyx_L3_error)</span>
+        if (unlikely(<span class='pyx_c_api'>__Pyx_ParseOptionalKeywords</span>(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "calc") &lt; 0)) <span class='error_goto'>__PYX_ERR(0, 216, __pyx_L3_error)</span>
       }
     } else {
       switch (<span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)) {
@@ -1962,25 +1964,25 @@ static PyObject *__pyx_pw_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
     }
     __pyx_v_base_group = ((struct __pyx_obj_8Orbitool_5utils_7formula_8_formula_Formula *)values[0]);
     if (values[1]) {
-      __pyx_v_MMin = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[1]); if (unlikely((__pyx_v_MMin == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 215, __pyx_L3_error)</span>
+      __pyx_v_MMin = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[1]); if (unlikely((__pyx_v_MMin == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 216, __pyx_L3_error)</span>
     } else {
       __pyx_v_MMin = ((double)-1.0);
     }
     if (values[2]) {
-      __pyx_v_MMax = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[2]); if (unlikely((__pyx_v_MMax == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 215, __pyx_L3_error)</span>
+      __pyx_v_MMax = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[2]); if (unlikely((__pyx_v_MMax == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 216, __pyx_L3_error)</span>
     } else {
       __pyx_v_MMax = ((double)-1.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("calc", 0, 1, 3, <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)); <span class='error_goto'>__PYX_ERR(0, 215, __pyx_L3_error)</span>
+  <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("calc", 0, 1, 3, <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)); <span class='error_goto'>__PYX_ERR(0, 216, __pyx_L3_error)</span>
   __pyx_L3_error:;
   <span class='pyx_c_api'>__Pyx_AddTraceback</span>("Orbitool.utils.formula._restrictedCalc.Calculator.calc", __pyx_clineno, __pyx_lineno, __pyx_filename);
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_base_group), __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula, 1, "base_group", 0))) <span class='error_goto'>__PYX_ERR(0, 215, __pyx_L1_error)</span>
+  if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_base_group), __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula, 1, "base_group", 0))) <span class='error_goto'>__PYX_ERR(0, 216, __pyx_L1_error)</span>
   __pyx_r = __pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_18calc(((struct __pyx_obj_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self), __pyx_v_base_group, __pyx_v_MMin, __pyx_v_MMax);
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -2003,8 +2005,8 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
   __pyx_t_1.__pyx_n = 2;
   __pyx_t_1.MMin = __pyx_v_MMin;
   __pyx_t_1.MMax = __pyx_v_MMax;
-  __pyx_vtabptr_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator-&gt;calc(__pyx_v_self, __pyx_v_base_group, 1, &amp;__pyx_t_1);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L1_error)</span>
-  __pyx_t_2 = __Pyx_void_to_None(NULL);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 215, __pyx_L1_error)</span>
+  __pyx_vtabptr_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator-&gt;calc(__pyx_v_self, __pyx_v_base_group, 1, &amp;__pyx_t_1);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 216, __pyx_L1_error)</span>
+  __pyx_t_2 = __Pyx_void_to_None(NULL);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 216, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
@@ -2020,45 +2022,45 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">216</span>:         if self.checkParameters() &lt; 0:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">217</span>:         if self.checkParameters() &lt; 0:</pre>
 <pre class='cython code score-0 '>  __pyx_t_9 = ((((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;checkParameters(__pyx_v_self) &lt; 0) != 0);
   if (unlikely(__pyx_t_9)) {
 /* … */
   }
-</pre><pre class="cython line score-23" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">217</span>:             raise ValueError(f"Please check element {e_elements[int(-self.checkParameters())]}")</pre>
+</pre><pre class="cython line score-23" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">218</span>:             raise ValueError(f"Please check element {e_elements[int(-self.checkParameters())]}")</pre>
 <pre class='cython code score-23 '>    if (unlikely(__pyx_v_8Orbitool_5utils_7formula_8_element_elements == Py_None)) {
       <span class='py_c_api'>PyErr_SetString</span>(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      <span class='error_goto'>__PYX_ERR(0, 217, __pyx_L1_error)</span>
+      <span class='error_goto'>__PYX_ERR(0, 218, __pyx_L1_error)</span>
     }
-    __pyx_t_1 = __Pyx_PyInt_From_int32_t((-((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;checkParameters(__pyx_v_self)));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 217, __pyx_L1_error)</span>
+    __pyx_t_1 = __Pyx_PyInt_From_int32_t((-((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;checkParameters(__pyx_v_self)));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 218, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyObject_CallOneArg</span>(((PyObject *)(&amp;PyInt_Type)), __pyx_t_1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 217, __pyx_L1_error)</span>
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyObject_CallOneArg</span>(((PyObject *)(&amp;PyInt_Type)), __pyx_t_1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 218, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetItem</span>(__pyx_v_8Orbitool_5utils_7formula_8_element_elements, __pyx_t_2);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 217, __pyx_L1_error)</span>
+    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetItem</span>(__pyx_v_8Orbitool_5utils_7formula_8_element_elements, __pyx_t_2);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 218, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyObject_FormatSimple</span>(__pyx_t_1, __pyx_empty_unicode);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 217, __pyx_L1_error)</span>
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyObject_FormatSimple</span>(__pyx_t_1, __pyx_empty_unicode);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 218, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyUnicode_Concat</span>(__pyx_kp_u_Please_check_element, __pyx_t_2);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 217, __pyx_L1_error)</span>
+    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyUnicode_Concat</span>(__pyx_kp_u_Please_check_element, __pyx_t_2);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 218, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyObject_CallOneArg</span>(__pyx_builtin_ValueError, __pyx_t_1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 217, __pyx_L1_error)</span>
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyObject_CallOneArg</span>(__pyx_builtin_ValueError, __pyx_t_1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 218, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
     <span class='pyx_c_api'>__Pyx_Raise</span>(__pyx_t_2, 0, 0, 0);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-    <span class='error_goto'>__PYX_ERR(0, 217, __pyx_L1_error)</span>
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">218</span>:         cdef double ML = self.MMin</pre>
+    <span class='error_goto'>__PYX_ERR(0, 218, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">219</span>:         cdef double ML = self.MMin</pre>
 <pre class='cython code score-0 '>  __pyx_t_10 = __pyx_v_self-&gt;MMin;
   __pyx_v_ML = __pyx_t_10;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">219</span>:         cdef double MR = self.MMax</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">220</span>:         cdef double MR = self.MMax</pre>
 <pre class='cython code score-0 '>  __pyx_t_10 = __pyx_v_self-&gt;MMax;
   __pyx_v_MR = __pyx_t_10;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">220</span>:         cdef double base_mass = base_group.mass()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">221</span>:         cdef double base_mass = base_group.mass()</pre>
 <pre class='cython code score-0 '>  __pyx_v_base_mass = ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_base_group-&gt;__pyx_vtab)-&gt;mass(__pyx_v_base_group, 0);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">221</span>:         if MMin&gt;0 and MMax&gt;0:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">222</span>:         if MMin&gt;0 and MMax&gt;0:</pre>
 <pre class='cython code score-0 '>  __pyx_t_11 = ((__pyx_v_MMin &gt; 0.0) != 0);
   if (__pyx_t_11) {
   } else {
@@ -2072,71 +2074,71 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
 /* … */
     goto __pyx_L4;
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">222</span>:             ML = MMin</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">223</span>:             ML = MMin</pre>
 <pre class='cython code score-0 '>    __pyx_v_ML = __pyx_v_MMin;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">223</span>:             MR = MMax</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">224</span>:             MR = MMax</pre>
 <pre class='cython code score-0 '>    __pyx_v_MR = __pyx_v_MMax;
-</pre><pre class="cython line score-0">&#xA0;<span class="">224</span>:         else:</pre>
-<pre class="cython line score-1" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">225</span>:             self.clear()</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">225</span>:         else:</pre>
+<pre class="cython line score-1" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">226</span>:             self.clear()</pre>
 <pre class='cython code score-1 '>  /*else*/ {
-    __pyx_t_2 = ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;clear(__pyx_v_self, 0);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 225, __pyx_L1_error)</span>
+    __pyx_t_2 = ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;clear(__pyx_v_self, 0);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 226, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
   }
   __pyx_L4:;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">226</span>:         if self.isCovered(ML, MR):</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">227</span>:         if self.isCovered(ML, MR):</pre>
 <pre class='cython code score-0 '>  __pyx_t_9 = (((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;isCovered(__pyx_v_self, __pyx_v_ML, __pyx_v_MR) != 0);
   if (__pyx_t_9) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">227</span>:             return</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">228</span>:             return</pre>
 <pre class='cython code score-0 '>    goto __pyx_L0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">228</span>:         ML -= base_mass</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">229</span>:         ML -= base_mass</pre>
 <pre class='cython code score-0 '>  __pyx_v_ML = (__pyx_v_ML - __pyx_v_base_mass);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">229</span>:         MR -= base_mass</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">230</span>:         MR -= base_mass</pre>
 <pre class='cython code score-0 '>  __pyx_v_MR = (__pyx_v_MR - __pyx_v_base_mass);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">230</span>:         cdef double DBE2Min = self.DBEMin*2</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">231</span>:         cdef double DBE2Min = self.DBEMin*2</pre>
 <pre class='cython code score-0 '>  __pyx_v_DBE2Min = (__pyx_v_self-&gt;DBEMin * 2.0);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">231</span>:         cdef double DBE2Max = self.DBEMax*2</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">232</span>:         cdef double DBE2Max = self.DBEMax*2</pre>
 <pre class='cython code score-0 '>  __pyx_v_DBE2Max = (__pyx_v_self-&gt;DBEMax * 2.0);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">232</span>:         cdef double DBE2Base = base_group.dbe()*2</pre>
-<pre class='cython code score-0 '>  __pyx_t_10 = ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_base_group-&gt;__pyx_vtab)-&gt;dbe(__pyx_v_base_group, 0);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 232, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">233</span>:         cdef double DBE2Base = base_group.dbe()*2</pre>
+<pre class='cython code score-0 '>  __pyx_t_10 = ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_base_group-&gt;__pyx_vtab)-&gt;dbe(__pyx_v_base_group, 0);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 233, __pyx_L1_error)</span>
   __pyx_v_DBE2Base = (__pyx_t_10 * 2.0);
-</pre><pre class="cython line score-0">&#xA0;<span class="">233</span>: </pre>
-<pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">234</span>:         cdef Formula f = Formula.__new__(Formula), g</pre>
-<pre class='cython code score-2 '>  __pyx_t_2 = __Pyx_tp_new(((PyObject *)__pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula), __pyx_empty_tuple);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 234, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0">&#xA0;<span class="">234</span>: </pre>
+<pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">235</span>:         cdef Formula f = Formula.__new__(Formula), g</pre>
+<pre class='cython code score-2 '>  __pyx_t_2 = __Pyx_tp_new(((PyObject *)__pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula), __pyx_empty_tuple);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 235, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
-  if (!(likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_t_2, __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula)))) <span class='error_goto'>__PYX_ERR(0, 234, __pyx_L1_error)</span>
+  if (!(likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_t_2, __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula)))) <span class='error_goto'>__PYX_ERR(0, 235, __pyx_L1_error)</span>
   __pyx_v_f = ((struct __pyx_obj_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_t_2);
   __pyx_t_2 = 0;
-</pre><pre class="cython line score-0">&#xA0;<span class="">235</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">236</span>:         cdef int32_t CNum, ONum, HNum, num, index, CMin, CMax, OMax, HMax, numMax, step</pre>
-<pre class="cython line score-0">&#xA0;<span class="">237</span>:         cdef cpplist[int32_t] elements</pre>
-<pre class="cython line score-0">&#xA0;<span class="">238</span>:         cdef cpplist[int32_t].iterator eit</pre>
-<pre class="cython line score-0">&#xA0;<span class="">239</span>:         cdef stack[int32_t] elementNum, elementMax</pre>
-<pre class="cython line score-0">&#xA0;<span class="">240</span>:         cdef stack[double] emass</pre>
-<pre class="cython line score-0">&#xA0;<span class="">241</span>:         cdef double mass</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">242</span>:         cdef bool nitrogenRule = self.nitrogenRule</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">236</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">237</span>:         cdef int32_t CNum, ONum, HNum, num, index, CMin, CMax, OMax, HMax, numMax, step</pre>
+<pre class="cython line score-0">&#xA0;<span class="">238</span>:         cdef cpplist[int32_t] elements</pre>
+<pre class="cython line score-0">&#xA0;<span class="">239</span>:         cdef cpplist[int32_t].iterator eit</pre>
+<pre class="cython line score-0">&#xA0;<span class="">240</span>:         cdef stack[int32_t] elementNum, elementMax</pre>
+<pre class="cython line score-0">&#xA0;<span class="">241</span>:         cdef stack[double] emass</pre>
+<pre class="cython line score-0">&#xA0;<span class="">242</span>:         cdef double mass</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">243</span>:         cdef bool nitrogenRule = self.nitrogenRule</pre>
 <pre class='cython code score-0 '>  __pyx_t_12 = __pyx_v_self-&gt;nitrogenRule;
   __pyx_v_nitrogenRule = __pyx_t_12;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">243</span>:         if nitrogenRule:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">244</span>:         if nitrogenRule:</pre>
 <pre class='cython code score-0 '>  __pyx_t_9 = (__pyx_v_nitrogenRule != 0);
   if (__pyx_t_9) {
 /* … */
     goto __pyx_L8;
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">244</span>:             step = 2</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">245</span>:             step = 2</pre>
 <pre class='cython code score-0 '>    __pyx_v_step = 2;
-</pre><pre class="cython line score-0">&#xA0;<span class="">245</span>:         else:</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">246</span>:             step = 1</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">246</span>:         else:</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">247</span>:             step = 1</pre>
 <pre class='cython code score-0 '>  /*else*/ {
     __pyx_v_step = 1;
   }
   __pyx_L8:;
-</pre><pre class="cython line score-0">&#xA0;<span class="">247</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">248</span>:         elements.push_back(CIndex)</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">248</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">249</span>:         elements.push_back(CIndex)</pre>
 <pre class='cython code score-0 '>  __pyx_v_elements.push_back(__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_CIndex);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">249</span>:         for num in self.calcedElements:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">250</span>:         for num in self.calcedElements:</pre>
 <pre class='cython code score-0 '>  __pyx_t_14 = &amp;__pyx_v_self-&gt;calcedElements;
   __pyx_t_13 = __pyx_t_14-&gt;begin();
   for (;;) {
@@ -2146,7 +2148,7 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
     __pyx_v_num = __pyx_t_15;
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">250</span>:             if num !=HIndex and num!=CIndex and num!=OIndex:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">251</span>:             if num !=HIndex and num!=CIndex and num!=OIndex:</pre>
 <pre class='cython code score-0 '>    __pyx_t_11 = ((__pyx_v_num != __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_HIndex) != 0);
     if (__pyx_t_11) {
     } else {
@@ -2165,18 +2167,18 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
     if (__pyx_t_9) {
 /* … */
     }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">251</span>:                 elements.push_back(num)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">252</span>:                 elements.push_back(num)</pre>
 <pre class='cython code score-0 '>      __pyx_v_elements.push_back(__pyx_v_num);
-</pre><pre class="cython line score-0">&#xA0;<span class="">252</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">253</span>:         cdef State state</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">254</span>:         CMin = self.ElementNumMin[CIndex]</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">253</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">254</span>:         cdef State state</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">255</span>:         CMin = self.ElementNumMin[CIndex]</pre>
 <pre class='cython code score-0 '>  __pyx_v_CMin = (__pyx_v_self-&gt;ElementNumMin[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_CIndex]);
-</pre><pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">255</span>:         CMax = min(&lt;int&gt;(MR/elementMass[CIndex]), self.ElementNumMax[CIndex])</pre>
+</pre><pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">256</span>:         CMax = min(&lt;int&gt;(MR/elementMass[CIndex]), self.ElementNumMax[CIndex])</pre>
 <pre class='cython code score-5 '>  __pyx_t_15 = (__pyx_v_self-&gt;ElementNumMax[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_CIndex]);
   __pyx_t_10 = (__pyx_v_8Orbitool_5utils_7formula_8_element_elementMass[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_CIndex]);
   if (unlikely(__pyx_t_10 == 0)) {
     <span class='py_c_api'>PyErr_SetString</span>(PyExc_ZeroDivisionError, "float division");
-    <span class='error_goto'>__PYX_ERR(0, 255, __pyx_L1_error)</span>
+    <span class='error_goto'>__PYX_ERR(0, 256, __pyx_L1_error)</span>
   }
   __pyx_t_7 = ((int)(__pyx_v_MR / __pyx_t_10));
   if (((__pyx_t_15 &lt; __pyx_t_7) != 0)) {
@@ -2185,70 +2187,76 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
     __pyx_t_16 = __pyx_t_7;
   }
   __pyx_v_CMax = __pyx_t_16;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">256</span>:         for CNum in range(CMin, CMax+1):</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">257</span>:         for CNum in range(CMin, CMax+1):</pre>
 <pre class='cython code score-0 '>  __pyx_t_17 = (__pyx_v_CMax + 1);
   __pyx_t_18 = __pyx_t_17;
   for (__pyx_t_16 = __pyx_v_CMin; __pyx_t_16 &lt; __pyx_t_18; __pyx_t_16+=1) {
     __pyx_v_CNum = __pyx_t_16;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">257</span>:             f.setE(CIndex, CNum)</pre>
-<pre class='cython code score-0 '>    ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_CIndex, __pyx_v_CNum);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 257, __pyx_L1_error)</span>
-</pre><pre class="cython line score-1" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">258</span>:             self.setStateForFormula(state, f.elements)</pre>
-<pre class='cython code score-1 '>    __pyx_t_2 = ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setStateForFormula(__pyx_v_self, __pyx_v_state, __pyx_v_f-&gt;elements);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 258, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">258</span>:             f.setE(CIndex, CNum)</pre>
+<pre class='cython code score-0 '>    ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_CIndex, __pyx_v_CNum);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 258, __pyx_L1_error)</span>
+</pre><pre class="cython line score-1" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">259</span>:             self.setStateForFormula(state, f.elements)</pre>
+<pre class='cython code score-1 '>    __pyx_t_2 = ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;setStateForFormula(__pyx_v_self, __pyx_v_state, __pyx_v_f-&gt;elements);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 259, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">259</span>:             elementNum.push(CNum)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">260</span>:             elementNum.push(CNum)</pre>
 <pre class='cython code score-0 '>    __pyx_v_elementNum.push(__pyx_v_CNum);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">260</span>:             elementMax.push(CNum)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">261</span>:             elementMax.push(CNum)</pre>
 <pre class='cython code score-0 '>    __pyx_v_elementMax.push(__pyx_v_CNum);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">261</span>:             emass.push(f.mass())</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">262</span>:             emass.push(f.mass())</pre>
 <pre class='cython code score-0 '>    __pyx_v_emass.push(((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;mass(__pyx_v_f, 0));
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">262</span>:             eit = elements.begin()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">263</span>:             eit = elements.begin()</pre>
 <pre class='cython code score-0 '>    __pyx_v_eit = __pyx_v_elements.begin();
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">263</span>:             while True:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">264</span>:             while True:</pre>
 <pre class='cython code score-0 '>    while (1) {
-</pre><pre class="cython line score-0">&#xA0;<span class="">264</span>:                 # print(str(f), elementNum)</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">265</span>:                 if elementNum.top() &gt; elementMax.top():</pre>
+</pre><pre class="cython line score-6" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">265</span>:                 print(str(f))</pre>
+<pre class='cython code score-6 '>      __pyx_t_2 = <span class='pyx_c_api'>__Pyx_PyObject_CallOneArg</span>(((PyObject *)(&amp;PyUnicode_Type)), ((PyObject *)__pyx_v_f));<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 265, __pyx_L1_error)</span>
+      <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
+      __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_CallOneArg</span>(__pyx_builtin_print, __pyx_t_2);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 265, __pyx_L1_error)</span>
+      <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
+      <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
+      <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">266</span>:                 if elementNum.top() &gt; elementMax.top():</pre>
 <pre class='cython code score-0 '>      __pyx_t_9 = ((__pyx_v_elementNum.top() &gt; __pyx_v_elementMax.top()) != 0);
       if (__pyx_t_9) {
 /* … */
         goto __pyx_L19;
       }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">266</span>:                     index = deref(eit)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">267</span>:                     index = deref(eit)</pre>
 <pre class='cython code score-0 '>        __pyx_v_index = (*__pyx_v_eit);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">267</span>:                     num = -elementNum.top()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">268</span>:                     num = -elementNum.top()</pre>
 <pre class='cython code score-0 '>        __pyx_v_num = (-__pyx_v_elementNum.top());
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">268</span>:                     elementNum.pop()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">269</span>:                     elementNum.pop()</pre>
 <pre class='cython code score-0 '>        __pyx_v_elementNum.pop();
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">269</span>:                     elementMax.pop()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">270</span>:                     elementMax.pop()</pre>
 <pre class='cython code score-0 '>        __pyx_v_elementMax.pop();
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">270</span>:                     emass.pop()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">271</span>:                     emass.pop()</pre>
 <pre class='cython code score-0 '>        __pyx_v_emass.pop();
-</pre><pre class="cython line score-0">&#xA0;<span class="">271</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">272</span>:                     _state_add(state, self.ElementState[index], num)</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">272</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">273</span>:                     _state_add(state, self.ElementState[index], num)</pre>
 <pre class='cython code score-0 '>        __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc__state_add(__pyx_v_state, (__pyx_v_self-&gt;ElementState[__pyx_v_index]), __pyx_v_num);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">273</span>:                     f.setE(index, 0)</pre>
-<pre class='cython code score-0 '>        ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_index, 0);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 273, __pyx_L1_error)</span>
-</pre><pre class="cython line score-0">&#xA0;<span class="">274</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">275</span>:                     # f.setE(deref(postdec(eit)),0) # *eit--</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">276</span>:                     predec(eit)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">274</span>:                     f.setE(index, 0)</pre>
+<pre class='cython code score-0 '>        ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_index, 0);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 274, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0">&#xA0;<span class="">275</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">276</span>:                     # f.setE(deref(postdec(eit)),0) # *eit--</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">277</span>:                     predec(eit)</pre>
 <pre class='cython code score-0 '>        (void)((--__pyx_v_eit));
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">277</span>:                 elif preinc(eit)!=elements.end():</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">278</span>:                 elif preinc(eit)!=elements.end():</pre>
 <pre class='cython code score-0 '>      __pyx_t_9 = (((++__pyx_v_eit) != __pyx_v_elements.end()) != 0);
       if (__pyx_t_9) {
 /* … */
       }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">278</span>:                     index = deref(eit)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">279</span>:                     index = deref(eit)</pre>
 <pre class='cython code score-0 '>        __pyx_v_index = (*__pyx_v_eit);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">279</span>:                     num = self.ElementNumMin[index]</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">280</span>:                     num = self.ElementNumMin[index]</pre>
 <pre class='cython code score-0 '>        __pyx_v_num = (__pyx_v_self-&gt;ElementNumMin[__pyx_v_index]);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">280</span>:                     elementNum.push(num)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">281</span>:                     elementNum.push(num)</pre>
 <pre class='cython code score-0 '>        __pyx_v_elementNum.push(__pyx_v_num);
-</pre><pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">281</span>:                     numMax = min(self.ElementNumMax[index],&lt;int&gt;((MR - emass.top())/elementMass[index]))</pre>
+</pre><pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">282</span>:                     numMax = min(self.ElementNumMax[index],&lt;int&gt;((MR - emass.top())/elementMass[index]))</pre>
 <pre class='cython code score-5 '>        __pyx_t_10 = (__pyx_v_MR - __pyx_v_emass.top());
         __pyx_t_19 = (__pyx_v_8Orbitool_5utils_7formula_8_element_elementMass[__pyx_v_index]);
         if (unlikely(__pyx_t_19 == 0)) {
           <span class='py_c_api'>PyErr_SetString</span>(PyExc_ZeroDivisionError, "float division");
-          <span class='error_goto'>__PYX_ERR(0, 281, __pyx_L1_error)</span>
+          <span class='error_goto'>__PYX_ERR(0, 282, __pyx_L1_error)</span>
         }
         __pyx_t_7 = ((int)(__pyx_t_10 / __pyx_t_19));
         __pyx_t_15 = (__pyx_v_self-&gt;ElementNumMax[__pyx_v_index]);
@@ -2258,38 +2266,38 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
           __pyx_t_20 = __pyx_t_15;
         }
         __pyx_v_numMax = __pyx_t_20;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">282</span>:                     elementMax.push(numMax)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">283</span>:                     elementMax.push(numMax)</pre>
 <pre class='cython code score-0 '>        __pyx_v_elementMax.push(__pyx_v_numMax);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">283</span>:                     if num&gt;0:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">284</span>:                     if num&gt;0:</pre>
 <pre class='cython code score-0 '>        __pyx_t_9 = ((__pyx_v_num &gt; 0) != 0);
         if (__pyx_t_9) {
 /* … */
           goto __pyx_L20;
         }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">284</span>:                         _state_add(state, self.ElementState[index], num)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">285</span>:                         _state_add(state, self.ElementState[index], num)</pre>
 <pre class='cython code score-0 '>          __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc__state_add(__pyx_v_state, (__pyx_v_self-&gt;ElementState[__pyx_v_index]), __pyx_v_num);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">285</span>:                         f.setE(index, num)</pre>
-<pre class='cython code score-0 '>          ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_index, __pyx_v_num);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 285, __pyx_L1_error)</span>
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">286</span>:                         emass.push(emass.top()+elementMass[index]*num)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">286</span>:                         f.setE(index, num)</pre>
+<pre class='cython code score-0 '>          ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_index, __pyx_v_num);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 286, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">287</span>:                         emass.push(emass.top()+elementMass[index]*num)</pre>
 <pre class='cython code score-0 '>          __pyx_v_emass.push((__pyx_v_emass.top() + ((__pyx_v_8Orbitool_5utils_7formula_8_element_elementMass[__pyx_v_index]) * __pyx_v_num)));
-</pre><pre class="cython line score-0">&#xA0;<span class="">287</span>:                     else:</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">288</span>:                         emass.push(emass.top())</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">288</span>:                     else:</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">289</span>:                         emass.push(emass.top())</pre>
 <pre class='cython code score-0 '>        /*else*/ {
           __pyx_v_emass.push(__pyx_v_emass.top());
         }
         __pyx_L20:;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">289</span>:                     continue</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">290</span>:                     continue</pre>
 <pre class='cython code score-0 '>        goto __pyx_L17_continue;
-</pre><pre class="cython line score-0">&#xA0;<span class="">290</span>:                 else:</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">291</span>:                     mass=emass.top()</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">291</span>:                 else:</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">292</span>:                     mass=emass.top()</pre>
 <pre class='cython code score-0 '>      /*else*/ {
         __pyx_v_mass = __pyx_v_emass.top();
-</pre><pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">292</span>:                     ONum=max(self.ElementNumMin[OIndex], &lt;int&gt;max(state.OMin, ceil((ML-mass-elementMass[HIndex]*state.HMax)/elementMass[OIndex])))</pre>
+</pre><pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">293</span>:                     ONum=max(self.ElementNumMin[OIndex], &lt;int&gt;max(state.OMin, ceil((ML-mass-elementMass[HIndex]*state.HMax)/elementMass[OIndex])))</pre>
 <pre class='cython code score-5 '>        __pyx_t_19 = ((__pyx_v_ML - __pyx_v_mass) - ((__pyx_v_8Orbitool_5utils_7formula_8_element_elementMass[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_HIndex]) * __pyx_v_state.HMax));
         __pyx_t_10 = (__pyx_v_8Orbitool_5utils_7formula_8_element_elementMass[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_OIndex]);
         if (unlikely(__pyx_t_10 == 0)) {
           <span class='py_c_api'>PyErr_SetString</span>(PyExc_ZeroDivisionError, "float division");
-          <span class='error_goto'>__PYX_ERR(0, 292, __pyx_L1_error)</span>
+          <span class='error_goto'>__PYX_ERR(0, 293, __pyx_L1_error)</span>
         }
         __pyx_t_21 = ceil((__pyx_t_19 / __pyx_t_10));
         __pyx_t_10 = __pyx_v_state.OMin;
@@ -2306,12 +2314,12 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
           __pyx_t_15 = __pyx_t_20;
         }
         __pyx_v_ONum = __pyx_t_15;
-</pre><pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">293</span>:                     OMax=min(self.ElementNumMax[OIndex], &lt;int&gt;min(state.OMax, (MR-mass-elementMass[HIndex]*state.HMin)/elementMass[OIndex]))</pre>
+</pre><pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">294</span>:                     OMax=min(self.ElementNumMax[OIndex], &lt;int&gt;min(state.OMax, (MR-mass-elementMass[HIndex]*state.HMin)/elementMass[OIndex]))</pre>
 <pre class='cython code score-5 '>        __pyx_t_19 = ((__pyx_v_MR - __pyx_v_mass) - ((__pyx_v_8Orbitool_5utils_7formula_8_element_elementMass[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_HIndex]) * __pyx_v_state.HMin));
         __pyx_t_21 = (__pyx_v_8Orbitool_5utils_7formula_8_element_elementMass[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_OIndex]);
         if (unlikely(__pyx_t_21 == 0)) {
           <span class='py_c_api'>PyErr_SetString</span>(PyExc_ZeroDivisionError, "float division");
-          <span class='error_goto'>__PYX_ERR(0, 293, __pyx_L1_error)</span>
+          <span class='error_goto'>__PYX_ERR(0, 294, __pyx_L1_error)</span>
         }
         __pyx_t_10 = (__pyx_t_19 / __pyx_t_21);
         __pyx_t_21 = __pyx_v_state.OMax;
@@ -2328,37 +2336,81 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
           __pyx_t_20 = __pyx_t_15;
         }
         __pyx_v_OMax = __pyx_t_20;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">294</span>:                     if ONum&lt;=OMax:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">295</span>:                     if ONum&lt;=OMax:</pre>
 <pre class='cython code score-0 '>        __pyx_t_9 = ((__pyx_v_ONum &lt;= __pyx_v_OMax) != 0);
         if (__pyx_t_9) {
 /* … */
         }
-</pre><pre class="cython line score-0">&#xA0;<span class="">295</span>:                         # print(f, state.DBE2, state.HMin, state.HMax, state.OMin, state.OMax, mass, f.mass())</pre>
-<pre class="cython line score-0">&#xA0;<span class="">296</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">297</span>:                         mass+=elementMass[OIndex]*ONum</pre>
+</pre><pre class="cython line score-53" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">296</span>:                         print(f, state.DBE2, state.HMin, state.HMax, state.OMin, state.OMax, mass, f.mass())</pre>
+<pre class='cython code score-53 '>          __pyx_t_1 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_v_state.DBE2);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 296, __pyx_L1_error)</span>
+          <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
+          __pyx_t_2 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_v_state.HMin);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 296, __pyx_L1_error)</span>
+          <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
+          __pyx_t_5 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_v_state.HMax);<span class='error_goto'> if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 296, __pyx_L1_error)</span>
+          <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_5);
+          __pyx_t_8 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_v_state.OMin);<span class='error_goto'> if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 296, __pyx_L1_error)</span>
+          <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_8);
+          __pyx_t_4 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_v_state.OMax);<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 296, __pyx_L1_error)</span>
+          <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_4);
+          __pyx_t_3 = <span class='py_c_api'>PyFloat_FromDouble</span>(__pyx_v_mass);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 296, __pyx_L1_error)</span>
+          <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
+          __pyx_t_6 = <span class='py_c_api'>PyFloat_FromDouble</span>(((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;mass(__pyx_v_f, 0));<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 296, __pyx_L1_error)</span>
+          <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
+          __pyx_t_22 = <span class='py_c_api'>PyTuple_New</span>(8);<span class='error_goto'> if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 296, __pyx_L1_error)</span>
+          <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_22);
+          <span class='pyx_macro_api'>__Pyx_INCREF</span>(((PyObject *)__pyx_v_f));
+          <span class='refnanny'>__Pyx_GIVEREF</span>(((PyObject *)__pyx_v_f));
+          <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_22, 0, ((PyObject *)__pyx_v_f));
+          <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_1);
+          <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_22, 1, __pyx_t_1);
+          <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_2);
+          <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_22, 2, __pyx_t_2);
+          <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_5);
+          <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_22, 3, __pyx_t_5);
+          <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_8);
+          <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_22, 4, __pyx_t_8);
+          <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_4);
+          <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_22, 5, __pyx_t_4);
+          <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_3);
+          <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_22, 6, __pyx_t_3);
+          <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_6);
+          <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_22, 7, __pyx_t_6);
+          __pyx_t_1 = 0;
+          __pyx_t_2 = 0;
+          __pyx_t_5 = 0;
+          __pyx_t_8 = 0;
+          __pyx_t_4 = 0;
+          __pyx_t_3 = 0;
+          __pyx_t_6 = 0;
+          __pyx_t_6 = <span class='pyx_c_api'>__Pyx_PyObject_Call</span>(__pyx_builtin_print, __pyx_t_22, NULL);<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 296, __pyx_L1_error)</span>
+          <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
+          <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_22); __pyx_t_22 = 0;
+          <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_6); __pyx_t_6 = 0;
+</pre><pre class="cython line score-0">&#xA0;<span class="">297</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">298</span>:                         mass+=elementMass[OIndex]*ONum</pre>
 <pre class='cython code score-0 '>          __pyx_v_mass = (__pyx_v_mass + ((__pyx_v_8Orbitool_5utils_7formula_8_element_elementMass[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_OIndex]) * __pyx_v_ONum));
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">298</span>:                         while ONum&lt;=OMax:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">299</span>:                         while ONum&lt;=OMax:</pre>
 <pre class='cython code score-0 '>          while (1) {
             __pyx_t_9 = ((__pyx_v_ONum &lt;= __pyx_v_OMax) != 0);
             if (!__pyx_t_9) break;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">299</span>:                             f.setE(OIndex,ONum)</pre>
-<pre class='cython code score-0 '>            ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_OIndex, __pyx_v_ONum);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 299, __pyx_L1_error)</span>
-</pre><pre class="cython line score-0">&#xA0;<span class="">300</span>:                             # O can't affect DBE and HNum, so don't change state</pre>
-<pre class="cython line score-10" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">301</span>:                             HNum=max(self.ElementNumMin[HIndex], &lt;int&gt;ceil(max(state.HMin, (ML-mass)/elementMass[HIndex], (DBE2Max-state.DBE2)/self.ElementDbe2[HIndex])))</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">300</span>:                             f.setE(OIndex,ONum)</pre>
+<pre class='cython code score-0 '>            ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_OIndex, __pyx_v_ONum);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 300, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0">&#xA0;<span class="">301</span>:                             # O can't affect DBE and HNum, so don't change state</pre>
+<pre class="cython line score-10" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">302</span>:                             HNum=max(self.ElementNumMin[HIndex], &lt;int&gt;ceil(max(state.HMin, (ML-mass)/elementMass[HIndex], (DBE2Max-state.DBE2)/self.ElementDbe2[HIndex])))</pre>
 <pre class='cython code score-10 '>            __pyx_t_19 = (__pyx_v_ML - __pyx_v_mass);
             __pyx_t_10 = (__pyx_v_8Orbitool_5utils_7formula_8_element_elementMass[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_HIndex]);
             if (unlikely(__pyx_t_10 == 0)) {
               <span class='py_c_api'>PyErr_SetString</span>(PyExc_ZeroDivisionError, "float division");
-              <span class='error_goto'>__PYX_ERR(0, 301, __pyx_L1_error)</span>
+              <span class='error_goto'>__PYX_ERR(0, 302, __pyx_L1_error)</span>
             }
             __pyx_t_21 = (__pyx_t_19 / __pyx_t_10);
             __pyx_t_10 = (__pyx_v_DBE2Max - __pyx_v_state.DBE2);
             __pyx_t_19 = (__pyx_v_self-&gt;ElementDbe2[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_HIndex]);
             if (unlikely(__pyx_t_19 == 0)) {
               <span class='py_c_api'>PyErr_SetString</span>(PyExc_ZeroDivisionError, "float division");
-              <span class='error_goto'>__PYX_ERR(0, 301, __pyx_L1_error)</span>
+              <span class='error_goto'>__PYX_ERR(0, 302, __pyx_L1_error)</span>
             }
-            __pyx_t_22 = (__pyx_t_10 / __pyx_t_19);
+            __pyx_t_23 = (__pyx_t_10 / __pyx_t_19);
             __pyx_t_19 = __pyx_v_state.HMin;
             if (((__pyx_t_21 &gt; __pyx_t_19) != 0)) {
               __pyx_t_10 = __pyx_t_21;
@@ -2366,8 +2418,8 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
               __pyx_t_10 = __pyx_t_19;
             }
             __pyx_t_19 = __pyx_t_10;
-            if (((__pyx_t_22 &gt; __pyx_t_19) != 0)) {
-              __pyx_t_10 = __pyx_t_22;
+            if (((__pyx_t_23 &gt; __pyx_t_19) != 0)) {
+              __pyx_t_10 = __pyx_t_23;
             } else {
               __pyx_t_10 = __pyx_t_19;
             }
@@ -2379,24 +2431,24 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
               __pyx_t_15 = __pyx_t_20;
             }
             __pyx_v_HNum = __pyx_t_15;
-</pre><pre class="cython line score-10" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">302</span>:                             HMax=min(self.ElementNumMax[HIndex], &lt;int&gt;min(state.HMax, (MR-mass)/elementMass[HIndex], (DBE2Min-state.DBE2)/self.ElementDbe2[HIndex]))</pre>
+</pre><pre class="cython line score-10" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">303</span>:                             HMax=min(self.ElementNumMax[HIndex], &lt;int&gt;min(state.HMax, (MR-mass)/elementMass[HIndex], (DBE2Min-state.DBE2)/self.ElementDbe2[HIndex]))</pre>
 <pre class='cython code score-10 '>            __pyx_t_10 = (__pyx_v_MR - __pyx_v_mass);
             __pyx_t_21 = (__pyx_v_8Orbitool_5utils_7formula_8_element_elementMass[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_HIndex]);
             if (unlikely(__pyx_t_21 == 0)) {
               <span class='py_c_api'>PyErr_SetString</span>(PyExc_ZeroDivisionError, "float division");
-              <span class='error_goto'>__PYX_ERR(0, 302, __pyx_L1_error)</span>
+              <span class='error_goto'>__PYX_ERR(0, 303, __pyx_L1_error)</span>
             }
-            __pyx_t_22 = (__pyx_t_10 / __pyx_t_21);
+            __pyx_t_23 = (__pyx_t_10 / __pyx_t_21);
             __pyx_t_21 = (__pyx_v_DBE2Min - __pyx_v_state.DBE2);
             __pyx_t_10 = (__pyx_v_self-&gt;ElementDbe2[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_HIndex]);
             if (unlikely(__pyx_t_10 == 0)) {
               <span class='py_c_api'>PyErr_SetString</span>(PyExc_ZeroDivisionError, "float division");
-              <span class='error_goto'>__PYX_ERR(0, 302, __pyx_L1_error)</span>
+              <span class='error_goto'>__PYX_ERR(0, 303, __pyx_L1_error)</span>
             }
             __pyx_t_19 = (__pyx_t_21 / __pyx_t_10);
             __pyx_t_10 = __pyx_v_state.HMax;
-            if (((__pyx_t_22 &lt; __pyx_t_10) != 0)) {
-              __pyx_t_21 = __pyx_t_22;
+            if (((__pyx_t_23 &lt; __pyx_t_10) != 0)) {
+              __pyx_t_21 = __pyx_t_23;
             } else {
               __pyx_t_21 = __pyx_t_10;
             }
@@ -2414,7 +2466,7 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
               __pyx_t_20 = __pyx_t_15;
             }
             __pyx_v_HMax = __pyx_t_20;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">303</span>:                             if nitrogenRule and fabs(remainder(state.DBE2+HNum*self.ElementDbe2[HIndex], DBE2Base))&gt;eps:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">304</span>:                             if nitrogenRule and fabs(remainder(state.DBE2+HNum*self.ElementDbe2[HIndex], DBE2Base))&gt;eps:</pre>
 <pre class='cython code score-0 '>            __pyx_t_11 = (__pyx_v_nitrogenRule != 0);
             if (__pyx_t_11) {
             } else {
@@ -2427,90 +2479,90 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
             if (__pyx_t_9) {
 /* … */
             }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">304</span>:                                 preinc(HNum)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">305</span>:                                 preinc(HNum)</pre>
 <pre class='cython code score-0 '>              (void)((++__pyx_v_HNum));
-</pre><pre class="cython line score-0">&#xA0;<span class="">305</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">306</span>:                             while HNum&lt;=HMax:</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">306</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">307</span>:                             while HNum&lt;=HMax:</pre>
 <pre class='cython code score-0 '>            while (1) {
               __pyx_t_9 = ((__pyx_v_HNum &lt;= __pyx_v_HMax) != 0);
               if (!__pyx_t_9) break;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">307</span>:                                 f.setE(HIndex,HNum)</pre>
-<pre class='cython code score-0 '>              ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_HIndex, __pyx_v_HNum);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 307, __pyx_L1_error)</span>
-</pre><pre class="cython line score-8" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">308</span>:                                 g = f + base_group</pre>
-<pre class='cython code score-8 '>              __pyx_t_2 = <span class='py_c_api'>PyNumber_Add</span>(((PyObject *)__pyx_v_f), ((PyObject *)__pyx_v_base_group));<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 308, __pyx_L1_error)</span>
-              <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
-              if (!(likely(((__pyx_t_2) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_t_2, __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula))))) <span class='error_goto'>__PYX_ERR(0, 308, __pyx_L1_error)</span>
-              <span class='pyx_macro_api'>__Pyx_XDECREF_SET</span>(__pyx_v_g, ((struct __pyx_obj_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_t_2));
-              __pyx_t_2 = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">309</span>:                                 mass = _elements_mass(g.elements)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">308</span>:                                 f.setE(HIndex,HNum)</pre>
+<pre class='cython code score-0 '>              ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_HIndex, __pyx_v_HNum);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 308, __pyx_L1_error)</span>
+</pre><pre class="cython line score-8" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">309</span>:                                 g = f + base_group</pre>
+<pre class='cython code score-8 '>              __pyx_t_6 = <span class='py_c_api'>PyNumber_Add</span>(((PyObject *)__pyx_v_f), ((PyObject *)__pyx_v_base_group));<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 309, __pyx_L1_error)</span>
+              <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
+              if (!(likely(((__pyx_t_6) == Py_None) || likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_t_6, __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula))))) <span class='error_goto'>__PYX_ERR(0, 309, __pyx_L1_error)</span>
+              <span class='pyx_macro_api'>__Pyx_XDECREF_SET</span>(__pyx_v_g, ((struct __pyx_obj_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_t_6));
+              __pyx_t_6 = 0;
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">310</span>:                                 mass = _elements_mass(g.elements)</pre>
 <pre class='cython code score-0 '>              __pyx_v_mass = __pyx_f_8Orbitool_5utils_7formula_8_formula__elements_mass(__pyx_v_g-&gt;elements);
-</pre><pre class="cython line score-0">&#xA0;<span class="">310</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">311</span>:                                 # print(f"insert {g} from {f}")</pre>
-<pre class="cython line score-0">&#xA0;<span class="">312</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">313</span>:                                 self.insertElements(g.elements, mass)</pre>
-<pre class='cython code score-0 '>              __pyx_t_23.__pyx_n = 1;
-              __pyx_t_23.mass = __pyx_v_mass;
-              ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;insertElements(__pyx_v_self, __pyx_v_g-&gt;elements, &amp;__pyx_t_23); 
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">314</span>:                                 self.insertIsotopes(g.elements, mass)</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">311</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">312</span>:                                 # print(f"insert {g} from {f}")</pre>
+<pre class="cython line score-0">&#xA0;<span class="">313</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">314</span>:                                 self.insertElements(g.elements, mass)</pre>
 <pre class='cython code score-0 '>              __pyx_t_24.__pyx_n = 1;
               __pyx_t_24.mass = __pyx_v_mass;
-              ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;insertIsotopes(__pyx_v_self, __pyx_v_g-&gt;elements, &amp;__pyx_t_24); 
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">315</span>:                                 HNum+=step</pre>
+              ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;insertElements(__pyx_v_self, __pyx_v_g-&gt;elements, &amp;__pyx_t_24); 
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">315</span>:                                 self.insertIsotopes(g.elements, mass)</pre>
+<pre class='cython code score-0 '>              __pyx_t_25.__pyx_n = 1;
+              __pyx_t_25.mass = __pyx_v_mass;
+              ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;insertIsotopes(__pyx_v_self, __pyx_v_g-&gt;elements, &amp;__pyx_t_25); 
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">316</span>:                                 HNum+=step</pre>
 <pre class='cython code score-0 '>              __pyx_v_HNum = (__pyx_v_HNum + __pyx_v_step);
             }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">316</span>:                             preinc(ONum)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">317</span>:                             preinc(ONum)</pre>
 <pre class='cython code score-0 '>            (void)((++__pyx_v_ONum));
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">317</span>:                             mass+=elementMass[OIndex]</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">318</span>:                             mass+=elementMass[OIndex]</pre>
 <pre class='cython code score-0 '>            __pyx_v_mass = (__pyx_v_mass + (__pyx_v_8Orbitool_5utils_7formula_8_element_elementMass[__pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_OIndex]));
           }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">318</span>:                     f.setE(OIndex,0)</pre>
-<pre class='cython code score-0 '>        ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_OIndex, 0);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 318, __pyx_L1_error)</span>
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">319</span>:                     f.setE(HIndex,0)</pre>
-<pre class='cython code score-0 '>        ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_HIndex, 0);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 319, __pyx_L1_error)</span>
-</pre><pre class="cython line score-0">&#xA0;<span class="">320</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">321</span>:                     predec(eit)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">319</span>:                     f.setE(OIndex,0)</pre>
+<pre class='cython code score-0 '>        ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_OIndex, 0);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 319, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">320</span>:                     f.setE(HIndex,0)</pre>
+<pre class='cython code score-0 '>        ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_HIndex, 0);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 320, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0">&#xA0;<span class="">321</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">322</span>:                     predec(eit)</pre>
 <pre class='cython code score-0 '>        (void)((--__pyx_v_eit));
       }
       __pyx_L19:;
-</pre><pre class="cython line score-0">&#xA0;<span class="">322</span>:                 # inc</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">323</span>:                 index=deref(eit)</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">323</span>:                 # inc</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">324</span>:                 index=deref(eit)</pre>
 <pre class='cython code score-0 '>      __pyx_v_index = (*__pyx_v_eit);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">324</span>:                 num = elementNum.top()+1</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">325</span>:                 num = elementNum.top()+1</pre>
 <pre class='cython code score-0 '>      __pyx_v_num = (__pyx_v_elementNum.top() + 1);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">325</span>:                 elementNum.pop()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">326</span>:                 elementNum.pop()</pre>
 <pre class='cython code score-0 '>      __pyx_v_elementNum.pop();
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">326</span>:                 emass.pop()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">327</span>:                 emass.pop()</pre>
 <pre class='cython code score-0 '>      __pyx_v_emass.pop();
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">327</span>:                 if elementNum.empty():</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">328</span>:                 if elementNum.empty():</pre>
 <pre class='cython code score-0 '>      __pyx_t_9 = (__pyx_v_elementNum.empty() != 0);
       if (__pyx_t_9) {
 /* … */
       }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">328</span>:                     elementMax.pop()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">329</span>:                     elementMax.pop()</pre>
 <pre class='cython code score-0 '>        __pyx_v_elementMax.pop();
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">329</span>:                     break</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">330</span>:                     break</pre>
 <pre class='cython code score-0 '>        goto __pyx_L18_break;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">330</span>:                 elementNum.push(num)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">331</span>:                 elementNum.push(num)</pre>
 <pre class='cython code score-0 '>      __pyx_v_elementNum.push(__pyx_v_num);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">331</span>:                 emass.push(emass.top()+elementMass[index]*num)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">332</span>:                 emass.push(emass.top()+elementMass[index]*num)</pre>
 <pre class='cython code score-0 '>      __pyx_v_emass.push((__pyx_v_emass.top() + ((__pyx_v_8Orbitool_5utils_7formula_8_element_elementMass[__pyx_v_index]) * __pyx_v_num)));
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">332</span>:                 f.setE(index, num)</pre>
-<pre class='cython code score-0 '>      ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_index, __pyx_v_num);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 332, __pyx_L1_error)</span>
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">333</span>:                 _state_inc(state, self.ElementState[index])</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">333</span>:                 f.setE(index, num)</pre>
+<pre class='cython code score-0 '>      ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;setE(__pyx_v_f, __pyx_v_index, __pyx_v_num);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 333, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">334</span>:                 _state_inc(state, self.ElementState[index])</pre>
 <pre class='cython code score-0 '>      __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc__state_inc(__pyx_v_state, (__pyx_v_self-&gt;ElementState[__pyx_v_index]));
       __pyx_L17_continue:;
     }
     __pyx_L18_break:;
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">334</span>:         self.cover(ML,MR)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">335</span>:         self.cover(ML,MR)</pre>
 <pre class='cython code score-0 '>  ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;cover(__pyx_v_self, __pyx_v_ML, __pyx_v_MR);
-</pre><pre class="cython line score-0">&#xA0;<span class="">335</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">336</span>:         # print(self.isotopes.size())</pre>
-<pre class="cython line score-0">&#xA0;<span class="">337</span>:         # cdef pair[double, pair[double, cpplist[pair[int, int]]]] isotope</pre>
-<pre class="cython line score-0">&#xA0;<span class="">338</span>:         # for isotope in self.isotopes:</pre>
-<pre class="cython line score-0">&#xA0;<span class="">339</span>:         #     print(isotope)</pre>
-<pre class="cython line score-0">&#xA0;<span class="">340</span>: </pre>
-<pre class="cython line score-33" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">341</span>:     cpdef clear(self):</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">336</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">337</span>:         # print(self.isotopes.size())</pre>
+<pre class="cython line score-0">&#xA0;<span class="">338</span>:         # cdef pair[double, pair[double, cpplist[pair[int, int]]]] isotope</pre>
+<pre class="cython line score-0">&#xA0;<span class="">339</span>:         # for isotope in self.isotopes:</pre>
+<pre class="cython line score-0">&#xA0;<span class="">340</span>:         #     print(isotope)</pre>
+<pre class="cython line score-0">&#xA0;<span class="">341</span>: </pre>
+<pre class="cython line score-33" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">342</span>:     cpdef clear(self):</pre>
 <pre class='cython code score-33 '>static PyObject *__pyx_pw_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_21clear(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
 static PyObject *__pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_clear(struct __pyx_obj_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *__pyx_v_self, int __pyx_skip_dispatch) {
   PyObject *__pyx_r = NULL;
@@ -2525,7 +2577,7 @@ static PyObject *__pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculato
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_type_dict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(((PyObject *)__pyx_v_self), __pyx_n_s_clear);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 341, __pyx_L1_error)</span>
+      __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyObject_GetAttrStr</span>(((PyObject *)__pyx_v_self), __pyx_n_s_clear);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 342, __pyx_L1_error)</span>
       <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
       if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_21clear)) {
         <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
@@ -2542,7 +2594,7 @@ static PyObject *__pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculato
         }
         __pyx_t_2 = (__pyx_t_4) ? <span class='pyx_c_api'>__Pyx_PyObject_CallOneArg</span>(__pyx_t_3, __pyx_t_4) : <span class='pyx_c_api'>__Pyx_PyObject_CallNoArg</span>(__pyx_t_3);
         <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_t_4); __pyx_t_4 = 0;
-        if (unlikely(!__pyx_t_2)) <span class='error_goto'>__PYX_ERR(0, 341, __pyx_L1_error)</span>
+        if (unlikely(!__pyx_t_2)) <span class='error_goto'>__PYX_ERR(0, 342, __pyx_L1_error)</span>
         <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
         <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_3); __pyx_t_3 = 0;
         __pyx_r = __pyx_t_2;
@@ -2597,7 +2649,7 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("clear", 0);
   <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
-  __pyx_t_1 = __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_clear(__pyx_v_self, 1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 341, __pyx_L1_error)</span>
+  __pyx_t_1 = __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_clear(__pyx_v_self, 1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 342, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -2613,14 +2665,14 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">342</span>:         self.formulas.clear()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">343</span>:         self.formulas.clear()</pre>
 <pre class='cython code score-0 '>  __pyx_v_self-&gt;formulas.clear();
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">343</span>:         self.isotopes.clear()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">344</span>:         self.isotopes.clear()</pre>
 <pre class='cython code score-0 '>  __pyx_v_self-&gt;isotopes.clear();
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">344</span>:         self.mCover.clear()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">345</span>:         self.mCover.clear()</pre>
 <pre class='cython code score-0 '>  __pyx_v_self-&gt;mCover.clear();
-</pre><pre class="cython line score-0">&#xA0;<span class="">345</span>: </pre>
-<pre class="cython line score-41" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">346</span>:     def get(self, double M, Formula base_group=Formula.__new__(Formula)):</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">346</span>: </pre>
+<pre class="cython line score-41" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">347</span>:     def get(self, double M, Formula base_group=Formula.__new__(Formula)):</pre>
 <pre class='cython code score-41 '>/* Python wrapper */
 static PyObject *__pyx_pw_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_23get(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyObject *__pyx_pw_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_23get(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
@@ -2657,7 +2709,7 @@ static PyObject *__pyx_pw_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
         }
       }
       if (unlikely(kw_args &gt; 0)) {
-        if (unlikely(<span class='pyx_c_api'>__Pyx_ParseOptionalKeywords</span>(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get") &lt; 0)) <span class='error_goto'>__PYX_ERR(0, 346, __pyx_L3_error)</span>
+        if (unlikely(<span class='pyx_c_api'>__Pyx_ParseOptionalKeywords</span>(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get") &lt; 0)) <span class='error_goto'>__PYX_ERR(0, 347, __pyx_L3_error)</span>
       }
     } else {
       switch (<span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)) {
@@ -2668,18 +2720,18 @@ static PyObject *__pyx_pw_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_M = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[0]); if (unlikely((__pyx_v_M == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 346, __pyx_L3_error)</span>
+    __pyx_v_M = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[0]); if (unlikely((__pyx_v_M == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 347, __pyx_L3_error)</span>
     __pyx_v_base_group = ((struct __pyx_obj_8Orbitool_5utils_7formula_8_formula_Formula *)values[1]);
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("get", 0, 1, 2, <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)); <span class='error_goto'>__PYX_ERR(0, 346, __pyx_L3_error)</span>
+  <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("get", 0, 1, 2, <span class='py_macro_api'>PyTuple_GET_SIZE</span>(__pyx_args)); <span class='error_goto'>__PYX_ERR(0, 347, __pyx_L3_error)</span>
   __pyx_L3_error:;
   <span class='pyx_c_api'>__Pyx_AddTraceback</span>("Orbitool.utils.formula._restrictedCalc.Calculator.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_base_group), __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula, 1, "base_group", 0))) <span class='error_goto'>__PYX_ERR(0, 346, __pyx_L1_error)</span>
+  if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_base_group), __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula, 1, "base_group", 0))) <span class='error_goto'>__PYX_ERR(0, 347, __pyx_L1_error)</span>
   __pyx_r = __pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_22get(((struct __pyx_obj_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self), __pyx_v_M, __pyx_v_base_group);
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -2721,104 +2773,104 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
   return __pyx_r;
 }
 /* … */
-  __pyx_t_1 = __Pyx_tp_new(((PyObject *)__pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula), __pyx_empty_tuple);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 346, __pyx_L1_error)</span>
+  __pyx_t_1 = __Pyx_tp_new(((PyObject *)__pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula), __pyx_empty_tuple);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 347, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-  if (!(likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_t_1, __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula)))) <span class='error_goto'>__PYX_ERR(0, 346, __pyx_L1_error)</span>
+  if (!(likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_t_1, __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula)))) <span class='error_goto'>__PYX_ERR(0, 347, __pyx_L1_error)</span>
   __pyx_k__17 = ((struct __pyx_obj_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_t_1);
   <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_1);
   __pyx_t_1 = 0;
-</pre><pre class="cython line score-0">&#xA0;<span class="">347</span>:         cdef double ML,MR,delta</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">348</span>:         delta = self.rtol*M</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">348</span>:         cdef double ML,MR,delta</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">349</span>:         delta = self.rtol*M</pre>
 <pre class='cython code score-0 '>  __pyx_v_delta = (__pyx_v_self-&gt;rtol * __pyx_v_M);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">349</span>:         ML=M-delta</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">350</span>:         ML=M-delta</pre>
 <pre class='cython code score-0 '>  __pyx_v_ML = (__pyx_v_M - __pyx_v_delta);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">350</span>:         MR=M+delta</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">351</span>:         MR=M+delta</pre>
 <pre class='cython code score-0 '>  __pyx_v_MR = (__pyx_v_M + __pyx_v_delta);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">351</span>:         if not self.isCovered(ML,MR):</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">352</span>:         if not self.isCovered(ML,MR):</pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((!(((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;isCovered(__pyx_v_self, __pyx_v_ML, __pyx_v_MR) != 0)) != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">352</span>:             self.calc(base_group,ML,MR)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">353</span>:             self.calc(base_group,ML,MR)</pre>
 <pre class='cython code score-0 '>    __pyx_t_2.__pyx_n = 2;
     __pyx_t_2.MMin = __pyx_v_ML;
     __pyx_t_2.MMax = __pyx_v_MR;
-    ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;calc(__pyx_v_self, __pyx_v_base_group, 0, &amp;__pyx_t_2);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 352, __pyx_L1_error)</span>
-</pre><pre class="cython line score-0">&#xA0;<span class="">353</span>: </pre>
-<pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">354</span>:         cdef list ret = list()</pre>
-<pre class='cython code score-5 '>  __pyx_t_3 = <span class='py_c_api'>PyList_New</span>(0);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 354, __pyx_L1_error)</span>
+    ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;calc(__pyx_v_self, __pyx_v_base_group, 0, &amp;__pyx_t_2);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 353, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0">&#xA0;<span class="">354</span>: </pre>
+<pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">355</span>:         cdef list ret = list()</pre>
+<pre class='cython code score-5 '>  __pyx_t_3 = <span class='py_c_api'>PyList_New</span>(0);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 355, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
   __pyx_v_ret = ((PyObject*)__pyx_t_3);
   __pyx_t_3 = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">355</span>:         if self.formulas.empty():</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">356</span>:         if self.formulas.empty():</pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = (__pyx_v_self-&gt;formulas.empty() != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">356</span>:             return ret</pre>
+</pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">357</span>:             return ret</pre>
 <pre class='cython code score-2 '>    <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
     <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_v_ret);
     __pyx_r = __pyx_v_ret;
     goto __pyx_L0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">357</span>:         it1 = self.formulas.lower_bound(ML)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">358</span>:         it1 = self.formulas.lower_bound(ML)</pre>
 <pre class='cython code score-0 '>  __pyx_v_it1 = __pyx_v_self-&gt;formulas.lower_bound(__pyx_v_ML);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">358</span>:         it2 = self.formulas.lower_bound(MR)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">359</span>:         it2 = self.formulas.lower_bound(MR)</pre>
 <pre class='cython code score-0 '>  __pyx_v_it2 = __pyx_v_self-&gt;formulas.lower_bound(__pyx_v_MR);
-</pre><pre class="cython line score-0">&#xA0;<span class="">359</span>:         cdef Formula formula</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">360</span>:         while it1!=it2:</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">360</span>:         cdef Formula formula</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">361</span>:         while it1!=it2:</pre>
 <pre class='cython code score-0 '>  while (1) {
     __pyx_t_1 = ((__pyx_v_it1 != __pyx_v_it2) != 0);
     if (!__pyx_t_1) break;
-</pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">361</span>:             formula = Formula.__new__(Formula)</pre>
-<pre class='cython code score-3 '>    __pyx_t_3 = __Pyx_tp_new(((PyObject *)__pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula), __pyx_empty_tuple);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 361, __pyx_L1_error)</span>
+</pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">362</span>:             formula = Formula.__new__(Formula)</pre>
+<pre class='cython code score-3 '>    __pyx_t_3 = __Pyx_tp_new(((PyObject *)__pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula), __pyx_empty_tuple);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 362, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
-    if (!(likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_t_3, __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula)))) <span class='error_goto'>__PYX_ERR(0, 361, __pyx_L1_error)</span>
+    if (!(likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_t_3, __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula)))) <span class='error_goto'>__PYX_ERR(0, 362, __pyx_L1_error)</span>
     <span class='pyx_macro_api'>__Pyx_XDECREF_SET</span>(__pyx_v_formula, ((struct __pyx_obj_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_t_3));
     __pyx_t_3 = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">362</span>:             formula.elements = deref(it1).second</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">363</span>:             formula.elements = deref(it1).second</pre>
 <pre class='cython code score-0 '>    __pyx_t_4 = (*__pyx_v_it1).second;
     __pyx_v_formula-&gt;elements = __pyx_t_4;
-</pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">363</span>:             ret.append(formula)</pre>
-<pre class='cython code score-2 '>    __pyx_t_5 = <span class='pyx_c_api'>__Pyx_PyList_Append</span>(__pyx_v_ret, ((PyObject *)__pyx_v_formula));<span class='error_goto'> if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 363, __pyx_L1_error)</span>
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">364</span>:             preinc(it1)</pre>
+</pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">364</span>:             ret.append(formula)</pre>
+<pre class='cython code score-2 '>    __pyx_t_5 = <span class='pyx_c_api'>__Pyx_PyList_Append</span>(__pyx_v_ret, ((PyObject *)__pyx_v_formula));<span class='error_goto'> if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 364, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">365</span>:             preinc(it1)</pre>
 <pre class='cython code score-0 '>    (void)((++__pyx_v_it1));
   }
-</pre><pre class="cython line score-0">&#xA0;<span class="">365</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">366</span>:         iit1 = self.isotopes.lower_bound(ML)</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">366</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">367</span>:         iit1 = self.isotopes.lower_bound(ML)</pre>
 <pre class='cython code score-0 '>  __pyx_v_iit1 = __pyx_v_self-&gt;isotopes.lower_bound(__pyx_v_ML);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">367</span>:         iit2 = self.isotopes.lower_bound(MR)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">368</span>:         iit2 = self.isotopes.lower_bound(MR)</pre>
 <pre class='cython code score-0 '>  __pyx_v_iit2 = __pyx_v_self-&gt;isotopes.lower_bound(__pyx_v_MR);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">368</span>:         while iit1!=iit2:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">369</span>:         while iit1!=iit2:</pre>
 <pre class='cython code score-0 '>  while (1) {
     __pyx_t_1 = ((__pyx_v_iit1 != __pyx_v_iit2) != 0);
     if (!__pyx_t_1) break;
-</pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">369</span>:             formula = Formula.__new__(Formula)</pre>
-<pre class='cython code score-3 '>    __pyx_t_3 = __Pyx_tp_new(((PyObject *)__pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula), __pyx_empty_tuple);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 369, __pyx_L1_error)</span>
+</pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">370</span>:             formula = Formula.__new__(Formula)</pre>
+<pre class='cython code score-3 '>    __pyx_t_3 = __Pyx_tp_new(((PyObject *)__pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula), __pyx_empty_tuple);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 370, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
-    if (!(likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_t_3, __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula)))) <span class='error_goto'>__PYX_ERR(0, 369, __pyx_L1_error)</span>
+    if (!(likely(<span class='pyx_c_api'>__Pyx_TypeTest</span>(__pyx_t_3, __pyx_ptype_8Orbitool_5utils_7formula_8_formula_Formula)))) <span class='error_goto'>__PYX_ERR(0, 370, __pyx_L1_error)</span>
     <span class='pyx_macro_api'>__Pyx_XDECREF_SET</span>(__pyx_v_formula, ((struct __pyx_obj_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_t_3));
     __pyx_t_3 = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">370</span>:             it1 = self.getFormula(deref(iit1).second.first).second</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">371</span>:             it1 = self.getFormula(deref(iit1).second.first).second</pre>
 <pre class='cython code score-0 '>    __pyx_t_6 = ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getFormula(__pyx_v_self, (*__pyx_v_iit1).second.first).second;
     __pyx_v_it1 = __pyx_t_6;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">371</span>:             formula.elements = deref(it1).second</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">372</span>:             formula.elements = deref(it1).second</pre>
 <pre class='cython code score-0 '>    __pyx_t_4 = (*__pyx_v_it1).second;
     __pyx_v_formula-&gt;elements = __pyx_t_4;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">372</span>:             formula.isotopes = deref(iit1).second.second</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">373</span>:             formula.isotopes = deref(iit1).second.second</pre>
 <pre class='cython code score-0 '>    __pyx_t_7 = (*__pyx_v_iit1).second.second;
     __pyx_v_formula-&gt;isotopes = __pyx_t_7;
-</pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">373</span>:             ret.append(formula)</pre>
-<pre class='cython code score-2 '>    __pyx_t_5 = <span class='pyx_c_api'>__Pyx_PyList_Append</span>(__pyx_v_ret, ((PyObject *)__pyx_v_formula));<span class='error_goto'> if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 373, __pyx_L1_error)</span>
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">374</span>:             preinc(iit1)</pre>
+</pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">374</span>:             ret.append(formula)</pre>
+<pre class='cython code score-2 '>    __pyx_t_5 = <span class='pyx_c_api'>__Pyx_PyList_Append</span>(__pyx_v_ret, ((PyObject *)__pyx_v_formula));<span class='error_goto'> if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(0, 374, __pyx_L1_error)</span>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">375</span>:             preinc(iit1)</pre>
 <pre class='cython code score-0 '>    (void)((++__pyx_v_iit1));
   }
-</pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">375</span>:         return ret</pre>
+</pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">376</span>:         return ret</pre>
 <pre class='cython code score-2 '>  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
   <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_v_ret);
   __pyx_r = __pyx_v_ret;
   goto __pyx_L0;
-</pre><pre class="cython line score-0">&#xA0;<span class="">376</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">377</span>:     cdef pair[bool, map[double, map[int32_t, int32_t]].iterator] getFormula(self, double&amp; mass):</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">377</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">378</span>:     cdef pair[bool, map[double, map[int32_t, int32_t]].iterator] getFormula(self, double&amp; mass):</pre>
 <pre class='cython code score-0 '>static std::pair&lt;bool,std::map&lt;double,std::map&lt;int32_t,int32_t&gt; &gt; ::iterator&gt;  __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_getFormula(struct __pyx_obj_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *__pyx_v_self, double &amp;__pyx_v_mass) {
   std::pair&lt;bool,std::map&lt;double,std::map&lt;int32_t,int32_t&gt; &gt; ::iterator&gt;  __pyx_v_it;
   std::pair&lt;bool,std::map&lt;double,std::map&lt;int32_t,int32_t&gt; &gt; ::iterator&gt;  __pyx_r;
@@ -2830,61 +2882,61 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
-</pre><pre class="cython line score-0">&#xA0;<span class="">378</span>:         cdef pair[bool, map[double, map[int32_t, int32_t]].iterator] it</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">379</span>:         if self.formulas.empty():</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">379</span>:         cdef pair[bool, map[double, map[int32_t, int32_t]].iterator] it</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">380</span>:         if self.formulas.empty():</pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = (__pyx_v_self-&gt;formulas.empty() != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">380</span>:             it.first = False</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">381</span>:             it.first = False</pre>
 <pre class='cython code score-0 '>    __pyx_v_it.first = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">381</span>:             it.second = self.formulas.end()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">382</span>:             it.second = self.formulas.end()</pre>
 <pre class='cython code score-0 '>    __pyx_v_it.second = __pyx_v_self-&gt;formulas.end();
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">382</span>:             return it</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">383</span>:             return it</pre>
 <pre class='cython code score-0 '>    __pyx_r = __pyx_v_it;
     goto __pyx_L0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">383</span>:         it.second = self.formulas.upper_bound(mass)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">384</span>:         it.second = self.formulas.upper_bound(mass)</pre>
 <pre class='cython code score-0 '>  __pyx_v_it.second = __pyx_v_self-&gt;formulas.upper_bound(__pyx_v_mass);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">384</span>:         if it.second != self.formulas.end():</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">385</span>:         if it.second != self.formulas.end():</pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((__pyx_v_it.second != __pyx_v_self-&gt;formulas.end()) != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">385</span>:             if fabs(deref(it.second).first - mass) &lt; eps:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">386</span>:             if fabs(deref(it.second).first - mass) &lt; eps:</pre>
 <pre class='cython code score-0 '>    __pyx_t_1 = ((fabs(((*__pyx_v_it.second).first - __pyx_v_mass)) &lt; __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_eps) != 0);
     if (__pyx_t_1) {
 /* … */
     }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">386</span>:                 it.first = True</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">387</span>:                 it.first = True</pre>
 <pre class='cython code score-0 '>      __pyx_v_it.first = 1;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">387</span>:                 return it</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">388</span>:                 return it</pre>
 <pre class='cython code score-0 '>      __pyx_r = __pyx_v_it;
       goto __pyx_L0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">388</span>:             elif it.second == self.formulas.begin():</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">389</span>:             elif it.second == self.formulas.begin():</pre>
 <pre class='cython code score-0 '>    __pyx_t_1 = ((__pyx_v_it.second == __pyx_v_self-&gt;formulas.begin()) != 0);
     if (__pyx_t_1) {
 /* … */
     }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">389</span>:                 it.first = False</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">390</span>:                 it.first = False</pre>
 <pre class='cython code score-0 '>      __pyx_v_it.first = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">390</span>:                 return it</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">391</span>:                 return it</pre>
 <pre class='cython code score-0 '>      __pyx_r = __pyx_v_it;
       goto __pyx_L0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">391</span>:         if fabs(deref(predec(it.second)).first - mass) &gt; eps:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">392</span>:         if fabs(deref(predec(it.second)).first - mass) &gt; eps:</pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((fabs(((*(--__pyx_v_it.second)).first - __pyx_v_mass)) &gt; __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_eps) != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">392</span>:             preinc(it.second)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">393</span>:             preinc(it.second)</pre>
 <pre class='cython code score-0 '>    (void)((++__pyx_v_it.second));
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">393</span>:             it.first = False</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">394</span>:             it.first = False</pre>
 <pre class='cython code score-0 '>    __pyx_v_it.first = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">394</span>:         return it</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">395</span>:         return it</pre>
 <pre class='cython code score-0 '>  __pyx_r = __pyx_v_it;
   goto __pyx_L0;
-</pre><pre class="cython line score-0">&#xA0;<span class="">395</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">396</span>: </pre>
-<pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">397</span>:     cdef void insertElements(self, int_map&amp;elements, double mass = -1):</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">396</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">397</span>: </pre>
+<pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">398</span>:     cdef void insertElements(self, int_map&amp;elements, double mass = -1):</pre>
 <pre class='cython code score-2 '>static void __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_insertElements(struct __pyx_obj_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *__pyx_v_self, __pyx_t_8Orbitool_5utils_7formula_8_formula_int_map &amp;__pyx_v_elements, struct __pyx_opt_args_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_insertElements *__pyx_optional_args) {
   double __pyx_v_mass = ((double)-1.0);
   std::pair&lt;bool,std::map&lt;double,std::map&lt;int32_t,int32_t&gt; &gt; ::iterator&gt;  __pyx_v_it;
@@ -2903,36 +2955,36 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
   __pyx_L0:;
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
 }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">398</span>:         if mass&lt;0:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">399</span>:         if mass&lt;0:</pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((__pyx_v_mass &lt; 0.0) != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">399</span>:             mass = _elements_mass(elements)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">400</span>:             mass = _elements_mass(elements)</pre>
 <pre class='cython code score-0 '>    __pyx_v_mass = __pyx_f_8Orbitool_5utils_7formula_8_formula__elements_mass(__pyx_v_elements);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">400</span>:         it = self.getFormula(mass)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">401</span>:         it = self.getFormula(mass)</pre>
 <pre class='cython code score-0 '>  __pyx_v_it = ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getFormula(__pyx_v_self, __pyx_v_mass);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">401</span>:         if not it.first:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">402</span>:         if not it.first:</pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((!(__pyx_v_it.first != 0)) != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">402</span>:             self.formulas.insert(it.second, d_ii_map_pair(mass, elements))</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">403</span>:             self.formulas.insert(it.second, d_ii_map_pair(mass, elements))</pre>
 <pre class='cython code score-0 '>    try {
       __pyx_t_2 = __pyx_t_8Orbitool_5utils_7formula_15_restrictedCalc_d_ii_map_pair(__pyx_v_mass, __pyx_v_elements);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      <span class='error_goto'>__PYX_ERR(0, 402, __pyx_L1_error)</span>
+      <span class='error_goto'>__PYX_ERR(0, 403, __pyx_L1_error)</span>
     }
     try {
       __pyx_v_self-&gt;formulas.insert(__pyx_v_it.second, __pyx_t_2);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      <span class='error_goto'>__PYX_ERR(0, 402, __pyx_L1_error)</span>
+      <span class='error_goto'>__PYX_ERR(0, 403, __pyx_L1_error)</span>
     }
-</pre><pre class="cython line score-0">&#xA0;<span class="">403</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">404</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">405</span>:     cdef void insertIsotopes(self, int_map&amp;elements, double mass = -1):</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">404</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">405</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">406</span>:     cdef void insertIsotopes(self, int_map&amp;elements, double mass = -1):</pre>
 <pre class='cython code score-0 '>static void __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_insertIsotopes(struct __pyx_obj_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *__pyx_v_self, __pyx_t_8Orbitool_5utils_7formula_8_formula_int_map &amp;__pyx_v_elements, struct __pyx_opt_args_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_insertIsotopes *__pyx_optional_args) {
   double __pyx_v_mass = ((double)-1.0);
   __pyx_t_8Orbitool_5utils_7formula_8_element_int_pair __pyx_v_i;
@@ -2950,19 +3002,19 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
   /* function exit code */
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
 }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">406</span>:         if mass&lt;0:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">407</span>:         if mass&lt;0:</pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((__pyx_v_mass &lt; 0.0) != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">407</span>:             mass = _elements_mass(elements)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">408</span>:             mass = _elements_mass(elements)</pre>
 <pre class='cython code score-0 '>    __pyx_v_mass = __pyx_f_8Orbitool_5utils_7formula_8_formula__elements_mass(__pyx_v_elements);
-</pre><pre class="cython line score-0">&#xA0;<span class="">408</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">409</span>:         cdef int_pair i</pre>
-<pre class="cython line score-0">&#xA0;<span class="">410</span>:         # cdef map[int32_t, int32_t].iterator it</pre>
-<pre class="cython line score-0">&#xA0;<span class="">411</span>:         cdef ints_map isotopes</pre>
-<pre class="cython line score-0">&#xA0;<span class="">412</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">413</span>:         for i in self.calcedIsotopes:</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">409</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">410</span>:         cdef int_pair i</pre>
+<pre class="cython line score-0">&#xA0;<span class="">411</span>:         # cdef map[int32_t, int32_t].iterator it</pre>
+<pre class="cython line score-0">&#xA0;<span class="">412</span>:         cdef ints_map isotopes</pre>
+<pre class="cython line score-0">&#xA0;<span class="">413</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">414</span>:         for i in self.calcedIsotopes:</pre>
 <pre class='cython code score-0 '>  __pyx_t_3 = &amp;__pyx_v_self-&gt;calcedIsotopes;
   __pyx_t_2 = __pyx_t_3-&gt;begin();
   for (;;) {
@@ -2973,36 +3025,36 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
 /* … */
     __pyx_L4_continue:;
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">414</span>:             it = elements.find(i.first)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">415</span>:             it = elements.find(i.first)</pre>
 <pre class='cython code score-0 '>    __pyx_v_it = __pyx_v_elements.find(__pyx_v_i.first);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">415</span>:             if it == elements.end():</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">416</span>:             if it == elements.end():</pre>
 <pre class='cython code score-0 '>    __pyx_t_1 = ((__pyx_v_it == __pyx_v_elements.end()) != 0);
     if (__pyx_t_1) {
 /* … */
     }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">416</span>:                 continue</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">417</span>:                 continue</pre>
 <pre class='cython code score-0 '>      goto __pyx_L4_continue;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">417</span>:             isotopes.clear()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">418</span>:             isotopes.clear()</pre>
 <pre class='cython code score-0 '>    __pyx_v_isotopes.clear();
-</pre><pre class="cython line score-0">&#xA0;<span class="">418</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">419</span>:             # double</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">420</span>:             if deref(it).second &gt; 1:</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">419</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">420</span>:             # double</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">421</span>:             if deref(it).second &gt; 1:</pre>
 <pre class='cython code score-0 '>    __pyx_t_1 = (((*__pyx_v_it).second &gt; 1) != 0);
     if (__pyx_t_1) {
 /* … */
     }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">421</span>:                 isotopes[i] = 2</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">422</span>:                 isotopes[i] = 2</pre>
 <pre class='cython code score-0 '>      (__pyx_v_isotopes[__pyx_v_i]) = 2;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">422</span>:                 self.insertIsotope(mass, isotopes)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">423</span>:                 self.insertIsotope(mass, isotopes)</pre>
 <pre class='cython code score-0 '>      ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;insertIsotope(__pyx_v_self, __pyx_v_mass, __pyx_v_isotopes);
-</pre><pre class="cython line score-0">&#xA0;<span class="">423</span>:             # single</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">424</span>:             isotopes[i] = 1</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">424</span>:             # single</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">425</span>:             isotopes[i] = 1</pre>
 <pre class='cython code score-0 '>    (__pyx_v_isotopes[__pyx_v_i]) = 1;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">425</span>:             self.insertIsotope(mass, isotopes)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">426</span>:             self.insertIsotope(mass, isotopes)</pre>
 <pre class='cython code score-0 '>    ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;insertIsotope(__pyx_v_self, __pyx_v_mass, __pyx_v_isotopes);
-</pre><pre class="cython line score-0">&#xA0;<span class="">426</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">427</span>:             # multi(2)</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">428</span>:             for j in self.calcedIsotopes:</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">427</span>: </pre>
+<pre class="cython line score-0">&#xA0;<span class="">428</span>:             # multi(2)</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">429</span>:             for j in self.calcedIsotopes:</pre>
 <pre class='cython code score-0 '>    __pyx_t_6 = &amp;__pyx_v_self-&gt;calcedIsotopes;
     __pyx_t_5 = __pyx_t_6-&gt;begin();
     for (;;) {
@@ -3014,28 +3066,28 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
       __pyx_L8_continue:;
     }
     __pyx_L9_break:;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">429</span>:                 if i==j:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">430</span>:                 if i==j:</pre>
 <pre class='cython code score-0 '>      __pyx_t_1 = ((__pyx_v_i == __pyx_v_j) != 0);
       if (__pyx_t_1) {
 /* … */
       }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">430</span>:                     break</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">431</span>:                     break</pre>
 <pre class='cython code score-0 '>        goto __pyx_L9_break;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">431</span>:                 if elements.find(j.first)==elements.end():</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">432</span>:                 if elements.find(j.first)==elements.end():</pre>
 <pre class='cython code score-0 '>      __pyx_t_1 = ((__pyx_v_elements.find(__pyx_v_j.first) == __pyx_v_elements.end()) != 0);
       if (__pyx_t_1) {
 /* … */
       }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">432</span>:                     continue</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">433</span>:                     continue</pre>
 <pre class='cython code score-0 '>        goto __pyx_L8_continue;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">433</span>:                 isotopes[j] = 1</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">434</span>:                 isotopes[j] = 1</pre>
 <pre class='cython code score-0 '>      (__pyx_v_isotopes[__pyx_v_j]) = 1;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">434</span>:                 self.insertIsotope(mass, isotopes)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">435</span>:                 self.insertIsotope(mass, isotopes)</pre>
 <pre class='cython code score-0 '>      ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;insertIsotope(__pyx_v_self, __pyx_v_mass, __pyx_v_isotopes);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">435</span>:                 isotopes.erase(j)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">436</span>:                 isotopes.erase(j)</pre>
 <pre class='cython code score-0 '>      (void)(__pyx_v_isotopes.erase(__pyx_v_j));
-</pre><pre class="cython line score-0">&#xA0;<span class="">436</span>: </pre>
-<pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">437</span>:     cdef void insertIsotope(self, double&amp;mass, ints_map&amp; isotopes):</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">437</span>: </pre>
+<pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">438</span>:     cdef void insertIsotope(self, double&amp;mass, ints_map&amp; isotopes):</pre>
 <pre class='cython code score-2 '>static void __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_insertIsotope(struct __pyx_obj_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *__pyx_v_self, double &amp;__pyx_v_mass, __pyx_t_8Orbitool_5utils_7formula_8_formula_ints_map &amp;__pyx_v_isotopes) {
   std::pair&lt;bool,std::map&lt;double,std::pair&lt;double,std::map&lt;std::pair&lt;int32_t,int32_t&gt; ,int32_t&gt; &gt; &gt; ::iterator&gt;  __pyx_v_it;
   double __pyx_v_isomass;
@@ -3049,37 +3101,37 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
   __pyx_L0:;
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
 }
-</pre><pre class="cython line score-0">&#xA0;<span class="">438</span>:         cdef pair[bool, map[double, pair[double, map[pair[int32_t, int32_t], int32_t]]].iterator] it</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">439</span>:         isomass = _mass_isotopes_mass(mass, isotopes)</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">439</span>:         cdef pair[bool, map[double, pair[double, map[pair[int32_t, int32_t], int32_t]]].iterator] it</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">440</span>:         isomass = _mass_isotopes_mass(mass, isotopes)</pre>
 <pre class='cython code score-0 '>  __pyx_v_isomass = __pyx_f_8Orbitool_5utils_7formula_8_formula__mass_isotopes_mass(__pyx_v_mass, __pyx_v_isotopes);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">440</span>:         it = self.getIsotope(isomass)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">441</span>:         it = self.getIsotope(isomass)</pre>
 <pre class='cython code score-0 '>  __pyx_v_it = ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *)__pyx_v_self-&gt;__pyx_vtab)-&gt;getIsotope(__pyx_v_self, __pyx_v_isomass);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">441</span>:         if not it.first:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">442</span>:         if not it.first:</pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((!(__pyx_v_it.first != 0)) != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">442</span>:             self.isotopes.insert(it.second, d_d_ii_i_map_pair_pair(isomass, d_ii_i_map_pair(mass, isotopes)))</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">443</span>:             self.isotopes.insert(it.second, d_d_ii_i_map_pair_pair(isomass, d_ii_i_map_pair(mass, isotopes)))</pre>
 <pre class='cython code score-0 '>    try {
       __pyx_t_2 = __pyx_t_8Orbitool_5utils_7formula_15_restrictedCalc_d_ii_i_map_pair(__pyx_v_mass, __pyx_v_isotopes);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      <span class='error_goto'>__PYX_ERR(0, 442, __pyx_L1_error)</span>
+      <span class='error_goto'>__PYX_ERR(0, 443, __pyx_L1_error)</span>
     }
     try {
       __pyx_t_3 = __pyx_t_8Orbitool_5utils_7formula_15_restrictedCalc_d_d_ii_i_map_pair_pair(__pyx_v_isomass, __pyx_t_2);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      <span class='error_goto'>__PYX_ERR(0, 442, __pyx_L1_error)</span>
+      <span class='error_goto'>__PYX_ERR(0, 443, __pyx_L1_error)</span>
     }
     try {
       __pyx_v_self-&gt;isotopes.insert(__pyx_v_it.second, __pyx_t_3);
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      <span class='error_goto'>__PYX_ERR(0, 442, __pyx_L1_error)</span>
+      <span class='error_goto'>__PYX_ERR(0, 443, __pyx_L1_error)</span>
     }
-</pre><pre class="cython line score-0">&#xA0;<span class="">443</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">444</span>:     cdef pair[bool, map[double, pair[double, map[pair[int32_t, int32_t], int32_t]]].iterator] getIsotope(self, double&amp;mass):</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">444</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">445</span>:     cdef pair[bool, map[double, pair[double, map[pair[int32_t, int32_t], int32_t]]].iterator] getIsotope(self, double&amp;mass):</pre>
 <pre class='cython code score-0 '>static std::pair&lt;bool,std::map&lt;double,std::pair&lt;double,std::map&lt;std::pair&lt;int32_t,int32_t&gt; ,int32_t&gt; &gt; &gt; ::iterator&gt;  __pyx_f_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculator_getIsotope(struct __pyx_obj_8Orbitool_5utils_7formula_15_restrictedCalc_Calculator *__pyx_v_self, double &amp;__pyx_v_mass) {
   std::pair&lt;bool,std::map&lt;double,std::pair&lt;double,std::map&lt;std::pair&lt;int32_t,int32_t&gt; ,int32_t&gt; &gt; &gt; ::iterator&gt;  __pyx_v_it;
   std::pair&lt;bool,std::map&lt;double,std::pair&lt;double,std::map&lt;std::pair&lt;int32_t,int32_t&gt; ,int32_t&gt; &gt; &gt; ::iterator&gt;  __pyx_r;
@@ -3091,64 +3143,64 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_15_restrictedCalc_10Calculat
   <span class='refnanny'>__Pyx_RefNannyFinishContext</span>();
   return __pyx_r;
 }
-</pre><pre class="cython line score-0">&#xA0;<span class="">445</span>:         cdef pair[bool, map[double, pair[double, map[pair[int32_t, int32_t], int32_t]]].iterator] it</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">446</span>:         if self.isotopes.empty():</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">446</span>:         cdef pair[bool, map[double, pair[double, map[pair[int32_t, int32_t], int32_t]]].iterator] it</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">447</span>:         if self.isotopes.empty():</pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = (__pyx_v_self-&gt;isotopes.empty() != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">447</span>:             it.second = self.isotopes.end()</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">448</span>:             it.second = self.isotopes.end()</pre>
 <pre class='cython code score-0 '>    __pyx_v_it.second = __pyx_v_self-&gt;isotopes.end();
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">448</span>:             it.first = False</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">449</span>:             it.first = False</pre>
 <pre class='cython code score-0 '>    __pyx_v_it.first = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">449</span>:             return it</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">450</span>:             return it</pre>
 <pre class='cython code score-0 '>    __pyx_r = __pyx_v_it;
     goto __pyx_L0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">450</span>:         it.second = self.isotopes.upper_bound(mass)</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">451</span>:         it.second = self.isotopes.upper_bound(mass)</pre>
 <pre class='cython code score-0 '>  __pyx_v_it.second = __pyx_v_self-&gt;isotopes.upper_bound(__pyx_v_mass);
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">451</span>:         if it.second!=self.isotopes.end():</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">452</span>:         if it.second!=self.isotopes.end():</pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((__pyx_v_it.second != __pyx_v_self-&gt;isotopes.end()) != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">452</span>:             if fabs(deref(it.second).first-mass)&lt;eps:</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">453</span>:             if fabs(deref(it.second).first-mass)&lt;eps:</pre>
 <pre class='cython code score-0 '>    __pyx_t_1 = ((fabs(((*__pyx_v_it.second).first - __pyx_v_mass)) &lt; __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_eps) != 0);
     if (__pyx_t_1) {
 /* … */
     }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">453</span>:                 it.first = True</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">454</span>:                 it.first = True</pre>
 <pre class='cython code score-0 '>      __pyx_v_it.first = 1;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">454</span>:                 return it</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">455</span>:                 return it</pre>
 <pre class='cython code score-0 '>      __pyx_r = __pyx_v_it;
       goto __pyx_L0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">455</span>:             elif it.second == self.isotopes.begin():</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">456</span>:             elif it.second == self.isotopes.begin():</pre>
 <pre class='cython code score-0 '>    __pyx_t_1 = ((__pyx_v_it.second == __pyx_v_self-&gt;isotopes.begin()) != 0);
     if (__pyx_t_1) {
 /* … */
     }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">456</span>:                 it.first = False</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">457</span>:                 it.first = False</pre>
 <pre class='cython code score-0 '>      __pyx_v_it.first = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">457</span>:                 return it</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">458</span>:                 return it</pre>
 <pre class='cython code score-0 '>      __pyx_r = __pyx_v_it;
       goto __pyx_L0;
-</pre><pre class="cython line score-0">&#xA0;<span class="">458</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">459</span>:         if fabs(deref(predec(it.second)).first - mass) &lt; eps:</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">459</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">460</span>:         if fabs(deref(predec(it.second)).first - mass) &lt; eps:</pre>
 <pre class='cython code score-0 '>  __pyx_t_1 = ((fabs(((*(--__pyx_v_it.second)).first - __pyx_v_mass)) &lt; __pyx_v_8Orbitool_5utils_7formula_15_restrictedCalc_eps) != 0);
   if (__pyx_t_1) {
 /* … */
   }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">460</span>:             it.first = True</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">461</span>:             it.first = True</pre>
 <pre class='cython code score-0 '>    __pyx_v_it.first = 1;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">461</span>:             return it</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">462</span>:             return it</pre>
 <pre class='cython code score-0 '>    __pyx_r = __pyx_v_it;
     goto __pyx_L0;
-</pre><pre class="cython line score-0">&#xA0;<span class="">462</span>:         else:</pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">463</span>:             preinc(it.second)</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">463</span>:         else:</pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">464</span>:             preinc(it.second)</pre>
 <pre class='cython code score-0 '>  /*else*/ {
     (void)((++__pyx_v_it.second));
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">464</span>:             it.first = False</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">465</span>:             it.first = False</pre>
 <pre class='cython code score-0 '>    __pyx_v_it.first = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">465</span>:             return it</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">466</span>:             return it</pre>
 <pre class='cython code score-0 '>    __pyx_r = __pyx_v_it;
     goto __pyx_L0;
   }

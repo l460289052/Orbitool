@@ -51,3 +51,15 @@ def test_calc2(calc: RestrictedCalc):
     f['H[2]'] = 2
     assert str(f) == 'CHH[2]2-'
     assert f in calc.get(f.mass(), Formula("-"))
+
+def test_neg_dbe(calc: RestrictedCalc):
+    for e in calc.getElements():
+        if e not in "CHO":
+            calc.setEI(e, False)
+
+    f = Formula('C10H30')
+    dbe = f.dbe()
+    assert dbe == -4.0
+
+    results = calc.get(f.mass(), base_group=Formula("H8"))
+    assert f in results
