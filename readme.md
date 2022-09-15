@@ -423,6 +423,11 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2022.09.15 version 2.2.3**
+
++ Fix a thermo bug
+  Some spectra may have wrong time when they are the last ones.
+
 **2022.07.23 version 2.2.2**
 
 + reduce size to ~100MB
