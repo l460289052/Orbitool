@@ -225,6 +225,15 @@
                 </color>
                </brush>
               </colorrole>
+              <colorrole role="PlaceholderText">
+               <brush brushstyle="NoBrush">
+                <color alpha="128">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
+                </color>
+               </brush>
+              </colorrole>
              </active>
              <inactive>
               <colorrole role="Text">
@@ -241,6 +250,15 @@
                 <color alpha="255">
                  <red>0</red>
                  <green>85</green>
+                 <blue>0</blue>
+                </color>
+               </brush>
+              </colorrole>
+              <colorrole role="PlaceholderText">
+               <brush brushstyle="NoBrush">
+                <color alpha="128">
+                 <red>0</red>
+                 <green>0</green>
                  <blue>0</blue>
                 </color>
                </brush>
@@ -262,6 +280,15 @@
                  <red>120</red>
                  <green>120</green>
                  <blue>120</blue>
+                </color>
+               </brush>
+              </colorrole>
+              <colorrole role="PlaceholderText">
+               <brush brushstyle="NoBrush">
+                <color alpha="128">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -349,14 +376,14 @@
        </item>
        <item>
         <layout class="QFormLayout" name="formLayout_6">
-         <item row="0" column="0">
+         <item row="1" column="0">
           <widget class="QLabel" name="degreeLabel">
            <property name="text">
             <string>degree of freedom</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
+         <item row="1" column="1">
           <widget class="QSpinBox" name="degreeSpinBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -375,14 +402,14 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
+         <item row="2" column="0">
           <widget class="QLabel" name="nIonsLabel">
            <property name="text">
             <string>use best N ions</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
+         <item row="2" column="1">
           <widget class="QSpinBox" name="nIonsSpinBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -393,8 +420,28 @@
            <property name="minimum">
             <number>1</number>
            </property>
+           <property name="maximum">
+            <number>999</number>
+           </property>
            <property name="value">
             <number>3</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="filterLabel">
+           <property name="text">
+            <string>intensity filter</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="filterSpinBox">
+           <property name="maximum">
+            <number>100000000</number>
+           </property>
+           <property name="value">
+            <number>100</number>
            </property>
           </widget>
          </item>

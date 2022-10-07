@@ -36,7 +36,7 @@ convertPolarity = {PolarityType.Any: 0,
 
 
 def initRawFile(path):
-    rawfile = RawFileReaderAdapter.FileFactory(path)
+    rawfile = RawFileReaderAdapter.FileFactory(str(path))
     rawfile.SelectInstrument(Device.MS, 1)
     rawfile.IncludeReferenceAndExceptionData = True
     return rawfile
@@ -58,8 +58,9 @@ class File:
             minutes=self.rawfile.RunHeader.EndTime)
         self.firstScanNumber = self.rawfile.RunHeader.FirstSpectrum
         self.lastScanNumber = self.rawfile.RunHeader.LastSpectrum
-        self.massResolution = float(
-            self.rawfile.GetTrailerExtraInformation(1).Values[11])
+        extra_info = self.rawfile.GetTrailerExtraInformation(1)
+        extra_info_dict = dict(zip(extra_info.Labels, extra_info.Values))
+        self.massResolution = float(extra_info_dict.get("FT Resolution:"))
 
     @property
     def startDatetime(self):

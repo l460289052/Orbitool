@@ -423,6 +423,12 @@ mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huan
 
 ## log
 
+**2022.10.07 version 2.2.4**
+
++ move intensity filter to calibration segment
++ change max clibration ions to 999
++ read mass resolution according to name instead of position to sync with new thermo file
+
 **2022.09.15 version 2.2.3**
 
 + Fix a thermo bug

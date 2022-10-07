@@ -24,6 +24,7 @@ class CalibratorInfoSegment(BaseStructure):
 
     end_point: float = math.inf
 
+    intensity_filter: int = 100
     degree: int = 2
     n_ions: int = 3
 

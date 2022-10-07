@@ -14,6 +14,7 @@ from ..functions.peakfit.normal_distribution import NormalDistributionFunc
 from ..structures.HDF5 import StructureListView
 from ..structures.spectrum import Spectrum, SpectrumInfo
 from ..workspace import WorkSpace
+from ..workspace.calibration import CalibratorInfoSegment
 from . import CalibrationUi
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
@@ -77,6 +78,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
     def updateState(self):
         self.calibration.ui_state.fromComponents(self, [
             self.rtolDoubleSpinBox,
+            self.filterSpinBox,
             self.degreeSpinBox,
             self.nIonsSpinBox])
 
@@ -107,12 +109,14 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             table.setItem(
                 index, 1, QtWidgets.QTableWidgetItem(format(ion.formula.mass(), ".4f")))
 
+        self.filterSpinBox.setValue(seg.intensity_filter)
         self.degreeSpinBox.setValue(seg.degree)
         self.nIonsSpinBox.setValue(seg.n_ions)
 
     def saveCurrentSegment(self):
         info = self.calibration.info
         seg = info.calibrate_info_segments[info.current_segment_index]
+        seg.intensity_filter = self.filterSpinBox.value()
         seg.degree = self.degreeSpinBox.value()
         seg.n_ions = self.nIonsSpinBox.value()
 
@@ -205,8 +209,8 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
                 func_kwargs=dict(
                     fit_func=workspace.peak_shape_tab.info.func,
                     ions=[formula.mass() for formula in formulas],
-                    rtol=rtol,
-                    intensity_filter=intensity_filter))
+                    segments=info.calibrate_info_segments,
+                    rtol=rtol))
 
             path_ions_peak: Dict[str, List[List[Tuple[float, float]]]] = yield func, "split and fit target peaks"
 
@@ -363,11 +367,14 @@ class SplitAndFitPeak(MultiProcess):
         return len(h5_spectra)
 
     @staticmethod
-    def func(data: Spectrum, fit_func: NormalDistributionFunc, ions: List[float], rtol: float, intensity_filter: float, **kwargs):
+    def func(data: Spectrum, fit_func: NormalDistributionFunc, ions: List[float], rtol: float, segments: List[CalibratorInfoSegment], **kwargs):
         ions_peak: List[Tuple[float, float]] = []
         mz = data.mz
         intensity = data.intensity
+        segment_index = 0
         for ion in ions:
+            while segments[segment_index].end_point < ion:
+                segment_index += 1
             delta = ion * rtol
             mz_, intensity_ = spectrum_func.safeCutSpectrum(
                 mz, intensity, ion - delta, ion + delta)
@@ -376,7 +383,7 @@ class SplitAndFitPeak(MultiProcess):
 
             # intensity filter for noise
             peaks = [peak for peak in peaks if peak.maxIntensity >
-                     intensity_filter]
+                     segments[segment_index].intensity_filter]
 
             # find highest peak within rtol
             find = False
