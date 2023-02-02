@@ -41,6 +41,7 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
         self.spectra_list.ui_state.set_state(self)
         self._comboBox_changed()
         self.comboBox.currentIndexChanged.connect(self.comboBox_changed)
+        # TODO: restore 无效
 
     def updateState(self):
         self.spectra_list.ui_state.fromComponents(self, [

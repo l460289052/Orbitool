@@ -11,8 +11,16 @@ class Widget(QtWidgets.QWidget, SpectrumUi.Ui_Form):
         super().__init__()
         self.setupUi(self)
         self.manager = manager
+    
+    def setupUi(self, Form):
+        super().setupUi(Form)
+
+        self.pushButton.clicked.connect(self.export)
+    
+    # TODO: restore
 
     def show_spectrum(self, spectrum: Spectrum):
+        # TODO 不能这样show，只能设置展示哪个，然后把状态记录下来，这样show完它也不知道正在展示哪个
         tableWidget = self.tableWidget
         tableWidget.setRowCount(0)
         mass = spectrum.mz
@@ -24,3 +32,6 @@ class Widget(QtWidgets.QWidget, SpectrumUi.Ui_Form):
                     format(v, '.6f') if v > 1e-6 else '0.0')
                 item.setTextAlignment(QtCore.Qt.AlignRight)
                 tableWidget.setItem(i, j, item)
+
+    def export(self):
+        pass
