@@ -169,7 +169,7 @@ cdef class Calculator:
             for i in range(len(point)):
                 num = point[i]
                 isotope = isotopes[i]
-                if num > tmp.getE(isotope.first) - tmp.getI(isotope.first, 0):
+                if num > tmp.getE(isotope.first) - tmp.getI(isotope.first, 0): # 考虑base_group内物质为同位素的可能性
                     find = False
                     break
                 tmp.setI(isotope.first, isotope.second, num)

@@ -149,3 +149,16 @@ def test_sub_in():
         f - g
     with pytest.raises(ValueError):
         g - f
+
+def test_modify():
+    f = Formula("CC[13]H6")
+    assert f['C'] == 2
+    assert f['C[12]'] == 1
+    f['C[12]'] = 2
+    assert f == Formula("C2C[13]H6")
+    f['C'] = 2
+    assert f == Formula("CC[13]H6")
+    f['C'] = 1
+    assert f == Formula("C[13]H6")
+    f['C[12]'] = 1
+    assert f == Formula("CC[13]H6")
