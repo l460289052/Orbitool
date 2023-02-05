@@ -26,7 +26,7 @@ class CalculatorGenerator:  # for Generator, Python is better than Cython
         self.relativeOH = True
 
         self.element_states: Dict[str, State] = {
-            row[0]: State(*row[2:]) for row in InitParams}
+            row[0]: State(*row[1:]) for row in InitParams}
         self.element_usable: Dict[str, Dict[int, IsotopeNum]] = {
             "C": {0: IsotopeNum(0, 20)},
             "H": {0: IsotopeNum(0, 40)},
@@ -58,7 +58,10 @@ class CalculatorGenerator:  # for Generator, Python is better than Cython
         assert min >= 0
         num = get_num(key1)
         assert num == key2 or max > 0
-        self.element_usable[key1][key2] = IsotopeNum(min, max)
+        if not key2:
+            self.element_usable.setdefault(key1, {})[key2] = IsotopeNum(min, max)
+        else:
+            self.element_usable[key1][key2] = IsotopeNum(min, max)
 
     def del_EI(self, key: Union[Isotope, str]):
         if isinstance(key, str):

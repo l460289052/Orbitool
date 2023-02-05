@@ -1,5 +1,6 @@
 from .calc import IsotopeNum, State, Calculator 
 from .calc_gen import CalculatorGenerator
+from .. import Formula
 
 
 def test_state():
@@ -40,3 +41,32 @@ def test_set():
         IsotopeNum("O", 16, 16, 0, 15, 0, 15),
         IsotopeNum("H", 1, 1, 0, 40, 0, 40),
     ]
+
+def test_restricted_1():
+    """
+    nitrogenrule & relative oh _ dbe & max isotope
+    """
+    gen = CalculatorGenerator()
+    gen.nitrogenRule = True
+    gen.set_EI("C", 0, 20)
+    gen.set_EI("H", 0, 40)
+    gen.set_EI("O", 0, 15)
+    gen.set_EI("N", 0, 3)
+    gen.set_EI(("N", 15), 0, 1)
+    gen.set_EI(("O", 18), 0, 2)
+    assert gen.get_EI(("N", 0)).max == 3
+    assert gen.get_EI(("N", 15)).max == 1
+    calc = gen.generate()
+    s = ["C9H12O11N-", "C10H15O11N-", "C10H20O2N+"]
+    for ss in s:
+        f = Formula(ss)
+        ret = list(calc.get(f.mass(), f.charge))
+        assert f in ret
+
+        f['N[15]'] = 1
+        ret = list(calc.get(f.mass(), f.charge))
+        assert f in ret
+
+        f['O[18]'] = 2
+        ret = list(calc.get(f.mass(), f.charge))
+        assert f in ret
