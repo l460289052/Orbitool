@@ -1,3 +1,4 @@
+from collections import deque
 from copy import copy
 from dataclasses import dataclass
 from functools import lru_cache
@@ -13,6 +14,7 @@ Isotope = Tuple[str, int]
 class IsotopeNum:
     min: int = 0
     max: int = 0
+    as_isotope: bool = False
 
 
 class CalculatorGenerator:  # for Generator, Python is better than Cython
@@ -20,17 +22,16 @@ class CalculatorGenerator:  # for Generator, Python is better than Cython
         self.rtol = 1e-6
         self.DBEMin = 0
         self.DBEMax = 8
-        self.nitrogenRule = False
+        self.nitrogenRule = True
         self.maxIsotope = 3
-        self.limitedIsotope = True
-        self.relativeOH = True
+        self.relativeOH_DBE = True
 
         self.element_states: Dict[str, State] = {
             row[0]: State(*row[1:]) for row in InitParams}
         self.element_usable: Dict[str, Dict[int, IsotopeNum]] = {
-            "C": {0: IsotopeNum(0, 20)},
-            "H": {0: IsotopeNum(0, 40)},
-            "O": {0: IsotopeNum(0, 15)}}
+            "C": {0: IsotopeNum(0, 20, False)},
+            "H": {0: IsotopeNum(0, 40, False)},
+            "O": {0: IsotopeNum(0, 15, False)}}
 
     def set_E_custom(self, key: str, enable: bool):
         d = self.element_usable.get(key, None)
@@ -40,7 +41,7 @@ class CalculatorGenerator:  # for Generator, Python is better than Cython
             d[num] = copy(d[0])
         if not enable and num in d:
             del d[num]
-    
+
     def get_E_custom(self, key: str):
         d = self.element_usable.get(key, None)
         if not d:
@@ -48,7 +49,7 @@ class CalculatorGenerator:  # for Generator, Python is better than Cython
         num = get_num(key)
         return d.get(num, None)
 
-    def set_EI(self, key: Union[Isotope, str], min: int, max: int):
+    def set_EI(self, key: Union[Isotope, str], min: int, max: int, as_isotope: bool):
         if isinstance(key, str):
             key1 = key
             key2 = 0
@@ -59,9 +60,11 @@ class CalculatorGenerator:  # for Generator, Python is better than Cython
         num = get_num(key1)
         assert num == key2 or max > 0
         if not key2:
-            self.element_usable.setdefault(key1, {})[key2] = IsotopeNum(min, max)
+            self.element_usable.setdefault(
+                key1, {})[key2] = IsotopeNum(min, max, as_isotope)
         else:
-            self.element_usable[key1][key2] = IsotopeNum(min, max)
+
+            self.element_usable[key1][key2] = IsotopeNum(min, max, as_isotope)
 
     def del_EI(self, key: Union[Isotope, str]):
         if isinstance(key, str):
@@ -101,34 +104,45 @@ class CalculatorGenerator:  # for Generator, Python is better than Cython
             v = v.copy()
             e_num = v.pop(0)
             e_mass_num: int = get_num(e)
-            ret = []
+            ret: List[CalcIsotopeNum] = []
+            no_isotope = []
+            flag = False
             for mass_num, num in v.items():
                 if mass_num == e_mass_num:
-                    continue
-                ret.append(CalcIsotopeNum(
-                    e, e_mass_num, mass_num, num.min, num.max, e_num.min, e_num.max))
-            i_num = CalcIsotopeNum(
-                    e, e_mass_num, e_mass_num, e_num.min, e_num.max, e_num.min, e_num.max)
-            if (num:=v.get(e_mass_num, None)) is not None:
-                if num.max == 0:
-                    return ret
-                i_num.min = num.min
-                i_num.max = num.max
-            ret.append(i_num)
+                    flag = True
+                if num.as_isotope:
+                    ret.append(CalcIsotopeNum(
+                        e, e_mass_num, mass_num, True, num.min, num.max, e_num.min, e_num.max))
+                elif num.max > 0:
+                    no_isotope.append(CalcIsotopeNum(
+                        e, e_mass_num, mass_num, False, num.min, num.max, e_num.min, e_num.max))
+            ret.extend(no_isotope)
+            if not flag:
+                i_num = CalcIsotopeNum(
+                    e, e_mass_num, e_mass_num, e_num.as_isotope, e_num.min, e_num.max, e_num.min, e_num.max)
+                if (num := v.get(e_mass_num, None)) is not None:
+                    if num.max == 0:
+                        return ret
+                    i_num.as_isotope = num.as_isotope
+                    i_num.min = num.min
+                    i_num.max = num.max
+                ret.append(i_num)
             return ret
 
         element_nums: List[CalcIsotopeNum] = []
-        for k, v in sorted(d.items(), key=lambda i:get_num(i[0]), reverse=True):
+        for k, v in sorted(d.items(), key=lambda i: get_num(i[0]), reverse=True):
             element_nums.extend(e_to_list(k, v))
 
         if O is not None:
             element_nums.extend(e_to_list("O", O))
         if H is not None:
-            element_nums.extend(e_to_list("H", H))
-        
+            ret = e_to_list("H", H)
+            H_max_mass = max(r.i_mass_num for r in ret)
+            element_nums.extend(ret)
+
         return Calculator(
             self.rtol, self.DBEMin, self.DBEMax, self.nitrogenRule,
-            self.maxIsotope, self.limitedIsotope, self.relativeOH,
+            self.maxIsotope, self.relativeOH_DBE, H_max_mass,
             self.element_states, element_nums)
 
 

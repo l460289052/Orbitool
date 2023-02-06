@@ -69,6 +69,7 @@ class IsotopeNum:
     element: str
     e_mass_num: int
     i_mass_num: int
+    as_isotope: bool
     min: int
     max: int
     element_min: int
@@ -93,13 +94,13 @@ class Calculator:
     rtol: float = 1e-6
     DBEMin: float = 0
     DBEMax: float = 8
-    nitrogenRule: bool = False
+    nitrogenRule: bool = True
     maxIsotope: int = 3
-    limitedIsotope: bool = True
     relativeOH_DBE: bool = True
+    H_max_mass: float = get_mass("H")
     element_states: Dict[str, State] = field(default_factory=dict)
     element_nums: List[IsotopeNum] = field(default_factory=list)
-    debug: bool = True
+    debug: bool = False
 
     def get(self, M: float, charge: int):
         delta = self.rtol * M
@@ -108,7 +109,8 @@ class Calculator:
 
         TAIL = len(self.element_nums) - 1
         cur = 0
-        states: List[State] = [self.element_states["e"] * -charge]
+        states: List[State] = [self.element_states["e"]
+                               * -charge - self.element_states["H"] * 2]
         num_states: List[NumState] = [
             NumState("e", -charge, -charge, -charge, 0, get_mass("e*") * -charge)]
         formulas: List[Formula] = [Formula(charge=charge)]
@@ -131,11 +133,11 @@ class Calculator:
                     if self.relativeOH_DBE:
                         if e_num.element == "O":
                             mi = max(mi, last_s.OMin, (ML - last_ns.mass -
-                                     get_mass("H") * last_s.HMax) / e_mass)
+                                     self.H_max_mass * last_s.HMax) / e_mass)
                         elif e_num.element == "H":
                             mi = max(
                                 mi, last_s.HMin,
-                                (self.DBEMax - last_s.DBE2) / e_s.DBE2)
+                                (self.DBEMax * 2 - last_s.DBE2) / e_s.DBE2)
                     if cur == TAIL:
                         mi = max(mi, (ML - last_ns.mass) / e_mass)
                 mi = math.ceil(mi)
@@ -150,15 +152,15 @@ class Calculator:
                     if e_num.element == "O":
                         ma = min(ma, last_s.OMax)
                     elif e_num.element == "H":
-                        ma = min(ma, last_s.HMax)
+                        ma = min(ma, last_s.HMax,
+                                 (self.DBEMin * 2 - last_s.DBE2) / e_s.DBE2)
 
-                if self.limitedIsotope:
-                    if e_num.e_mass_num != e_num.i_mass_num:
-                        isotope_sum = last_ns.total_isotope_sum + mi
-                        ma = min(ma, self.maxIsotope -
-                                 last_ns.total_isotope_sum)
-                    else:
-                        isotope_sum = last_ns.total_isotope_sum
+                if e_num.as_isotope:
+                    isotope_sum = last_ns.total_isotope_sum + mi
+                    ma = min(ma, self.maxIsotope -
+                             last_ns.total_isotope_sum)
+                else:
+                    isotope_sum = last_ns.total_isotope_sum
                 ma = min(ma, (MR - last_ns.mass) / e_mass)
                 ma = math.floor(ma)
 
@@ -176,21 +178,22 @@ class Calculator:
                 else:
                     if self.nitrogenRule:
                         DBE2 = last_s.DBE2 + mi * e_s.DBE2
-                        for i in range(mi, ma + 1):
-                            if abs(round(DBE2) - DBE2) < 1e-6:
-                                f[key] = i
-                                if self.check(f, ML, MR, charge):
-                                    yield f
+                        f.addElement(e_num.element, e_num.i_mass_num, mi)
+                        for _ in range(mi, ma + 1):
+                            if abs(round(DBE2) - DBE2) < 1e-6 and self.check(f, ML, MR, charge):
+                                yield copy(f)
                             elif self.debug:
                                 raise ValueError(str(f))
                             DBE2 += e_s.DBE2
+                            f.addElement(e_num.element, e_num.i_mass_num)
                     else:
-                        for i in range(mi, ma + 1):
-                            f[key] = i
+                        f.addElement(e_num.element, e_num.i_mass_num, mi)
+                        for _ in range(mi, ma + 1):
                             if self.check(f, ML, MR, charge):
-                                yield f
+                                yield copy(f)
                             elif self.debug:
                                 raise ValueError(str(f))
+                            f.addElement(e_num.element, e_num.i_mass_num)
             else:
                 cur -= 1
                 if cur == 0:
@@ -206,9 +209,9 @@ class Calculator:
             ns.current += 1
             ns.mass += get_mass(e_num.element, e_num.i_mass_num)
             s += e_s
+            if e_num.as_isotope:
+                ns.total_isotope_sum += 1
             if e_num.e_mass_num != e_num.i_mass_num:
-                if self.limitedIsotope:
-                    ns.total_isotope_sum += 1
                 formulas[-1][e_num.element] += 1
             formulas[-1][f"{e_num.element}[{e_num.i_mass_num}]"] += 1
 
@@ -217,14 +220,15 @@ class Calculator:
             return False
         if abs(f.charge - charge) > 1e-6:
             return False
-        s = self.element_states["e"] * -charge
+        s: State = self.element_states["H"] * -2
         o = f.findOrigin()
         for e, n in o.items():
             s += self.element_states[e] * n
-        if not s.OMin <= 0 <= s.OMax:
-            return False
-        if not s.HMin <= 0 <= s.HMax:
-            return False
-        if not self.DBEMin <= s.DBE2 <= self.DBEMax:
-            return False
+        if self.relativeOH_DBE:
+            if not s.OMin <= 0 <= s.OMax:
+                return False
+            if not s.HMin <= 0 <= s.HMax:
+                return False
+            if not self.DBEMin <= s.DBE2 / 2 <= self.DBEMax:
+                return False
         return True
