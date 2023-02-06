@@ -9,11 +9,6 @@ from .. import Formula
 
 
 @lru_cache(None)
-def get_num(key: str, num=0):
-    return round(nist_mass[key][num][0])
-
-
-@lru_cache(None)
 def get_mass(key: str, num=0):
     return nist_mass[key][num][0]
 
@@ -67,16 +62,16 @@ class State:
 @dataclass
 class IsotopeNum:
     element: str
-    e_mass_num: int
-    i_mass_num: int
-    as_isotope: bool
+    e_num: int
+    i_num: int
+    global_limit: bool
     min: int
     max: int
     element_min: int
     element_max: int
 
     def __repr__(self) -> str:
-        return f"IsotopeNum({self.element},{self.e_mass_num},{self.i_mass_num},{self.min},{self.max},{self.element_min},{self.element_max})"
+        return f"IsotopeNum({self.element},{self.e_num},{self.i_num},{self.global_limit},{self.min},{self.max},{self.element_min},{self.element_max})"
 
 
 @dataclass
@@ -85,7 +80,7 @@ class NumState:
     current: int
     max: int
     e_current: int
-    total_isotope_sum: int
+    global_limit_sum: int
     mass: float
 
 
@@ -95,7 +90,7 @@ class Calculator:
     DBEMin: float = 0
     DBEMax: float = 8
     nitrogenRule: bool = True
-    maxIsotope: int = 3
+    global_limit: int = 3
     relativeOH_DBE: bool = True
     H_max_mass: float = get_mass("H")
     element_states: Dict[str, State] = field(default_factory=dict)
@@ -123,7 +118,7 @@ class Calculator:
                 last_f = formulas[-1]
                 e_num = self.element_nums[cur]
                 e_s = self.element_states[e_num.element]
-                e_mass = get_mass(e_num.element, e_num.i_mass_num)
+                e_mass = get_mass(e_num.element, e_num.i_num)
                 mi = e_num.min
                 if cur == TAIL or self.element_nums[cur + 1].element != e_num.element:
                     if last_ns.element == e_num.element:
@@ -155,16 +150,16 @@ class Calculator:
                         ma = min(ma, last_s.HMax,
                                  (self.DBEMin * 2 - last_s.DBE2) / e_s.DBE2)
 
-                if e_num.as_isotope:
-                    isotope_sum = last_ns.total_isotope_sum + mi
-                    ma = min(ma, self.maxIsotope -
-                             last_ns.total_isotope_sum)
+                if e_num.global_limit:
+                    isotope_sum = last_ns.global_limit_sum + mi
+                    ma = min(ma, self.global_limit -
+                             last_ns.global_limit_sum)
                 else:
-                    isotope_sum = last_ns.total_isotope_sum
+                    isotope_sum = last_ns.global_limit_sum
                 ma = min(ma, (MR - last_ns.mass) / e_mass)
                 ma = math.floor(ma)
 
-                key = f"{e_num.element}[{e_num.i_mass_num}]"
+                key = f"{e_num.element}[{e_num.i_num}]"
                 f = copy(last_f)
                 if cur != TAIL:
                     ns = NumState(e_num.element, mi, ma, e_current, isotope_sum,
@@ -178,22 +173,22 @@ class Calculator:
                 else:
                     if self.nitrogenRule:
                         DBE2 = last_s.DBE2 + mi * e_s.DBE2
-                        f.addElement(e_num.element, e_num.i_mass_num, mi)
+                        f.addElement(e_num.element, e_num.i_num, mi)
                         for _ in range(mi, ma + 1):
                             if abs(round(DBE2) - DBE2) < 1e-6 and self.check(f, ML, MR, charge):
                                 yield copy(f)
                             elif self.debug:
                                 raise ValueError(str(f))
                             DBE2 += e_s.DBE2
-                            f.addElement(e_num.element, e_num.i_mass_num)
+                            f.addElement(e_num.element, e_num.i_num)
                     else:
-                        f.addElement(e_num.element, e_num.i_mass_num, mi)
+                        f.addElement(e_num.element, e_num.i_num, mi)
                         for _ in range(mi, ma + 1):
                             if self.check(f, ML, MR, charge):
                                 yield copy(f)
                             elif self.debug:
                                 raise ValueError(str(f))
-                            f.addElement(e_num.element, e_num.i_mass_num)
+                            f.addElement(e_num.element, e_num.i_num)
             else:
                 cur -= 1
                 if cur == 0:
@@ -207,13 +202,14 @@ class Calculator:
             e_num = self.element_nums[cur - 1]
             e_s = self.element_states[e_num.element]
             ns.current += 1
-            ns.mass += get_mass(e_num.element, e_num.i_mass_num)
+            ns.e_current += 1
+            ns.mass += get_mass(e_num.element, e_num.i_num)
+            if e_num.global_limit:
+                ns.global_limit_sum += 1
             s += e_s
-            if e_num.as_isotope:
-                ns.total_isotope_sum += 1
-            if e_num.e_mass_num != e_num.i_mass_num:
+            if e_num.e_num != e_num.i_num:
                 formulas[-1][e_num.element] += 1
-            formulas[-1][f"{e_num.element}[{e_num.i_mass_num}]"] += 1
+            formulas[-1][f"{e_num.element}[{e_num.i_num}]"] += 1
 
     def check(self, f: Formula, ml: float, mr: float, charge: float):
         if not ml <= f.mass() <= mr:
