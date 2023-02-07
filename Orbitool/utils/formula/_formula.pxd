@@ -1,7 +1,5 @@
 # distutils: language = c++
 # cython: language_level = 3
-# distutils: language = c++
-# cython: language_level = 3
 
 from cpython cimport *
 from cython.operator cimport dereference as deref, preincrement as inc
@@ -53,7 +51,6 @@ cdef:
         cdef void mul_(self, int32_t times)except *
         cdef bool eq(self, Formula f)
         cdef bool contains(self, Formula f)
-
 
 
 

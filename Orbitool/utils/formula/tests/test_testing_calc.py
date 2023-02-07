@@ -1,5 +1,5 @@
-from .calc import IsotopeNum, State
-from ..calc_gen import CalculatorGenerator
+from ..calc import Calculator
+from ..calc_gen import CalculatorGenerator, CalcIsotopeNum, State
 from .. import Formula
 
 
@@ -35,13 +35,13 @@ def test_set():
 
     gen.add_EI("O[18]")
     gen.set_EI_num("O[18]", 0, 2, True)
-    calc = gen.generate()
+    calc = gen.generate(Calculator)
 
     assert calc.element_nums == [
-        IsotopeNum("C", 12, 13, True, 0, 5, 0, 20),
-        IsotopeNum("O", 16, 18, True, 0, 2, 0, 15),
-        IsotopeNum("O", 16, 16, False, 0, 15, 0, 15),
-        IsotopeNum("H", 1, 1, False, 0, 40, 0, 40),
+        CalcIsotopeNum("C", 12, 13, True, 0, 5, 0, 20),
+        CalcIsotopeNum("O", 16, 18, True, 0, 2, 0, 15),
+        CalcIsotopeNum("O", 16, 16, False, 0, 15, 0, 15),
+        CalcIsotopeNum("H", 1, 1, False, 0, 40, 0, 40),
     ]
 
 
@@ -60,8 +60,8 @@ def test_restricted_1():
     gen.set_EI_num("O[18]", 0, 2, True)
     assert gen.get_EI_num("N").max == 3
     assert gen.get_EI_num("N[15]").max == 1
+    # calc = gen.generate(Calculator)
     calc = gen.generate()
-    calc.debug = True
     s = ["C9H12O11N-", "C10H15O11N-", "C10H20O2N+"]
     for ss in s:
         f = Formula(ss)
@@ -164,8 +164,9 @@ def test_unlimited_isotope():
     assert len(ret) >= 5
     assert f in ret
 
-    calc.relativeOH_DBE = False
-    calc.nitrogenRule = False
+    gen.relativeOH_DBE = False
+    gen.nitrogenRule = False
+    calc = gen.generate()
     ret = list(calc.get(f.mass(), f.charge))
     assert len(ret) >= 15
 

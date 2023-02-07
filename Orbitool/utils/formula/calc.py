@@ -2,76 +2,15 @@ from copy import copy
 from dataclasses import dataclass, field
 from functools import lru_cache
 import math
-from time import sleep
 from typing import Dict, List, Tuple, Union
 from pyteomics.mass import nist_mass
-from .. import Formula
+from . import Formula
+from .calc_gen import State, CalcIsotopeNum
 
 
 @lru_cache(None)
 def get_mass(key: str, num=0):
     return nist_mass[key][num][0]
-
-
-@dataclass
-class State:
-    DBE2: float = 0
-    HMin: float = 0
-    HMax: float = 0
-    OMin: float = 0
-    OMax: float = 0
-
-    def __imul__(self, num: int):
-        assert isinstance(num, int)
-        self.DBE2 *= num
-        self.OMin *= num
-        self.OMax *= num
-        self.HMin *= num
-        self.HMax *= num
-        return self
-
-    def __mul__(self, num: int):
-        new_ins = copy(self)
-        new_ins *= num
-        return new_ins
-
-    def __iadd__(self, other: "State"):
-        assert isinstance(other, State)
-        self.DBE2 += other.DBE2
-        self.OMin += other.OMin
-        self.OMax += other.OMax
-        self.HMin += other.HMin
-        self.HMax += other.HMax
-        return self
-
-    def __add__(self, other: "State"):
-        new_ins = copy(self)
-        new_ins += other
-        return new_ins
-
-    def __isub__(self, other: "State"):
-        self += other * -1
-        return self
-
-    def __sub__(self, other: "State"):
-        new_ins = copy(self)
-        new_ins -= other
-        return new_ins
-
-
-@dataclass
-class IsotopeNum:
-    element: str
-    e_num: int
-    i_num: int
-    global_limit: bool
-    min: int
-    max: int
-    element_min: int
-    element_max: int
-
-    def __repr__(self) -> str:
-        return f"IsotopeNum({self.element},{self.e_num},{self.i_num},{self.global_limit},{self.min},{self.max},{self.element_min},{self.element_max})"
 
 
 @dataclass
@@ -94,7 +33,7 @@ class Calculator:
     relativeOH_DBE: bool = True
     H_max_mass: float = get_mass("H")
     element_states: Dict[str, State] = field(default_factory=dict)
-    element_nums: List[IsotopeNum] = field(default_factory=list)
+    element_nums: List[CalcIsotopeNum] = field(default_factory=list)
     debug: bool = False
 
     def get(self, M: float, charge: int):
@@ -111,20 +50,21 @@ class Calculator:
         formulas: List[Formula] = [Formula(charge=charge)]
 
         while True:
-            ns = num_states[cur]
+            ns = num_states[-1]
             if ns.current <= ns.max:
                 last_ns = num_states[-1]
                 last_s = states[-1]
                 last_f = formulas[-1]
+                # print(last_f)
                 e_num = self.element_nums[cur]
                 e_s = self.element_states[e_num.element]
                 e_mass = get_mass(e_num.element, e_num.i_num)
-                mi = e_num.min
+                mi = e_num.i_min
                 if cur == TAIL or self.element_nums[cur + 1].element != e_num.element:
                     if last_ns.element == e_num.element:
-                        mi = max(mi, e_num.element_min - last_ns.e_current)
+                        mi = max(mi, e_num.e_min - last_ns.e_current)
                     else:
-                        mi = max(mi, e_num.element_min)
+                        mi = max(mi, e_num.e_min)
                     if self.relativeOH_DBE:
                         if e_num.element == "O":
                             mi = max(mi, last_s.OMin, (ML - last_ns.mass -
@@ -137,9 +77,9 @@ class Calculator:
                         mi = max(mi, (ML - last_ns.mass) / e_mass)
                 mi = math.ceil(mi)
 
-                ma = e_num.max
+                ma = e_num.i_max
                 if last_ns.element == e_num.element:
-                    ma = min(ma, e_num.element_max - last_ns.e_current)
+                    ma = min(ma, e_num.e_max - last_ns.e_current)
                     e_current = last_ns.e_current + mi
                 else:
                     e_current = mi
@@ -151,29 +91,28 @@ class Calculator:
                                  (self.DBEMin * 2 - last_s.DBE2) / e_s.DBE2)
 
                 if e_num.global_limit:
-                    isotope_sum = last_ns.global_limit_sum + mi
+                    global_limit_sum = last_ns.global_limit_sum + mi
                     ma = min(ma, self.global_limit -
                              last_ns.global_limit_sum)
                 else:
-                    isotope_sum = last_ns.global_limit_sum
+                    global_limit_sum = last_ns.global_limit_sum
                 ma = min(ma, (MR - last_ns.mass) / e_mass)
                 ma = math.floor(ma)
 
-                key = f"{e_num.element}[{e_num.i_num}]"
                 f = copy(last_f)
                 if cur != TAIL:
-                    ns = NumState(e_num.element, mi, ma, e_current, isotope_sum,
+                    ns = NumState(e_num.element, mi, ma, e_current, global_limit_sum,
                                   last_ns.mass + mi * e_mass)
                     num_states.append(ns)
                     states.append(last_s + e_s * mi)
-                    f[key] = mi
+                    f.addElement(e_num.element, e_num.i_num, mi)
                     formulas.append(f)
                     cur += 1
                     continue
                 else:
+                    f.addElement(e_num.element, e_num.i_num, mi)
                     if self.nitrogenRule:
                         DBE2 = last_s.DBE2 + mi * e_s.DBE2
-                        f.addElement(e_num.element, e_num.i_num, mi)
                         for _ in range(mi, ma + 1):
                             if abs(round(DBE2) - DBE2) < 1e-6 and self.check(f, ML, MR, charge):
                                 yield copy(f)
@@ -182,7 +121,6 @@ class Calculator:
                             DBE2 += e_s.DBE2
                             f.addElement(e_num.element, e_num.i_num)
                     else:
-                        f.addElement(e_num.element, e_num.i_num, mi)
                         for _ in range(mi, ma + 1):
                             if self.check(f, ML, MR, charge):
                                 yield copy(f)
@@ -207,9 +145,7 @@ class Calculator:
             if e_num.global_limit:
                 ns.global_limit_sum += 1
             s += e_s
-            if e_num.e_num != e_num.i_num:
-                formulas[-1][e_num.element] += 1
-            formulas[-1][f"{e_num.element}[{e_num.i_num}]"] += 1
+            formulas[-1].addElement(e_num.element, e_num.i_num)
 
     def check(self, f: Formula, ml: float, mr: float, charge: float):
         if not ml <= f.mass() <= mr:

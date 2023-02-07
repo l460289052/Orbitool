@@ -1,10 +1,9 @@
 from copy import copy
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Type, TypeVar, Union
 from pyteomics.mass import nist_mass
 
-from .tests.calc import Calculator, State, IsotopeNum as CalcIsotopeNum
 from ._formula import Formula
 
 Isotope = Tuple[str, int]
@@ -17,6 +16,67 @@ class IsotopeNum:
     min: int = 0
     max: int = 0
     global_limit: bool = False
+
+
+@dataclass
+class State:
+    DBE2: float = 0
+    HMin: float = 0
+    HMax: float = 0
+    OMin: float = 0
+    OMax: float = 0
+
+    def __imul__(self, num: int):
+        assert isinstance(num, int)
+        self.DBE2 *= num
+        self.OMin *= num
+        self.OMax *= num
+        self.HMin *= num
+        self.HMax *= num
+        return self
+
+    def __mul__(self, num: int):
+        new_ins = copy(self)
+        new_ins *= num
+        return new_ins
+
+    def __iadd__(self, other: "State"):
+        assert isinstance(other, State)
+        self.DBE2 += other.DBE2
+        self.OMin += other.OMin
+        self.OMax += other.OMax
+        self.HMin += other.HMin
+        self.HMax += other.HMax
+        return self
+
+    def __add__(self, other: "State"):
+        new_ins = copy(self)
+        new_ins += other
+        return new_ins
+
+    def __isub__(self, other: "State"):
+        self += other * -1
+        return self
+
+    def __sub__(self, other: "State"):
+        new_ins = copy(self)
+        new_ins -= other
+        return new_ins
+
+
+@dataclass
+class CalcIsotopeNum:
+    element: str
+    e_num: int
+    i_num: int
+    global_limit: bool
+    i_min: int
+    i_max: int
+    e_min: int
+    e_max: int
+
+    def __repr__(self) -> str:
+        return f"IsotopeNum({self.element},{self.e_num},{self.i_num},{self.global_limit},{self.min},{self.max},{self.element_min},{self.element_max})"
 
 
 @lru_cache(None)
@@ -40,6 +100,9 @@ def parse_element(key: str):
         return key, 0
 
 
+T = TypeVar("T")
+
+
 class CalculatorGenerator:  # for Generator, Python is better than Cython
     def __init__(self) -> None:
         self.rtol = 1e-6
@@ -48,6 +111,7 @@ class CalculatorGenerator:  # for Generator, Python is better than Cython
         self.nitrogenRule = True
         self.globalLimit = 3
         self.relativeOH_DBE = True
+        self.debug = False
 
         self.element_states: Dict[str, State] = {
             row[0]: State(*row[1:]) for row in InitParams}
@@ -93,7 +157,8 @@ class CalculatorGenerator:  # for Generator, Python is better than Cython
         i_num = self.element_usable[key]
         _ = parse_element(key)
         assert min >= 0 and max >= 0, f"Isotope {key}'s min/max should be non-negative"
-        assert not (i_num.i_num == 0 and global_limit), f"Cannot set global_limit to a whole element"
+        assert not (
+            i_num.i_num == 0 and global_limit), f"Cannot set global_limit to a whole element"
         self.element_usable[key] = IsotopeNum(
             i_num.e_num, i_num.i_num, min, max, global_limit)
 
@@ -102,7 +167,10 @@ class CalculatorGenerator:  # for Generator, Python is better than Cython
         assert key in self.element_usable, f"Cannot find {key} in list"
         return self.element_usable[key]
 
-    def generate(self):
+    def generate(self, cls: Type[T]=None) -> T:
+        if cls is None:
+            from ._calc import Calculator
+            cls = Calculator
         e_list = [(k, v) for k, v in self.get_E_iter() if k not in "HO"]
         e_list.sort(key=lambda i: i[1].e_num, reverse=True)
 
@@ -141,10 +209,10 @@ class CalculatorGenerator:  # for Generator, Python is better than Cython
             H_max_mass = max(r.i_num for r in ret)
             element_nums.extend(ret)
 
-        return Calculator(
+        return cls(
             self.rtol, self.DBEMin, self.DBEMax, self.nitrogenRule,
             self.globalLimit, self.relativeOH_DBE, H_max_mass,
-            self.element_states, element_nums)
+            self.element_states, element_nums, self.debug)
 
 
 InitParams = [

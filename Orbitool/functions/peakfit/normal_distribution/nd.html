@@ -286,6 +286,80 @@ body.cython { font-family: courier; font-size: 12; }
 .cython.score-252 {background-color: #FFFF09;}
 .cython.score-253 {background-color: #FFFF09;}
 .cython.score-254 {background-color: #FFFF09;}
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.cython .hll { background-color: #ffffcc }
+.cython { background: #f8f8f8; }
+.cython .c { color: #3D7B7B; font-style: italic } /* Comment */
+.cython .err { border: 1px solid #FF0000 } /* Error */
+.cython .k { color: #008000; font-weight: bold } /* Keyword */
+.cython .o { color: #666666 } /* Operator */
+.cython .ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
+.cython .cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
+.cython .cp { color: #9C6500 } /* Comment.Preproc */
+.cython .cpf { color: #3D7B7B; font-style: italic } /* Comment.PreprocFile */
+.cython .c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
+.cython .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
+.cython .gd { color: #A00000 } /* Generic.Deleted */
+.cython .ge { font-style: italic } /* Generic.Emph */
+.cython .gr { color: #E40000 } /* Generic.Error */
+.cython .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.cython .gi { color: #008400 } /* Generic.Inserted */
+.cython .go { color: #717171 } /* Generic.Output */
+.cython .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.cython .gs { font-weight: bold } /* Generic.Strong */
+.cython .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.cython .gt { color: #0044DD } /* Generic.Traceback */
+.cython .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.cython .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.cython .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.cython .kp { color: #008000 } /* Keyword.Pseudo */
+.cython .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.cython .kt { color: #B00040 } /* Keyword.Type */
+.cython .m { color: #666666 } /* Literal.Number */
+.cython .s { color: #BA2121 } /* Literal.String */
+.cython .na { color: #687822 } /* Name.Attribute */
+.cython .nb { color: #008000 } /* Name.Builtin */
+.cython .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+.cython .no { color: #880000 } /* Name.Constant */
+.cython .nd { color: #AA22FF } /* Name.Decorator */
+.cython .ni { color: #717171; font-weight: bold } /* Name.Entity */
+.cython .ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
+.cython .nf { color: #0000FF } /* Name.Function */
+.cython .nl { color: #767600 } /* Name.Label */
+.cython .nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+.cython .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.cython .nv { color: #19177C } /* Name.Variable */
+.cython .ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+.cython .w { color: #bbbbbb } /* Text.Whitespace */
+.cython .mb { color: #666666 } /* Literal.Number.Bin */
+.cython .mf { color: #666666 } /* Literal.Number.Float */
+.cython .mh { color: #666666 } /* Literal.Number.Hex */
+.cython .mi { color: #666666 } /* Literal.Number.Integer */
+.cython .mo { color: #666666 } /* Literal.Number.Oct */
+.cython .sa { color: #BA2121 } /* Literal.String.Affix */
+.cython .sb { color: #BA2121 } /* Literal.String.Backtick */
+.cython .sc { color: #BA2121 } /* Literal.String.Char */
+.cython .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.cython .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.cython .s2 { color: #BA2121 } /* Literal.String.Double */
+.cython .se { color: #AA5D1F; font-weight: bold } /* Literal.String.Escape */
+.cython .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.cython .si { color: #A45A77; font-weight: bold } /* Literal.String.Interpol */
+.cython .sx { color: #008000 } /* Literal.String.Other */
+.cython .sr { color: #A45A77 } /* Literal.String.Regex */
+.cython .s1 { color: #BA2121 } /* Literal.String.Single */
+.cython .ss { color: #19177C } /* Literal.String.Symbol */
+.cython .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.cython .fm { color: #0000FF } /* Name.Function.Magic */
+.cython .vc { color: #19177C } /* Name.Variable.Class */
+.cython .vg { color: #19177C } /* Name.Variable.Global */
+.cython .vi { color: #19177C } /* Name.Variable.Instance */
+.cython .vm { color: #19177C } /* Name.Variable.Magic */
+.cython .il { color: #666666 } /* Literal.Number.Integer.Long */
     </style>
 </head>
 <body class="cython">
@@ -295,29 +369,29 @@ body.cython { font-family: courier; font-size: 12; }
     Click on a line that starts with a "<code>+</code>" to see the C code that Cython generated for it.
 </p>
 <p>Raw output: <a href="nd.cpp">nd.cpp</a></p>
-<div class="cython"><pre class="cython line score-8" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">01</span>: # distutils: language = c++</pre>
+<div class="cython"><pre class="cython line score-8" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">01</span>: <span class="c"># distutils: language = c++</span></pre>
 <pre class='cython code score-8 '>  __pyx_t_3 = <span class='pyx_c_api'>__Pyx_PyDict_NewPresized</span>(0);<span class='error_goto'> if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_3);
   if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_test, __pyx_t_3) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 1, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_3); __pyx_t_3 = 0;
-</pre><pre class="cython line score-0">&#xA0;<span class="">02</span>: # cython: language_level = 3</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">02</span>: <span class="c"># cython: language_level = 3</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">03</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">04</span>: from libc cimport math</pre>
-<pre class="cython line score-8" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">05</span>: import numpy as np</pre>
+<pre class="cython line score-0">&#xA0;<span class="">04</span>: <span class="k">from</span> <span class="nn">libc</span> <span class="k">cimport</span> <span class="n">math</span></pre>
+<pre class="cython line score-8" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">05</span>: <span class="k">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span></pre>
 <pre class='cython code score-8 '>  __pyx_t_1 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_numpy, 0, 0);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 5, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
   if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_np, __pyx_t_1) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 5, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-</pre><pre class="cython line score-0">&#xA0;<span class="">06</span>: cimport numpy as np</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">06</span>: <span class="k">cimport</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">07</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">08</span>: ctypedef fused p_or_np:</pre>
-<pre class="cython line score-0">&#xA0;<span class="">09</span>:     int</pre>
-<pre class="cython line score-0">&#xA0;<span class="">10</span>:     float</pre>
-<pre class="cython line score-0">&#xA0;<span class="">11</span>:     double</pre>
-<pre class="cython line score-0">&#xA0;<span class="">12</span>:     np.ndarray[float]</pre>
-<pre class="cython line score-0">&#xA0;<span class="">13</span>:     np.ndarray[double]</pre>
+<pre class="cython line score-0">&#xA0;<span class="">08</span>: <span class="k">ctypedef</span> <span class="k">fused</span> <span class="n">p_or_np</span><span class="p">:</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">09</span>:     <span class="nb">int</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">10</span>:     <span class="nb">float</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">11</span>:     <span class="n">double</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">12</span>:     <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">13</span>:     <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="n">double</span><span class="p">]</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">14</span>: </pre>
-<pre class="cython line score-25" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">15</span>: def maxFitNum(int num)-&gt;int:</pre>
+<pre class="cython line score-25" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">15</span>: <span class="k">def</span> <span class="nf">maxFitNum</span><span class="p">(</span><span class="nb">int</span> <span class="n">num</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">int</span><span class="p">:</span></pre>
 <pre class='cython code score-25 '>/* Python wrapper */
 static PyObject *__pyx_pw_8Orbitool_9functions_7peakfit_19normal_distribution_2nd_1maxFitNum(PyObject *__pyx_self, PyObject *__pyx_arg_num); /*proto*/
 static PyMethodDef __pyx_mdef_8Orbitool_9functions_7peakfit_19normal_distribution_2nd_1maxFitNum = {"maxFitNum", (PyCFunction)__pyx_pw_8Orbitool_9functions_7peakfit_19normal_distribution_2nd_1maxFitNum, METH_O, 0};
@@ -370,7 +444,7 @@ static PyObject *__pyx_pf_8Orbitool_9functions_7peakfit_19normal_distribution_2n
   if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_maxFitNum, __pyx_t_1) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 15, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_codeobj__27 = (PyObject*)<span class='pyx_c_api'>__Pyx_PyCode_New</span>(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Orbitool_functions_peakfit_norma, __pyx_n_s_maxFitNum, 15, __pyx_empty_bytes);<span class='error_goto'> if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(0, 15, __pyx_L1_error)</span>
-</pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">16</span>:     return &lt;int&gt;(math.atan((num-6)/20)*4000+1100)</pre>
+</pre><pre class="cython line score-3" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">16</span>:     <span class="k">return</span> <span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;(</span><span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">((</span><span class="n">num</span><span class="o">-</span><span class="mf">6</span><span class="p">)</span><span class="o">/</span><span class="mf">20</span><span class="p">)</span><span class="o">*</span><span class="mf">4000</span><span class="o">+</span><span class="mf">1100</span><span class="p">)</span></pre>
 <pre class='cython code score-3 '>  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
   __pyx_t_1 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(((int)((atan((((double)(__pyx_v_num - 6)) / 20.0)) * 4000.0) + 1100.0)));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
@@ -378,7 +452,7 @@ static PyObject *__pyx_pf_8Orbitool_9functions_7peakfit_19normal_distribution_2n
   __pyx_t_1 = 0;
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">17</span>: </pre>
-<pre class="cython line score-849" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">18</span>: def func(p_or_np mz, double a, double mu, double sigma)-&gt;double:</pre>
+<pre class="cython line score-849" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">18</span>: <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">p_or_np</span> <span class="n">mz</span><span class="p">,</span> <span class="n">double</span> <span class="n">a</span><span class="p">,</span> <span class="n">double</span> <span class="n">mu</span><span class="p">,</span> <span class="n">double</span> <span class="n">sigma</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">double</span><span class="p">:</span></pre>
 <pre class='cython code score-849 '>/* Python wrapper */
 static PyObject *__pyx_pw_8Orbitool_9functions_7peakfit_19normal_distribution_2nd_3func(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyMethodDef __pyx_mdef_8Orbitool_9functions_7peakfit_19normal_distribution_2nd_3func = {"func", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8Orbitool_9functions_7peakfit_19normal_distribution_2nd_3func, METH_VARARGS|METH_KEYWORDS, 0};
@@ -1585,7 +1659,7 @@ static PyObject *__pyx_pf_8Orbitool_9functions_7peakfit_19normal_distribution_2n
   if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_func, __pyx_t_3) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 18, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_codeobj__29 = (PyObject*)<span class='pyx_c_api'>__Pyx_PyCode_New</span>(4, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Orbitool_functions_peakfit_norma, __pyx_n_s_func, 18, __pyx_empty_bytes);<span class='error_goto'> if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 18, __pyx_L1_error)</span>
-</pre><pre class="cython line score-505" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">19</span>:     return a/(math.sqrt(2*math.pi)*sigma)*np.exp(-0.5*np.power((mz-mu)/sigma,2))</pre>
+</pre><pre class="cython line score-505" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">19</span>:     <span class="k">return</span> <span class="n">a</span><span class="o">/</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="n">sigma</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="n">mz</span><span class="o">-</span><span class="n">mu</span><span class="p">)</span><span class="o">/</span><span class="n">sigma</span><span class="p">,</span><span class="mf">2</span><span class="p">))</span></pre>
 <pre class='cython code score-505 '>  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
   __pyx_t_1 = (sqrt((2.0 * M_PI)) * __pyx_v_sigma);
   if (unlikely(__pyx_t_1 == 0)) {
@@ -2089,7 +2163,7 @@ static PyObject *__pyx_pf_8Orbitool_9functions_7peakfit_19normal_distribution_2n
   __pyx_t_5 = 0;
   goto __pyx_L0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">20</span>: </pre>
-<pre class="cython line score-46" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">21</span>: def mergePeaksParam(tuple param1, tuple param2)-&gt;tuple:</pre>
+<pre class="cython line score-46" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">21</span>: <span class="k">def</span> <span class="nf">mergePeaksParam</span><span class="p">(</span><span class="nb">tuple</span> <span class="n">param1</span><span class="p">,</span> <span class="nb">tuple</span> <span class="n">param2</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">:</span></pre>
 <pre class='cython code score-46 '>/* Python wrapper */
 static PyObject *__pyx_pw_8Orbitool_9functions_7peakfit_19normal_distribution_2nd_5mergePeaksParam(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyMethodDef __pyx_mdef_8Orbitool_9functions_7peakfit_19normal_distribution_2nd_5mergePeaksParam = {"mergePeaksParam", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8Orbitool_9functions_7peakfit_19normal_distribution_2nd_5mergePeaksParam, METH_VARARGS|METH_KEYWORDS, 0};
@@ -2193,8 +2267,8 @@ static PyObject *__pyx_pf_8Orbitool_9functions_7peakfit_19normal_distribution_2n
   if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_mergePeaksParam, __pyx_t_3) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 21, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_codeobj__31 = (PyObject*)<span class='pyx_c_api'>__Pyx_PyCode_New</span>(2, 0, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__30, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Orbitool_functions_peakfit_norma, __pyx_n_s_mergePeaksParam, 21, __pyx_empty_bytes);<span class='error_goto'> if (unlikely(!__pyx_codeobj__31)) __PYX_ERR(0, 21, __pyx_L1_error)</span>
-</pre><pre class="cython line score-0">&#xA0;<span class="">22</span>:     cdef double a1,a2,mu1,mu2</pre>
-<pre class="cython line score-36" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">23</span>:     a1,mu1=param1</pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">22</span>:     <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">a1</span><span class="p">,</span><span class="nf">a2</span><span class="p">,</span><span class="nf">mu1</span><span class="p">,</span><span class="nf">mu2</span></pre>
+<pre class="cython line score-36" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">23</span>:     <span class="n">a1</span><span class="p">,</span><span class="n">mu1</span><span class="o">=</span><span class="n">param1</span></pre>
 <pre class='cython code score-36 '>  if (likely(__pyx_v_param1 != Py_None)) {
     PyObject* sequence = __pyx_v_param1;
     Py_ssize_t size = <span class='pyx_c_api'>__Pyx_PySequence_SIZE</span>(sequence);
@@ -2223,7 +2297,7 @@ static PyObject *__pyx_pf_8Orbitool_9functions_7peakfit_19normal_distribution_2n
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_a1 = __pyx_t_3;
   __pyx_v_mu1 = __pyx_t_4;
-</pre><pre class="cython line score-36" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">24</span>:     a2,mu2=param2</pre>
+</pre><pre class="cython line score-36" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">24</span>:     <span class="n">a2</span><span class="p">,</span><span class="n">mu2</span><span class="o">=</span><span class="n">param2</span></pre>
 <pre class='cython code score-36 '>  if (likely(__pyx_v_param2 != Py_None)) {
     PyObject* sequence = __pyx_v_param2;
     Py_ssize_t size = <span class='pyx_c_api'>__Pyx_PySequence_SIZE</span>(sequence);
@@ -2252,9 +2326,9 @@ static PyObject *__pyx_pf_8Orbitool_9functions_7peakfit_19normal_distribution_2n
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_a2 = __pyx_t_4;
   __pyx_v_mu2 = __pyx_t_3;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">25</span>:     cdef double aSum=a1+a2</pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">25</span>:     <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">aSum</span><span class="o">=</span><span class="n">a1</span><span class="o">+</span><span class="n">a2</span></pre>
 <pre class='cython code score-0 '>  __pyx_v_aSum = (__pyx_v_a1 + __pyx_v_a2);
-</pre><pre class="cython line score-23" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">26</span>:     return (a1+a2,(mu1*a1+mu2*a2)/aSum)</pre>
+</pre><pre class="cython line score-23" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">26</span>:     <span class="k">return</span> <span class="p">(</span><span class="n">a1</span><span class="o">+</span><span class="n">a2</span><span class="p">,(</span><span class="n">mu1</span><span class="o">*</span><span class="n">a1</span><span class="o">+</span><span class="n">mu2</span><span class="o">*</span><span class="n">a2</span><span class="p">)</span><span class="o">/</span><span class="n">aSum</span><span class="p">)</span></pre>
 <pre class='cython code score-23 '>  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
   __pyx_t_1 = <span class='py_c_api'>PyFloat_FromDouble</span>((__pyx_v_a1 + __pyx_v_a2));<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 26, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
