@@ -27,3 +27,4 @@ htmlcov
 *.sqlite3
 collect.txt
 /build-config.json
+.VSCodeCounter
