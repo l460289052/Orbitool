@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>220</width>
-    <height>578</height>
+    <width>321</width>
+    <height>644</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,650 +15,401 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QToolBox" name="toolBox">
-     <property name="frameShape">
-      <enum>QFrame::Box</enum>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+     <property name="widgetResizable">
+      <bool>true</bool>
      </property>
-     <property name="lineWidth">
-      <number>1</number>
-     </property>
-     <property name="midLineWidth">
-      <number>0</number>
-     </property>
-     <property name="currentIndex">
-      <number>1</number>
-     </property>
-     <widget class="QWidget" name="page">
+     <widget class="QWidget" name="scrollAreaWidgetContents">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>198</width>
-        <height>362</height>
+        <width>286</width>
+        <height>589</height>
        </rect>
       </property>
-      <attribute name="label">
-       <string>Spctrum information</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <layout class="QFormLayout" name="formLayout">
+        <layout class="QFormLayout" name="formLayout_3">
+         <item row="0" column="0">
+          <widget class="QLabel" name="chargeLabel">
+           <property name="text">
+            <string>charge</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="chargeSpinBox">
+           <property name="minimum">
+            <number>-99</number>
+           </property>
+          </widget>
+         </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>mz range min</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QDoubleSpinBox" name="mzMinDoubleSpinBox">
-           <property name="maximum">
-            <double>999.990000000000009</double>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>mz range max</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QDoubleSpinBox" name="mzMaxDoubleSpinBox">
-           <property name="maximum">
-            <double>9999.989999999999782</double>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_6">
+          <widget class="QLabel" name="tolerancePpmLabel">
            <property name="text">
             <string>tolerance(ppm)</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="1" column="1">
           <widget class="QDoubleSpinBox" name="rtolDoubleSpinBox"/>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>base group</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="baseGroupLineEdit">
-           <property name="text">
-            <string>-</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="page_2">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>181</width>
-        <height>545</height>
-       </rect>
-      </property>
-      <attribute name="label">
-       <string>Standard element table</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <layout class="QFormLayout" name="formLayout_6">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_10">
-           <property name="text">
-            <string>DBE min</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QDoubleSpinBox" name="dbeMinDoubleSpinBox">
-           <property name="minimum">
-            <double>-99.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>DBE max</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QDoubleSpinBox" name="dbeMaxDoubleSpinBox">
-           <property name="minimum">
-            <double>-99.000000000000000</double>
-           </property>
-          </widget>
-         </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="label_7">
+          <widget class="QLabel" name="globalLimitLabel">
            <property name="text">
-            <string>nitrogen rule</string>
+            <string>global limit(g-limit)</string>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QCheckBox" name="nitrogenRuleCheckBox">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
+          <widget class="QSpinBox" name="globalLimitSpinBox"/>
          </item>
         </layout>
        </item>
        <item>
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>elements</string>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>DBE limit</string>
          </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QCheckBox" name="nitrogenRuleCheckBox">
+            <property name="text">
+             <string>enable Nitrogen Rule</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="dbeLimitCheckBox">
+            <property name="text">
+             <string>enable DBE limit</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>min</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="dbeMinDoubleSpinBox">
+              <property name="minimum">
+               <double>-99.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>max</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="dbeMaxDoubleSpinBox">
+              <property name="minimum">
+               <double>-99.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
-        <widget class="QTableWidget" name="elementTableWidget">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>200</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>0</width>
-           <height>200</height>
-          </size>
-         </property>
-         <property name="verticalScrollMode">
-          <enum>QAbstractItemView::ScrollPerPixel</enum>
-         </property>
-         <property name="horizontalScrollMode">
-          <enum>QAbstractItemView::ScrollPerPixel</enum>
-         </property>
-         <attribute name="horizontalHeaderMinimumSectionSize">
-          <number>40</number>
-         </attribute>
-         <attribute name="horizontalHeaderDefaultSectionSize">
-          <number>50</number>
-         </attribute>
-         <attribute name="horizontalHeaderStretchLastSection">
-          <bool>true</bool>
-         </attribute>
-         <column>
-          <property name="text">
-           <string>element</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>use</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>mass</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Min</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Max</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>2DBE</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Hmin</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Hmax</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Omin</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Omax</string>
-          </property>
-         </column>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_30">
-         <item>
-          <widget class="QLineEdit" name="elementLineEdit">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="elementAddToolButton">
-           <property name="maximumSize">
-            <size>
-             <width>20</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="palette">
-            <palette>
-             <active>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>85</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </active>
-             <inactive>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>85</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </inactive>
-             <disabled>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>120</red>
-                 <green>120</green>
-                 <blue>120</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </disabled>
-            </palette>
-           </property>
-           <property name="font">
-            <font>
-             <family>Consolas</family>
-             <pointsize>12</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>+</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_9">
-         <property name="text">
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
           <string>isotopes</string>
          </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QTreeWidget" name="isotopeTreeWidget">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <attribute name="headerVisible">
+             <bool>true</bool>
+            </attribute>
+            <attribute name="headerCascadingSectionResizes">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="headerMinimumSectionSize">
+             <number>40</number>
+            </attribute>
+            <attribute name="headerDefaultSectionSize">
+             <number>55</number>
+            </attribute>
+            <column>
+             <property name="text">
+              <string>Isotope</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>min</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>max</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>g-limit</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string/>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLineEdit" name="isotopeLineEdit"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="isotopeAddToolButton">
+              <property name="maximumSize">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="palette">
+               <palette>
+                <active>
+                 <colorrole role="ButtonText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>85</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="ButtonText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>85</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="ButtonText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>120</red>
+                    <green>120</green>
+                    <blue>120</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="font">
+               <font>
+                <family>Consolas</family>
+                <pointsize>12</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>+</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
-        <widget class="QTableWidget" name="isotopeTableWidget">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
+          <string>element infos</string>
          </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>150</height>
-          </size>
-         </property>
-         <property name="verticalScrollMode">
-          <enum>QAbstractItemView::ScrollPerPixel</enum>
-         </property>
-         <property name="horizontalScrollMode">
-          <enum>QAbstractItemView::ScrollPerPixel</enum>
-         </property>
-         <attribute name="horizontalHeaderStretchLastSection">
-          <bool>true</bool>
-         </attribute>
-         <column>
-          <property name="text">
-           <string>isotope</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>mass</string>
-          </property>
-         </column>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <widget class="QTableWidget" name="elementTableWidget">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>200</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>0</width>
+              <height>200</height>
+             </size>
+            </property>
+            <property name="verticalScrollMode">
+             <enum>QAbstractItemView::ScrollPerPixel</enum>
+            </property>
+            <property name="horizontalScrollMode">
+             <enum>QAbstractItemView::ScrollPerPixel</enum>
+            </property>
+            <attribute name="horizontalHeaderMinimumSectionSize">
+             <number>40</number>
+            </attribute>
+            <attribute name="horizontalHeaderDefaultSectionSize">
+             <number>50</number>
+            </attribute>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>true</bool>
+            </attribute>
+            <column>
+             <property name="text">
+              <string>element</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>mass</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>2DBE</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Hmin</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Hmax</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Omin</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Omax</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_30">
+            <item>
+             <widget class="QLineEdit" name="elementLineEdit">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="elementAddToolButton">
+              <property name="maximumSize">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="palette">
+               <palette>
+                <active>
+                 <colorrole role="ButtonText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>85</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="ButtonText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>85</green>
+                    <blue>0</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="ButtonText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>120</red>
+                    <green>120</green>
+                    <blue>120</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="font">
+               <font>
+                <family>Consolas</family>
+                <pointsize>12</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>+</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_25">
-         <item>
-          <widget class="QLineEdit" name="isotopeLineEdit">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="isotopeAddToolButton">
-           <property name="minimumSize">
-            <size>
-             <width>20</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>20</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="palette">
-            <palette>
-             <active>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>85</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </active>
-             <inactive>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>0</red>
-                 <green>85</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </inactive>
-             <disabled>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>120</red>
-                 <green>120</green>
-                 <blue>120</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </disabled>
-            </palette>
-           </property>
-           <property name="font">
-            <font>
-             <family>Consolas</family>
-             <pointsize>12</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>+</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="isotopeDelToolButton">
-           <property name="minimumSize">
-            <size>
-             <width>20</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>20</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="palette">
-            <palette>
-             <active>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>170</red>
-                 <green>0</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </active>
-             <inactive>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>170</red>
-                 <green>0</green>
-                 <blue>0</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </inactive>
-             <disabled>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>120</red>
-                 <green>120</green>
-                 <blue>120</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </disabled>
-            </palette>
-           </property>
-           <property name="font">
-            <font>
-             <family>Consolas</family>
-             <pointsize>12</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>-</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="page_3">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>198</width>
-        <height>362</height>
-       </rect>
-      </property>
-      <attribute name="label">
-       <string>Unrestricted element table</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
-       <item>
-        <widget class="QTableWidget" name="unrestrictedTableWidget">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>150</height>
-          </size>
-         </property>
-         <property name="editTriggers">
-          <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
-         </property>
-         <property name="verticalScrollMode">
-          <enum>QAbstractItemView::ScrollPerPixel</enum>
-         </property>
-         <property name="horizontalScrollMode">
-          <enum>QAbstractItemView::ScrollPerPixel</enum>
-         </property>
-         <attribute name="horizontalHeaderDefaultSectionSize">
-          <number>100</number>
-         </attribute>
-         <attribute name="horizontalHeaderStretchLastSection">
-          <bool>true</bool>
-         </attribute>
-         <column>
-          <property name="text">
-           <string>element/isotope</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>number</string>
-          </property>
-         </column>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_34">
-         <item>
-          <widget class="QLineEdit" name="unrestrictedLineEdit"/>
-         </item>
-         <item>
-          <widget class="QToolButton" name="unrestrictedAddToolButton">
-           <property name="minimumSize">
-            <size>
-             <width>20</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>20</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>Consolas</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>+</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="unrestrictedDelToolButton">
-           <property name="minimumSize">
-            <size>
-             <width>20</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>20</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>Consolas</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>-</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="applyPushButton">
-     <property name="text">
-      <string>Apply</string>
-     </property>
     </widget>
    </item>
    <item>
