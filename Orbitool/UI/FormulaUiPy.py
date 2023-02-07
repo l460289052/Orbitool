@@ -1,3 +1,5 @@
+from copy import copy
+import enum
 from typing import Union, Optional
 from . import FormulaUi
 
@@ -18,101 +20,75 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         self.manager.init_or_restored.connect(self.show_or_restore)
 
     def setupUi(self, Form):
+        # FormulaUi.Ui_Form.setupUi(self, Form)
         super().setupUi(Form)
 
-        self.elementAddToolButton.clicked.connect(self.restrictedAddElement)
-        self.isotopeAddToolButton.clicked.connect(self.restrictedAddIsotope)
-        self.isotopeDelToolButton.clicked.connect(self.restrictedDelIsotopes)
+        # self.elementAddToolButton.clicked.connect(self.restrictedAddElement)
+        # self.isotopeAddToolButton.clicked.connect(self.restrictedAddIsotope)
+        # self.isotopeDelToolButton.clicked.connect(self.restrictedDelIsotopes)
 
-        self.unrestrictedAddToolButton.clicked.connect(self.forceAdd)
-        self.unrestrictedDelToolButton.clicked.connect(self.forceDel)
+        # self.unrestrictedAddToolButton.clicked.connect(self.forceAdd)
+        # self.unrestrictedDelToolButton.clicked.connect(self.forceDel)
 
-        self.applyPushButton.clicked.connect(self.applyChange)
+        # self.applyPushButton.clicked.connect(self.applyChange)
 
-        self.calcPushButton.clicked.connect(lambda: self.calc(False))
-        self.forcePushButton.clicked.connect(lambda: self.calc(True))
+        # self.calcPushButton.clicked.connect(lambda: self.calc(False))
+        # self.forcePushButton.clicked.connect(lambda: self.calc(True))
 
     @property
     def formula(self):
         return self.manager.workspace.formula_docker
 
     def show_or_restore(self):
-        self.showUnify()
-        self.showRestricted()
-        self.showForce()
-
-    def showUnify(self):
         info = self.formula.info
+        self.chargeSpinBox.setValue(info.charge)
+        self.rtolDoubleSpinBox.setValue(info.calc_gen.rtol * 1e6)
+        self.globalLimitSpinBox.setValue(info.calc_gen.global_limit)
+        self.nitrogenRuleCheckBox.setChecked(info.calc_gen.nitrogen_rule)
+        self.dbeLimitCheckBox.setChecked(info.calc_gen.dbe_limit)
+        self.dbeMinDoubleSpinBox.setValue(info.calc_gen.DBEMin)
+        self.dbeMaxDoubleSpinBox.setValue(info.calc_gen.DBEMax)
 
-        self.baseGroupLineEdit.setText(str(info.base_group))
+        # show isotopes
+        gen = info.calc_gen
+        tree: QtWidgets.QTreeWidget = self.isotopeTreeWidget
+        tree.clear()
+        for  e, e_num in gen.get_E_iter():
+            e_item = QtWidgets.QTreeWidgetItem([e])
+            custom_e = f"{e}[{e_num.e_num}]"
+            custom = custom_e in gen.isotope_usable
+            tree.addTopLevelItem(e_item)
+            tree.setItemWidget(e_item, 1, factory.SpinBoxFactory(-999, 999, 1, e_num.min))
+            tree.setItemWidget(e_item, 2, factory.SpinBoxFactory(-999, 999, 1, e_num.max))
+            tree.setItemWidget(e_item, 3, factory.CheckBoxFactory(custom, f"{custom_e} custom", True, QtCore.Qt.LayoutDirection.RightToLeft))
 
-        self.mzMinDoubleSpinBox.setValue(info.mz_min)
-        self.mzMaxDoubleSpinBox.setValue(info.mz_max)
+            for i, i_num in sorted(gen.get_I_iter(e_num.e_num), key=lambda i:i[1].i_num != e_num.e_num):
+                i_item = QtWidgets.QTreeWidgetItem([i])
+                e_item.addChild(i_item)
+                tree.setItemWidget(i_item, 1, factory.SpinBoxFactory(-999, 999, 1, i_num.min))
+                tree.setItemWidget(i_item, 2, factory.SpinBoxFactory(-999, 999, 1, i_num.max))
+                tree.setItemWidget(i_item, 3, factory.CheckBoxFactory(i_num.global_limit, "global limit", True, QtCore.Qt.LayoutDirection.RightToLeft))
+            tree.setExpanded(tree.indexFromItem(e_item), True)
 
-        self.rtolDoubleSpinBox.setValue(info.rtol * 1e6)
 
-    def showRestricted(self):
-        calc = self.formula.info.restricted_calc
-
-        self.dbeMinDoubleSpinBox.setValue(calc.DBEMin)
-        self.dbeMaxDoubleSpinBox.setValue(calc.DBEMax)
-        self.nitrogenRuleCheckBox.setChecked(calc.nitrogenRule)
-
-        usedElements = set(calc.getElements())
-
-        element_table = self.elementTableWidget
+        # show element infos
+        element_table: QtWidgets.QTableWidget = self.elementTableWidget
         element_table.clearContents()
         element_table.setRowCount(0)
-        inited_elements = calc.getInitedElements()
-        element_table.setRowCount(len(inited_elements))
-        inited_elements = list(chain(usedElements, set(
-            inited_elements) - usedElements))
-        for index in range(len(inited_elements)):
-            if inited_elements[index].startswith('e'):
-                inited_elements.insert(0, inited_elements.pop(index))
-        for index, e in enumerate(inited_elements):
-            params = calc[e]
-
-            element_table.setItem(index, 0, QtWidgets.QTableWidgetItem(e))
-            element_table.setCellWidget(
-                index, 1, factory.CheckBoxFactory(e in usedElements or e.startswith('e')))
-
-            for column, s in enumerate([
-                    format(Formula(e if not e.startswith(
-                        'e') else '-').mass(), '.4f'),
-                    str(params["Min"]),
-                    str(params["Max"]),
-                    str(params["DBE2"]),
-                    str(params["HMin"]),
-                    str(params["HMax"]),
-                    str(params["OMin"]),
-                    str(params["OMax"])], 2):
-                element_table.setItem(
-                    index, column, QtWidgets.QTableWidgetItem(s))
-
-        isotope_table = self.isotopeTableWidget
-        isotope_table.clearContents()
-        isotope_table.setRowCount(0)
-        isotopes = calc.getIsotopes()
-        isotope_table.setRowCount(len(isotopes))
-
-        for index, isotope in enumerate(isotopes):
-            isotope_table.setItem(
-                index, 0, QtWidgets.QTableWidgetItem(isotope))
-            isotope_table.setItem(
-                index, 1,
-                QtWidgets.QTableWidgetItem(format(Formula(isotope).mass(), '.4f')))
-
-    def showForce(self):
-        calc = self.formula.info.force_calc
-        table = self.unrestrictedTableWidget
-        table.clearContents()
-        table.setRowCount(0)
-        ei_list = calc.getEIList()
-        table.setRowCount(len(ei_list))
-        for index, ei in enumerate(ei_list):
-            table.setItem(index, 0, QtWidgets.QTableWidgetItem(ei))
-            table.setItem(index, 1, QtWidgets.QTableWidgetItem(str(calc[ei])))
+        element_table.setRowCount(len(gen.element_states))
+        for row, (e, e_info) in enumerate(gen.element_states.items()):
+            element_table.setItem(row, 0, QtWidgets.QTableWidgetItem(e))
+            if e.startswith("e"):
+                f = Formula(charge=-1)
+            else:
+                f = Formula(e)
+            element_table.setItem(
+                row, 1, QtWidgets.QTableWidgetItem(format(f.mass(), '.4f')))
+            for col, val in enumerate(e_info.to_list(), 2):
+                spin_box = factory.DoubleSpinBoxFactory(-99, 99, 2, 1, val)
+                spin_box.wheelEvent = lambda event: None
+                element_table.setCellWidget(
+                    row, col, spin_box)
 
     @state_node(withArgs=True)
     def calc(self, force: bool):

@@ -161,6 +161,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         manager = self.manager
 
         def formula_and_residual():
+            # TODO: add mz min & mz maz
             calc = workspace.formula_docker.info.restricted_calc
             calc_get = workspace.formula_docker.info.restricted_calc_get
             for peak in manager.tqdm(peaks, msg="init formula"):
