@@ -474,13 +474,13 @@ static int __pyx_pw_8Orbitool_5utils_7formula_5_calc_10Calculator_1__init__(PyOb
   bool __pyx_v_dbe_limit;
   double __pyx_v_H_max_mass;
   PyObject *__pyx_v_element_states = 0;
-  PyObject *__pyx_v_element_nums = 0;
+  PyObject *__pyx_v_isotope_nums = 0;
   CYTHON_UNUSED bool __pyx_v_debug;
   int __pyx_r;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
   <span class='refnanny'>__Pyx_RefNannySetupContext</span>("__init__ (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&amp;__pyx_n_s_rtol,&amp;__pyx_n_s_DBEMin,&amp;__pyx_n_s_DBEMax,&amp;__pyx_n_s_nitrogen_rule,&amp;__pyx_n_s_global_limit,&amp;__pyx_n_s_dbe_limit,&amp;__pyx_n_s_H_max_mass,&amp;__pyx_n_s_element_states,&amp;__pyx_n_s_element_nums,&amp;__pyx_n_s_debug,0};
+    static PyObject **__pyx_pyargnames[] = {&amp;__pyx_n_s_rtol,&amp;__pyx_n_s_DBEMin,&amp;__pyx_n_s_DBEMax,&amp;__pyx_n_s_nitrogen_rule,&amp;__pyx_n_s_global_limit,&amp;__pyx_n_s_dbe_limit,&amp;__pyx_n_s_H_max_mass,&amp;__pyx_n_s_element_states,&amp;__pyx_n_s_isotope_nums,&amp;__pyx_n_s_debug,0};
     PyObject* values[10] = {0,0,0,0,0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
@@ -558,7 +558,7 @@ static int __pyx_pw_8Orbitool_5utils_7formula_5_calc_10Calculator_1__init__(PyOb
         }
         CYTHON_FALLTHROUGH;
         case  8:
-        if (likely((values[8] = <span class='pyx_c_api'>__Pyx_PyDict_GetItemStr</span>(__pyx_kwds, __pyx_n_s_element_nums)) != 0)) kw_args--;
+        if (likely((values[8] = <span class='pyx_c_api'>__Pyx_PyDict_GetItemStr</span>(__pyx_kwds, __pyx_n_s_isotope_nums)) != 0)) kw_args--;
         else {
           <span class='pyx_c_api'>__Pyx_RaiseArgtupleInvalid</span>("__init__", 1, 10, 10, 8); <span class='error_goto'>__PYX_ERR(0, 45, __pyx_L3_error)</span>
         }
@@ -594,7 +594,7 @@ static int __pyx_pw_8Orbitool_5utils_7formula_5_calc_10Calculator_1__init__(PyOb
     __pyx_v_dbe_limit = <span class='pyx_c_api'>__Pyx_PyObject_IsTrue</span>(values[5]); if (unlikely((__pyx_v_dbe_limit == ((bool)-1)) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 47, __pyx_L3_error)</span>
     __pyx_v_H_max_mass = __pyx_<span class='py_c_api'>PyFloat_AsDouble</span>(values[6]); if (unlikely((__pyx_v_H_max_mass == (double)-1) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 48, __pyx_L3_error)</span>
     __pyx_v_element_states = ((PyObject*)values[7]);
-    __pyx_v_element_nums = ((PyObject*)values[8]);
+    __pyx_v_isotope_nums = ((PyObject*)values[8]);
     __pyx_v_debug = <span class='pyx_c_api'>__Pyx_PyObject_IsTrue</span>(values[9]); if (unlikely((__pyx_v_debug == ((bool)-1)) &amp;&amp; <span class='py_c_api'>PyErr_Occurred</span>())) <span class='error_goto'>__PYX_ERR(0, 49, __pyx_L3_error)</span>
   }
   goto __pyx_L4_argument_unpacking_done;
@@ -606,8 +606,8 @@ static int __pyx_pw_8Orbitool_5utils_7formula_5_calc_10Calculator_1__init__(PyOb
   return -1;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_element_states), (&amp;PyDict_Type), 1, "element_states", 1))) <span class='error_goto'>__PYX_ERR(0, 48, __pyx_L1_error)</span>
-  if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_element_nums), (&amp;PyList_Type), 1, "element_nums", 1))) <span class='error_goto'>__PYX_ERR(0, 48, __pyx_L1_error)</span>
-  __pyx_r = __pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator___init__(((struct __pyx_obj_8Orbitool_5utils_7formula_5_calc_Calculator *)__pyx_v_self), __pyx_v_rtol, __pyx_v_DBEMin, __pyx_v_DBEMax, __pyx_v_nitrogen_rule, __pyx_v_global_limit, __pyx_v_dbe_limit, __pyx_v_H_max_mass, __pyx_v_element_states, __pyx_v_element_nums, __pyx_v_debug);
+  if (unlikely(!<span class='pyx_c_api'>__Pyx_ArgTypeTest</span>(((PyObject *)__pyx_v_isotope_nums), (&amp;PyList_Type), 1, "isotope_nums", 1))) <span class='error_goto'>__PYX_ERR(0, 48, __pyx_L1_error)</span>
+  __pyx_r = __pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator___init__(((struct __pyx_obj_8Orbitool_5utils_7formula_5_calc_Calculator *)__pyx_v_self), __pyx_v_rtol, __pyx_v_DBEMin, __pyx_v_DBEMax, __pyx_v_nitrogen_rule, __pyx_v_global_limit, __pyx_v_dbe_limit, __pyx_v_H_max_mass, __pyx_v_element_states, __pyx_v_isotope_nums, __pyx_v_debug);
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -621,7 +621,7 @@ static int __pyx_pw_8Orbitool_5utils_7formula_5_calc_10Calculator_1__init__(PyOb
   return __pyx_r;
 }
 
-static int __pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator___init__(struct __pyx_obj_8Orbitool_5utils_7formula_5_calc_Calculator *__pyx_v_self, double __pyx_v_rtol, double __pyx_v_DBEMin, double __pyx_v_DBEMax, bool __pyx_v_nitrogen_rule, int32_t __pyx_v_global_limit, bool __pyx_v_dbe_limit, double __pyx_v_H_max_mass, PyObject *__pyx_v_element_states, PyObject *__pyx_v_element_nums, CYTHON_UNUSED bool __pyx_v_debug) {
+static int __pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator___init__(struct __pyx_obj_8Orbitool_5utils_7formula_5_calc_Calculator *__pyx_v_self, double __pyx_v_rtol, double __pyx_v_DBEMin, double __pyx_v_DBEMax, bool __pyx_v_nitrogen_rule, int32_t __pyx_v_global_limit, bool __pyx_v_dbe_limit, double __pyx_v_H_max_mass, PyObject *__pyx_v_element_states, PyObject *__pyx_v_isotope_nums, CYTHON_UNUSED bool __pyx_v_debug) {
   PyObject *__pyx_v_key = NULL;
   PyObject *__pyx_v_state = NULL;
   PyObject *__pyx_v_i_num = NULL;
@@ -647,7 +647,7 @@ static int __pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator___init__(struc
 }
 </pre><pre class="cython line score-0">&#xA0;<span class="">046</span>:             <span class="bp">self</span><span class="p">,</span> <span class="n">double</span> <span class="n">rtol</span><span class="p">,</span> <span class="n">double</span> <span class="n">DBEMin</span><span class="p">,</span> <span class="n">double</span> <span class="n">DBEMax</span><span class="p">,</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">047</span>:             <span class="nb">bool</span> <span class="n">nitrogen_rule</span><span class="p">,</span> <span class="n">int32_t</span> <span class="n">global_limit</span><span class="p">,</span> <span class="nb">bool</span> <span class="n">dbe_limit</span><span class="p">,</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">048</span>:             <span class="n">double</span> <span class="n">H_max_mass</span><span class="p">,</span> <span class="nb">dict</span> <span class="n">element_states</span><span class="p">,</span> <span class="nb">list</span> <span class="n">element_nums</span><span class="p">,</span></pre>
+<pre class="cython line score-0">&#xA0;<span class="">048</span>:             <span class="n">double</span> <span class="n">H_max_mass</span><span class="p">,</span> <span class="nb">dict</span> <span class="n">element_states</span><span class="p">,</span> <span class="nb">list</span> <span class="n">isotope_nums</span><span class="p">,</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">049</span>:             <span class="nb">bool</span> <span class="n">debug</span><span class="p">):</span></pre>
 <pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">050</span>:         <span class="bp">self</span><span class="o">.</span><span class="n">rtol</span> <span class="o">=</span> <span class="n">rtol</span></pre>
 <pre class='cython code score-0 '>  __pyx_v_self-&gt;rtol = __pyx_v_rtol;
@@ -718,12 +718,12 @@ static int __pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator___init__(struc
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_t_8.HMax = __pyx_t_9;
 </pre><pre class="cython line score-0">&#xA0;<span class="">061</span>: </pre>
-<pre class="cython line score-12" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">062</span>:         <span class="k">for</span> <span class="n">i_num</span> <span class="ow">in</span> <span class="n">element_nums</span><span class="p">:</span></pre>
-<pre class='cython code score-12 '>  if (unlikely(__pyx_v_element_nums == Py_None)) {
+<pre class="cython line score-12" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">062</span>:         <span class="k">for</span> <span class="n">i_num</span> <span class="ow">in</span> <span class="n">isotope_nums</span><span class="p">:</span></pre>
+<pre class='cython code score-12 '>  if (unlikely(__pyx_v_isotope_nums == Py_None)) {
     <span class='py_c_api'>PyErr_SetString</span>(PyExc_TypeError, "'NoneType' object is not iterable");
     <span class='error_goto'>__PYX_ERR(0, 62, __pyx_L1_error)</span>
   }
-  __pyx_t_1 = __pyx_v_element_nums; <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_t_1); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_v_isotope_nums; <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_t_1); __pyx_t_3 = 0;
   for (;;) {
     if (__pyx_t_3 &gt;= <span class='py_macro_api'>PyList_GET_SIZE</span>(__pyx_t_1)) break;
     #if CYTHON_ASSUME_SAFE_MACROS &amp;&amp; !CYTHON_AVOID_BORROWED_REFS
@@ -737,9 +737,9 @@ static int __pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator___init__(struc
 /* … */
   }
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">063</span>:             <span class="bp">self</span><span class="o">.</span><span class="n">element_nums</span><span class="o">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">IsotopeNum</span><span class="p">(</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">063</span>:             <span class="bp">self</span><span class="o">.</span><span class="n">isotope_nums</span><span class="o">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">IsotopeNum</span><span class="p">(</span></pre>
 <pre class='cython code score-0 '>    try {
-      __pyx_v_self-&gt;element_nums.push_back(__pyx_t_11);
+      __pyx_v_self-&gt;isotope_nums.push_back(__pyx_t_11);
     } catch(...) {
       __Pyx_CppExn2PyErr();
       <span class='error_goto'>__PYX_ERR(0, 63, __pyx_L1_error)</span>
@@ -950,9 +950,9 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator_2get(str
 <pre class="cython line score-0">&#xA0;<span class="">086</span>:         <span class="k">cdef</span> <span class="kt">Formula</span> <span class="nf">f</span><span class="p">,</span> <span class="nf">last_f</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">087</span>:         <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">e_mass</span><span class="p">,</span> <span class="nf">mi</span><span class="p">,</span> <span class="nf">ma</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">088</span>:         <span class="k">cdef</span> <span class="kt">int32_t</span> <span class="nf">e_current</span><span class="p">,</span> <span class="nf">global_limit_sum</span><span class="p">,</span> <span class="nf">mi_int</span><span class="p">,</span> <span class="nf">ma_int</span></pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">089</span>:         <span class="k">cdef</span> <span class="kt">int32_t</span> <span class="nf">cur</span> <span class="o">=</span> <span class="mf">0</span><span class="p">,</span> <span class="n">TAIL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_nums</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">-</span> <span class="mf">1</span></pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">089</span>:         <span class="k">cdef</span> <span class="kt">int32_t</span> <span class="nf">cur</span> <span class="o">=</span> <span class="mf">0</span><span class="p">,</span> <span class="n">TAIL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotope_nums</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">-</span> <span class="mf">1</span></pre>
 <pre class='cython code score-0 '>  __pyx_v_cur = 0;
-  __pyx_v_TAIL = (__pyx_v_self-&gt;element_nums.size() - 1);
+  __pyx_v_TAIL = (__pyx_v_self-&gt;isotope_nums.size() - 1);
 </pre><pre class="cython line score-5" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">090</span>:         <span class="k">cdef</span> <span class="kt">list</span> <span class="nf">ret</span> <span class="o">=</span> <span class="p">[]</span></pre>
 <pre class='cython code score-5 '>  __pyx_t_1 = <span class='py_c_api'>PyList_New</span>(0);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 90, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
@@ -980,8 +980,8 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator_2get(str
       <span class='pyx_macro_api'>__Pyx_XDECREF_SET</span>(__pyx_v_last_f, ((struct __pyx_obj_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_t_1));
       __pyx_t_1 = 0;
 </pre><pre class="cython line score-0">&#xA0;<span class="">098</span>:                 <span class="c"># print(last_f)</span></pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">099</span>:                 <span class="n">e_num</span> <span class="o">=</span> <span class="o">&amp;</span><span class="bp">self</span><span class="o">.</span><span class="n">element_nums</span><span class="p">[</span><span class="n">cur</span><span class="p">]</span></pre>
-<pre class='cython code score-0 '>      __pyx_v_e_num = (&amp;(__pyx_v_self-&gt;element_nums[__pyx_v_cur]));
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">099</span>:                 <span class="n">e_num</span> <span class="o">=</span> <span class="o">&amp;</span><span class="bp">self</span><span class="o">.</span><span class="n">isotope_nums</span><span class="p">[</span><span class="n">cur</span><span class="p">]</span></pre>
+<pre class='cython code score-0 '>      __pyx_v_e_num = (&amp;(__pyx_v_self-&gt;isotope_nums[__pyx_v_cur]));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">100</span>:                 <span class="n">e_s</span> <span class="o">=</span> <span class="o">&amp;</span><span class="bp">self</span><span class="o">.</span><span class="n">element_states</span><span class="p">[</span><span class="n">e_num</span><span class="o">.</span><span class="n">e</span><span class="p">]</span></pre>
 <pre class='cython code score-0 '>      __pyx_v_e_s = (&amp;(__pyx_v_self-&gt;element_states[__pyx_v_e_num-&gt;e]));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">101</span>:                 <span class="n">e_mass</span> <span class="o">=</span> <span class="n">elementMassDist</span><span class="p">[</span><span class="n">e_num</span><span class="o">.</span><span class="n">e</span><span class="p">][</span><span class="n">e_num</span><span class="o">.</span><span class="n">i_num</span><span class="p">]</span><span class="o">.</span><span class="n">first</span></pre>
@@ -990,14 +990,14 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator_2get(str
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">102</span>:                 <span class="n">mi</span> <span class="o">=</span> <span class="n">e_num</span><span class="o">.</span><span class="n">i_min</span></pre>
 <pre class='cython code score-0 '>      __pyx_t_7 = __pyx_v_e_num-&gt;i_min;
       __pyx_v_mi = __pyx_t_7;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">103</span>:                 <span class="k">if</span> <span class="n">cur</span> <span class="o">==</span> <span class="n">TAIL</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_nums</span><span class="p">[</span><span class="n">cur</span><span class="o">+</span><span class="mf">1</span><span class="p">]</span><span class="o">.</span><span class="n">e</span> <span class="o">!=</span> <span class="n">e_num</span><span class="o">.</span><span class="n">e</span><span class="p">:</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">103</span>:                 <span class="k">if</span> <span class="n">cur</span> <span class="o">==</span> <span class="n">TAIL</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">isotope_nums</span><span class="p">[</span><span class="n">cur</span><span class="o">+</span><span class="mf">1</span><span class="p">]</span><span class="o">.</span><span class="n">e</span> <span class="o">!=</span> <span class="n">e_num</span><span class="o">.</span><span class="n">e</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>      __pyx_t_8 = ((__pyx_v_cur == __pyx_v_TAIL) != 0);
       if (!__pyx_t_8) {
       } else {
         __pyx_t_5 = __pyx_t_8;
         goto __pyx_L7_bool_binop_done;
       }
-      __pyx_t_8 = (((__pyx_v_self-&gt;element_nums[(__pyx_v_cur + 1)]).e != __pyx_v_e_num-&gt;e) != 0);
+      __pyx_t_8 = (((__pyx_v_self-&gt;isotope_nums[(__pyx_v_cur + 1)]).e != __pyx_v_e_num-&gt;e) != 0);
       __pyx_t_5 = __pyx_t_8;
       __pyx_L7_bool_binop_done:;
       if (__pyx_t_5) {
@@ -1366,8 +1366,8 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator_2get(str
 <pre class='cython code score-0 '>    __pyx_v_ns = (&amp;__pyx_v_num_states.top());
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">181</span>:             <span class="n">s</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">states</span><span class="o">.</span><span class="n">top</span><span class="p">()</span></pre>
 <pre class='cython code score-0 '>    __pyx_v_s = (&amp;__pyx_v_states.top());
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">182</span>:             <span class="n">e_num</span> <span class="o">=</span> <span class="o">&amp;</span><span class="bp">self</span><span class="o">.</span><span class="n">element_nums</span><span class="p">[</span><span class="n">cur</span> <span class="o">-</span> <span class="mf">1</span><span class="p">]</span></pre>
-<pre class='cython code score-0 '>    __pyx_v_e_num = (&amp;(__pyx_v_self-&gt;element_nums[(__pyx_v_cur - 1)]));
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">182</span>:             <span class="n">e_num</span> <span class="o">=</span> <span class="o">&amp;</span><span class="bp">self</span><span class="o">.</span><span class="n">isotope_nums</span><span class="p">[</span><span class="n">cur</span> <span class="o">-</span> <span class="mf">1</span><span class="p">]</span></pre>
+<pre class='cython code score-0 '>    __pyx_v_e_num = (&amp;(__pyx_v_self-&gt;isotope_nums[(__pyx_v_cur - 1)]));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">183</span>:             <span class="n">e_s</span> <span class="o">=</span> <span class="o">&amp;</span><span class="bp">self</span><span class="o">.</span><span class="n">element_states</span><span class="p">[</span><span class="n">e_num</span><span class="o">.</span><span class="n">e</span><span class="p">]</span></pre>
 <pre class='cython code score-0 '>    __pyx_v_e_s = (&amp;(__pyx_v_self-&gt;element_states[__pyx_v_e_num-&gt;e]));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">184</span>:             <span class="n">ns</span><span class="o">.</span><span class="n">current</span> <span class="o">+=</span> <span class="mf">1</span></pre>

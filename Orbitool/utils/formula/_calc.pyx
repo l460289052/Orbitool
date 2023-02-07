@@ -45,7 +45,7 @@ cdef class Calculator:
     def __init__(
             self, double rtol, double DBEMin, double DBEMax,
             bool nitrogen_rule, int32_t global_limit, bool dbe_limit, 
-            double H_max_mass, dict element_states, list element_nums, 
+            double H_max_mass, dict element_states, list isotope_nums, 
             bool debug):
         self.rtol = rtol
         self.DBEMin = DBEMin
@@ -59,8 +59,8 @@ cdef class Calculator:
             self.element_states[str2element(key).first] = State(
                 DBE2=state.DBE2, OMin=state.OMin, OMax=state.OMax, HMin=state.HMin, HMax=state.HMax)
 
-        for i_num in element_nums:
-            self.element_nums.push_back(IsotopeNum(
+        for i_num in isotope_nums:
+            self.isotope_nums.push_back(IsotopeNum(
                 e=str2element(i_num.element).first, i_num=i_num.i_num, i_min=i_num.i_min, i_max=i_num.i_max,
                 e_min=i_num.e_min, e_max=i_num.e_max, global_limit=i_num.global_limit))
     
@@ -86,7 +86,7 @@ cdef class Calculator:
         cdef Formula f, last_f
         cdef double e_mass, mi, ma
         cdef int32_t e_current, global_limit_sum, mi_int, ma_int
-        cdef int32_t cur = 0, TAIL = self.element_nums.size() - 1
+        cdef int32_t cur = 0, TAIL = self.isotope_nums.size() - 1
         cdef list ret = []
 
         while True:
@@ -96,11 +96,11 @@ cdef class Calculator:
                 last_s = &states.top()
                 last_f = formulas[-1]
                 # print(last_f)
-                e_num = &self.element_nums[cur]
+                e_num = &self.isotope_nums[cur]
                 e_s = &self.element_states[e_num.e]
                 e_mass = elementMassDist[e_num.e][e_num.i_num].first
                 mi = e_num.i_min
-                if cur == TAIL or self.element_nums[cur+1].e != e_num.e:
+                if cur == TAIL or self.isotope_nums[cur+1].e != e_num.e:
                     if last_ns.e == e_num.e:
                         mi = max(mi, e_num.e_min - last_ns.e_current)
                     else:
@@ -179,7 +179,7 @@ cdef class Calculator:
             
             ns = &num_states.top()
             s = &states.top()
-            e_num = &self.element_nums[cur - 1]
+            e_num = &self.isotope_nums[cur - 1]
             e_s = &self.element_states[e_num.e]
             ns.current += 1
             ns.e_current += 1

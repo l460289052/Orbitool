@@ -14,7 +14,7 @@ def test_state():
 
 
 def test_set():
-    gen = CalculatorGenerator()
+    gen = CalculatorGenerator.Factory()
     gen.set_EI_num("C", 0, 20, False)
     gen.set_EI_num("H", 0, 40, False)
     gen.set_EI_num("O", 0, 15, False)
@@ -37,7 +37,7 @@ def test_set():
     gen.set_EI_num("O[18]", 0, 2, True)
     calc = gen.generate(Calculator)
 
-    assert calc.element_nums == [
+    assert calc.isotope_nums == [
         CalcIsotopeNum("C", 12, 13, True, 0, 5, 0, 20),
         CalcIsotopeNum("O", 16, 18, True, 0, 2, 0, 15),
         CalcIsotopeNum("O", 16, 16, False, 0, 15, 0, 15),
@@ -49,7 +49,7 @@ def test_restricted_1():
     """
     nitrogenrule & relative oh _ dbe & max isotope
     """
-    gen = CalculatorGenerator()
+    gen = CalculatorGenerator.Factory()
     gen.set_EI_num("C", 0, 20, False)
     gen.set_EI_num("H", 0, 40, False)
     gen.set_EI_num("O", 0, 15, False)
@@ -81,7 +81,7 @@ def test_restricted_1():
 
 
 def test_restricted_2():
-    gen = CalculatorGenerator()
+    gen = CalculatorGenerator.Factory()
     gen.del_EI("O")
     gen.set_EI_num("C", 0, 20, False)
     gen.set_EI_num("H", 0, 40, False)
@@ -102,10 +102,10 @@ def test_without_oh_dbe():
     """
     neg dbe
     """
-    gen = CalculatorGenerator()
+    gen = CalculatorGenerator.Factory()
     # gen.del_EI("O")
-    gen.nitrogenRule = True
-    gen.relativeOH_DBE = False
+    gen.nitrogen_rule = True
+    gen.dbe_limit = False
     calc = gen.generate()
 
     f = Formula('C10H30')
@@ -117,7 +117,7 @@ def test_without_oh_dbe():
 
 
 def test_any_isotope():
-    gen = CalculatorGenerator()
+    gen = CalculatorGenerator.Factory()
     # max should be 2, 30 for comparison with below
     gen.add_EI("H[1]")
     gen.set_EI_num("H[1]", 0, 30, True)
@@ -143,7 +143,7 @@ def test_any_isotope():
 
 
 def test_unlimited_isotope():
-    gen = CalculatorGenerator()
+    gen = CalculatorGenerator.Factory()
 
     gen.add_EI("H[1]")
     gen.set_EI_num("H[1]", 0, 30, False)
@@ -156,7 +156,7 @@ def test_unlimited_isotope():
     gen.add_EI("N[15]")
     gen.set_EI_num("N[15]", 0, 1, True)
 
-    gen.globalLimit = 20
+    gen.global_limit = 20
     calc = gen.generate()
 
     f = Formula("C9H[2]12O11N-")
@@ -164,15 +164,15 @@ def test_unlimited_isotope():
     assert len(ret) >= 5
     assert f in ret
 
-    gen.relativeOH_DBE = False
-    gen.nitrogenRule = False
+    gen.dbe_limit = False
+    gen.nitrogen_rule = False
     calc = gen.generate()
     ret = list(calc.get(f.mass(), f.charge))
     assert len(ret) >= 15
 
 
 def test_some_formula():
-    gen = CalculatorGenerator()
+    gen = CalculatorGenerator.Factory()
     gen.add_EI("O[18]")
     gen.set_EI_num("O[18]", 0, 3, True)
     gen.add_EI("N")
@@ -194,7 +194,7 @@ def test_some_formula():
     assert f in ret
 
 def test_cai_1():
-    gen = CalculatorGenerator()
+    gen = CalculatorGenerator.Factory()
     gen.add_EI("N")
     gen.set_EI_num("N", 1, 5, False)
     gen.add_EI("N[15]")
@@ -207,7 +207,7 @@ def test_cai_1():
 
 
 def test_cai_2():
-    gen = CalculatorGenerator()
+    gen = CalculatorGenerator.Factory()
     gen.add_EI("N")
     gen.add_EI("N[15]")
     gen.set_EI_num("N", 0, 5, False)
@@ -230,7 +230,7 @@ def test_cai_2():
     assert f in ret
 
 def test_cai_3():
-    gen = CalculatorGenerator()
+    gen = CalculatorGenerator.Factory()
     gen.add_EI("Cl")
     gen.add_EI("Cl[37]")
     gen.set_EI_num("Cl", 0, 20, False)

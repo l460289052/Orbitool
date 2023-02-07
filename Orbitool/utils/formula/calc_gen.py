@@ -4,13 +4,16 @@ from functools import lru_cache
 from typing import Dict, List, Tuple, Type, TypeVar, Union
 from pyteomics.mass import nist_mass
 
+from Orbitool.structures import BaseRowItem, field, BaseStructure, DictRow
+
 from ._formula import Formula
 
 Isotope = Tuple[str, int]
 
 
-@dataclass
-class IsotopeNum:
+class IsotopeNum(BaseRowItem):
+    item_name = "IsotopeNum"
+
     e_num: int
     i_num: int
     min: int = 0
@@ -18,13 +21,16 @@ class IsotopeNum:
     global_limit: bool = False
 
 
-@dataclass
-class State:
+class State(BaseRowItem):
+    item_name = "ElementState"
     DBE2: float = 0
     HMin: float = 0
     HMax: float = 0
     OMin: float = 0
     OMax: float = 0
+
+    def to_list(self):
+        return [self.DBE2, self.HMin, self.HMax, self.OMin, self.OMax]
 
     def __imul__(self, num: int):
         assert isinstance(num, int)
@@ -64,8 +70,9 @@ class State:
         return new_ins
 
 
-@dataclass
-class CalcIsotopeNum:
+class CalcIsotopeNum(BaseRowItem):
+    item_name = "CalcIsotopeNum"
+
     element: str
     e_num: int
     i_num: int
@@ -103,71 +110,82 @@ def parse_element(key: str):
 T = TypeVar("T")
 
 
-class CalculatorGenerator:  # for Generator, Python is better than Cython
-    def __init__(self) -> None:
-        self.rtol = 1e-6
-        self.DBEMin = 0
-        self.DBEMax = 8
-        self.nitrogenRule = True
-        self.globalLimit = 3
-        self.relativeOH_DBE = True
-        self.debug = False
+# for Generator, Python is better than Cython
+class CalculatorGenerator(BaseStructure):
+    h5_type = "calculator generator"
+    rtol: float = 1e-6
+    DBEMin: float = 0
+    DBEMax: float = 8
+    nitrogen_rule: bool = True
+    global_limit: int = 3
+    dbe_limit: bool = True
+    debug: bool = False
+    element_states: DictRow[str, State] = field(dict)
+    isotope_usable: DictRow[str, IsotopeNum] = field(dict)
 
-        self.element_states: Dict[str, State] = {
-            row[0]: State(*row[1:]) for row in InitParams}
-        self.element_usable: Dict[str, IsotopeNum] = {
-            "C": IsotopeNum(12, 0, 0, 20, False),
-            "H": IsotopeNum(1, 0, 0, 40, False),
-            "O": IsotopeNum(16, 0, 0, 15, False)}
+    @classmethod
+    def Factory(cls):
+        ins = cls(
+            element_states={
+                row[0]: State(*row[1:]) for row in InitParams},
+            isotope_usable={
+                "C": IsotopeNum(12, 0, 0, 20, False),
+                # "C[12]": IsotopeNum(12, 12, 0, 10, False),
+                # "C[13]": IsotopeNum(12, 13, 0, 10, False),
+                "H": IsotopeNum(1, 0, 0, 40, False),
+                "O": IsotopeNum(16, 0, 0, 15, False),
+                "O[18]": IsotopeNum(16, 18, 0, 2, True)}
+        )
+        return ins
 
     def add_EI(self, key: str):
         key1, key2 = parse_element(key)
         if key2 != 0:
-            if key1 not in self.element_usable:
+            if key1 not in self.isotope_usable:
                 self.add_EI(key1)
-            e_num = self.element_usable[key1]
+            e_num = self.isotope_usable[key1]
             i_num = copy(e_num)
             i_num.i_num = key2
             if i_num.e_num != key2:
                 i_num.global_limit = True
-            self.element_usable[key] = i_num
+            self.isotope_usable[key] = i_num
         else:
-            self.element_usable[key] = IsotopeNum(get_num(key), 0, 0, 3, False)
+            self.isotope_usable[key] = IsotopeNum(get_num(key), 0, 0, 3, False)
 
     def del_EI(self, key: str):
         _ = parse_element(key)
-        assert key in self.element_usable, f"Cannot find {key} in list"
-        del self.element_usable[key]
+        assert key in self.isotope_usable, f"Cannot find {key} in list"
+        del self.isotope_usable[key]
 
     def get_E_iter(self):
-        for k, v in self.element_usable.items():
+        for k, v in self.isotope_usable.items():
             if v.i_num == 0:
                 yield k, v
 
     def get_I_iter(self, e_num: int):
-        for k, v in self.element_usable.items():
+        for k, v in self.isotope_usable.items():
             if v.e_num == e_num and v.i_num != 0:
                 yield k, v
 
     def get_EI_List(self):
-        return self.element_usable.keys()
+        return self.isotope_usable.keys()
 
     def set_EI_num(self, key: str, min: int, max: int, global_limit: bool):
-        assert key in self.element_usable, f"Isotope {key} should be added first"
-        i_num = self.element_usable[key]
+        assert key in self.isotope_usable, f"Isotope {key} should be added first"
+        i_num = self.isotope_usable[key]
         _ = parse_element(key)
         assert min >= 0 and max >= 0, f"Isotope {key}'s min/max should be non-negative"
         assert not (
             i_num.i_num == 0 and global_limit), f"Cannot set global_limit to a whole element"
-        self.element_usable[key] = IsotopeNum(
+        self.isotope_usable[key] = IsotopeNum(
             i_num.e_num, i_num.i_num, min, max, global_limit)
 
     def get_EI_num(self, key: str):
         _ = parse_element(key)
-        assert key in self.element_usable, f"Cannot find {key} in list"
-        return self.element_usable[key]
+        assert key in self.isotope_usable, f"Cannot find {key} in list"
+        return self.isotope_usable[key]
 
-    def generate(self, cls: Type[T]=None) -> T:
+    def generate(self, cls: Type[T] = None) -> T:
         if cls is None:
             from ._calc import Calculator
             cls = Calculator
@@ -198,21 +216,21 @@ class CalculatorGenerator:  # for Generator, Python is better than Cython
                 ret.append(i_num)
             return ret
 
-        element_nums: List[CalcIsotopeNum] = []
+        isotope_nums: List[CalcIsotopeNum] = []
         for key, num in e_list:
-            element_nums.extend(e_to_list(key, num.e_num))
+            isotope_nums.extend(e_to_list(key, num.e_num))
 
-        if "O" in self.element_usable:
-            element_nums.extend(e_to_list("O", get_num("O")))
-        if "H" in self.element_usable:
+        if "O" in self.isotope_usable:
+            isotope_nums.extend(e_to_list("O", get_num("O")))
+        if "H" in self.isotope_usable:
             ret = e_to_list("H", get_num("H"))
             H_max_mass = max(r.i_num for r in ret)
-            element_nums.extend(ret)
+            isotope_nums.extend(ret)
 
         return cls(
-            self.rtol, self.DBEMin, self.DBEMax, self.nitrogenRule,
-            self.globalLimit, self.relativeOH_DBE, H_max_mass,
-            self.element_states, element_nums, self.debug)
+            self.rtol, self.DBEMin, self.DBEMax, self.nitrogen_rule,
+            self.global_limit, self.dbe_limit, H_max_mass,
+            self.element_states, isotope_nums, self.debug)
 
 
 InitParams = [

@@ -19,10 +19,11 @@ class FormulaItem(BaseRowItem):
 def test_formula():
     f = HDF5.H5File()
 
-    f.write_table("table", FormulaItem, [FormulaItem(
+    row = Row((FormulaItem,))
+    row.write_to_h5(f._obj, "table", [FormulaItem(
         formula=formula) for formula in formula_list])
 
-    formulas = f.read_table("table", FormulaItem)
+    formulas = row.read_from_h5(f._obj, "table")
     for f1, f2 in zip(formulas, formula_list):
         assert f1.formula == f2
 
@@ -35,9 +36,10 @@ class FormulasItem(BaseRowItem):
 def test_formulas():
     f = HDF5.H5File()
 
-    f.write_table("table", FormulasItem, [
-                  FormulasItem(formulas=formula_list)] * 10)
+    row = Row((FormulasItem,))
+    row.write_to_h5(f._obj, "table", [FormulasItem(
+        formulas=formula_list)] * 10)
 
-    formulas_table = f.read_table("table", FormulasItem)
+    formulas_table = row.read_from_h5(f._obj, "table")
     for formulas in formulas_table:
         assert formulas.formulas == formula_list

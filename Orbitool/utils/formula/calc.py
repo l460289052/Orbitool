@@ -33,7 +33,7 @@ class Calculator:
     relativeOH_DBE: bool = True
     H_max_mass: float = get_mass("H")
     element_states: Dict[str, State] = field(default_factory=dict)
-    element_nums: List[CalcIsotopeNum] = field(default_factory=list)
+    isotope_nums: List[CalcIsotopeNum] = field(default_factory=list)
     debug: bool = False
 
     def get(self, M: float, charge: int):
@@ -41,7 +41,7 @@ class Calculator:
         ML = M - delta
         MR = M + delta
 
-        TAIL = len(self.element_nums) - 1
+        TAIL = len(self.isotope_nums) - 1
         cur = 0
         states: List[State] = [self.element_states["e"]
                                * -charge - self.element_states["H"] * 2]
@@ -56,11 +56,11 @@ class Calculator:
                 last_s = states[-1]
                 last_f = formulas[-1]
                 # print(last_f)
-                e_num = self.element_nums[cur]
+                e_num = self.isotope_nums[cur]
                 e_s = self.element_states[e_num.element]
                 e_mass = get_mass(e_num.element, e_num.i_num)
                 mi = e_num.i_min
-                if cur == TAIL or self.element_nums[cur + 1].element != e_num.element:
+                if cur == TAIL or self.isotope_nums[cur + 1].element != e_num.element:
                     if last_ns.element == e_num.element:
                         mi = max(mi, e_num.e_min - last_ns.e_current)
                     else:
@@ -137,7 +137,7 @@ class Calculator:
 
             ns = num_states[-1]
             s = states[-1]
-            e_num = self.element_nums[cur - 1]
+            e_num = self.isotope_nums[cur - 1]
             e_s = self.element_states[e_num.element]
             ns.current += 1
             ns.e_current += 1

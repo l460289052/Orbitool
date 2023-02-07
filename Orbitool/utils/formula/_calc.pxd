@@ -27,6 +27,6 @@ cdef:
         cdef int32_t global_limit
         cdef bool nitrogen_rule, dbe_limit
         cdef map[int32_t, State] element_states
-        cdef vector[IsotopeNum] element_nums
+        cdef vector[IsotopeNum] isotope_nums
 
         cpdef bool check(self, Formula f, double ml, double mr, double charge)
