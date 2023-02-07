@@ -16,14 +16,6 @@ class H5Obj:
     def __init__(self, obj) -> None:
         self._obj: h5py.Group = obj
 
-    def write_table(self, path: str, item_type: Type[T], values: List[T]):
-        handler: StructureTypeHandler = get_handler(Row[item_type])
-        handler.write_to_h5(self._obj, path, values)
-
-    def read_table(self, path: str, item_type: Type[T]) -> List[T]:
-        handler: StructureTypeHandler = get_handler(Row[item_type])
-        return handler.read_from_h5(self._obj, path)
-
     def write(self, path: str, value: BaseStructure):
         handler: StructureTypeHandler = get_handler(BaseStructure)
         handler.write_to_h5(self._obj, path, value)

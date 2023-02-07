@@ -4,6 +4,8 @@ from datetime import datetime
 import numpy as np
 from numpy import testing as nptest
 
+from Orbitool.structures.HDF5.h5type_handlers.row_handler import DictRow
+
 from ...base_structure import BaseStructure
 from ...base_row import BaseRowItem
 from ...HDF5 import H5File
@@ -24,11 +26,39 @@ def test_dt():
     dt = datetime(2021, 6, 27, 7, 53, 41)
     item = TableItem(1, .1, "1" * 1000, dt_test=dt)
 
-    f.write_table("table", TableItem, [item] * 10)
+    row = Row((TableItem, ))
+    row.write_to_h5(f._obj, "table", [item] * 10)
 
-    items = f.read_table("table", TableItem)
+    items = row.read_from_h5(f._obj, "table")
     assert len(items) == 10
     item = items[0]
+    assert item.int_test == 1
+    assert item.float_test == .1
+    assert item.str_test == "1" * 1000
+    assert item.dt_test == dt
+
+
+def test_dict_dt():
+    class TableItem(BaseRowItem):
+        item_name = "test_item_name"
+
+        int_test: int
+        float_test: float
+        str_test: str
+        dt_test: datetime
+    f = H5File()
+    dt = datetime(2021, 6, 27, 7, 53, 41)
+    item = TableItem(1, .1, "1" * 1000, dt_test=dt)
+
+    dr = DictRow((str, TableItem))
+
+    dr.write_to_h5(f._obj, "dict", {str(i): item for i in range(10)})
+
+    items: DictRow[str, TableItem] = dr.read_from_h5(f._obj, "dict")
+
+    assert len(items) == 10
+    assert set(items.keys()) == set(map(str, range(10)))
+    item = items["0"]
     assert item.int_test == 1
     assert item.float_test == .1
     assert item.str_test == "1" * 1000
@@ -43,9 +73,10 @@ def test_ascii():
     f = H5File()
 
     item = AsciiItem("123321")
-    f.write_table("table", AsciiItem, [item] * 10)
+    row = Row((AsciiItem, ))
+    row.write_to_h5(f._obj, "table", [item] * 10)
 
-    items = f.read_table("table", AsciiItem)
+    items = row.read_from_h5(f._obj, "table")
 
     assert len(items) == 10
     item = items[0]
@@ -61,9 +92,10 @@ def test_ndarray_1d():
     f = H5File()
 
     item = Ndarray1DItem(value=range(10))
-    f.write_table("table", Ndarray1DItem, [item] * 10)
+    row = Row((Ndarray1DItem,))
+    row.write_to_h5(f._obj, "table", [item] * 10)
 
-    items = f.read_table("table", Ndarray1DItem)
+    items = row.read_from_h5(f._obj, "table")
     assert len(items) == 10
     item = items[0]
 
@@ -78,17 +110,19 @@ def test_ndarray_long():
     f = H5File()
 
     item = Ndarray1DLongItem(value=range(10))
-    f.write_table("table", Ndarray1DLongItem, [item] * 10)
+    row = Row((Ndarray1DLongItem,))
+    row.write_to_h5(f._obj, "table", [item] * 10)
 
-    items = f.read_table("table", Ndarray1DLongItem)
+    items = row.read_from_h5(f._obj, "table")
     assert len(items) == 10
     item = items[0]
 
     nptest.assert_array_equal(range(10), item.value)
 
     item = Ndarray1DLongItem(value=range(10000))
-    f.write_table("table", Ndarray1DLongItem, [item] * 10)
-    items = f.read_table("table", Ndarray1DLongItem)
+    row.write_to_h5(f._obj, "table", [item] * 10)
+
+    items = row.read_from_h5(f._obj, "table")
     assert len(items) == 10
     item = items[0]
 
@@ -103,9 +137,10 @@ def test_ndarray_hd():
     f = H5File()
 
     item = NdarrayHDItem(value=np.empty((50, 10, 2, 2, 1)))
-    f.write_table("table", NdarrayHDItem, [item] * 10)
+    row = Row((NdarrayHDItem,))
+    row.write_to_h5(f._obj, "table", [item] * 10)
 
-    items = f.read_table("table", NdarrayHDItem)
+    items = row.read_from_h5(f._obj, "table")
     assert len(items) == 10
     item = items[0]
 
@@ -120,18 +155,19 @@ def test_ndarray_hd_long():
     f = H5File()
 
     item = NdarrayHDLongItem(value=np.empty((5, 10, 2, 2, 1)))
-    f.write_table("table", NdarrayHDLongItem, [item] * 10)
+    row = Row((NdarrayHDLongItem))
+    row.write_to_h5(f._obj, "table", [item] * 10)
 
-    items = f.read_table("table", NdarrayHDLongItem)
+    items = row.read_from_h5(f._obj, "table")
     assert len(items) == 10
     item = items[0]
 
     assert item.value.shape == (5, 10, 2, 2, 1)
 
     item = NdarrayHDLongItem(value=np.empty((5, 10, 2, 2, 37)))
-    f.write_table("table", NdarrayHDLongItem, [item] * 10)
+    row.write_to_h5(f._obj, "table", [item] * 10)
 
-    items = f.read_table("table", NdarrayHDLongItem)
+    items = row.read_from_h5(f._obj, "table")
     assert len(items) == 10
     item = items[0]
 

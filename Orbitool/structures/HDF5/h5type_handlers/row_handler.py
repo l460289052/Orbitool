@@ -23,9 +23,15 @@ def get_dtype(item_type: Type[BaseRowItem]) -> Tuple[list, Dict[str, RowDTypeHan
 
 
 T = TypeVar("T")
+K = TypeVar("K")
+V = TypeVar("V")
+
 
 if TYPE_CHECKING:
     class Row(StructureTypeHandler, List[T]):
+        pass
+
+    class DictRow(StructureTypeHandler, Dict[K, V]):
         pass
 else:
     class Row(StructureTypeHandler):
@@ -60,3 +66,39 @@ else:
                 **{key: handler.convert_from_h5(v) for key, v in zip(keys, row)
                     if (handler := handlers.get(key, None)) is not None
                    }) for row in rows]
+
+
+    class DictRow(StructureTypeHandler):
+        def __init__(self, args=()) -> None:
+            super().__init__(args=args)
+            self.key_type = self.args[0]
+            self.inner_type: BaseRowItem = self.args[1]
+
+        def __call__(self):
+            return []
+
+        def write_to_h5(self, h5group: Group, key: str, value: dict):
+            if key in h5group:
+                del h5group[key]
+            inner_type = self.inner_type
+
+            dtype, handlers = get_dtype(inner_type)
+            dataset = h5group.create_dataset(
+                key, (len(value),), dtype, compression="gzip", compression_opts=1)
+            rows = [tuple(handler.convert_to_h5(getattr(v, k))
+                    for k, handler in handlers.items()) for v in value.values()]
+            dataset[:] = rows
+            dataset.attrs["item_name"] = BaseRowItem.item_name
+            dataset.attrs["indexes"] = list(map(str, value.keys()))
+
+        def read_from_h5(self, h5group: Group, key: str):
+            key_type, inner_type = self.key_type, self.inner_type
+            dtype, handlers = get_dtype(inner_type)
+            dataset = h5group[key]
+
+            rows = dataset[()]
+            keys = rows.dtype.names
+            return {key_type(k): inner_type(
+                **{key: handler.convert_from_h5(v) for key, v in zip(keys, row)
+                    if (handler := handlers.get(key, None)) is not None})
+                for k, row in zip(dataset.attrs["indexes"], rows)}
