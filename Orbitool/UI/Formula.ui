@@ -58,6 +58,9 @@
          </item>
          <item row="0" column="1">
           <widget class="QSpinBox" name="chargeSpinBox">
+           <property name="focusPolicy">
+            <enum>Qt::StrongFocus</enum>
+           </property>
            <property name="minimum">
             <number>-99</number>
            </property>
@@ -71,7 +74,11 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QDoubleSpinBox" name="rtolDoubleSpinBox"/>
+          <widget class="QDoubleSpinBox" name="rtolDoubleSpinBox">
+           <property name="focusPolicy">
+            <enum>Qt::StrongFocus</enum>
+           </property>
+          </widget>
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="globalLimitLabel">
@@ -81,7 +88,11 @@
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QSpinBox" name="globalLimitSpinBox"/>
+          <widget class="QSpinBox" name="globalLimitSpinBox">
+           <property name="focusPolicy">
+            <enum>Qt::StrongFocus</enum>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -125,6 +136,9 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="dbeMinDoubleSpinBox">
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
               <property name="minimum">
                <double>-99.000000000000000</double>
               </property>
@@ -145,6 +159,9 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="dbeMaxDoubleSpinBox">
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
               <property name="minimum">
                <double>-99.000000000000000</double>
               </property>
@@ -175,6 +192,12 @@
               <height>150</height>
              </size>
             </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+            <property name="expandsOnDoubleClick">
+             <bool>false</bool>
+            </property>
             <attribute name="headerVisible">
              <bool>true</bool>
             </attribute>
@@ -190,6 +213,11 @@
             <column>
              <property name="text">
               <string>Isotope</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>del</string>
              </property>
             </column>
             <column>
@@ -272,64 +300,6 @@
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QToolButton" name="isotopeDelToolButton">
-              <property name="maximumSize">
-               <size>
-                <width>20</width>
-                <height>20</height>
-               </size>
-              </property>
-              <property name="palette">
-               <palette>
-                <active>
-                 <colorrole role="ButtonText">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>170</red>
-                    <green>0</green>
-                    <blue>0</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </active>
-                <inactive>
-                 <colorrole role="ButtonText">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>170</red>
-                    <green>0</green>
-                    <blue>0</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </inactive>
-                <disabled>
-                 <colorrole role="ButtonText">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>120</red>
-                    <green>120</green>
-                    <blue>120</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </disabled>
-               </palette>
-              </property>
-              <property name="font">
-               <font>
-                <family>Consolas</family>
-                <pointsize>12</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>-</string>
-              </property>
-             </widget>
-            </item>
            </layout>
           </item>
          </layout>
@@ -396,6 +366,11 @@
             <column>
              <property name="text">
               <string>mass</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>del</string>
              </property>
             </column>
             <column>
@@ -495,64 +470,6 @@
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QToolButton" name="elementDelToolButton">
-              <property name="maximumSize">
-               <size>
-                <width>20</width>
-                <height>20</height>
-               </size>
-              </property>
-              <property name="palette">
-               <palette>
-                <active>
-                 <colorrole role="ButtonText">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>170</red>
-                    <green>0</green>
-                    <blue>0</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </active>
-                <inactive>
-                 <colorrole role="ButtonText">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>170</red>
-                    <green>0</green>
-                    <blue>0</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </inactive>
-                <disabled>
-                 <colorrole role="ButtonText">
-                  <brush brushstyle="SolidPattern">
-                   <color alpha="255">
-                    <red>120</red>
-                    <green>120</green>
-                    <blue>120</blue>
-                   </color>
-                  </brush>
-                 </colorrole>
-                </disabled>
-               </palette>
-              </property>
-              <property name="font">
-               <font>
-                <family>Consolas</family>
-                <pointsize>12</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>-</string>
-              </property>
-             </widget>
-            </item>
            </layout>
           </item>
          </layout>
@@ -573,6 +490,13 @@
        </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="applyPushButton">
+     <property name="text">
+      <string>Apply</string>
+     </property>
     </widget>
    </item>
    <item>

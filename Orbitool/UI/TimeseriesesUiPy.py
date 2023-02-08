@@ -147,7 +147,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         table.setRowCount(len(series))
         shown_series = self.shown_series
         for index, s in enumerate(series):
-            chb = factory.CheckBoxFactory(index in shown_series)
+            chb = factory.CheckBox(index in shown_series)
             chb.toggled.connect(partial(self.showTimeseriesAt, index))
             table.setCellWidget(index, 0, chb)
             table.setItem(index, 1, QtWidgets.QTableWidgetItem(s.tag))

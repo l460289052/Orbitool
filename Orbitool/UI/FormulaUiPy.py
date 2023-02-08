@@ -1,9 +1,10 @@
 from copy import copy
 import enum
+from functools import partial
 from typing import Union, Optional
 from . import FormulaUi
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import chain
 from .manager import Manager, state_node
 from .component import factory
@@ -22,6 +23,20 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
     def setupUi(self, Form):
         # FormulaUi.Ui_Form.setupUi(self, Form)
         super().setupUi(Form)
+
+        def change_only_focus(self, e: QtGui.QWheelEvent):
+            if self.hasFocus():
+                return type(self).wheelEvent(self, e)
+            else:
+                e.ignore()
+
+        for sb in [
+                self.chargeSpinBox,
+                self.rtolDoubleSpinBox,
+                self.globalLimitSpinBox,
+                self.dbeMinDoubleSpinBox,
+                self.dbeMaxDoubleSpinBox]:
+            sb.wheelEvent = partial(change_only_focus, sb)
 
         # self.elementAddToolButton.clicked.connect(self.restrictedAddElement)
         # self.isotopeAddToolButton.clicked.connect(self.restrictedAddIsotope)
@@ -53,42 +68,71 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         gen = info.calc_gen
         tree: QtWidgets.QTreeWidget = self.isotopeTreeWidget
         tree.clear()
-        for  e, e_num in gen.get_E_iter():
+        icon = self.style().standardIcon(
+            QtWidgets.QStyle.StandardPixmap.SP_DialogDiscardButton)
+        pixmap = icon.pixmap(20, 20)
+
+        def label(num: int):
+            return QtWidgets.QLabel(str(num))
+
+        def icon_label():
+            label = QtWidgets.QLabel()
+            label.setPixmap(pixmap)
+            return label
+        for e, e_num in gen.get_E_iter():
             e_item = QtWidgets.QTreeWidgetItem([e])
             custom_e = f"{e}[{e_num.e_num}]"
             custom = custom_e in gen.isotope_usable
             tree.addTopLevelItem(e_item)
-            tree.setItemWidget(e_item, 1, factory.SpinBoxFactory(-999, 999, 1, e_num.min))
-            tree.setItemWidget(e_item, 2, factory.SpinBoxFactory(-999, 999, 1, e_num.max))
-            tree.setItemWidget(e_item, 3, factory.CheckBoxFactory(custom, f"{custom_e} custom", True, QtCore.Qt.LayoutDirection.RightToLeft))
+            tree.setItemWidget(e_item, 1, icon_label())
+            tree.setItemWidget(e_item, 2, label(e_num.min))
+            tree.setItemWidget(e_item, 3, label(e_num.max))
+            tree.setItemWidget(e_item, 4, factory.CheckBox(
+                custom, f"{custom_e} custom", True, QtCore.Qt.LayoutDirection.RightToLeft))
 
-            for i, i_num in sorted(gen.get_I_iter(e_num.e_num), key=lambda i:i[1].i_num != e_num.e_num):
+            for i, i_num in sorted(gen.get_I_iter(e_num.e_num), key=lambda i: i[1].i_num != e_num.e_num):
                 i_item = QtWidgets.QTreeWidgetItem([i])
                 e_item.addChild(i_item)
-                tree.setItemWidget(i_item, 1, factory.SpinBoxFactory(-999, 999, 1, i_num.min))
-                tree.setItemWidget(i_item, 2, factory.SpinBoxFactory(-999, 999, 1, i_num.max))
-                tree.setItemWidget(i_item, 3, factory.CheckBoxFactory(i_num.global_limit, "global limit", True, QtCore.Qt.LayoutDirection.RightToLeft))
+                tree.setItemWidget(i_item, 1, icon_label())
+                tree.setItemWidget(i_item, 2, label(i_num.min))
+                tree.setItemWidget(i_item, 3, label(i_num.max))
+                tree.setItemWidget(i_item, 4, factory.CheckBox(
+                    i_num.global_limit, "global limit", True, QtCore.Qt.LayoutDirection.RightToLeft))
             tree.setExpanded(tree.indexFromItem(e_item), True)
-
+        for i in range(tree.columnCount()):
+            tree.resizeColumnToContents(i)
 
         # show element infos
-        element_table: QtWidgets.QTableWidget = self.elementTableWidget
-        element_table.clearContents()
-        element_table.setRowCount(0)
-        element_table.setRowCount(len(gen.element_states))
+        table: QtWidgets.QTableWidget = self.elementTableWidget
+        table.clearContents()
+        table.setRowCount(0)
+        table.setRowCount(len(gen.element_states))
+
+        def f2text4(val: float):
+            item = QtWidgets.QTableWidgetItem(format(val, '.4f'))
+            item.setTextAlignment(
+                QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+            return item
+
+        def f2text1(val: float):
+            item = QtWidgets.QTableWidgetItem(format(val, '.1f'))
+            item.setTextAlignment(
+                QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+            return item
+
+        def del_icon():
+            return QtWidgets.QTableWidgetItem(icon, "")
         for row, (e, e_info) in enumerate(gen.element_states.items()):
-            element_table.setItem(row, 0, QtWidgets.QTableWidgetItem(e))
+            table.setItem(row, 0, QtWidgets.QTableWidgetItem(e))
             if e.startswith("e"):
                 f = Formula(charge=-1)
             else:
                 f = Formula(e)
-            element_table.setItem(
-                row, 1, QtWidgets.QTableWidgetItem(format(f.mass(), '.4f')))
-            for col, val in enumerate(e_info.to_list(), 2):
-                spin_box = factory.DoubleSpinBoxFactory(-99, 99, 2, 1, val)
-                spin_box.wheelEvent = lambda event: None
-                element_table.setCellWidget(
-                    row, col, spin_box)
+            table.setItem(row, 1, f2text4(f.mass()))
+            table.setItem(row, 2, del_icon())
+            for col, val in enumerate(e_info.to_list(), 3):
+                table.setItem(row, col, f2text1(val))
+        table.resizeColumnsToContents()
 
     @state_node(withArgs=True)
     def calc(self, force: bool):
@@ -118,7 +162,7 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         table.setRowCount(row + 1)
 
         table.setItem(row, 0, QtWidgets.QTableWidgetItem(str(element)))
-        table.setCellWidget(row, 1, factory.CheckBoxFactory(False))
+        table.setCellWidget(row, 1, factory.CheckBox(False))
         contents = [format(element.mass(), '.4f'),
                     0, 0, 0, 0, 0, 0, 0]
 

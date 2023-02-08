@@ -280,9 +280,9 @@ class Widget(QtWidgets.QWidget, NoiseUi.Ui_Form):
         table.setRowCount(len(checkeds))
 
         for i, (useable, checked, name, noise, lod) in enumerate(zip(useables, checkeds, names, noises, lods)):
-            checkBox = factory.CheckBoxFactory(checked)
-            noisespinbox = factory.DoubleSpinBoxFactory(0, 1e11, 1, 1, noise)
-            lodspinbox = factory.DoubleSpinBoxFactory(0, 1e11, 1, 1, lod)
+            checkBox = factory.CheckBox(checked)
+            noisespinbox = factory.DoubleSpinBox(0, 1e11, 1, 1, noise)
+            lodspinbox = factory.DoubleSpinBox(0, 1e11, 1, 1, lod)
             enable = i and useable
             checkBox.setEnabled(enable)
             noisespinbox.setEnabled(enable)

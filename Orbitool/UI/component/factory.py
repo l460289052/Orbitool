@@ -1,7 +1,8 @@
-from PyQt5 import QtWidgets, QtCore
+from typing import Callable, Union
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 
-def CheckBoxFactory(checked: bool, text: str, enable: bool = True, direction: QtCore.Qt.LayoutDirection = QtCore.Qt.LayoutDirection.LayoutDirectionAuto) -> QtWidgets.QCheckBox:
+def CheckBox(checked: bool, text: str, enable: bool = True, direction: QtCore.Qt.LayoutDirection = QtCore.Qt.LayoutDirection.LayoutDirectionAuto) -> QtWidgets.QCheckBox:
     box = QtWidgets.QCheckBox(text)
     box.setChecked(checked)
     box.setEnabled(enable)
@@ -9,7 +10,7 @@ def CheckBoxFactory(checked: bool, text: str, enable: bool = True, direction: Qt
     return box
 
 
-def SpinBoxFactory(minimum: int, maximum: int, step: int, value: int, enable: bool = True) -> QtWidgets.QDoubleSpinBox:
+def SpinBox(minimum: int, maximum: int, step: int, value: int, enable: bool = True) -> QtWidgets.QDoubleSpinBox:
     box = QtWidgets.QSpinBox()
     box.setMinimum(minimum)
     box.setMaximum(maximum)
@@ -19,7 +20,7 @@ def SpinBoxFactory(minimum: int, maximum: int, step: int, value: int, enable: bo
     return box
 
 
-def DoubleSpinBoxFactory(minimum: float, maximum: float, decimals: int, step: float, value: float, enable: bool = True) -> QtWidgets.QDoubleSpinBox:
+def DoubleSpinBox(minimum: float, maximum: float, decimals: int, step: float, value: float, enable: bool = True) -> QtWidgets.QDoubleSpinBox:
     box = QtWidgets.QDoubleSpinBox()
     box.setMinimum(minimum)
     box.setMaximum(maximum)
@@ -28,3 +29,18 @@ def DoubleSpinBoxFactory(minimum: float, maximum: float, decimals: int, step: fl
     box.setValue(value)
     box.setEnabled(enable)
     return box
+
+
+def PushButton(text: int, clicked: Union[Callable, None] = None):
+    btn = QtWidgets.QPushButton(text)
+    if clicked:
+        btn.clicked.connect(clicked)
+    return btn
+
+
+def ToolButton(icon: QtGui.QIcon, clicked: Union[Callable, None] = None):
+    btn = QtWidgets.QToolButton()
+    btn.setIcon(icon)
+    if clicked:
+        btn.clicked.connect(clicked)
+    return btn
