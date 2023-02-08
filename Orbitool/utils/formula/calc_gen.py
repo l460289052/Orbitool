@@ -139,6 +139,8 @@ class CalculatorGenerator(BaseStructure):
         return ins
 
     def add_EI(self, key: str):
+        if key in self.isotope_usable:
+            return
         key1, key2 = parse_element(key)
         if key2 != 0:
             if key1 not in self.isotope_usable:

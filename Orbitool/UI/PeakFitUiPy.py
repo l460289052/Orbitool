@@ -21,8 +21,7 @@ from .manager import Manager, MultiProcess, state_node
 
 
 class FitMethod(str, Enum):
-    restricted_calc = "restricted calc"
-    force_calc = "force calc"
+    calc = "calc"
     mass_list = "mass list"
 
 
@@ -86,8 +85,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         # combox
         self.filterTagComboBox.addItems([tag.name for tag in PeakTags])
         self.addTagComboBox.addItems([tag.name for tag in PeakTags])
-        self.fitComboBox.addItem("standard calc", FitMethod.restricted_calc)
-        self.fitComboBox.addItem("unrestricted calc", FitMethod.force_calc)
+        self.fitComboBox.addItem("calc", FitMethod.calc)
         self.fitComboBox.addItem("mass list", FitMethod.mass_list)
 
         # actions
@@ -162,14 +160,13 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         def formula_and_residual():
             # TODO: add mz min & mz maz
-            calc = workspace.formula_docker.info.restricted_calc
-            calc_get = workspace.formula_docker.info.restricted_calc_get
-            for peak in manager.tqdm(peaks, msg="init formula"):
-                calc_get(peak.peak_position)
+            rtol = workspace.formula_docker.info.calc_gen.rtol
+            calc_get = workspace.formula_docker.info.get_calcer()
 
-            for peak in manager.tqdm(peaks):
+            for peak in manager.tqdm(peaks, msg="calc formulas"):
                 peak.formulas = calc_get(peak.peak_position)
-                peak.formulas = formula_func.correct(peak, peaks, calc.rtol)
+            for peak in manager.tqdm(peaks, msg="correct formulas"):
+                peak.formulas = formula_func.correct(peak, peaks, rtol)
 
             mz, residual = peakfit_func.calculateResidual(
                 raw_peaks, original_indexes, peaks, workspace.peak_shape_tab.info.func)
@@ -542,41 +539,34 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     @state_node
     def fit(self):
         method: FitMethod = self.fitComboBox.currentData()
-        if method == FitMethod.restricted_calc:
+        if method == FitMethod.calc:
             yield from self.fit_formula()
-        elif method == FitMethod.force_calc:
-            yield from self.fit_force_formula()
         elif method == FitMethod.mass_list:
             yield from self.fit_mass_list()
 
     def fit_formula(self):
         info = self.peakfit.info
 
-        calc = self.manager.workspace.formula_docker.info.restricted_calc
-        calc_get = self.manager.workspace.formula_docker.info.restricted_calc_get
+        rtol = self.manager.workspace.formula_docker.info.calc_gen.rtol
+        calc_get = self.manager.workspace.formula_docker.info.get_calcer()
         peaks = info.peaks
         indexes = info.shown_indexes
 
         manager = self.manager
 
         def func():
-            for peak in manager.tqdm(peaks, msg="init formula"):
-                calc_get(peak.peak_position)  # init
-            for index in manager.tqdm(indexes):
+            index: int
+            for index in manager.tqdm(indexes, msg="calc formula"):
                 peak = peaks[index]
                 peak.formulas = calc_get(peak.peak_position)
-                peak.formulas = formula_func.correct(peak, peaks, calc.rtol)
+
+            for index in manager.tqdm(indexes, msg="correct formulas"):
+                peak = peaks[index]
+                peak.formulas = formula_func.correct(peak, peaks, rtol)
 
         yield func, "fit use restricted calc"
 
         self.manager.signals.peak_list_show.emit()
-
-    def fit_force_formula(self):
-        calc_get = self.manager.workspace.formula_docker.info.force_calc_get
-
-        def proc(fp: FittedPeak):
-            fp.formulas = calc_get(fp.peak_position)
-        yield from self._general_action(proc, "fit use unrestricted calc")
 
     def fit_mass_list(self):
         rtol = self.manager.workspace.masslist_docker.info.rtol

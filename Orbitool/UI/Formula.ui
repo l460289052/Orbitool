@@ -248,6 +248,9 @@
             <attribute name="headerDefaultSectionSize">
              <number>55</number>
             </attribute>
+            <attribute name="headerShowSortIndicator" stdset="0">
+             <bool>false</bool>
+            </attribute>
             <column>
              <property name="text">
               <string>Isotope</string>
@@ -528,13 +531,6 @@
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="applyPushButton">
-     <property name="text">
-      <string>Apply</string>
-     </property>
     </widget>
    </item>
    <item>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1149</width>
-    <height>600</height>
+    <width>1147</width>
+    <height>596</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,13 +28,6 @@
            <widget class="QPushButton" name="calcPushButton">
             <property name="text">
              <string>Calc</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="forceCalcPushButton">
-            <property name="text">
-             <string>Unrestricted Calc</string>
             </property>
            </widget>
           </item>
@@ -220,8 +213,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1149</width>
-     <height>20</height>
+     <width>1147</width>
+     <height>22</height>
     </rect>
    </property>
   </widget>

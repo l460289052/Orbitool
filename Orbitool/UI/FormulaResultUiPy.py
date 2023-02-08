@@ -37,8 +37,7 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
             QtWidgets.QHeaderView.ResizeToContents)
 
         self.plot = Plot(self.widget)
-        self.calcPushButton.clicked.connect(lambda: self.calc(False))
-        self.forceCalcPushButton.clicked.connect(lambda: self.calc(True))
+        self.calcPushButton.clicked.connect(self.calc)
         self.resultTableWidget.itemDoubleClicked.connect(self.plot_row)
         self.isotopesTableWidget.itemDoubleClicked.connect(self.edit_peak)
         self.showAllToolButton.clicked.connect(self.showResult)
@@ -47,8 +46,8 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
         self.acceptEmptyToolButton.clicked.connect(self.acceptEmpty)
 
     @classmethod
-    def FactoryCalc(cls, manager: Manager, input: str, force: bool):
-        return Window(manager, *calc(manager, input, force))
+    def FactoryCalc(cls, manager: Manager, input: str):
+        return Window(manager, *calc(manager, input))
 
     @classmethod
     def FactoryPeak(cls, manager: Manager, peak_index: int):
@@ -63,10 +62,10 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
     def peaks(self):
         return self.manager.workspace.peakfit_tab.info.peaks
 
-    @state_node(withArgs=True)
-    def calc(self, force):
+    @state_node
+    def calc(self):
         input = self.lineEdit.text()
-        _, mass, formulas, peak_index = calc(self.manager, input, force)
+        _, mass, formulas, peak_index = calc(self.manager, input)
         self.mass = mass
         self.formulas = formulas
         self.peak_index = peak_index
@@ -77,7 +76,7 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
         mass = self.mass
         formulas = self.formulas
 
-        table = self.resultTableWidget
+        table: QtWidgets.QTableWidget = self.resultTableWidget
         table.clearContents()
         table.setRowCount(0)
         table.setRowCount(len(formulas))
@@ -89,9 +88,10 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
             def setText(column, text):
                 table.setItem(index, column, QtWidgets.QTableWidgetItem(text))
             setText(0, str(formula))
-            setText(1, format(formula.mass(), '.4f'))
+            setText(1, format(formula.mass(), '.6f'))
             setText(2, format(ppm(formula.mass()), '.2f'))
             setText(3, format(formula.dbe(), '.1f'))
+        table.resizeColumnsToContents()
 
         ax = self.plot.ax
         ax.clear()
@@ -227,14 +227,11 @@ def peak_position(peaks: List[FittedPeak], index):
     return peaks[index].peak_position
 
 
-def calc(manager: Manager, input: str, force: bool):
+def calc(manager: Manager, input: str):
     try:
         info = manager.workspace.formula_docker.info
         mass = float(input)
-        if force:
-            formulas = info.force_calc_get(mass)
-        else:
-            formulas = info.restricted_calc_get(mass)
+        formulas = info.calc_gen.generate().get(mass, info.charge)
     except ValueError:
         formula = Formula(input)
         formulas = [formula]
