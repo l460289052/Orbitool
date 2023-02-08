@@ -1,7 +1,8 @@
+import contextlib
 from copy import copy
 import enum
 from functools import partial
-from typing import Union, Optional
+from typing import List, Union, Optional
 from . import FormulaUi
 
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -23,6 +24,12 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
     def setupUi(self, Form):
         # FormulaUi.Ui_Form.setupUi(self, Form)
         super().setupUi(Form)
+        self.sbs: List[Union[QtWidgets.QSpinBox, QtWidgets.QDoubleSpinBox]] = [
+            self.mzMinDoubleSpinBox, self.mzMaxDoubleSpinBox, self.chargeSpinBox,
+            self.rtolDoubleSpinBox, self.globalLimitSpinBox, self.dbeMinDoubleSpinBox,
+            self.dbeMaxDoubleSpinBox]
+        self.cbs: List[QtWidgets.QCheckBox] = [
+            self.nitrogenRuleCheckBox, self.dbeLimitCheckBox]
 
         def change_only_focus(self, e: QtGui.QWheelEvent):
             if self.hasFocus():
@@ -30,13 +37,12 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
             else:
                 e.ignore()
 
-        for sb in [
-                self.chargeSpinBox,
-                self.rtolDoubleSpinBox,
-                self.globalLimitSpinBox,
-                self.dbeMinDoubleSpinBox,
-                self.dbeMaxDoubleSpinBox]:
+        for sb in self.sbs:
             sb.wheelEvent = partial(change_only_focus, sb)
+            sb.valueChanged.connect(self.update_calc)
+
+        for cb in self.cbs:
+            cb.stateChanged.connect(self.update_calc)
 
         # self.elementAddToolButton.clicked.connect(self.restrictedAddElement)
         # self.isotopeAddToolButton.clicked.connect(self.restrictedAddIsotope)
@@ -50,21 +56,44 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         # self.calcPushButton.clicked.connect(lambda: self.calc(False))
         # self.forcePushButton.clicked.connect(lambda: self.calc(True))
 
+    @contextlib.contextmanager
+    def without_info_change(self):
+        for sb in self.sbs:
+            sb.valueChanged.disconnect(self.update_calc)
+        for cb in self.cbs:
+            cb.stateChanged.disconnect(self.update_calc)
+        yield
+        for sb in self.sbs:
+            sb.valueChanged.connect(self.update_calc)
+        for cb in self.cbs:
+            cb.stateChanged.connect(self.update_calc)
+
     @property
     def formula(self):
         return self.manager.workspace.formula_docker
 
     def show_or_restore(self):
-        info = self.formula.info
-        self.chargeSpinBox.setValue(info.charge)
-        self.rtolDoubleSpinBox.setValue(info.calc_gen.rtol * 1e6)
-        self.globalLimitSpinBox.setValue(info.calc_gen.global_limit)
-        self.nitrogenRuleCheckBox.setChecked(info.calc_gen.nitrogen_rule)
-        self.dbeLimitCheckBox.setChecked(info.calc_gen.dbe_limit)
-        self.dbeMinDoubleSpinBox.setValue(info.calc_gen.DBEMin)
-        self.dbeMaxDoubleSpinBox.setValue(info.calc_gen.DBEMax)
+        self.show_info()
+        self.show_isotopes()
+        self.show_element_infos()
 
-        # show isotopes
+    def show_info(self):
+        info = self.formula.info
+        with self.without_info_change():
+            self.mzMinDoubleSpinBox.setValue(info.mz_min)
+            self.mzMaxDoubleSpinBox.setValue(info.mz_max)
+            self.chargeSpinBox.setValue(info.charge)
+            self.rtolDoubleSpinBox.setValue(info.calc_gen.rtol * 1e6)
+            self.globalLimitSpinBox.setValue(info.calc_gen.global_limit)
+            self.nitrogenRuleCheckBox.setChecked(info.calc_gen.nitrogen_rule)
+            self.dbeLimitCheckBox.setChecked(info.calc_gen.dbe_limit)
+            self.dbeMinDoubleSpinBox.setValue(info.calc_gen.DBEMin)
+            self.dbeMinDoubleSpinBox.setMaximum(info.calc_gen.DBEMax)
+            self.dbeMaxDoubleSpinBox.setValue(info.calc_gen.DBEMax)
+            self.dbeMaxDoubleSpinBox.setMinimum(info.calc_gen.DBEMin)
+
+    def show_isotopes(self):
+        info = self.formula.info
         gen = info.calc_gen
         tree: QtWidgets.QTreeWidget = self.isotopeTreeWidget
         tree.clear()
@@ -102,7 +131,12 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         for i in range(tree.columnCount()):
             tree.resizeColumnToContents(i)
 
-        # show element infos
+    def show_element_infos(self):
+        info = self.formula.info
+        gen = info.calc_gen
+
+        icon = self.style().standardIcon(
+            QtWidgets.QStyle.StandardPixmap.SP_DialogDiscardButton)
         table: QtWidgets.QTableWidget = self.elementTableWidget
         table.clearContents()
         table.setRowCount(0)
@@ -134,6 +168,20 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
                 table.setItem(row, col, f2text1(val))
         table.resizeColumnsToContents()
 
+    @state_node
+    def update_calc(self):
+        info = self.formula.info
+        info.mz_min = self.mzMinDoubleSpinBox.value()
+        info.mz_max = self.mzMaxDoubleSpinBox.value()
+        info.charge = self.chargeSpinBox.value()
+        info.calc_gen.rtol = self.rtolDoubleSpinBox.value() * 1e-6
+        info.calc_gen.global_limit = self.globalLimitSpinBox.value()
+        info.calc_gen.nitrogen_rule = self.nitrogenRuleCheckBox.isChecked()
+        info.calc_gen.dbe_limit = self.dbeLimitCheckBox.isChecked()
+        info.calc_gen.DBEMin = self.dbeMinDoubleSpinBox.value()
+        info.calc_gen.DBEMax = self.dbeMaxDoubleSpinBox.value()
+        self.show_info()
+
     @state_node(withArgs=True)
     def calc(self, force: bool):
         manager = self.manager
@@ -148,122 +196,3 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         manager.formulas_result_win = FormulaResultUiPy.Window.FactoryCalc(
             manager, text, force)
         manager.formulas_result_win.show()
-
-    @state_node
-    def restrictedAddElement(self):
-        element = self.elementLineEdit.text().strip()
-        if element in self.formula.info.restricted_calc.getInitedElements():
-            return
-
-        element = Formula(element)
-
-        table = self.elementTableWidget
-        row = table.rowCount()
-        table.setRowCount(row + 1)
-
-        table.setItem(row, 0, QtWidgets.QTableWidgetItem(str(element)))
-        table.setCellWidget(row, 1, factory.CheckBox(False))
-        contents = [format(element.mass(), '.4f'),
-                    0, 0, 0, 0, 0, 0, 0]
-
-        for column, s in enumerate(contents, 2):
-            table.setItem(row, column, QtWidgets.QTableWidgetItem(str(s)))
-
-    @state_node
-    def restrictedAddIsotope(self):
-        isotope = self.isotopeLineEdit.text().strip()
-        if isotope in self.formula.info.restricted_calc.getIsotopes():
-            return
-
-        isotope = Formula(isotope)
-
-        table = self.isotopeTableWidget
-        row = table.rowCount()
-        table.setRowCount(row + 1)
-
-        table.setItem(row, 0, QtWidgets.QTableWidgetItem(str(isotope)))
-        table.setItem(row, 1, QtWidgets.QTableWidgetItem(
-            format(isotope.mass(), '.4f')))
-
-    @state_node
-    def restrictedDelIsotopes(self):
-        table = self.isotopeTableWidget
-        indexes = get_tablewidget_selected_row(table)
-        for index in reversed(indexes):
-            table.removeRow(index)
-
-    @state_node
-    def forceAdd(self):
-        element = self.unrestrictedLineEdit.text().strip()
-        if element in self.formula.info.force_calc.getEIList():
-            return
-
-        element = Formula(element)
-
-        table = self.unrestrictedTableWidget
-        row = table.rowCount()
-        table.setRowCount(row + 1)
-
-        table.setItem(row, 0, QtWidgets.QTableWidgetItem(str(element)))
-        table.setItem(row, 1, QtWidgets.QTableWidgetItem(str(999)))
-
-    @state_node
-    def forceDel(self):
-        table = self.unrestrictedTableWidget
-        indexes = get_tablewidget_selected_row(table)
-        for index in reversed(indexes):
-            table.removeRow(index)
-
-    @state_node
-    def applyChange(self):
-        info = self.formula.info
-        calc = info.restricted_calc
-        force_calc = info.force_calc
-        info.base_group = Formula(self.baseGroupLineEdit.text())
-
-        calc.MMin = info.mz_min = self.mzMinDoubleSpinBox.value()
-        calc.MMax = info.mz_max = self.mzMaxDoubleSpinBox.value()
-
-        force_calc.rtol = calc.rtol = info.rtol = self.rtolDoubleSpinBox.value() * 1e-6
-
-        # restricted
-        calc.DBEMin = self.dbeMinDoubleSpinBox.value()
-        calc.DBEMax = self.dbeMaxDoubleSpinBox.value()
-        calc.nitrogenRule = self.nitrogenRuleCheckBox.isChecked()
-
-        table = self.elementTableWidget
-
-        for row in range(table.rowCount()):
-            e = table.item(row, 0).text()
-            used = table.cellWidget(row, 1).isChecked()
-            if not e.startswith('e'):
-                calc.setEI(e, used)
-            params = {
-                "Min": int(table.item(row, 3).text()),
-                "Max": int(table.item(row, 4).text()),
-                "DBE2": float(table.item(row, 5).text()),
-                "HMin": float(table.item(row, 6).text()),
-                "HMax": float(table.item(row, 7).text()),
-                "OMin": float(table.item(row, 8).text()),
-                "OMax": float(table.item(row, 9).text())}
-            calc[e] = params
-
-        for isotope in calc.getIsotopes():
-            calc.setEI(isotope, False)
-
-        table = self.isotopeTableWidget
-        for row in range(table.rowCount()):
-            i = table.item(row, 0).text()
-            calc.setEI(i)
-
-        calc.clear()
-
-        table = self.unrestrictedTableWidget
-        nums = {ei: -1 for ei in force_calc.getEIList()}
-        for row in range(table.rowCount()):
-            nums[table.item(row, 0).text()] = int(table.item(row, 1).text())
-
-        for ei, num in nums.items():
-            force_calc[ei] = num
-
-        self.show_or_restore()
