@@ -131,10 +131,9 @@ class CalculatorGenerator(BaseStructure):
             isotope_usable={
                 "C": IsotopeNum(12, 0, 0, 20, False),
                 # "C[12]": IsotopeNum(12, 12, 0, 10, False),
-                # "C[13]": IsotopeNum(12, 13, 0, 10, False),
                 "H": IsotopeNum(1, 0, 0, 40, False),
                 "O": IsotopeNum(16, 0, 0, 15, False),
-                "O[18]": IsotopeNum(16, 18, 0, 2, True)}
+                }
         )
         return ins
 

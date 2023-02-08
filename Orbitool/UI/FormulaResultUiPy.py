@@ -122,7 +122,7 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
         isotopes.sort(key=lambda i: i[0].mass())
         isotopes.insert(0, first)
 
-        rtol = self.manager.workspace.formula_docker.info.rtol
+        rtol = self.manager.workspace.formula_docker.info.calc_gen.rtol
 
         mass = formula.mass()
         if len(self.peaks) > 0:

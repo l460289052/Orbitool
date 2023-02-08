@@ -65,14 +65,13 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         is_ele = self.elementRadioButton.isChecked()
         is_atom = self.atomsRadioButton.isChecked()
 
-        calc = self.manager.workspace.formula_docker.info.restricted_calc
         peaks = self.manager.workspace.peakfit_tab.info.peaks
 
         clr_peaks = [peak for peak in peaks if len(peak.formulas) > 0]
         clr_formula = list(map(find_formula, clr_peaks))
 
         if is_dbe:
-            clr_color = [calc.getFormulaDBE(f) for f in clr_formula]
+            clr_color = [f.dbe() for f in clr_formula]
             clr_color = np.array(clr_color, dtype=float)
             clr_labels = None
         elif is_ele:

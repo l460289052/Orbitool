@@ -2,7 +2,7 @@ from typing import Callable, Union
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 
-def CheckBox(checked: bool, text: str, enable: bool = True, direction: QtCore.Qt.LayoutDirection = QtCore.Qt.LayoutDirection.LayoutDirectionAuto) -> QtWidgets.QCheckBox:
+def CheckBox(checked: bool, text: str="", enable: bool = True, direction: QtCore.Qt.LayoutDirection = QtCore.Qt.LayoutDirection.LayoutDirectionAuto) -> QtWidgets.QCheckBox:
     box = QtWidgets.QCheckBox(text)
     box.setChecked(checked)
     box.setEnabled(enable)

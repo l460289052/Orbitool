@@ -40,7 +40,7 @@ def test_dt():
 
 def test_dict_dt():
     class TableItem(BaseRowItem):
-        item_name = "test_item_name"
+        item_name = "test_dict_item_name"
 
         int_test: int
         float_test: float
