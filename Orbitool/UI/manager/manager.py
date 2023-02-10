@@ -27,6 +27,7 @@ class Values:
         self.mass_list_selected_indexes: ValueGetter[np.ndarray] = ValueGetter(
         )
         self.spectra_list_selected_index: ValueGetter[int] = ValueGetter()
+        self.peak_list_selected_true_index: ValueGetter[List[int]] = ValueGetter()
 
 
 class Signals:

@@ -28,6 +28,7 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         manager.save.connect(self.updateState)
 
         manager.signals.peak_list_show.connect(self.showPeaks)
+        manager.getters.peak_list_selected_true_index.connect(self.getSelected)
         self.setupUi(self)
 
     def setupUi(self, Form):
@@ -128,6 +129,12 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
             for index in reversed(selectedindex):
                 indexes.pop(index)
 
+    def getSelected(self):
+        selectedindex = get_tablewidget_selected_row(self.tableWidget)
+        info = self.peaks_info
+        indexes = info.shown_indexes
+        return [indexes[index] for index in selectedindex]
+
     @state_node
     def goto_mass(self):
         mass = self.doubleSpinBox.value()
@@ -184,10 +191,9 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
 
         peaks = self.peaks_info.peaks
         indexes = self.peaks_info.shown_indexes
-        peaks = [peaks[index] for index in indexes]
+        peaks: List[FittedPeak] = [peaks[index] for index in indexes]
         raw_split_num = self.peaks_info.raw_split_num
         orginal_indexes = self.peaks_info.original_indexes
-        calc = self.manager.workspace.formula_docker.info.restricted_calc
 
         with open(f, 'w', newline='') as file:
             writer = csv.writer(file)
@@ -199,7 +205,7 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
                     peak.peak_intensity,
                     peak.area,
                     '/'.join([str(formula) for formula in peak.formulas]),
-                    '/'.join([str(calc.getFormulaDBE(formula))
+                    '/'.join([str(formula.dbe())
                               for formula in peak.formulas]),
                     (peak.peak_position /
                      peak.formulas[0].mass() - 1) if len(peak.formulas) == 1 else '',

@@ -104,7 +104,7 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
         table.setRowCount(0)
         table.setRowCount(len(show_peaks))
 
-        rtol = self.manager.workspace.formula_docker.info.restricted_calc.rtol
+        rtol = self.manager.workspace.formula_docker.info.calc_gen.rtol
 
         for index, peak in enumerate(show_peaks):
             def setText(column, msg):
@@ -223,10 +223,10 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
         fittedpeaks = func.splitPeak(
             info.raw_peaks[self.original_index], num, True)
 
-        calc_get = self.manager.workspace.formula_docker.info.restricted_calc_get
+        calc_get = self.manager.workspace.formula_docker.info.get_calcer
         for peak in fittedpeaks:
             peak.formulas = calc_get(peak.peak_position)
-            peak.formulas = formula_func.correct(peak, info.peaks)
+            # peak.formulas = formula_func.correct(peak, info.peaks)
 
         self.peaks = fittedpeaks
 

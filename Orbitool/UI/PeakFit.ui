@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>826</width>
-    <height>572</height>
+    <height>616</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -396,6 +396,16 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
+         <widget class="QCheckBox" name="onlySelectedCheckBox">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>Only apply to selected peaks</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="replotPushButton">
           <property name="text">
            <string>replot within list</string>
@@ -408,7 +418,10 @@
            <enum>Qt::RightToLeft</enum>
           </property>
           <property name="text">
-           <string>Calc with natural distribution restrictions</string>
+           <string>Cal and Fit within natural distribution</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>

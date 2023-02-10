@@ -459,6 +459,7 @@ class CalibrateMergeDenoise(MultiProcess):
         paths = set()
         start_times = []
         end_times = []
+        calibrator: Calibrator
         for spectrum, separators, calibrators in data:
             if not calibrate_skip:
                 mz = []

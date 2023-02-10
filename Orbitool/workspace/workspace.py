@@ -14,6 +14,7 @@ from .noise_tab import Widget as NoiseWidget
 from .peak_fit import PeakFitInfo
 from .peak_shape import PeakShapeInfo
 from .spectra_list import SpectraListInfo
+from .spectrum import SpectrumInfo
 from .timeseries import TimeseriesInfo
 
 T = TypeVar("T")
@@ -54,6 +55,8 @@ class WorkSpace(H5File):
             "masslist docker", MassListInfo)
         self.peaklist_docker = self.visit_or_create_widget(
             "peaklist docker", BaseStructure)
+        self.spectrum_docker = self.visit_or_create_widget(
+            "spectrum docker", SpectrumInfo)
 
     def save(self):
         self.write("info", self.info)

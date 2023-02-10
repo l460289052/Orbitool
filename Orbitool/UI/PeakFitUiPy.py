@@ -127,6 +127,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
             self.stepAccordToMassCheckBox,
             self.stepRtolDoubleSpinBox,
 
+            self.onlySelectedCheckBox,
             self.calcDistributionCheckBox,
 
             self.yLogcheckBox])
@@ -449,8 +450,9 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         peaks = info.peaks
         indexes = info.shown_indexes
-
         manager = self.manager
+        if self.onlySelectedCheckBox.isChecked():
+            indexes = manager.getters.peak_list_selected_true_index.get()
 
         def func():
             for index in manager.tqdm(indexes):
@@ -555,6 +557,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         calc_get = self.manager.workspace.formula_docker.info.get_calcer()
         peaks = info.peaks
         indexes = info.shown_indexes
+        if self.onlySelectedCheckBox.isChecked():
+            indexes = manager.getters.peak_list_selected_true_index.get()
         distribution = self.calcDistributionCheckBox.isChecked()
 
         manager = self.manager
@@ -571,7 +575,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
                     peak = peaks[index]
                     peak.formulas = formula_func.correct(peak, peaks, rtol)
 
-        yield func, "fit use restricted calc"
+        yield func, "fit use calc"
 
         self.manager.signals.peak_list_show.emit()
 
