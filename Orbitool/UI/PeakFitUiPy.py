@@ -127,6 +127,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
             self.stepAccordToMassCheckBox,
             self.stepRtolDoubleSpinBox,
 
+            self.calcDistributionCheckBox,
+
             self.yLogcheckBox])
 
     def show_and_plot(self):
@@ -157,6 +159,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
         peaks = cast(List[FittedPeak], peaks)
         manager = self.manager
+        distribution = self.calcDistributionCheckBox.isChecked()
 
         def formula_and_residual():
             # TODO: add mz min & mz maz
@@ -165,8 +168,9 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
             for peak in manager.tqdm(peaks, msg="calc formulas"):
                 peak.formulas = calc_get(peak.peak_position)
-            for peak in manager.tqdm(peaks, msg="correct formulas"):
-                peak.formulas = formula_func.correct(peak, peaks, rtol)
+            if distribution:
+                for peak in manager.tqdm(peaks, msg="correct formulas to natural distribution"):
+                    peak.formulas = formula_func.correct(peak, peaks, rtol)
 
             mz, residual = peakfit_func.calculateResidual(
                 raw_peaks, original_indexes, peaks, workspace.peak_shape_tab.info.func)
@@ -551,6 +555,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         calc_get = self.manager.workspace.formula_docker.info.get_calcer()
         peaks = info.peaks
         indexes = info.shown_indexes
+        distribution = self.calcDistributionCheckBox.isChecked()
 
         manager = self.manager
 
@@ -560,9 +565,11 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
                 peak = peaks[index]
                 peak.formulas = calc_get(peak.peak_position)
 
-            for index in manager.tqdm(indexes, msg="correct formulas"):
-                peak = peaks[index]
-                peak.formulas = formula_func.correct(peak, peaks, rtol)
+
+            if distribution:
+                for index in manager.tqdm(indexes, msg="correct formulas to natural distribution"):
+                    peak = peaks[index]
+                    peak.formulas = formula_func.correct(peak, peaks, rtol)
 
         yield func, "fit use restricted calc"
 

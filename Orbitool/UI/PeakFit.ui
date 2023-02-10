@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>735</width>
-    <height>488</height>
+    <width>826</width>
+    <height>572</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -399,6 +399,16 @@
          <widget class="QPushButton" name="replotPushButton">
           <property name="text">
            <string>replot within list</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="calcDistributionCheckBox">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>Calc with natural distribution restrictions</string>
           </property>
          </widget>
         </item>
