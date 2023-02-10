@@ -47,6 +47,9 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         self.isotopeTreeWidget.itemClicked.connect(self.isotope_item_clicked)
         self.isotopeAddToolButton.clicked.connect(self.isotope_add)
 
+        self.elementShowPushButton.clicked.connect(self.show_element_infos)
+        self.elementHidePushButton.clicked.connect(lambda a: self.hide_element_infos())
+
         self.elementTableWidget.itemClicked.connect(self.element_item_clicked)
         self.elementAddToolButton.clicked.connect(self.element_add)
 
@@ -71,7 +74,7 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
     def show_or_restore(self):
         self.show_info()
         self.show_isotopes()
-        self.show_element_infos()
+        self.hide_element_infos()
 
     def show_info(self):
         info = self.formula.info
@@ -148,8 +151,19 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
             tree.setExpanded(tree.indexFromItem(e_item), True)
         for i in range(tree.columnCount()):
             tree.resizeColumnToContents(i)
+    
+    @state_node(withArgs=True, mode="a")
+    def hide_element_infos(self, a:bool=True):
+        b = not a
+        self.elementHidePushButton.setVisible(b)
+        self.elementTableWidget.setVisible(b)
+        self.elementLineEdit.setVisible(b)
+        self.elementAddToolButton.setVisible(b)
+        
 
+    @state_node(mode="a")
     def show_element_infos(self):
+        self.hide_element_infos(False)
         info = self.formula.info
         gen = info.calc_gen
 

@@ -157,11 +157,11 @@ cdef class Calculator:
                 else:
                     f.addEI(e_num.e, e_num.i_num, mi_int)
                     if self.nitrogen_rule:
-                        DBE2 = last_s.DBE2 + mi_int * e_s.DBE2
+                        DBE = (last_s.DBE2 + mi_int * e_s.DBE2) / 2.
                         for _ in range(mi_int, ma_int + 1) :
-                            if fabs(fround(DBE2)-DBE2) < eps and self.check(f, ML, MR, charge):
+                            if fabs(fround(DBE)-DBE) < eps and self.check(f, ML, MR, charge):
                                 ret.append(f.copy())
-                            DBE2 += e_s.DBE2
+                            DBE += e_s.DBE2 / 2.
                             f.addEI(e_num.e, e_num.i_num, 1)
                     else:
                         for _ in range(mi_int, ma_int + 1):

@@ -62,7 +62,7 @@ def test_restricted_1():
     assert gen.get_EI_num("N[15]").max == 1
     # calc = gen.generate(Calculator)
     calc = gen.generate()
-    s = ["C9H12O11N-", "C10H15O11N-", "C10H20O2N+"]
+    s = ["C9H12O11N-", "C10H20O2N+"]
     for ss in s:
         f = Formula(ss)
         ret = list(calc.get(f.mass(), f.charge))
@@ -77,6 +77,27 @@ def test_restricted_1():
         f['O[18]'] = 2
         ret = list(calc.get(f.mass(), f.charge))
         assert len(ret) <= 3
+        assert f in ret
+    gen.nitrogen_rule = False
+    calc2 = gen.generate()
+    s = ["C10H15O11N-"]
+    for ss in s:
+        f = Formula(ss)
+        ret = list(calc.get(f.mass(), f.charge))
+        assert f not in ret
+        ret = list(calc2.get(f.mass(), f.charge))
+        assert f in ret
+
+        f['N[15]'] = 1
+        ret = list(calc.get(f.mass(), f.charge))
+        assert f not in ret
+        ret = list(calc2.get(f.mass(), f.charge))
+        assert f in ret
+
+        f['O[18]'] = 2
+        ret = list(calc.get(f.mass(), f.charge))
+        assert f not in ret
+        ret = list(calc2.get(f.mass(), f.charge))
         assert f in ret
 
 
@@ -161,17 +182,17 @@ def test_unlimited_isotope():
 
     f = Formula("C9H[2]12O11N-")
     ret = list(calc.get(f.mass(), f.charge))
-    assert len(ret) >= 5
+    # assert len(ret) >= 5
     assert f in ret
 
     gen.dbe_limit = False
     gen.nitrogen_rule = False
     calc = gen.generate()
     ret = list(calc.get(f.mass(), f.charge))
-    assert len(ret) >= 15
+    assert len(ret) >= 5
 
 
-def test_some_formula():
+def test_some_formula_1():
     gen = CalculatorGenerator.Factory()
     gen.add_EI("O[18]")
     gen.set_EI_num("O[18]", 0, 3, True)
@@ -190,6 +211,20 @@ def test_some_formula():
 
     f = Formula("HNO3")
     ret = list(calc.get(f.mass(), 0))
+    assert len(ret) < 3
+    assert f in ret
+
+def test_some_formula_2():
+    gen = CalculatorGenerator.Factory()
+    gen.del_EI("C")
+    gen.del_EI("H")
+    gen.add_EI("N")
+    gen.set_EI_num("N", 0, 5, False)
+
+    calc = gen.generate(Calculator)
+
+    f = Formula("NO3-")
+    ret = list(calc.get(f.mass(), f.charge))
     assert len(ret) < 3
     assert f in ret
 

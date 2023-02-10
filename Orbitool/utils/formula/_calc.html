@@ -873,7 +873,7 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator_2get(str
   int32_t __pyx_v_cur;
   int32_t __pyx_v_TAIL;
   PyObject *__pyx_v_ret = 0;
-  double __pyx_v_DBE2;
+  double __pyx_v_DBE;
   CYTHON_UNUSED long __pyx_v__;
   PyObject *__pyx_r = NULL;
   <span class='refnanny'>__Pyx_RefNannyDeclarations</span>
@@ -1286,15 +1286,15 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator_2get(str
 /* … */
           goto __pyx_L18;
         }
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">160</span>:                         <span class="n">DBE2</span> <span class="o">=</span> <span class="n">last_s</span><span class="o">.</span><span class="n">DBE2</span> <span class="o">+</span> <span class="n">mi_int</span> <span class="o">*</span> <span class="n">e_s</span><span class="o">.</span><span class="n">DBE2</span></pre>
-<pre class='cython code score-0 '>          __pyx_v_DBE2 = (__pyx_v_last_s-&gt;DBE2 + (__pyx_v_mi_int * __pyx_v_e_s-&gt;DBE2));
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">160</span>:                         <span class="n">DBE</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_s</span><span class="o">.</span><span class="n">DBE2</span> <span class="o">+</span> <span class="n">mi_int</span> <span class="o">*</span> <span class="n">e_s</span><span class="o">.</span><span class="n">DBE2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span></pre>
+<pre class='cython code score-0 '>          __pyx_v_DBE = ((__pyx_v_last_s-&gt;DBE2 + (__pyx_v_mi_int * __pyx_v_e_s-&gt;DBE2)) / 2.);
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">161</span>:                         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mi_int</span><span class="p">,</span> <span class="n">ma_int</span> <span class="o">+</span> <span class="mf">1</span><span class="p">)</span> <span class="p">:</span></pre>
 <pre class='cython code score-0 '>          __pyx_t_13 = (__pyx_v_ma_int + 1);
           __pyx_t_14 = __pyx_t_13;
           for (__pyx_t_15 = __pyx_v_mi_int; __pyx_t_15 &lt; __pyx_t_14; __pyx_t_15+=1) {
             __pyx_v__ = __pyx_t_15;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">162</span>:                             <span class="k">if</span> <span class="n">fabs</span><span class="p">(</span><span class="n">fround</span><span class="p">(</span><span class="n">DBE2</span><span class="p">)</span><span class="o">-</span><span class="n">DBE2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">eps</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">ML</span><span class="p">,</span> <span class="n">MR</span><span class="p">,</span> <span class="n">charge</span><span class="p">):</span></pre>
-<pre class='cython code score-0 '>            __pyx_t_8 = ((fabs((round(__pyx_v_DBE2) - __pyx_v_DBE2)) &lt; __pyx_v_8Orbitool_5utils_7formula_5_calc_eps) != 0);
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">162</span>:                             <span class="k">if</span> <span class="n">fabs</span><span class="p">(</span><span class="n">fround</span><span class="p">(</span><span class="n">DBE</span><span class="p">)</span><span class="o">-</span><span class="n">DBE</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">eps</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">ML</span><span class="p">,</span> <span class="n">MR</span><span class="p">,</span> <span class="n">charge</span><span class="p">):</span></pre>
+<pre class='cython code score-0 '>            __pyx_t_8 = ((fabs((round(__pyx_v_DBE) - __pyx_v_DBE)) &lt; __pyx_v_8Orbitool_5utils_7formula_5_calc_eps) != 0);
             if (__pyx_t_8) {
             } else {
               __pyx_t_5 = __pyx_t_8;
@@ -1311,8 +1311,8 @@ static PyObject *__pyx_pf_8Orbitool_5utils_7formula_5_calc_10Calculator_2get(str
               <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
               __pyx_t_12 = <span class='pyx_c_api'>__Pyx_PyList_Append</span>(__pyx_v_ret, __pyx_t_1);<span class='error_goto'> if (unlikely(__pyx_t_12 == ((int)-1))) __PYX_ERR(0, 163, __pyx_L1_error)</span>
               <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">164</span>:                             <span class="n">DBE2</span> <span class="o">+=</span> <span class="n">e_s</span><span class="o">.</span><span class="n">DBE2</span></pre>
-<pre class='cython code score-0 '>            __pyx_v_DBE2 = (__pyx_v_DBE2 + __pyx_v_e_s-&gt;DBE2);
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">164</span>:                             <span class="n">DBE</span> <span class="o">+=</span> <span class="n">e_s</span><span class="o">.</span><span class="n">DBE2</span> <span class="o">/</span> <span class="mf">2.</span></pre>
+<pre class='cython code score-0 '>            __pyx_v_DBE = (__pyx_v_DBE + (__pyx_v_e_s-&gt;DBE2 / 2.));
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">165</span>:                             <span class="n">f</span><span class="o">.</span><span class="n">addEI</span><span class="p">(</span><span class="n">e_num</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="n">e_num</span><span class="o">.</span><span class="n">i_num</span><span class="p">,</span> <span class="mf">1</span><span class="p">)</span></pre>
 <pre class='cython code score-0 '>            ((struct __pyx_vtabstruct_8Orbitool_5utils_7formula_8_formula_Formula *)__pyx_v_f-&gt;__pyx_vtab)-&gt;addEI(__pyx_v_f, __pyx_v_e_num-&gt;e, __pyx_v_e_num-&gt;i_num, 1);<span class='error_goto'> if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 165, __pyx_L1_error)</span>
           }

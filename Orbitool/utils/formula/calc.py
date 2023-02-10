@@ -112,13 +112,13 @@ class Calculator:
                 else:
                     f.addElement(e_num.element, e_num.i_num, mi)
                     if self.nitrogenRule:
-                        DBE2 = last_s.DBE2 + mi * e_s.DBE2
+                        DBE = (last_s.DBE2 + mi * e_s.DBE2) / 2.
                         for _ in range(mi, ma + 1):
-                            if abs(round(DBE2) - DBE2) < 1e-6 and self.check(f, ML, MR, charge):
+                            if abs(round(DBE) - DBE) < 1e-6 and self.check(f, ML, MR, charge):
                                 yield copy(f)
                             elif self.debug:
                                 raise ValueError(str(f))
-                            DBE2 += e_s.DBE2
+                            DBE += e_s.DBE2 / 2.
                             f.addElement(e_num.element, e_num.i_num)
                     else:
                         for _ in range(mi, ma + 1):

@@ -83,7 +83,7 @@ class CalcIsotopeNum(BaseRowItem):
     e_max: int
 
     def __repr__(self) -> str:
-        return f"IsotopeNum({self.element},{self.e_num},{self.i_num},{self.global_limit},{self.min},{self.max},{self.element_min},{self.element_max})"
+        return f"IsotopeNum({self.element},{self.e_num},{self.i_num},{self.global_limit},{self.i_min},{self.i_max},{self.element_min},{self.element_max})"
 
 
 @lru_cache(None)
@@ -190,6 +190,7 @@ class CalculatorGenerator(BaseStructure):
         if cls is None:
             from ._calc import Calculator
             cls = Calculator
+        assert len(self.isotope_usable) >= 2, "At least two isotopes should be added"
         e_list = [(k, v) for k, v in self.get_E_iter() if k not in "HO"]
         e_list.sort(key=lambda i: i[1].e_num, reverse=True)
 
@@ -227,6 +228,8 @@ class CalculatorGenerator(BaseStructure):
             ret = e_to_list("H", get_num("H"))
             H_max_mass = max(r.i_num for r in ret)
             isotope_nums.extend(ret)
+        else:
+            H_max_mass = 0
 
         return cls(
             self.rtol, self.DBEMin, self.DBEMax, self.nitrogen_rule,
@@ -235,7 +238,7 @@ class CalculatorGenerator(BaseStructure):
 
 
 InitParams = [
-    ('e', -1, -0.5, -0.5, 0, 0),
+    ('e', -1, -1, -1, 0, 0),
     ('C', 2, 0, 2, 0, 3),
     ('H', -1, -1, -1, 0, 0),
     ('O', 0, 0, 0, -1, -1),
