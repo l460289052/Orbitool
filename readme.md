@@ -9,7 +9,7 @@
 
 ## Run by python
 
-+ install python 3.8.10
++ install python 3.8
 + please view requirements.txt
 + copy those dlls to Orbitool/utils/readers
   + ThermoFisher.CommonCore.BackgroundSubtraction.dll
@@ -169,7 +169,7 @@ Docker could be dragged out or be stacked.
 
 ### 1.Formula
 
-There are two formula calculator. One use DBE and the other not.
+There are only one formula calculator now. I will explain in detail below how it works and how to use it.
 
 ### 2.Mass List
 
@@ -252,13 +252,6 @@ There are some points with larger noise, like NO3- and HN2O6-, etc. They should 
 
 When averaging spectra between files, make sure calibration first.
 
-Before calibration:
-
-
-
-After calibration:
-
-
 
 ## 4.Spectra&Peak fit
 
@@ -317,11 +310,12 @@ some examples to help you understand the format of formula of Orbitool
 
 You can change the formula's settings used in formula guessing.
 
-+ base group
-+ mz range
++ charge
++ mz range (not used now, this option is only a limit when fitting spectra.)
 + DBE
 + ppm
-+ whether use Nitrogen rule
++ whether enable Nitrogen rule
++ whether enable DBE range & OH limit
 + elements and isotopes to be used
 + elements' parameters
 
@@ -332,14 +326,18 @@ You can input **formula** or **mass**.
 + If formula was inputted, the result will be its mass (with electron). 
 + if mass was inputted, the Calculator will calculate and show formula(s).
 
-Just a hint: the result text box is editable just for copying. Orbitool won't read anything from it.
+### Isotope num limit
 
-### Calculation method
+For the limit on the number of elements, the limit is "number of element atoms + number of isotope atoms + global limit".
 
-each element (take electron as a special element) has 7 parameters can be changed (some elements' some parameters won't be changed):
+- Element number limit: The range of the total number of all atoms of the element.
+- Isotope number limit: A limit on the number range of atoms of a particular isotope, like C[12], C[13], H[1], H[3], etc. 
+- Global limit: In the calculation, the sum of isotopes marked with "global limit" will not exceed this value. You can use it as a way to limit rare isotopes. However, if you have a large number of rare isotopes in your experiment, be sure not to check the "global limit" restriction for that element.
 
-+ MIN: minimum of the element's number
-+ MAX: maximum of the element's number
+### Element info & Calculation method
+
+Each element (take electron as a special element) has 5 parameters can be changed (some elements' some parameters won't be changed):
+
 + 2*DBE: 2 times element's effect to DBE
 + H min, H max: ability to replace H
 + O min, O max: ability to replace O
@@ -348,8 +346,8 @@ each element (take electron as a special element) has 7 parameters can be change
 
 |     | min | max | 2*DBE | H min | H max | O min | O max |
 | --- | --- | --- | ----- | ----- | ----- | ----- | ----- |
-| e   | -1  | 1   | -1    | -0.5  | -0.5  | 0     | 0     |
-| C   | 0   | 20  | 2     | -     | 2     | 0     | 3     |
+| e   | -1  | 1   | -1    | -1    | -1    | 0     | 0     |
+| C   | 0   | 20  | 2     | 0     | 2     | 0     | 3     |
 | H   | 0   | 40  | -1    | -1    | -1    | 0     | 0     |
 | O   | 0   | 15  | 0     | 0     | 0     | -1    | -1    |
 | N   | 0   | 4   | 1     | -1    | 1     | 0     | 3     |
@@ -364,17 +362,11 @@ each element (take electron as a special element) has 7 parameters can be change
 | P   | 0   | 4   | 1     | -1    | 1     | 0     | 6     |
 | Si  | 0   | 5   | 2     | 0     | 2     | 0     | 3     |
 
-for element C, H min change with number
-
-| C num | 0   | 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 9   | 10  | 11  | 12  |
-| ----- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| H min | 0   | 4   | 4   | 6   | 6   | 6   | 6   | 8   | 8   | 8   | 8   | 10  | ... |
-
 some parameters have some initial value:
 
 | 2*DBE | H min | H max | O min | O max |
 | ----- | ----- | ----- | ----- | ----- |
-| 2     | -0.5  | 2.5   | 0     | 0     |
+| 2     | 2     | 2     | 0     | 0     |
 
 #### example
 
@@ -387,8 +379,8 @@ Then program will iterate O number from 0 to 15.
 
 If O number is 11 at some time while iterating, the part becomes 'C10O11N-':
 
-+ minimum of H will be $max(0_{H:min},-0.5_{initial:Hmin}+1*(-0.5)_{e:Hmin}+8_{\text{Hmin for C=10}}+1*(-1)_{N:Hmin})=6$
-+ maximum of H will be $min(40_{H:min},2.5_{initial:Hmax}+1*(-0.5)_{e:Hmax}+10*2_{C:Hmax}+1*1_{N:Hmax})=23$
++ minimum of H will be $max(0_{H:min},1*(-1)_{e:Hmin}+8_{\text{Hmin for C=10}}+1*(-1)_{N:Hmin})=6$
++ maximum of H will be $min(40_{H:min},2_{initial:Hmax}+1*(-1)_{e:Hmax}+10*2_{C:Hmax}+1*1_{N:Hmax})=23$
 
 So the program will iterate H number from 6 to 23 for a specific mass guessing.
 
@@ -396,18 +388,14 @@ I will add some mass constrains within iteration.
 
 for a ion 'C10H15O11N-', $DBE=\frac{2_{initial:2DBE}+1*(-1)_{e:2DBE}+10*2_{C:2DBE}+1*1_{N:2DBE}+15*(-1)_{H:2DBE}}{2}=3.5$
 
-### Unstricted Calculator
-
-This calculator will ignore DBE, search all formulas which is correspond with ppm restriction and elements/isotopes number constrain.
-
-It can find formulas like 'C5HO5-' or 'C[13]3H3O[18]-'. So the result maybe very long.
-
-
-
 # Maintain
 
 ## Maintainer
-+ School of Electronic, Information and Electrical Engineering, Shanghai Jiao Tong University, Shanghai, 200240, China
+
+The program is developed and maintained by students of Shanghai Jiao Tong University. Runlong acts as a chemical advisor during program development.
+
++ Developer: Yihao Li<liyihao321@sjtu.edu.cn, liyihc@outlook.com>
++ Chemical advisor: Runlong Cai<>
 
 ## Contributors
 
@@ -422,6 +410,13 @@ If you meet any bugs, please let me know. You can send me the 'log.txt' file whi
 mail to: "Matthieu Riva"\<<matthieu.riva@ircelyon.univ-lyon1.fr>\>;  "Cheng Huang"\<<huangc@saes.sh.cn>\>
 
 ## log
+
+**2023.02.12 version 2.3.0**
+
++ Combine restricted calculator and unrestricted calculator into a new calculator
++ In peakfit tab, actions can only be applied to selected peaks.
++ Bug fix
+  + save spectrum.
 
 **2022.10.07 version 2.2.4**
 

@@ -281,6 +281,7 @@ class Ui_Form(object):
         Form.setWindowTitle(_translate("Form", "Form"))
         self.label.setText(_translate("Form", "Calibration Segments"))
         self.rtolLabel.setText(_translate("Form", "tolerance(ppm)"))
+        self.separatorAddPushButton.setToolTip(_translate("Form", "You can select multiple adjacent segments and choose Merge in the context menu"))
         self.separatorAddPushButton.setText(_translate("Form", "add separator"))
         self.label_2.setText(_translate("Form", "Calibration Ions"))
         item = self.ionsTableWidget.horizontalHeaderItem(0)

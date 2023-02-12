@@ -123,6 +123,9 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="toolTip">
+          <string>You can select multiple adjacent segments and choose Merge in the context menu</string>
+         </property>
          <property name="text">
           <string>add separator</string>
          </property>

@@ -41,7 +41,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-163</y>
+        <y>0</y>
         <width>365</width>
         <height>732</height>
        </rect>
@@ -120,8 +120,11 @@
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="globalLimitLabel">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In the calculation, the sum of isotopes marked with &amp;quot;global limit&amp;quot; will not exceed this value&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
-            <string>global limit(g-limit)</string>
+            <string>global limit</string>
            </property>
           </widget>
          </item>
@@ -142,6 +145,9 @@
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
            <widget class="QCheckBox" name="nitrogenRuleCheckBox">
+            <property name="toolTip">
+             <string>the restriction that DBE must be an integer</string>
+            </property>
             <property name="layoutDirection">
              <enum>Qt::LeftToRight</enum>
             </property>
@@ -152,8 +158,12 @@
           </item>
           <item>
            <widget class="QCheckBox" name="dbeLimitCheckBox">
+            <property name="toolTip">
+             <string>DBE range limit and O and H quantity limit. Please check the instruction manual for the specific calculation method.
+You can update the DBE of the element and the attributes that affect the number of O and H in the &quot;element infos&quot;.</string>
+            </property>
             <property name="text">
-             <string>enable DBE limit &amp; O H limit</string>
+             <string>enable DBE limit and O H limit</string>
             </property>
            </widget>
           </item>
