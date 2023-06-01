@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>18</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuWorkspace">
@@ -55,16 +55,18 @@
     <addaction name="workspaceLoadAction"/>
     <addaction name="workspaceSaveAction"/>
     <addaction name="workspaceSaveAsAction"/>
-   </widget>
-   <widget class="QMenu" name="menuConfig">
-    <property name="title">
-     <string>Config</string>
-    </property>
+    <addaction name="separator"/>
     <addaction name="configLoadAction"/>
     <addaction name="configSaveAction"/>
    </widget>
+   <widget class="QMenu" name="menuOrbitool">
+    <property name="title">
+     <string>Orbitool</string>
+    </property>
+    <addaction name="settingAction"/>
+   </widget>
+   <addaction name="menuOrbitool"/>
    <addaction name="menuWorkspace"/>
-   <addaction name="menuConfig"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="workspaceSaveAction">
@@ -87,12 +89,28 @@
   </action>
   <action name="configLoadAction">
    <property name="text">
-    <string>Load</string>
+    <string>Load config from workspace</string>
+   </property>
+   <property name="toolTip">
+    <string>Load Config from Workspace</string>
    </property>
   </action>
   <action name="configSaveAction">
    <property name="text">
-    <string>Save</string>
+    <string>Save config to workspace</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Config to Workspace</string>
+   </property>
+  </action>
+  <action name="actionss">
+   <property name="text">
+    <string>ss</string>
+   </property>
+  </action>
+  <action name="settingAction">
+   <property name="text">
+    <string>Setting</string>
    </property>
   </action>
  </widget>

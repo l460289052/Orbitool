@@ -11,6 +11,7 @@ from .manager import Manager, state_node, MultiProcess
 from . import utils as UiUtils
 
 from . import MainUi
+from .setting import Dialog as SettingDialog
 
 from . import FileUiPy, NoiseUiPy, PeakShapeUiPy, CalibrationUiPy, PeakFitUiPy, MassDefectUiPy
 from . import TimeseriesesUiPy
@@ -27,6 +28,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         manager = self.manager
         self.setWindowTitle(f"Orbitool {manager.workspace.info.version}")
 
+        self.settingAction.triggered.connect(self.setting)
         self.workspaceLoadAction.triggered.connect(self.load)
         self.workspaceSaveAction.triggered.connect(self.save)
         self.workspaceSaveAsAction.triggered.connect(self.save_as)
@@ -145,6 +147,11 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     def closeEvent(self, e: QtGui.QCloseEvent) -> None:
         self.workspace.close()
         e.accept()
+
+    @state_node
+    def setting(self):
+        dialog = SettingDialog()
+        dialog.exec()
 
     @state_node
     def load(self):
