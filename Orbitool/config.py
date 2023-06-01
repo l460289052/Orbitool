@@ -47,10 +47,10 @@ class _Setting(BaseModel):
 
     plot_refresh_interval: float = 1
 
-    def save(self):
+    def save_setting(self):
         config_path.write_text(self.json(indent=4))
 
-    def update(self, new_config: "_Setting"):
+    def update_from(self, new_config: "_Setting"):
         for key in new_config.__fields__.keys():
             setattr(self, key, getattr(new_config, key))
 
@@ -60,4 +60,4 @@ if config_path.exists():
 else:
     setting = _Setting()
 
-setting.save()
+setting.save_setting()

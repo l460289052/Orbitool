@@ -1,23 +1,19 @@
-from typing import Union, Dict
 from datetime import datetime
+from typing import Dict, Union
 
-from PyQt5 import QtWidgets, QtCore, QtGui
 from matplotlib.pyplot import get
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ..structures.HDF5 import h5_brokens
-from ..workspace import WorkSpace, update as workspace_update, need_update, get_version, VERSION
-
-from .manager import Manager, state_node, MultiProcess
+from ..workspace import VERSION, WorkSpace, get_version, need_update
+from ..workspace import update as workspace_update
+from . import (CalibrationUiPy, FileUiPy, FormulaUiPy, MainUi, MassDefectUiPy,
+               MassListUiPy, NoiseUiPy, PeakFitUiPy, PeakListUiPy,
+               PeakShapeUiPy, SpectraListUiPy, SpectrumUiPy, TimeseriesesUiPy,
+               TimeseriesUiPy)
 from . import utils as UiUtils
-
-from . import MainUi
+from .manager import Manager, MultiProcess, state_node
 from .setting import Dialog as SettingDialog
-
-from . import FileUiPy, NoiseUiPy, PeakShapeUiPy, CalibrationUiPy, PeakFitUiPy, MassDefectUiPy
-from . import TimeseriesesUiPy
-
-from . import FormulaUiPy, MassListUiPy, SpectraListUiPy, PeakListUiPy, SpectrumUiPy
-from . import TimeseriesUiPy
 
 
 class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
@@ -28,7 +24,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         manager = self.manager
         self.setWindowTitle(f"Orbitool {manager.workspace.info.version}")
 
-        self.settingAction.triggered.connect(self.setting)
+        self.settingAction.triggered.connect(self.setting_dialog)
         self.workspaceLoadAction.triggered.connect(self.load)
         self.workspaceSaveAction.triggered.connect(self.save)
         self.workspaceSaveAsAction.triggered.connect(self.save_as)
@@ -149,7 +145,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         e.accept()
 
     @state_node
-    def setting(self):
+    def setting_dialog(self):
         dialog = SettingDialog()
         dialog.exec()
 

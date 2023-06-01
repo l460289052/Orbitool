@@ -68,10 +68,27 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>375</width>
-          <height>303</height>
+          <width>380</width>
+          <height>313</height>
          </rect>
         </property>
+        <layout class="QVBoxLayout" name="scrollAreaLayout">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+        </layout>
        </widget>
       </widget>
      </item>
