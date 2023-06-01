@@ -6,6 +6,7 @@ try:
     import multiprocessing
     import argparse
 
+    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = '1'
     os.environ["OPENBLAS_NUM_THREADS"] = '1'
     os.environ["GOTO_NUM_THREADS"] = '1'
     os.environ["OMP_NUM_THREADS"] = '1'
@@ -24,16 +25,21 @@ try:
         parser.add_argument("--no_multiprocess", action="store_true")
         parser.add_argument("--to_step")
 
-        from Orbitool.config import get_config
-        config = get_config()
+        from Orbitool.config import setting
         args = parser.parse_args()
-        config.DEBUG = args.debug
-        config.NO_MULTIPROCESS = args.no_multiprocess
+        if args.debug:
+            setting.DEBUG = True
+        if args.no_multiprocess:
+            setting.NO_MULTIPROCESS = True
 
         import matplotlib as mpl
         mpl.rcParams['agg.path.chunksize'] = 10000
 
-        from PyQt5 import QtWidgets
+        from PyQt5 import QtCore, QtWidgets
+        # QtWidgets.QApplication.setAttribute(QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.ApplicationAttribute.AA_EnableHighDpiScaling)
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.ApplicationAttribute.AA_UseHighDpiPixmaps)
+
         app = QtWidgets.QApplication(sys.argv)
         app.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
 
@@ -67,3 +73,4 @@ except Exception as e:
         f.writelines([
             datetime.datetime.now().isoformat(),
             traceback.format_exc()])
+    traceback.print_exc()

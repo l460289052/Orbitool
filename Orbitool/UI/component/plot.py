@@ -7,7 +7,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvas, NavigationToolbar2Q
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
-from ... import get_config
+from ... import setting
 
 
 class Plot:
@@ -31,7 +31,7 @@ class Plot:
         self.resized = True
         self.timer = QTimer()
         self.timer.timeout.connect(self.resize)
-        self.timer.start(int(get_config().plot_refresh_interval * 1000))
+        self.timer.start(int(setting.plot_refresh_interval * 1000))
 
     def clear(self):
         self.fig.clf()

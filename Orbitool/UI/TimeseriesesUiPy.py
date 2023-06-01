@@ -9,7 +9,7 @@ import matplotlib.ticker
 import numpy as np
 from PyQt5 import QtCore, QtWidgets
 
-from .. import get_config
+from .. import setting
 from ..functions import binary_search
 from ..functions.peakfit.base import BaseFunc as BaseFitFunc
 from ..functions.spectrum import splitPeaks
@@ -211,7 +211,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         time_max = max(max(s.times) for s in series if len(s.times) > 0)
 
         ret, file = savefile("Timeseries", "CSV file(*.csv)",
-                             f"timeseries {time_min.strftime(get_config().format_export_time)}-{time_max.strftime(get_config().format_export_time)}.csv")
+                             f"timeseries {time_min.strftime(setting.format_export_time)}-{time_max.strftime(setting.format_export_time)}.csv")
         if not ret:
             return
 

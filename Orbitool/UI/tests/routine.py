@@ -1,7 +1,7 @@
 import os
 
 from PyQt5 import QtWidgets, QtCore
-from ... import get_config, config
+from Orbitool import config, setting
 from .. import MainUiPy, FileUiPy
 
 from ..utils import test
@@ -11,14 +11,14 @@ loop: QtCore.QEventLoop = None
 
 
 def wait_not_busy():
-    if not get_config().DEBUG:
+    if not setting.DEBUG:
         loop.exec_()
     sleep()
 
 
 def sleep(timeout=None):
     if not timeout:
-        timeout = get_config().test_timeout
+        timeout = setting.test_timeout
     if timeout > 0:
         timer = QtCore.QTimer()
         timer.timeout.connect(loop.quit)
@@ -36,22 +36,24 @@ def init(window: MainUiPy.Window):
     loop = QtCore.QEventLoop()
     window.manager.busy_signal.connect(loop.quit)
 
-def qt_exit(app:QtWidgets.QApplication):
+
+def qt_exit(app: QtWidgets.QApplication):
     timer = QtCore.QTimer()
     timer.timeout.connect(app.exit)
-    timer.start(get_config().test_timeout)
+    timer.start(setting.test_timeout)
+
 
 def fileui(window: MainUiPy.Window):
     fileui = window.fileTab
     manager = fileui.manager
     workspace = manager.workspace
-    test.input((True, os.path.join(os.path.dirname(config.rootPath), 'data')))
+    test.input(True, config.ROOT_PATH.parent / 'data')
     sleep()
     fileui.addFolder()
 
     wait_not_busy()
     assert not manager.busy
-    assert workspace.file_tab.info.pathlist.paths 
+    assert workspace.file_tab.info.pathlist.paths
 
     test.input([1, 2, 3])
     fileui.processSelected()

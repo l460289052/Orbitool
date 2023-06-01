@@ -158,7 +158,7 @@ class CalibratorInfo(BaseStructure):
                     calibrators.append(cali)
                 self.calibrator_segments[path] = calibrators
             except Exception as e:
-                raise ValueError(f"Error at file {path}") from e
+                raise ValueError(f"Error at file {path}:{e}") from e
         self.last_calibrate_info_segments = deepcopy(
             self.calibrate_info_segments)
 

@@ -11,7 +11,7 @@ from typing import (Any, Deque, Generator, Generic, Iterable, List, Tuple,
 
 from PyQt5 import QtCore
 
-from ... import get_config
+from ... import setting
 from ..utils import sleep
 from . import manager
 
@@ -78,7 +78,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
         try:
             if self.tqdm is None:
                 self.tqdm = manager.TQDMER()
-            if get_config().NO_MULTIPROCESS:
+            if setting.NO_MULTIPROCESS:
                 self._single_run_memory()
             else:
                 self._run()
@@ -105,7 +105,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
             self.write, (file, iter_queue()), self.write_kwargs)
         write_thread.start()
 
-        multi_cores = get_config().multi_cores
+        multi_cores = setting.multi_cores
 
         with Pool(multi_cores) as pool:
             def abort():

@@ -28,3 +28,4 @@ htmlcov
 collect.txt
 /build-config.json
 .VSCodeCounter
+/setting.json

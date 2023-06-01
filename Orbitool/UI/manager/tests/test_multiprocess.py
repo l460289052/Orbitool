@@ -4,7 +4,7 @@ from time import sleep
 
 from PyQt5 import QtWidgets, QtCore
 from .. import MultiProcess, Manager
-from .... import get_config
+from Orbitool import setting
 
 
 class p(MultiProcess):
@@ -53,9 +53,8 @@ class p(MultiProcess):
 #     assert file == {"ret": list(range(20))}
 
 def test_single():
-    config = get_config()
     # config.DEBUG = True
-    config.NO_MULTIPROCESS = True
+    setting.NO_MULTIPROCESS = True
     app = QtWidgets.QApplication([])
     num = 20
     file = {}

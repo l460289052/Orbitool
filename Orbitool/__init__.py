@@ -1,2 +1,2 @@
-from .config import get_config, set_config
+from .config import setting
 from .version import VERSION

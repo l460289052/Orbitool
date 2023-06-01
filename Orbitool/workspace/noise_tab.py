@@ -1,7 +1,7 @@
 import numpy as np
 
 from .base import Widget as BaseWidget
-from .. import get_config
+from .. import setting
 from ..structures import BaseRowItem, BaseStructure, Row, field
 from ..structures.file import FileSpectrumInfo
 from ..structures.HDF5 import NdArray, StructureList
@@ -20,7 +20,7 @@ class NoiseFormulaParameter(BaseRowItem):
 
 
 def default_formula_parameter():
-    return [NoiseFormulaParameter(Formula(f)) for f in get_config().noise_formulas]
+    return [NoiseFormulaParameter(Formula(f)) for f in setting.noise_formulas]
 
 
 class NoiseGeneralSetting(BaseStructure):
