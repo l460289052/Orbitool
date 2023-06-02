@@ -36,7 +36,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.processWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 26))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
         self.menubar.setObjectName("menubar")
         self.menuWorkspace = QtWidgets.QMenu(self.menubar)
         self.menuWorkspace.setObjectName("menuWorkspace")
@@ -67,8 +67,8 @@ class Ui_MainWindow(object):
         self.menuWorkspace.addAction(self.configLoadAction)
         self.menuWorkspace.addAction(self.configSaveAction)
         self.menuOrbitool.addAction(self.settingAction)
-        self.menubar.addAction(self.menuOrbitool.menuAction())
         self.menubar.addAction(self.menuWorkspace.menuAction())
+        self.menubar.addAction(self.menuOrbitool.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)

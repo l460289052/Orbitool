@@ -169,8 +169,8 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         spectrum = self.peaks_info.spectrum
         ret, f = savefile(
             "Save Spectrum", "CSV file(*.csv)",
-            f"fitted_spectrum {spectrum.start_time.strftime(setting.format_export_time)}-"
-            f"{spectrum.end_time.strftime(setting.format_export_time)}")
+            f"fitted_spectrum {spectrum.start_time.strftime(setting.general.format_export_time)}-"
+            f"{spectrum.end_time.strftime(setting.general.format_export_time)}")
 
         if not ret:
             return
@@ -186,8 +186,8 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
 
         ret, f = savefile(
             "Save Peak List", "CSV file(*.csv)",
-            f"peak_list {spectrum.start_time.strftime(setting.format_export_time)}"
-            f"-{spectrum.end_time.strftime(setting.format_export_time)}")
+            f"peak_list {spectrum.start_time.strftime(setting.general.format_export_time)}"
+            f"-{spectrum.end_time.strftime(setting.general.format_export_time)}")
         if not ret:
             return
 
@@ -219,8 +219,8 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
 
         ret, f = savefile(
             "Save Isotopes", "CSV file(*.csv)",
-            f"isotope {spectrum.start_time.strftime(setting.format_export_time)}"
-            f"-{spectrum.end_time.strftime(setting.format_export_time)}")
+            f"isotope {spectrum.start_time.strftime(setting.general.format_export_time)}"
+            f"-{spectrum.end_time.strftime(setting.general.format_export_time)}")
         if not ret:
             return
 

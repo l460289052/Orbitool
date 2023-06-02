@@ -11,7 +11,7 @@ loop: QtCore.QEventLoop = None
 
 
 def wait_not_busy():
-    if not setting.DEBUG:
+    if not setting.debug.DEBUG:
         loop.exec_()
     sleep()
 

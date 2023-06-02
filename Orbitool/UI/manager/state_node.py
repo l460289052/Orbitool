@@ -104,7 +104,7 @@ class node:
                             thread.set_tqdmer(manager.tqdm)
                             thread.finished.connect(run_send)
                             manager.running_thread = thread
-                            if setting.DEBUG:
+                            if setting.debug.thread_block_gui:
                                 thread.run()
                             else:
                                 thread.start()
@@ -126,7 +126,7 @@ class node:
             except Exception as e:
                 logger = logging.getLogger("Orbitool")
                 logger.error(str(e), exc_info=e)
-                showInfo(str(e))
+                showInfo(repr(e))
                 if (tmpfunc := self.except_node.func):
                     tmpfunc(selfWidget)
                 elif self._mode in _busy_reset:

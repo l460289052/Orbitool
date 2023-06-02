@@ -78,7 +78,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
         try:
             if self.tqdm is None:
                 self.tqdm = manager.TQDMER()
-            if setting.NO_MULTIPROCESS:
+            if setting.debug.NO_MULTIPROCESS:
                 self._single_run_memory()
             else:
                 self._run()
@@ -105,7 +105,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
             self.write, (file, iter_queue()), self.write_kwargs)
         write_thread.start()
 
-        multi_cores = setting.multi_cores
+        multi_cores = setting.general.multi_cores
 
         with Pool(multi_cores) as pool:
             def abort():

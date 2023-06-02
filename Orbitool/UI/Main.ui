@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuWorkspace">
@@ -65,8 +65,8 @@
     </property>
     <addaction name="settingAction"/>
    </widget>
-   <addaction name="menuOrbitool"/>
    <addaction name="menuWorkspace"/>
+   <addaction name="menuOrbitool"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="workspaceSaveAction">

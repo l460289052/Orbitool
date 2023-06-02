@@ -1,3 +1,4 @@
+from multiprocessing import cpu_count
 import typing
 from PyQt5 import QtCore, QtWidgets
 from .GeneralTabUi import Ui_Form
@@ -15,17 +16,33 @@ class Tab(BaseTab):
 
     def init(self, setting: _Setting):
         ui = self.ui
-        ui.defaultSelectCheckBox.setChecked(setting.default_select)
+
+        general = setting.general
+
+        ui.defaultSelectCheckBox.setChecked(general.default_select)
+
+        ui.multiCoresSpinBox.setMinimum(1)
+        ui.multiCoresSpinBox.setMaximum(cpu_count())
+        ui.multiCoresSpinBox.setValue(general.multi_cores)
+
         ui.timeFormatLineEdit.textChanged.connect(self.change_time_format)
-        ui.timeFormatLineEdit.setText(setting.format_time)
-        ui.exportTimeFormatLineEdit.textChanged.connect(self.change_export_time_format)
-        ui.exportTimeFormatLineEdit.setText(setting.format_export_time)
+        ui.timeFormatLineEdit.setText(general.format_time)
+        ui.timeFormatRevertButton.clicked.connect(
+            lambda: ui.timeFormatLineEdit.setText(general.__fields__["format_time"].get_default()))
+
+        ui.exportTimeFormatLineEdit.textChanged.connect(
+            self.change_export_time_format)
+        ui.exportTimeFormatLineEdit.setText(general.format_export_time)
+        ui.exportTimeFormatRevertButton.clicked.connect(
+            lambda: ui.exportTimeFormatLineEdit.setText(general.__fields__["format_export_time"].get_default()))
 
     def stash_setting(self, setting: _Setting):
         ui = self.ui
-        setting.default_select = ui.defaultSelectCheckBox.isChecked()
-        setting.format_time = ui.timeFormatLineEdit.text()
-        setting.format_export_time = ui.exportTimeFormatLineEdit.text()
+        general = setting.general
+        general.multi_cores = ui.multiCoresSpinBox.value()
+        general.default_select = ui.defaultSelectCheckBox.isChecked()
+        general.format_time = ui.timeFormatLineEdit.text()
+        general.format_export_time = ui.exportTimeFormatLineEdit.text()
 
     def change_time_format(self, text: str):
         try:

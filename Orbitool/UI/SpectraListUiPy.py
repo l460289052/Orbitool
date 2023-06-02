@@ -90,8 +90,8 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
         tableWidget.setRowCount(len(infos))
 
         for i, (info, end) in enumerate(zip(infos, ends)):
-            time_range = (info.start_time.strftime(setting.format_time),
-                          end.strftime(setting.format_time))
+            time_range = (info.start_time.strftime(setting.general.format_time),
+                          end.strftime(setting.general.format_time))
             for j, v in enumerate(time_range):
                 tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(v))
 
@@ -102,9 +102,9 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
         tableWidget.setRowCount(len(infos))
         for i, info in enumerate(infos):
             tableWidget.setItem(i, 0, QtWidgets.QTableWidgetItem(
-                info.start_time.strftime(setting.format_time)))
+                info.start_time.strftime(setting.general.format_time)))
             tableWidget.setItem(i, 1, QtWidgets.QTableWidgetItem(
-                info.end_time.strftime(setting.format_time)))
+                info.end_time.strftime(setting.general.format_time)))
 
     def show_combobox_selection(self):
         comboBox = self.comboBox
@@ -115,7 +115,7 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
     def get_selected_index(self):
         indexes = utils.get_tablewidget_selected_row(self.tableWidget)
         if len(indexes) == 0:
-            if setting.default_select:
+            if setting.general.default_select:
                 return 0
             raise ValueError("Please select a spectrum in spectra list")
         return indexes[0]
@@ -138,7 +138,7 @@ class Widget(QtWidgets.QWidget, SpectraListUi.Ui_Form):
 
         def func():
             for spectrum in manager.tqdm(spectra):
-                filename = f"spectrum {spectrum.start_time.strftime(setting.format_export_time)}-{spectrum.end_time.strftime(config.format_export_time)}"
+                filename = f"spectrum {spectrum.start_time.strftime(setting.general.format_export_time)}-{spectrum.end_time.strftime(config.format_export_time)}"
                 manager.msg.emit(f"export {filename}")
                 with open(os.path.join(folder, f"{filename}.csv"), 'w', newline='') as f:
                     writer = csv.writer(f)

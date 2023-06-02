@@ -214,8 +214,8 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
     def export(self):
         spectrum = self.peak_shape.info.spectrum
         ret, f = savefile("Save Peak Shape Info", "CSV file(*.csv)",
-                          f"peak_shape_info {spectrum.start_time.strftime(setting.format_export_time)}"
-                          f"-{spectrum.end_time.strftime(setting.format_export_time)}")
+                          f"peak_shape_info {spectrum.start_time.strftime(setting.general.format_export_time)}"
+                          f"-{spectrum.end_time.strftime(setting.general.format_export_time)}")
         if not ret:
             return
 

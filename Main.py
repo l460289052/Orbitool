@@ -28,9 +28,9 @@ try:
         from Orbitool.config import setting
         args = parser.parse_args()
         if args.debug:
-            setting.DEBUG = True
+            setting.debug.thread_block_gui = True
         if args.no_multiprocess:
-            setting.NO_MULTIPROCESS = True
+            setting.debug.NO_MULTIPROCESS = True
 
         import matplotlib as mpl
         mpl.rcParams['agg.path.chunksize'] = 10000

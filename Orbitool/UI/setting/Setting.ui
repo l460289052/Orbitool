@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>608</width>
-    <height>364</height>
+    <width>700</width>
+    <height>332</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>700</width>
+    <height>300</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
@@ -68,8 +74,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>380</width>
-          <height>313</height>
+          <width>472</width>
+          <height>281</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="scrollAreaLayout">
