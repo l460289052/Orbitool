@@ -44,7 +44,8 @@ def test_dict():
 
     proxy.save_to_disk()
 
-    assert key not in to
+    assert key in to
+    assert len(to[key]) == 0
     assert len(fo[key]) == 5
     assert len(proxy.spectrum_dict) == 5
     assert set(fo[key].keys()) == set(map(str, range(1, 10, 2)))
@@ -69,10 +70,30 @@ def test_list():
         proxy.spectrum_list.append(Spectrum(mz=mz, intensity=intensity,
                                                time=datetime(2000, 1, i + 1)))
 
+    spectrum_list = list(proxy.spectrum_list)
+
     assert key in to
 
     assert len(fo[key]) == 0
     assert len(to[key]) == 10
+    assert len(proxy.spectrum_list) == 10
+
+    proxy.save_to_disk()
+
+    for i, spectrum in enumerate(proxy.spectrum_list):
+        nptest.assert_equal(spectrum.mz, np.ones(10) * i)
+        assert datetime(2000, 1, i + 1) == spectrum.time
+
+    proxy.spectrum_list = spectrum_list
+
+    assert len(fo[key]) == 10
+    assert len(to[key]) == 10
+    assert len(proxy.spectrum_list) == 10
+
+    proxy.save_to_disk()
+
+    assert len(fo[key]) == 10
+    assert len(to[key]) == 0
     assert len(proxy.spectrum_list) == 10
 
     for i, spectrum in enumerate(proxy.spectrum_list):
@@ -84,7 +105,8 @@ def test_list():
 
     proxy.save_to_disk()
 
-    assert key not in to
+    assert key in to
+    assert len(to[key]) == 0
     assert len(fo[key]) == 5
     assert len(proxy.spectrum_list) == 5
     for i, spectrum in enumerate(proxy.spectrum_list):
