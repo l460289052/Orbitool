@@ -211,7 +211,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
         time_max = max(max(s.times) for s in series if len(s.times) > 0)
 
         ret, file = savefile("Timeseries", "CSV file(*.csv)",
-                             f"timeseries {time_min.strftime(setting.general.format_export_time)}-{time_max.strftime(setting.general.format_export_time)}.csv")
+                             f"timeseries {time_min.strftime(setting.general.export_time_format)}-{time_max.strftime(setting.general.export_time_format)}.csv")
         if not ret:
             return
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\Orbitool\UI\PeakFit.ui'
+# Form implementation generated from reading ui file 'Orbitool\UI\PeakFit.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(826, 616)
+        Form.resize(826, 624)
         self.horizontalLayout = QtWidgets.QHBoxLayout(Form)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.verticalLayout = QtWidgets.QVBoxLayout()
@@ -337,7 +337,7 @@ class Ui_Form(object):
         self.checkBox.setText(_translate("Form", "All if no peak selected"))
         self.replotPushButton.setText(_translate("Form", "replot within list"))
         self.calcDistributionCheckBox.setToolTip(_translate("Form", "If checked, isotope peaks that do not match the natural distribution will be removed after fitting."))
-        self.calcDistributionCheckBox.setText(_translate("Form", "Cal and Fit within natural distribution"))
+        self.calcDistributionCheckBox.setText(_translate("Form", "Filter formulas with natural abundance"))
         self.label.setText(_translate("Form", "Use"))
         self.fitPushButton.setText(_translate("Form", "Fit"))
         self.actionRmTagPushButton.setToolTip(_translate("Form", "Alt+R"))
