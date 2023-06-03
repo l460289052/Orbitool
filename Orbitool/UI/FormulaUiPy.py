@@ -3,7 +3,6 @@ from copy import copy
 import enum
 from functools import partial
 from typing import Callable, List, Union, Optional
-from . import FormulaUi
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import chain
@@ -13,23 +12,28 @@ from ..utils.formula import Formula, parse_element, ElementState
 from .utils import get_tablewidget_selected_row, showInfo
 from . import FormulaResultUiPy
 
+from . import FormulaUi
 
-class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
+class Widget(QtWidgets.QWidget):
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager = manager
-        self.setupUi(self)
+        self.ui = FormulaUi.Ui_Form()
+
+        self.setupUi()
         self.manager.init_or_restored.connect(self.show_or_restore)
 
-    def setupUi(self, Form):
-        # FormulaUi.Ui_Form.setupUi(self, Form)
-        super().setupUi(Form)
+    def setupUi(self):
+        self.ui.setupUi(self)
+        ui = self.ui
+
+
         self.sbs: List[Union[QtWidgets.QSpinBox, QtWidgets.QDoubleSpinBox]] = [
-            self.mzMinDoubleSpinBox, self.mzMaxDoubleSpinBox, self.chargeSpinBox,
-            self.rtolDoubleSpinBox, self.globalLimitSpinBox, self.dbeMinDoubleSpinBox,
-            self.dbeMaxDoubleSpinBox]
+            ui.mzMinDoubleSpinBox, ui.mzMaxDoubleSpinBox, ui.chargeSpinBox,
+            ui.rtolDoubleSpinBox, ui.globalLimitSpinBox, ui.dbeMinDoubleSpinBox,
+            ui.dbeMaxDoubleSpinBox]
         self.cbs: List[QtWidgets.QCheckBox] = [
-            self.nitrogenRuleCheckBox, self.dbeLimitCheckBox]
+            ui.nitrogenRuleCheckBox, ui.dbeLimitCheckBox]
 
         def change_only_focus(self, e: QtGui.QWheelEvent):
             if self.hasFocus():
@@ -44,16 +48,16 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         for cb in self.cbs:
             cb.stateChanged.connect(self.update_calc)
 
-        self.isotopeTreeWidget.itemClicked.connect(self.isotope_item_clicked)
-        self.isotopeAddToolButton.clicked.connect(self.isotope_add)
+        ui.isotopeTreeWidget.itemClicked.connect(self.isotope_item_clicked)
+        ui.isotopeAddToolButton.clicked.connect(self.isotope_add)
 
-        self.elementShowPushButton.clicked.connect(self.show_element_infos)
-        self.elementHidePushButton.clicked.connect(lambda a: self.hide_element_infos())
+        ui.elementShowPushButton.clicked.connect(self.show_element_infos)
+        ui.elementHidePushButton.clicked.connect(lambda a: self.hide_element_infos())
 
-        self.elementTableWidget.itemClicked.connect(self.element_item_clicked)
-        self.elementAddToolButton.clicked.connect(self.element_add)
+        ui.elementTableWidget.itemClicked.connect(self.element_item_clicked)
+        ui.elementAddToolButton.clicked.connect(self.element_add)
 
-        self.calcPushButton.clicked.connect(self.calc)
+        ui.calcPushButton.clicked.connect(self.calc)
 
     @contextlib.contextmanager
     def without_info_change(self):
@@ -68,8 +72,8 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
             cb.stateChanged.connect(self.update_calc)
 
     @property
-    def formula(self):
-        return self.manager.workspace.formula_docker
+    def info(self):
+        return self.manager.workspace.info.formula_docker
 
     def show_or_restore(self):
         self.show_info()
@@ -77,24 +81,25 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
         self.hide_element_infos()
 
     def show_info(self):
-        info = self.formula.info
+        info = self.info
+        ui = self.ui
         with self.without_info_change():
-            self.mzMinDoubleSpinBox.setValue(info.mz_min)
-            self.mzMaxDoubleSpinBox.setValue(info.mz_max)
-            self.chargeSpinBox.setValue(info.charge)
-            self.rtolDoubleSpinBox.setValue(info.calc_gen.rtol * 1e6)
-            self.globalLimitSpinBox.setValue(info.calc_gen.global_limit)
-            self.nitrogenRuleCheckBox.setChecked(info.calc_gen.nitrogen_rule)
-            self.dbeLimitCheckBox.setChecked(info.calc_gen.dbe_limit)
-            self.dbeMinDoubleSpinBox.setValue(info.calc_gen.DBEMin)
-            self.dbeMinDoubleSpinBox.setMaximum(info.calc_gen.DBEMax)
-            self.dbeMaxDoubleSpinBox.setValue(info.calc_gen.DBEMax)
-            self.dbeMaxDoubleSpinBox.setMinimum(info.calc_gen.DBEMin)
+            ui.mzMinDoubleSpinBox.setValue(info.mz_min)
+            ui.mzMaxDoubleSpinBox.setValue(info.mz_max)
+            ui.chargeSpinBox.setValue(info.charge)
+            ui.rtolDoubleSpinBox.setValue(info.calc_gen.rtol * 1e6)
+            ui.globalLimitSpinBox.setValue(info.calc_gen.global_limit)
+            ui.nitrogenRuleCheckBox.setChecked(info.calc_gen.nitrogen_rule)
+            ui.dbeLimitCheckBox.setChecked(info.calc_gen.dbe_limit)
+            ui.dbeMinDoubleSpinBox.setValue(info.calc_gen.DBEMin)
+            ui.dbeMinDoubleSpinBox.setMaximum(info.calc_gen.DBEMax)
+            ui.dbeMaxDoubleSpinBox.setValue(info.calc_gen.DBEMax)
+            ui.dbeMaxDoubleSpinBox.setMinimum(info.calc_gen.DBEMin)
 
     def show_isotopes(self):
-        info = self.formula.info
+        info = self.info
         gen = info.calc_gen
-        tree: QtWidgets.QTreeWidget = self.isotopeTreeWidget
+        tree: QtWidgets.QTreeWidget = self.ui.isotopeTreeWidget
         tree.clear()
         icon = self.style().standardIcon(
             QtWidgets.QStyle.StandardPixmap.SP_DialogDiscardButton)
@@ -155,21 +160,23 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
     @state_node(withArgs=True, mode="a")
     def hide_element_infos(self, a:bool=True):
         b = not a
-        self.elementHidePushButton.setVisible(b)
-        self.elementTableWidget.setVisible(b)
-        self.elementLineEdit.setVisible(b)
-        self.elementAddToolButton.setVisible(b)
+        ui = self.ui
+        ui.elementHidePushButton.setVisible(b)
+        ui.elementTableWidget.setVisible(b)
+        ui.elementLineEdit.setVisible(b)
+        ui.elementAddToolButton.setVisible(b)
         
 
     @state_node(mode="a")
     def show_element_infos(self):
         self.hide_element_infos(False)
-        info = self.formula.info
+        ui = self.ui
+        info = self.info
         gen = info.calc_gen
 
         icon = self.style().standardIcon(
             QtWidgets.QStyle.StandardPixmap.SP_DialogDiscardButton)
-        table: QtWidgets.QTableWidget = self.elementTableWidget
+        table: QtWidgets.QTableWidget = ui.elementTableWidget
         table.clearContents()
         table.setRowCount(0)
         table.setRowCount(len(gen.element_states))
@@ -202,22 +209,23 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
 
     @state_node(mode="a")
     def update_calc(self):
-        info = self.formula.info
-        info.mz_min = self.mzMinDoubleSpinBox.value()
-        info.mz_max = self.mzMaxDoubleSpinBox.value()
-        info.charge = self.chargeSpinBox.value()
-        info.calc_gen.rtol = self.rtolDoubleSpinBox.value() * 1e-6
-        info.calc_gen.global_limit = self.globalLimitSpinBox.value()
-        info.calc_gen.nitrogen_rule = self.nitrogenRuleCheckBox.isChecked()
-        info.calc_gen.dbe_limit = self.dbeLimitCheckBox.isChecked()
-        info.calc_gen.DBEMin = self.dbeMinDoubleSpinBox.value()
-        info.calc_gen.DBEMax = self.dbeMaxDoubleSpinBox.value()
+        info = self.info
+        ui = self.ui
+        info.mz_min = ui.mzMinDoubleSpinBox.value()
+        info.mz_max = ui.mzMaxDoubleSpinBox.value()
+        info.charge = ui.chargeSpinBox.value()
+        info.calc_gen.rtol = ui.rtolDoubleSpinBox.value() * 1e-6
+        info.calc_gen.global_limit = ui.globalLimitSpinBox.value()
+        info.calc_gen.nitrogen_rule = ui.nitrogenRuleCheckBox.isChecked()
+        info.calc_gen.dbe_limit = ui.dbeLimitCheckBox.isChecked()
+        info.calc_gen.DBEMin = ui.dbeMinDoubleSpinBox.value()
+        info.calc_gen.DBEMax = ui.dbeMaxDoubleSpinBox.value()
         self.show_info()
 
     @state_node(withArgs=True, mode="a")
     def isotope_item_clicked(self, item: QtWidgets.QTreeWidgetItem, col: int):
-        tree: QtWidgets.QTreeWidget = self.isotopeTreeWidget
-        gen = self.formula.info.calc_gen
+        tree: QtWidgets.QTreeWidget = self.ui.isotopeTreeWidget
+        gen = self.info.calc_gen
         key = item.text(0)
         i_num = gen.isotope_usable[key]
         if col == 1:  # del
@@ -260,14 +268,14 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
 
     @state_node
     def isotope_add(self):
-        text: str = self.isotopeLineEdit.text()
+        text: str = self.ui.isotopeLineEdit.text()
         try:
-            gen = self.formula.info.calc_gen
+            gen = self.info.calc_gen
             gen.add_EI(text)
             f = Formula(text).findOrigin()
             assert str(f) in gen.element_states, f"Please add the element '{f}' infos first"
             self.show_isotopes()
-            self.isotopeLineEdit.setText("")
+            self.ui.isotopeLineEdit.setText("")
         except Exception as e:
             if text in gen.isotope_usable:
                 del gen.isotope_usable[text]
@@ -277,8 +285,8 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
     def element_item_clicked(self, item: QtWidgets.QTableWidgetItem):
         row = item.row()
         col = item.column()
-        ele = self.formula.info.calc_gen.element_states
-        table: QtWidgets.QTableWidget = self.elementTableWidget
+        ele = self.info.calc_gen.element_states
+        table: QtWidgets.QTableWidget = self.ui.elementTableWidget
         key = table.item(row, 0).text()
         if col == 2:  # del
             btn = QtWidgets.QToolButton()
@@ -332,10 +340,10 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
 
     @state_node
     def element_add(self):
-        text: str = self.elementLineEdit.text()
+        text: str = self.ui.elementLineEdit.text()
         try:
             e, i = parse_element(text)
-            gen = self.formula.info.calc_gen
+            gen = self.info.calc_gen
             if e in gen.element_states:
                 return
             gen.element_states[e] = ElementState()
@@ -347,7 +355,7 @@ class Widget(QtWidgets.QWidget, FormulaUi.Ui_Form):
     def calc(self):
         manager = self.manager
 
-        text = self.inputLineEdit.text()
+        text = self.ui.inputLineEdit.text()
 
         if manager.formulas_result_win is not None:
             manager.formulas_result_win.close()

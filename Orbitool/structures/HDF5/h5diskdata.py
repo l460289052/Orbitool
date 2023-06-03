@@ -161,11 +161,11 @@ class DiskDictProxyView(Generic[T]):
         keys = set(map(str, self.keys))
         obj_keys: Set[str] = set(self.obj.keys())
         obj = self.obj
-        tmp = self.direct.obj
-        if len(tmp) == 0 and keys == obj_keys:
+        proxy = self.direct.obj
+        if len(proxy) == 0 and keys == obj_keys:
             # no update
             return False
-        tmp_keys = set(tmp.keys())
+        tmp_keys = set(proxy.keys())
 
         for to_delete in obj_keys - keys:
             del obj[to_delete]
@@ -174,8 +174,8 @@ class DiskDictProxyView(Generic[T]):
         for to_update in tmp_keys:
             handler.write_to_h5(
                 obj, to_update,
-                handler.read_from_h5(tmp, to_update))
-        tmp.clear()
+                handler.read_from_h5(proxy, to_update))
+        proxy.clear()
         self.obj.attrs[ATTR_KEYS] = self.keys
         return True
 

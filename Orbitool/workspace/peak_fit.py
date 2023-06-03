@@ -5,13 +5,14 @@ import numpy as np
 from ..structures import BaseStructure, field, Row
 from ..structures.HDF5 import Array
 from ..structures.spectrum import Spectrum, FittedPeak, Peak
+from .base import BaseInfo
 
 
 def array_int():
     return array('i')
 
 
-class PeakFitInfo(BaseStructure):
+class PeakFitInfo(BaseInfo):
     h5_type = "peak fit tab"
     spectrum: Spectrum = None
 

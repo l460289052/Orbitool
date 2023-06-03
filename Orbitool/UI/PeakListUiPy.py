@@ -19,7 +19,7 @@ colors = {
     PeakTags.Fail: QtGui.QColor(0xFFBBB1)}
 
 
-class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
+class Widget(QtWidgets.QWidget):
 
     def __init__(self, manager: Manager) -> None:
         super().__init__()
@@ -29,42 +29,43 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
 
         manager.signals.peak_list_show.connect(self.showPeaks)
         manager.getters.peak_list_selected_true_index.connect(self.getSelected)
-        self.setupUi(self)
 
-    def setupUi(self, Form):
-        super().setupUi(Form)
+        self.ui = PeakListUi.Ui_Form()
+        self.setupUi()
 
-        self.doubleSpinBox.setKeyboardTracking(False)
-        self.doubleSpinBox.valueChanged.connect(self.goto_mass)
-        self.gotoToolButton.clicked.connect(self.goto_mass)
-        self.tableWidget.itemDoubleClicked.connect(self.openPeakFloatWin)
-        self.tableWidget.verticalScrollBar().valueChanged.connect(self.scrolled)
+    def setupUi(self):
+        ui = self.ui
+        ui.setupUi(self)
+
+        ui.doubleSpinBox.setKeyboardTracking(False)
+        ui.doubleSpinBox.valueChanged.connect(self.goto_mass)
+        ui.gotoToolButton.clicked.connect(self.goto_mass)
+        ui.tableWidget.itemDoubleClicked.connect(self.openPeakFloatWin)
+        ui.tableWidget.verticalScrollBar().valueChanged.connect(self.scrolled)
 
         self.manager.bind.peak_fit_left_index.connect(
             "peaklist", self.scroll_to_index)
 
-        self.exportSpectrumPushButton.clicked.connect(self.exportSpectrum)
-        self.exportPeaksPushButton.clicked.connect(self.exportPeaks)
-        self.exportIsotopePushButton.clicked.connect(self.exportIsotopes)
+        ui.exportSpectrumPushButton.clicked.connect(self.exportSpectrum)
+        ui.exportPeaksPushButton.clicked.connect(self.exportPeaks)
+        ui.exportIsotopePushButton.clicked.connect(self.exportIsotopes)
 
     def restore(self):
-        self.manager.workspace.peaklist_docker.ui_state.set_state(self)
+        self.info.ui_state.restore_state(self.ui)
 
     def updateState(self):
-        self.manager.workspace.peaklist_docker.ui_state.fromComponents(self, [
-            self.bindPlotCheckBox,
-            self.doubleSpinBox])
+        self.info.ui_state.store_state(self.ui)
 
     @property
-    def peaks_info(self):
-        return self.manager.workspace.peakfit_tab.info
+    def info(self):
+        return self.manager.workspace.info.peak_fit_tab
 
     def showPeaks(self):
-        table = self.tableWidget
-        peaks = self.peaks_info.peaks
-        original_indexes = self.peaks_info.original_indexes
-        raw_split_num = self.peaks_info.raw_split_num
-        indexes = self.peaks_info.shown_indexes
+        table = self.ui.tableWidget
+        peaks = self.info.peaks
+        original_indexes = self.info.original_indexes
+        raw_split_num = self.info.raw_split_num
+        indexes = self.info.shown_indexes
 
         peaks = [peaks[index] for index in indexes]
 
@@ -109,8 +110,8 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
 
     @contextlib.contextmanager
     def no_send_slider(self):
-        bar = self.tableWidget.verticalScrollBar()
-        box = self.bindPlotCheckBox
+        bar = self.ui.tableWidget.verticalScrollBar()
+        box = self.ui.bindPlotCheckBox
         value = box.isChecked()
         box.setChecked(False)
         yield
@@ -120,8 +121,8 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         """
             filter selected or filter unselected
         """
-        selectedindex = get_tablewidget_selected_row(self.tableWidget)
-        info = self.peaks_info
+        selectedindex = get_tablewidget_selected_row(self.ui.tableWidget)
+        info = self.info
         indexes = info.shown_indexes
         if select:
             info.shown_indexes = [indexes[index] for index in selectedindex]
@@ -130,16 +131,16 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
                 indexes.pop(index)
 
     def getSelected(self):
-        selectedindex = get_tablewidget_selected_row(self.tableWidget)
-        info = self.peaks_info
+        selectedindex = get_tablewidget_selected_row(self.ui.tableWidget)
+        info = self.info
         indexes = info.shown_indexes
         return [indexes[index] for index in selectedindex]
 
     @state_node
     def goto_mass(self):
-        mass = self.doubleSpinBox.value()
-        peaks = self.peaks_info.peaks
-        indexes = self.peaks_info.shown_indexes
+        mass = self.ui.doubleSpinBox.value()
+        peaks = self.info.peaks
+        indexes = self.info.shown_indexes
         index = binary_search.indexNearest(
             indexes, mass, method=lambda indexes, ind: peaks[indexes[ind]].peak_position)
         self.scroll_to_index(index)
@@ -147,26 +148,26 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
 
     @state_node(mode='n', withArgs=True)
     def scrolled(self, index):
-        if self.bindPlotCheckBox.isChecked():
+        if self.ui.bindPlotCheckBox.isChecked():
             self.manager.bind.peak_fit_left_index.emit_except(
                 "peaklist", index)
 
     def scroll_to_index(self, index):
-        if self.bindPlotCheckBox.isChecked():
+        if self.ui.bindPlotCheckBox.isChecked():
             with self.no_send_slider():
-                self.tableWidget.verticalScrollBar().setSliderPosition(index)
+                self.ui.tableWidget.verticalScrollBar().setSliderPosition(index)
 
     @state_node(withArgs=True)
     def openPeakFloatWin(self, item: QtWidgets.QTableWidgetItem):
         row = item.row()
         win = PeakFloatWin.get_or_create(
-            self.manager, self.peaks_info.shown_indexes[row])
+            self.manager, self.info.shown_indexes[row])
         win.show()
         win.raise_()
 
     @state_node
     def exportSpectrum(self):
-        spectrum = self.peaks_info.spectrum
+        spectrum = self.info.spectrum
         ret, f = savefile(
             "Save Spectrum", "CSV file(*.csv)",
             f"fitted_spectrum {spectrum.start_time.strftime(setting.general.export_time_format)}-"
@@ -182,7 +183,8 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
 
     @state_node
     def exportPeaks(self):
-        spectrum = self.peaks_info.spectrum
+        info = self.info
+        spectrum = info.spectrum
 
         ret, f = savefile(
             "Save Peak List", "CSV file(*.csv)",
@@ -191,11 +193,11 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         if not ret:
             return
 
-        peaks = self.peaks_info.peaks
-        indexes = self.peaks_info.shown_indexes
+        peaks = info.peaks
+        indexes = info.shown_indexes
         peaks: List[FittedPeak] = [peaks[index] for index in indexes]
-        raw_split_num = self.peaks_info.raw_split_num
-        orginal_indexes = self.peaks_info.original_indexes
+        raw_split_num = info.raw_split_num
+        orginal_indexes = info.original_indexes
 
         with open(f, 'w', newline='') as file:
             writer = csv.writer(file)
@@ -215,7 +217,8 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
 
     @state_node
     def exportIsotopes(self):
-        spectrum = self.peaks_info.spectrum
+        info = self.info
+        spectrum = info.spectrum
 
         ret, f = savefile(
             "Save Isotopes", "CSV file(*.csv)",
@@ -224,8 +227,8 @@ class Widget(QtWidgets.QWidget, PeakListUi.Ui_Form):
         if not ret:
             return
 
-        peaks = self.peaks_info.peaks
-        shown_indexes = self.peaks_info.shown_indexes
+        peaks = info.peaks
+        shown_indexes = info.shown_indexes
 
         formula_map: Dict[Formula, List[Tuple[int, Formula]]] = {}
         for index, peak in enumerate(peaks):

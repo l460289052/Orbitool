@@ -26,6 +26,7 @@ try:
         parser.add_argument("--to_step")
 
         from Orbitool.config import setting
+        setting.save_setting()
         args = parser.parse_args()
         if args.debug:
             setting.debug.thread_block_gui = True

@@ -17,12 +17,12 @@ from .utils import set_header_sizes
 from . import FormulaResultUiPy
 
 
-class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
+class Window(QtWidgets.QMainWindow):
     callback = QtCore.pyqtSignal()
 
     @classmethod
     def get_or_create(cls, manager: Manager, peak_index: int):
-        info = manager.workspace.peakfit_tab.info
+        info = manager.workspace.info.peak_fit_tab
         original_index = info.original_indexes[peak_index]
         wins = manager.peak_float_wins
         if original_index in wins:
@@ -35,9 +35,10 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
     def __init__(self, manager: Manager, original_index: int) -> None:
         super().__init__()
         self.manager = manager
-        self.setupUi(self)
+        self.ui = PeakFitFloatUi.Ui_MainWindow()
+        self.setupUi()
 
-        info = self.peakfit_info
+        info = self.info
         self.original_index = original_index
 
         self.original_slice = binary_search.indexBetween(
@@ -48,30 +49,32 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
         self.showPeak()
         self.plotPeak()
 
-    def setupUi(self, Form):
-        super().setupUi(Form)
-        self.plot = Plot(self.widget)
-        self.refitPushButton.clicked.connect(self.refit)
-        self.savePushButton.clicked.connect(self.save)
-        self.closePushButton.clicked.connect(self.close)
+    def setupUi(self):
+        ui = self.ui
+        ui.setupUi(self)
+        self.plot = Plot(ui.widget)
+        ui.refitPushButton.clicked.connect(self.refit)
+        ui.savePushButton.clicked.connect(self.save)
+        ui.closePushButton.clicked.connect(self.close)
 
-        self.sumCheckBox.clicked.connect(self.replotPeak)
-        self.idealCheckBox.clicked.connect(self.replotPeak)
-        self.legendCheckBox.clicked.connect(self.replotPeak)
-        self.originCheckBox.clicked.connect(self.replotPeak)
-        self.residualCheckBox.clicked.connect(self.replotPeak)
-        set_header_sizes(self.peaksTableWidget.horizontalHeader(),
+        ui.sumCheckBox.clicked.connect(self.replotPeak)
+        ui.idealCheckBox.clicked.connect(self.replotPeak)
+        ui.legendCheckBox.clicked.connect(self.replotPeak)
+        ui.originCheckBox.clicked.connect(self.replotPeak)
+        ui.residualCheckBox.clicked.connect(self.replotPeak)
+        set_header_sizes(ui.peaksTableWidget.horizontalHeader(),
                          [140, 300, 130, 130, 130, 130, 130])
 
-        self.peaksTableWidget.itemDoubleClicked.connect(self.finetuneFormula)
+        ui.peaksTableWidget.itemDoubleClicked.connect(self.finetuneFormula)
 
     def set_formulas(self, peak_index: int, formulas: List[Formula]):
-        self.peaks[peak_index - self.original_slice.start].formulas = formulas
+        ind: int = peak_index - self.original_slice.start
+        self.peaks[ind].formulas = formulas
         self.showPeak()
 
     @property
-    def peakfit_info(self):
-        return self.manager.workspace.peakfit_tab.info
+    def info(self):
+        return self.manager.workspace.info.peak_fit_tab
 
     @state_node(withArgs=True)
     def finetuneFormula(self, item: QtWidgets.QTableWidgetItem):
@@ -88,23 +91,24 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
         manager.formulas_result_win.acceptSignal.connect(
             lambda formulas: self.finetuneFinish(row, formulas))
 
-    def finetuneFinish(self, local_index, formulas: List[Formula]):
+    def finetuneFinish(self, local_index: int, formulas: List[Formula]):
         self.peaks[local_index].formulas = formulas
         self.showPeak()
 
     def showPeak(self):
-        origin_peak = self.peakfit_info.raw_peaks[self.original_index]
-        peaks = self.peakfit_info.peaks
+        origin_peak = self.info.raw_peaks[self.original_index]
+        peaks = self.info.peaks
         show_peaks = self.peaks
 
-        self.spinBox.setValue(len(show_peaks))
+        ui = self.ui
+        ui.spinBox.setValue(len(show_peaks))
 
-        table = self.peaksTableWidget
+        table = ui.peaksTableWidget
         table.clearContents()
         table.setRowCount(0)
         table.setRowCount(len(show_peaks))
 
-        rtol = self.manager.workspace.formula_docker.info.calc_gen.rtol
+        rtol = self.manager.workspace.info.formula_docker.calc_gen.rtol
 
         for index, peak in enumerate(show_peaks):
             def setText(column, msg):
@@ -139,7 +143,7 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
                             continue
                         break
 
-        table = self.intensityTableWidget
+        table = ui.intensityTableWidget
         table.clearContents()
         table.setRowCount(0)
         table.setRowCount(len(origin_peak.mz))
@@ -150,16 +154,17 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
                 format(intensity, '.5f')))
 
     def plotPeak(self):
-        show_origin = self.originCheckBox.isChecked()
-        show_sum = self.sumCheckBox.isChecked()
-        show_id = self.idealCheckBox.isChecked()
-        show_residual = self.residualCheckBox.isChecked()
-        show_legend = self.legendCheckBox.isChecked()
+        ui = self.ui
+        show_origin = ui.originCheckBox.isChecked()
+        show_sum = ui.sumCheckBox.isChecked()
+        show_id = ui.idealCheckBox.isChecked()
+        show_residual = ui.residualCheckBox.isChecked()
+        show_legend = ui.legendCheckBox.isChecked()
 
-        origin_peak = self.peakfit_info.raw_peaks[self.original_index]
+        origin_peak = self.info.raw_peaks[self.original_index]
         show_peaks = self.peaks
 
-        func = self.manager.workspace.peak_shape_tab.info.func
+        func = self.manager.workspace.info.peak_shape_tab.func
 
         ax = self.plot.ax
         ax.clear()
@@ -217,13 +222,13 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
 
     @state_node
     def refit(self):
-        num = self.spinBox.value()
-        func = self.manager.workspace.peak_shape_tab.info.func
-        info = self.peakfit_info
+        num = self.ui.spinBox.value()
+        func = self.manager.workspace.info.peak_shape_tab.func
+        info = self.info
         fittedpeaks = func.splitPeak(
             info.raw_peaks[self.original_index], num, True)
 
-        calc_get = self.manager.workspace.formula_docker.info.get_calcer()
+        calc_get = self.manager.workspace.info.formula_docker.get_calcer()
         for peak in fittedpeaks:
             peak.formulas = calc_get(peak.peak_position)
             # peak.formulas = formula_func.correct(peak, info.peaks)
@@ -237,11 +242,11 @@ class Window(QtWidgets.QMainWindow, PeakFitFloatUi.Ui_MainWindow):
     def save(self):
         new_peaks = self.peaks
 
-        self.peakfit_info.raw_split_num[self.original_index] = len(new_peaks)
+        self.info.raw_split_num[self.original_index] = len(new_peaks)
 
-        peaks = self.peakfit_info.peaks
-        original_indexes = self.peakfit_info.original_indexes
-        shown_indexes = self.peakfit_info.shown_indexes
+        peaks = self.info.peaks
+        original_indexes = self.info.original_indexes
+        shown_indexes = self.info.shown_indexes
 
         start = self.original_slice.start
         stop = self.original_slice.stop

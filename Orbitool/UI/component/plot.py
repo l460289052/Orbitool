@@ -3,6 +3,7 @@ from statistics import mode
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTimer
 
+from matplotlib.backend_bases import FigureCanvasBase
 from matplotlib.backends.backend_qt5agg import FigureCanvas, NavigationToolbar2QT
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
@@ -15,9 +16,9 @@ class Plot:
         self.parent = parentWidget
         parentWidget.setMinimumSize(100, 100)
         parentWidget.setLayout(QtWidgets.QVBoxLayout())
-        self.canvas = FigureCanvas(
+        self.canvas: FigureCanvasBase = FigureCanvas(
             Figure(figsize=(20, 20)))
-        self.fig = self.canvas.figure
+        self.fig: Figure = self.canvas.figure
         self.toolBar = NavigationToolbar2QT(
             self.canvas, parentWidget)
         parentWidget.layout().addWidget(self.toolBar)

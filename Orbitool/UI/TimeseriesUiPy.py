@@ -9,29 +9,31 @@ from .manager import Manager, state_node
 from .utils import savefile
 
 
-class Widget(QtWidgets.QWidget, TimeseriesUi.Ui_Form):
+class Widget(QtWidgets.QWidget):
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager = manager
-        self.setupUi(self)
+        self.ui = TimeseriesUi.Ui_Form()
+        self.setupUi()
         manager.init_or_restored.connect(self.showSeries)
 
-    def setupUi(self, Form):
-        super().setupUi(Form)
+    def setupUi(self):
+        ui = self.ui
+        ui.setupUi(self)
 
-        self.exportPushButton.clicked.connect(self.export)
+        ui.exportPushButton.clicked.connect(self.export)
 
     @property
-    def timeseries(self):
-        return self.manager.workspace.timeseries_tab
+    def info(self):
+        return self.manager.workspace.info.time_series_tab
 
     def showSeries(self):
-        index = self.timeseries.info.show_index
+        index = self.info.show_index
         if index < 0:
             return
-        series = self.timeseries.info.series[index]
+        series = self.info.series[index]
 
-        table = self.tableWidget
+        table = self.ui.tableWidget
         table.clearContents()
         table.setRowCount(0)
         table.setRowCount(len(series.times))
@@ -44,11 +46,11 @@ class Widget(QtWidgets.QWidget, TimeseriesUi.Ui_Form):
 
     @state_node
     def export(self):
-        index = self.timeseries.info.show_index
+        index = self.info.show_index
         if index < 0:
             return
 
-        series = self.timeseries.info.series[index]
+        series = self.info.series[index]
         ret, f = savefile("timeseries", "CSV file(*.csv)",
                           f"timeseries {series.tag}")
         if not ret:

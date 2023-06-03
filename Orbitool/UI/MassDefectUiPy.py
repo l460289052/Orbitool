@@ -14,46 +14,41 @@ from .manager import Manager, state_node
 from .utils import savefile
 
 
-class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
+class Widget(QtWidgets.QWidget):
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager = manager
-        self.setupUi(self)
-        self.plot = Plot(self.widget)
+
+        self.ui = MassDefectUi.Ui_Form()
+        self.setupUi()
+        self.plot = Plot(self.ui.widget)
 
         manager.init_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
 
-    def setupUi(self, Form):
-        super().setupUi(Form)
+    def setupUi(self):
+        ui = self.ui
+        ui.setupUi(self)
 
-        self.calcPushButton.clicked.connect(self.calc)
-        self.exportPushButton.clicked.connect(self.export)
+        ui.calcPushButton.clicked.connect(self.calc)
+        ui.exportPushButton.clicked.connect(self.export)
 
-        self.transparencyDoubleSpinBox.valueChanged.connect(self.replot)
-        self.logCheckBox.toggled.connect(self.replot)
-        self.showGreyCheckBox.toggled.connect(self.replot)
-        self.minSizeHorizontalSlider.valueChanged.connect(self.replot)
-        self.maxSizeHorizontalSlider.valueChanged.connect(self.replot)
+        ui.transparencyDoubleSpinBox.valueChanged.connect(self.replot)
+        ui.logCheckBox.toggled.connect(self.replot)
+        ui.showGreyCheckBox.toggled.connect(self.replot)
+        ui.minSizeHorizontalSlider.valueChanged.connect(self.replot)
+        ui.maxSizeHorizontalSlider.valueChanged.connect(self.replot)
 
     def restore(self):
-        self.manager.workspace.massdefect_tab.ui_state.set_state(self)
+        self.info.ui_state.restore_state(self.ui)
         self.plotMassDefect()
 
     def updateState(self):
-        self.manager.workspace.massdefect_tab.ui_state.fromComponents(self, [
-            self.dbeRadioButton,
-            self.elementRadioButton,
-            self.elementLineEdit,
-            self.showGreyCheckBox,
-            self.logCheckBox,
-            self.transparencyDoubleSpinBox,
-            self.minSizeHorizontalSlider,
-            self.maxSizeHorizontalSlider])
+        self.info.ui_state.store_state(self.ui)
 
     @property
-    def massdefect(self):
-        return self.manager.workspace.massdefect_tab.info
+    def info(self):
+        return self.manager.workspace.info.mass_defect_tab
 
     @state_node
     def calc(self):
@@ -61,11 +56,12 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         self.plotMassDefect()
 
     def calculateMassDefect(self):
-        is_dbe = self.dbeRadioButton.isChecked()
-        is_ele = self.elementRadioButton.isChecked()
-        is_atom = self.atomsRadioButton.isChecked()
+        ui = self.ui
+        is_dbe = ui.dbeRadioButton.isChecked()
+        is_ele = ui.elementRadioButton.isChecked()
+        is_atom = ui.atomsRadioButton.isChecked()
 
-        peaks = self.manager.workspace.peakfit_tab.info.peaks
+        peaks = self.manager.workspace.info.peak_fit_tab.peaks
 
         clr_peaks = [peak for peak in peaks if len(peak.formulas) > 0]
         clr_formula = list(map(find_formula, clr_peaks))
@@ -75,7 +71,7 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
             clr_color = np.array(clr_color, dtype=float)
             clr_labels = None
         elif is_ele:
-            element = self.elementLineEdit.text()
+            element = ui.elementLineEdit.text()
             clr_color = [f[element] for f in clr_formula]
             clr_color = np.array(clr_color, dtype=int)
             clr_labels = None
@@ -99,7 +95,7 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         gry_y = gry_x - np.round(gry_x)
         gry_size = np.array([peak.peak_intensity for peak in gry_peaks])
 
-        info = self.massdefect
+        info = self.info
         info.is_dbe = is_dbe
         if is_dbe:
             info.clr_title = "DBE"
@@ -115,24 +111,26 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
         plot = self.plot
         plot.clear()
 
-        info = self.massdefect
+        info = self.info
         if len(info.clr_x) == 0 and len(info.gry_x) == 0:
             return
 
-        if self.minSizeHorizontalSlider.value() > self.maxSizeHorizontalSlider.value():
-            self.minSizeHorizontalSlider.setValue(
-                self.maxSizeHorizontalSlider.value())  # will call replot
+        ui = self.ui
+
+        if ui.minSizeHorizontalSlider.value() > ui.maxSizeHorizontalSlider.value():
+            ui.minSizeHorizontalSlider.setValue(
+                ui.maxSizeHorizontalSlider.value())  # will call replot
             return
 
         min_factor = math.exp(
-            self.minSizeHorizontalSlider.value() / 10) * 10
+            ui.minSizeHorizontalSlider.value() / 10) * 10
         max_factor = math.exp(
-            self.maxSizeHorizontalSlider.value() / 10) * 10
+            ui.maxSizeHorizontalSlider.value() / 10) * 10
 
         is_dbe = info.is_dbe
-        gry = self.showGreyCheckBox.isChecked()
-        is_log = self.logCheckBox.isChecked()
-        alpha = 1 - self.transparencyDoubleSpinBox.value()
+        gry = ui.showGreyCheckBox.isChecked()
+        is_log = ui.logCheckBox.isChecked()
+        alpha = 1 - ui.transparencyDoubleSpinBox.value()
 
         clr_x, clr_y, clr_size, clr_color, clr_labels = info.clr_x, info.clr_y, info.clr_size, info.clr_color, info.clr_labels
         gry_x, gry_y, gry_size = info.gry_x, info.gry_y, info.gry_size
@@ -189,7 +187,7 @@ class Widget(QtWidgets.QWidget, MassDefectUi.Ui_Form):
 
     @state_node
     def export(self):
-        info = self.massdefect
+        info = self.info
         ret, f = savefile("Mass Defect", "CSV file(*.csv)", info.clr_title)
 
         if not ret:

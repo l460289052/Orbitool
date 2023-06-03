@@ -16,24 +16,25 @@ from .manager import Manager, MultiProcess, state_node
 from .setting import Dialog as SettingDialog
 
 
-class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
+class Window(QtWidgets.QMainWindow):
 
-    def setupUi(self, MainWindow):
-        super().setupUi(MainWindow)
+    def setupUi(self):
+        ui = self.ui
+        ui.setupUi(self)
 
         manager = self.manager
         self.setWindowTitle(f"Orbitool {manager.workspace.info.version}")
 
-        self.settingAction.triggered.connect(self.setting_dialog)
-        self.workspaceLoadAction.triggered.connect(self.load)
-        self.workspaceSaveAction.triggered.connect(self.save)
-        self.workspaceSaveAsAction.triggered.connect(self.save_as)
+        ui.settingAction.triggered.connect(self.setting_dialog)
+        ui.workspaceLoadAction.triggered.connect(self.load)
+        ui.workspaceSaveAction.triggered.connect(self.save)
+        ui.workspaceSaveAsAction.triggered.connect(self.save_as)
 
-        self.configLoadAction.triggered.connect(self.loadConfig)
-        self.configSaveAction.triggered.connect(self.saveConfig)
+        ui.configLoadAction.triggered.connect(self.loadConfig)
+        ui.configSaveAction.triggered.connect(self.saveConfig)
 
         # tab widgets
-        self.abortPushButton.clicked.connect(self.abort_process)
+        ui.abortPushButton.clicked.connect(self.abort_process)
 
         self.fileTab: FileUiPy.Widget = self.add_tab(
             FileUiPy.Widget(manager), "File")
@@ -93,8 +94,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             "Timeseries", self.timeseries, self.peakListDw)
         self.timeseriesesTab.click_series.connect(self.timeseries.showSeries)
 
-        self.tabWidget.setCurrentIndex(0)
-        self.tabWidget.currentChanged.connect(self.tab_changed)
+        ui.tabWidget.setCurrentIndex(0)
+        ui.tabWidget.currentChanged.connect(self.tab_changed)
         self.tab_changed(0)
 
     def __init__(self, workspacefile=None) -> None:
@@ -102,7 +103,8 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         self.manager = Manager()
         self.manager.workspace = WorkSpace(workspacefile)
 
-        self.setupUi(self)
+        self.ui = MainUi.Ui_MainWindow()
+        self.setupUi()
 
         self.manager.busy_signal.connect(self.set_busy)
 
@@ -117,8 +119,9 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         return self.manager.workspace
 
     def set_busy(self, value):
-        self.tabWidget.setDisabled(value)
-        self.processWidget.setHidden(not value)
+        self.ui.menubar.setDisabled(value)
+        self.ui.tabWidget.setDisabled(value)
+        self.ui.processWidget.setHidden(not value)
         self.formula.setEnabled(True)
 
         if not value:
@@ -129,7 +132,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
     def add_dockerwidget(self, title, widget, after=None):
         dw = QtWidgets.QDockWidget(title)
         dw.setWidget(widget)
-        dw.setAllowedAreas(QtCore.Qt.AllDockWidgetAreas)
+        dw.setAllowedAreas(QtCore.Qt.DockWidgetArea.AllDockWidgetAreas)
         dw.setFeatures(dw.DockWidgetMovable | dw.DockWidgetFloatable)
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dw)
         if after is not None:
@@ -137,10 +140,11 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         return dw
 
     def add_tab(self, widget, title):
-        self.tabWidget.addTab(widget, title)
+        self.ui.tabWidget.addTab(widget, title)
         return widget
 
     def closeEvent(self, e: QtGui.QCloseEvent) -> None:
+        self.manager.save.emit()
         self.workspace.close()
         e.accept()
 
@@ -192,7 +196,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         if not ret:
             return
 
-        self.manager.workspace.load_config(WorkSpace(f))
+        self.manager.workspace.load_config_from_file(f)
         self.manager.init_or_restored.emit()
 
     @state_node
@@ -207,7 +211,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
         config.close_as(f)
 
     def showMsg(self, msg):
-        self.statusbar.showMessage(
+        self.ui.statusbar.showMessage(
             f"{datetime.now().replace(microsecond=0).isoformat(sep=' ')} | {msg}")
 
     def showBarLabelMessage(self, label: int, percent: int, msg: str):
@@ -216,18 +220,18 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             bar.setRange(0, 100)
             bar.setValue(1)
             bar.setFormat("")
-            self.progressBarLayout.addWidget(bar)
+            self.ui.progressBarLayout.addWidget(bar)
             self.progress_bars[label] = bar
         bar.setValue(percent)
         bar.setFormat(msg)
 
     @state_node(mode='x')
     def file_tab_finish(self):
-        self.spectraList.comboBox.setCurrentIndex(-1)
-        self.spectraList.comboBox.setCurrentIndex(0)
+        self.spectraList.ui.comboBox.setCurrentIndex(-1)
+        self.spectraList.ui.comboBox.setCurrentIndex(0)
         self.spectraListDw.show()
         self.spectraListDw.raise_()
-        self.tabWidget.setCurrentWidget(self.noiseTab)
+        self.ui.tabWidget.setCurrentWidget(self.noiseTab)
 
     @state_node(mode='x', withArgs=True)
     def show_spectrum(self, spectrum):
@@ -237,18 +241,18 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
 
     @state_node(mode='x', withArgs=True)
     def noise_tab_finish(self, result):
-        self.workspace.peak_shape_tab.info.spectrum = result[0]
-        self.tabWidget.setCurrentWidget(self.peakShapeTab)
+        self.workspace.info.peak_shape_tab.spectrum = result[0]
+        self.ui.tabWidget.setCurrentWidget(self.peakShapeTab)
         return self.peakShapeTab.showPeak()  # yield
 
     @state_node(mode='x')
     def peak_shape_tab_finish(self):
-        self.tabWidget.setCurrentWidget(self.calibrationTab)
+        self.ui.tabWidget.setCurrentWidget(self.calibrationTab)
 
     @state_node(mode='x')
     def calibration_finish(self):
-        self.tabWidget.setCurrentWidget(self.peakFitTab)
-        self.spectraList.comboBox.setCurrentIndex(1)
+        self.ui.tabWidget.setCurrentWidget(self.peakFitTab)
+        self.spectraList.ui.comboBox.setCurrentIndex(1)
         self.spectraListDw.raise_()
 
     def abort_process(self):
@@ -257,7 +261,7 @@ class Window(QtWidgets.QMainWindow, MainUi.Ui_MainWindow):
             thread.abort()
 
     def tab_changed(self, index):
-        widget = self.tabWidget.currentWidget()
+        widget = self.ui.tabWidget.currentWidget()
 
         def hide(dockerwidget):
             dockerwidget.hide()

@@ -1,6 +1,6 @@
 from enum import Enum
 from itertools import chain
-from typing import Callable, List, Optional, Tuple, cast, Set
+from typing import Callable, List, Optional, Set, Tuple, cast
 
 import matplotlib.text
 import matplotlib.ticker
@@ -25,7 +25,7 @@ class FitMethod(str, Enum):
     mass_list = "mass list"
 
 
-class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
+class Widget(QtWidgets.QWidget):
     show_spectrum = QtCore.pyqtSignal(Spectrum)
     show_masslist = QtCore.pyqtSignal()
     filter_selected = QtCore.pyqtSignal(bool)  # selected or unselected
@@ -33,7 +33,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager = manager
-        self.setupUi(self)
+        self.ui = PeakFitUi.Ui_Form()
+        self.setupUi()
         manager.init_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
         manager.signals.peak_refit_finish.connect(self.peak_refit_finish)
@@ -44,102 +45,86 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.timer.start()
         self.plot_lim: Tuple[Tuple[int, int], Tuple[int, int]] = None
 
-    def setupUi(self, Form):
-        super().setupUi(Form)
+    def setupUi(self):
+        ui = self.ui
+        ui.setupUi(self)
 
-        self.showSelectedPushButton.clicked.connect(self.showSelect)
+        ui.showSelectedPushButton.clicked.connect(self.showSelect)
 
         # filters
-        self.filterSelectYToolButton.clicked.connect(self.filterSelected)
-        self.filterSelectNToolButton.clicked.connect(self.filterUnselected)
-        self.filterFormulaYToolButton.clicked.connect(
+        ui.filterSelectYToolButton.clicked.connect(self.filterSelected)
+        ui.filterSelectNToolButton.clicked.connect(self.filterUnselected)
+        ui.filterFormulaYToolButton.clicked.connect(
             lambda: self.filterGeneral(filter_formula_y))
-        self.filterFormulaNToolButton.clicked.connect(
+        ui.filterFormulaNToolButton.clicked.connect(
             lambda: self.filterGeneral(filter_formula_n))
-        self.filterStableIsotopeYToolButton.clicked.connect(
+        ui.filterStableIsotopeYToolButton.clicked.connect(
             lambda: self.filterGeneral(filter_stable_y))
-        self.filterStableIsotopeNToolButton.clicked.connect(
+        ui.filterStableIsotopeNToolButton.clicked.connect(
             lambda: self.filterGeneral(filter_stable_n))
-        self.filterTagYToolButton.clicked.connect(
+        ui.filterTagYToolButton.clicked.connect(
             lambda: self.filter_tag(True))
-        self.filterTagNToolButton.clicked.connect(
+        ui.filterTagNToolButton.clicked.connect(
             lambda: self.filter_tag(False))
-        self.filterIntensityMaxToolButton.clicked.connect(
+        ui.filterIntensityMaxToolButton.clicked.connect(
             self.filter_intensity_max)
-        self.filterIntensityMinToolButton.clicked.connect(
+        ui.filterIntensityMinToolButton.clicked.connect(
             self.filter_intensity_min)
-        self.filterMassDefectToolButton.clicked.connect(
+        ui.filterMassDefectToolButton.clicked.connect(
             self.filter_mass_defect)
-        self.filterGroupYToolButton.clicked.connect(
+        ui.filterGroupYToolButton.clicked.connect(
             self.filter_group_y)
-        self.filterGroupNToolButton.clicked.connect(
+        ui.filterGroupNToolButton.clicked.connect(
             self.filter_group_n)
 
         # step
-        self.stepAccordToMassCheckBox.toggled.connect(self.step_accord_toggled)
-        self.stepPushButton.clicked.connect(self.do_step)
+        ui.stepAccordToMassCheckBox.toggled.connect(self.step_accord_toggled)
+        ui.stepPushButton.clicked.connect(self.do_step)
 
         # clear
-        self.filterClearPushButton.clicked.connect(self.filterClear)
+        ui.filterClearPushButton.clicked.connect(self.filterClear)
 
         # combox
-        self.filterTagComboBox.addItems([tag.name for tag in PeakTags])
-        self.addTagComboBox.addItems([tag.name for tag in PeakTags])
-        self.fitComboBox.addItem("calc", FitMethod.calc)
-        self.fitComboBox.addItem("mass list", FitMethod.mass_list)
+        ui.filterTagComboBox.addItems([tag.name for tag in PeakTags])
+        ui.addTagComboBox.addItems([tag.name for tag in PeakTags])
+        ui.fitComboBox.addItem("calc", FitMethod.calc)
+        ui.fitComboBox.addItem("mass list", FitMethod.mass_list)
 
         # actions
-        self.replotPushButton.clicked.connect(self.replot_within_peaks)
-        self.fitPushButton.clicked.connect(self.fit)
-        self.addTagPushButton.clicked.connect(self.add_tag)
-        self.actionAddToMassListPushButton.clicked.connect(self.addToMassList)
-        self.actionRmTagPushButton.clicked.connect(self.remove_tag)
+        ui.replotPushButton.clicked.connect(self.replot_within_peaks)
+        ui.fitPushButton.clicked.connect(self.fit)
+        ui.addTagPushButton.clicked.connect(self.add_tag)
+        ui.actionAddToMassListPushButton.clicked.connect(self.addToMassList)
+        ui.actionRmTagPushButton.clicked.connect(self.remove_tag)
 
         # plots
-        self.plot = Plot(self.widget)
+        self.plot = Plot(ui.widget)
         self.manager.bind.peak_fit_left_index.connect(
             "peakfit", self.move_plot_to_index)
 
-        self.scaleToSpectrumPushButton.clicked.connect(self.scale_spectrum)
-        self.yLogcheckBox.toggled.connect(self.ylog_toggle)
-        self.rescaleToolButton.clicked.connect(self.rescale_clicked)
-        self.leftToolButton.clicked.connect(lambda: self.moveRight(-1))
-        self.rightToolButton.clicked.connect(lambda: self.moveRight(1))
-        self.yLimDoubleToolButton.clicked.connect(lambda: self.y_times(2))
-        self.yLimHalfToolButton.clicked.connect(lambda: self.y_times(.5))
+        ui.scaleToSpectrumPushButton.clicked.connect(self.scale_spectrum)
+        ui.yLogcheckBox.toggled.connect(self.ylog_toggle)
+        ui.rescaleToolButton.clicked.connect(self.rescale_clicked)
+        ui.leftToolButton.clicked.connect(lambda: self.moveRight(-1))
+        ui.rightToolButton.clicked.connect(lambda: self.moveRight(1))
+        ui.yLimDoubleToolButton.clicked.connect(lambda: self.y_times(2))
+        ui.yLimHalfToolButton.clicked.connect(lambda: self.y_times(.5))
 
     def restore(self):
         self.show_and_plot()
-        self.peakfit.ui_state.set_state(self)
+        self.info.ui_state.restore_state(self.ui)
 
     def updateState(self):
-        self.peakfit.ui_state.fromComponents(self, [
-            self.filterIntensityMaxDoubleSpinBox,
-            self.filterIntensityMinDoubleSpinBox,
-            self.filterMassDefectMinDoubleSpinBox,
-            self.filterMassDefectMaxDoubleSpinBox,
-            self.filterGroupLineEdit,
-
-            self.stepMinSpinBox,
-            self.stepMaxSpinBox,
-            self.stepMinusLineEdit,
-            self.stepPlusLineEdit,
-            self.stepAccordToMassCheckBox,
-            self.stepRtolDoubleSpinBox,
-
-            self.onlySelectedCheckBox,
-            self.calcDistributionCheckBox,
-
-            self.yLogcheckBox])
+        self.info.ui_state.store_state(self.ui)
 
     def show_and_plot(self):
         self.manager.signals.peak_list_show.emit()
-        if self.peakfit.info.spectrum:
+        if self.info.spectrum:
             self.plot_peaks()
 
     @property
-    def peakfit(self):
-        return self.manager.workspace.peakfit_tab
+    def info(self):
+        return self.manager.workspace.info.peak_fit_tab
 
     @state_node
     def showSelect(self):
@@ -147,25 +132,24 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         selected_index = self.manager.getters.spectra_list_selected_index.get()
 
         def read():
-            spectrum = workspace.calibration_tab.calibrated_spectra[
-                selected_index]
+            spectrum = workspace.data.calibrated_spectra[selected_index]
             raw_peaks = spectrum_func.splitPeaks(
                 spectrum.mz, spectrum.intensity)
             return spectrum, raw_peaks
 
         spectrum, raw_peaks = yield read, "read spectrum"
+        raw_peaks: List[Peak]
 
         raw_split_num, original_indexes, peaks = yield SplitPeaks(raw_peaks, func_kwargs={
-            "func": workspace.peak_shape_tab.info.func}), "fit use peak shape func"
+            "func": workspace.info.peak_shape_tab.func}), "fit use peak shape func"
 
         peaks = cast(List[FittedPeak], peaks)
         manager = self.manager
-        distribution = self.calcDistributionCheckBox.isChecked()
+        distribution = self.ui.calcDistributionCheckBox.isChecked()
 
         def formula_and_residual():
-            # TODO: add mz min & mz maz
-            rtol = workspace.formula_docker.info.calc_gen.rtol
-            calc_get = workspace.formula_docker.info.get_calcer()
+            rtol = workspace.info.formula_docker.calc_gen.rtol
+            calc_get = workspace.info.formula_docker.get_calcer()
 
             for peak in manager.tqdm(peaks, msg="calc formulas"):
                 peak.formulas = calc_get(peak.peak_position)
@@ -174,13 +158,13 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
                     peak.formulas = formula_func.correct(peak, peaks, rtol)
 
             mz, residual = peakfit_func.calculateResidual(
-                raw_peaks, original_indexes, peaks, workspace.peak_shape_tab.info.func)
+                raw_peaks, original_indexes, peaks, workspace.info.peak_shape_tab.func)
 
             return mz, residual
 
         mz, residual = yield formula_and_residual, "calc formula"
 
-        info = self.peakfit.info
+        info = self.info
         info.spectrum, info.raw_peaks = spectrum, raw_peaks
         info.raw_split_num = raw_split_num
         info.original_indexes = original_indexes
@@ -197,9 +181,9 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.manager.signals.peak_list_show.emit()
 
     def plot_peaks(self):
-        info = self.peakfit.info
+        info = self.info
         plot = self.plot
-        is_log = self.yLogcheckBox.isChecked()
+        is_log = self.ui.yLogcheckBox.isChecked()
         ax = plot.ax
         ax.clear()
 
@@ -248,7 +232,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         plot = self.plot
         y_min, y_max = plot.ax.get_ylim()
         y_max *= times
-        if not self.yLogcheckBox.isChecked():
+        if not self.ui.yLogcheckBox.isChecked():
             y_min = - 0.025 * y_max
         plot.ax.set_ylim(y_min, y_max)
         plot.canvas.draw()
@@ -259,7 +243,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.plot.canvas.draw()
 
     def rescale(self):
-        info = self.peakfit.info
+        info = self.info
         mz = info.shown_mz
         intensity = info.shown_intensity
         if mz is None:
@@ -273,7 +257,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
             return
         y_max = intensity[id_min:id_max].max()
 
-        if self.yLogcheckBox.isChecked():
+        if self.ui.yLogcheckBox.isChecked():
             y_min = .1
             y_max *= 2
         else:
@@ -286,7 +270,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
     @state_node
     def scale_spectrum(self):
-        info = self.peakfit.info
+        info = self.info
         if info.spectrum is None:
             return
         spectrum = info.spectrum
@@ -297,8 +281,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.plot.canvas.draw()
 
     def move_plot_to_index(self, index):
-        peaks = self.peakfit.info.peaks
-        indexes = self.peakfit.info.shown_indexes
+        peaks = self.info.peaks
+        indexes = self.info.shown_indexes
         ax = self.plot.ax
 
         if not indexes:
@@ -319,8 +303,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
             return
 
         (x_min, x_max), (y_min, y_max) = now_lim
-        peaks = self.peakfit.info.peaks
-        indexes = self.peakfit.info.shown_indexes
+        peaks = self.info.peaks
+        indexes = self.info.shown_indexes
 
         index = binary_search.indexFirstBiggerThan(
             indexes, x_min, method=lambda indexes, ind: peaks[indexes[ind]].peak_position)
@@ -334,10 +318,11 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         now_lim = (ax.get_xlim(), ax.get_ylim())
         self.plot_lim = now_lim
 
-        raw_peaks = self.peakfit.info.raw_peaks
-        original_indexes = self.peakfit.info.original_indexes
-        peaks = self.peakfit.info.peaks
-        indexes = self.peakfit.info.shown_indexes
+        info = self.info
+        raw_peaks = info.raw_peaks
+        original_indexes = info.original_indexes
+        peaks = info.peaks
+        indexes = info.shown_indexes
 
         (x_min, x_max), (y_min, y_max) = now_lim
 
@@ -377,7 +362,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
     @state_node
     def filterClear(self):
-        info = self.peakfit.info
+        info = self.info
         info.shown_indexes = list(range(len(info.peaks)))
         self.manager.signals.peak_list_show.emit()
 
@@ -396,7 +381,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self._filter_general(filter)
 
     def _filter_general(self, filter: Callable[[FittedPeak], bool]):
-        info = self.peakfit.info
+        info = self.info
         peaks = info.peaks
         info.shown_indexes = [
             index for index in info.shown_indexes if filter(peaks[index])]
@@ -404,7 +389,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
     @state_node(withArgs=True)
     def filter_tag(self, y: bool):
-        tag = self.filterTagComboBox.currentText()
+        tag = self.ui.filterTagComboBox.currentText()
         tag: PeakTags = getattr(PeakTags, tag)
         if y:
             self._filter_general(lambda fp: tag.value in fp.tags)
@@ -413,30 +398,30 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
     @state_node
     def filter_intensity_max(self):
-        value = self.filterIntensityMaxDoubleSpinBox.value()
+        value = self.ui.filterIntensityMaxDoubleSpinBox.value()
         self._filter_general(lambda fp: fp.peak_intensity < value)
 
     @state_node
     def filter_intensity_min(self):
-        value = self.filterIntensityMinDoubleSpinBox.value()
+        value = self.ui.filterIntensityMinDoubleSpinBox.value()
         self._filter_general(lambda fp: fp.peak_intensity > value)
 
     @state_node
     def filter_mass_defect(self):
-        mi = self.filterMassDefectMinDoubleSpinBox.value()
-        ma = self.filterMassDefectMaxDoubleSpinBox.value()
+        mi = self.ui.filterMassDefectMinDoubleSpinBox.value()
+        ma = self.ui.filterMassDefectMaxDoubleSpinBox.value()
         self._filter_general(
             lambda fp: mi < fp.peak_position - round(fp.peak_position) < ma)
 
     @state_node
     def filter_group_y(self):
-        group = self.filterGroupLineEdit.text()
+        group = self.ui.filterGroupLineEdit.text()
         group = Formula(group)
         self._filter_general(lambda fp: any(group in f for f in fp.formulas))
 
     @state_node
     def filter_group_n(self):
-        group = self.filterGroupLineEdit.text()
+        group = self.ui.filterGroupLineEdit.text()
         group = Formula(group)
         self._filter_general(lambda fp: any(
             group not in f for f in fp.formulas))
@@ -446,12 +431,12 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         yield from self._general_action(action, msg)
 
     def _general_action(self, action: Callable[[FittedPeak], None], msg: str):
-        info = self.peakfit.info
+        info = self.info
 
         peaks = info.peaks
         indexes = info.shown_indexes
         manager = self.manager
-        if self.onlySelectedCheckBox.isChecked():
+        if self.ui.onlySelectedCheckBox.isChecked():
             indexes = manager.getters.peak_list_selected_true_index.get()
 
         def func():
@@ -464,18 +449,19 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
     @state_node(mode='n', withArgs=True)
     def step_accord_toggled(self, value: bool):
-        self.stepRtolDoubleSpinBox.setEnabled(value)
+        self.ui.stepRtolDoubleSpinBox.setEnabled(value)
 
     @state_node
     def do_step(self):
-        group_p = Formula(self.stepPlusLineEdit.text())
-        group_m = Formula(self.stepMinusLineEdit.text())
-        step_mi = self.stepMinSpinBox.value()
-        step_ma = self.stepMaxSpinBox.value()
-        mass = self.stepAccordToMassCheckBox.isChecked()
-        rtol = self.stepRtolDoubleSpinBox.value() * 1e-6
+        ui = self.ui
+        group_p = Formula(ui.stepPlusLineEdit.text())
+        group_m = Formula(ui.stepMinusLineEdit.text())
+        step_mi = ui.stepMinSpinBox.value()
+        step_ma = ui.stepMaxSpinBox.value()
+        mass = ui.stepAccordToMassCheckBox.isChecked()
+        rtol = ui.stepRtolDoubleSpinBox.value() * 1e-6
 
-        info = self.peakfit.info
+        info = self.info
         peaks = info.peaks
         indexes = info.shown_indexes
 
@@ -500,6 +486,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         else:
             def func():
                 shown_sets: Set[Formula] = set()
+                index: int
                 for index in indexes:
                     peak = peaks[index]
                     for f in peak.formulas:
@@ -518,12 +505,12 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
     @state_node
     def replot_within_peaks(self):
-        info = self.peakfit.info
+        info = self.info
         raw_peaks = info.raw_peaks
         o_peaks = info.peaks
         original_indexes = info.original_indexes
         indexes = info.shown_indexes
-        func = self.manager.workspace.peak_shape_tab.info.func
+        func = self.manager.workspace.info.peak_shape_tab.func
 
         def residual():
             o_indexes = set(original_indexes[index] for index in indexes)
@@ -544,24 +531,26 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
     @state_node
     def fit(self):
-        method: FitMethod = self.fitComboBox.currentData()
+        method: FitMethod = self.ui.fitComboBox.currentData()
         if method == FitMethod.calc:
             yield from self.fit_formula()
         elif method == FitMethod.mass_list:
             yield from self.fit_mass_list()
 
     def fit_formula(self):
-        info = self.peakfit.info
+        info = self.info
 
-        rtol = self.manager.workspace.formula_docker.info.calc_gen.rtol
-        calc_get = self.manager.workspace.formula_docker.info.get_calcer()
+        rtol = self.manager.workspace.info.formula_docker.calc_gen.rtol
+        calc_get = self.manager.workspace.info.formula_docker.get_calcer()
         peaks = info.peaks
         indexes = info.shown_indexes
-        if self.onlySelectedCheckBox.isChecked():
-            indexes = manager.getters.peak_list_selected_true_index.get()
-        distribution = self.calcDistributionCheckBox.isChecked()
-
+        ui = self.ui
         manager = self.manager
+
+        if ui.onlySelectedCheckBox.isChecked():
+            indexes = manager.getters.peak_list_selected_true_index.get()
+        distribution = ui.calcDistributionCheckBox.isChecked()
+
 
         def func():
             index: int
@@ -580,8 +569,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
         self.manager.signals.peak_list_show.emit()
 
     def fit_mass_list(self):
-        rtol = self.manager.workspace.masslist_docker.info.rtol
-        masslist = self.manager.workspace.masslist_docker.info.masslist
+        rtol = self.manager.workspace.info.masslist_docker.rtol
+        masslist = self.manager.workspace.info.masslist_docker.masslist
 
         def proc(fp: FittedPeak):
             fp.formulas = masslist_func.fitUseMassList(
@@ -591,7 +580,7 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
     @state_node
     def add_tag(self):
-        tag = self.addTagComboBox.currentText()
+        tag = self.ui.addTagComboBox.currentText()
         tag: PeakTags = getattr(PeakTags, tag)
 
         def proc(fp: FittedPeak):
@@ -600,8 +589,8 @@ class Widget(QtWidgets.QWidget, PeakFitUi.Ui_Form):
 
     @state_node
     def addToMassList(self):
-        masslist = self.manager.workspace.masslist_docker.info.masslist
-        rtol = self.manager.workspace.masslist_docker.info.rtol
+        masslist = self.manager.workspace.info.masslist_docker.masslist
+        rtol = self.manager.workspace.info.masslist_docker.rtol
 
         yield from self._general_action(lambda fp: masslist_func.addMassTo(
             masslist, MassListItem(fp.peak_position, fp.formulas), rtol=rtol), "add to mass list")

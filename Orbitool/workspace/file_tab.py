@@ -2,11 +2,12 @@ from typing import List
 
 import numpy as np
 
+from .base import BaseInfo
 from ..structures import BaseStructure, field, Row
 from ..structures.file import FileSpectrumInfo, PathList, PeriodItem
 
 
-class FileTabInfo(BaseStructure):
+class FileTabInfo(BaseInfo):
     h5_type = "file tab"
 
     rtol: float = 1e-6

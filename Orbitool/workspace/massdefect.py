@@ -3,9 +3,10 @@ from typing import List
 import numpy as np
 
 from ..structures import BaseStructure, field
+from .base import BaseInfo
 
 
-class MassDefectInfo(BaseStructure):
+class MassDefectInfo(BaseInfo):
     h5_type = "mass defect tab"
 
     is_dbe: bool = True

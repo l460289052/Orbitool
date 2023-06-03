@@ -24,75 +24,66 @@ from .manager import Manager, MultiProcess, state_node
 from .utils import get_tablewidget_selected_row, savefile
 
 
-class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
+class Widget(QtWidgets.QWidget):
     click_series = QtCore.pyqtSignal()
 
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager = manager
-        self.setupUi(self)
+        self.ui = TimeseriesesUi.Ui_Form()
+        self.setupUi()
         manager.init_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
 
         self.shown_series: Dict[int, matplotlib.lines.Line2D] = {}
 
-    def setupUi(self, Form):
-        super().setupUi(Form)
+    def setupUi(self):
+        ui = self.ui
+        ui.setupUi(self)
 
-        self.plot = Plot(self.widget)
+        self.plot = Plot(ui.widget)
 
-        self.calcPushButton.clicked.connect(self.calc)
-        self.tableWidget.itemDoubleClicked.connect(self.seriesClicked)
-        self.removeSelectedPushButton.clicked.connect(self.removeSelect)
-        self.removeAllPushButton.clicked.connect(self.removeAll)
-        self.exportPushButton.clicked.connect(self.export)
+        ui.calcPushButton.clicked.connect(self.calc)
+        ui.tableWidget.itemDoubleClicked.connect(self.seriesClicked)
+        ui.removeSelectedPushButton.clicked.connect(self.removeSelect)
+        ui.removeAllPushButton.clicked.connect(self.removeAll)
+        ui.exportPushButton.clicked.connect(self.export)
 
-        self.rescalePushButton.clicked.connect(self.rescale)
-        self.logScaleCheckBox.toggled.connect(self.logScale)
+        ui.rescalePushButton.clicked.connect(self.rescale)
+        ui.logScaleCheckBox.toggled.connect(self.logScale)
 
     @property
-    def timeseries(self):
-        return self.manager.workspace.timeseries_tab
+    def info(self):
+        return self.manager.workspace.info.time_series_tab
 
     def restore(self):
         self.showTimeseries()
-        self.timeseries.ui_state.set_state(self)
+        self.info.ui_state.restore_state(self.ui)
 
     def updateState(self):
-        self.timeseries.ui_state.fromComponents(self, [
-            self.mzRadioButton,
-            self.mzDoubleSpinBox,
-            self.formulaRadioButton,
-            self.formulaLineEdit,
-            self.mzRadioButton,
-            self.mzMinDoubleSpinBox,
-            self.mzMaxDoubleSpinBox,
-            self.peakListRadioButton,
-            self.massListRadioButton,
-            self.selectedMassListRadioButton,
-            self.rtolDoubleSpinBox,
-            self.logScaleCheckBox])
+        self.info.ui_state.store_state(self.ui)
 
     @state_node
     def calc(self):
+        ui = self.ui
 
         series: List[TimeSeries] = []
-        rtol = self.rtolDoubleSpinBox.value() * 1e-6
+        rtol = ui.rtolDoubleSpinBox.value() * 1e-6
 
-        if self.mzRadioButton.isChecked():
-            position = self.mzDoubleSpinBox.value()
+        if ui.mzRadioButton.isChecked():
+            position = ui.mzDoubleSpinBox.value()
             series.append(
                 TimeSeries.FactoryPositionRtol(position, rtol, str(position)))
-        elif self.formulaRadioButton.isChecked():
-            f = Formula(self.formulaLineEdit.text())
+        elif ui.formulaRadioButton.isChecked():
+            f = Formula(ui.formulaLineEdit.text())
             series.append(
                 TimeSeries.FactoryPositionRtol(f.mass(), rtol, str(f)))
-        elif self.mzRangeRadioButton.isChecked():
-            l = self.mzMinDoubleSpinBox.value()
-            r = self.mzMaxDoubleSpinBox.value()
+        elif ui.mzRangeRadioButton.isChecked():
+            l = ui.mzMinDoubleSpinBox.value()
+            r = ui.mzMaxDoubleSpinBox.value()
             series.append(TimeSeries(l, r, "%.5f - %.5f" % (l, r)))
-        elif self.peakListRadioButton.isChecked():
-            peaklist = self.manager.workspace.peakfit_tab.info
+        elif ui.peakListRadioButton.isChecked():
+            peaklist = self.manager.workspace.info.peak_fit_tab
             for index in peaklist.shown_indexes:
                 peak = peaklist.peaks[index]
                 if len(peak.formulas) == 1:
@@ -105,13 +96,13 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
                 series.append(
                     TimeSeries.FactoryPositionRtol(position, rtol, tag))
         else:
-            if self.selectedMassListRadioButton.isChecked():
+            if ui.selectedMassListRadioButton.isChecked():
                 indexes = self.manager.getters.mass_list_selected_indexes.get()
-                masslist = self.manager.workspace.masslist_docker.info.masslist
+                masslist = self.manager.workspace.info.masslist_docker.masslist
                 masslist: List[MassListItem] = [masslist[index]
                                                 for index in indexes]
-            elif self.massListRadioButton.isChecked():
-                masslist = self.manager.workspace.masslist_docker.info.masslist
+            elif ui.massListRadioButton.isChecked():
+                masslist = self.manager.workspace.info.masslist_docker.masslist
             else:
                 masslist = []
             for mass in masslist:
@@ -122,9 +113,9 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
                 series.append(
                     TimeSeries.FactoryPositionRtol(mass.position, rtol, tag))
 
-        func = self.manager.workspace.peak_shape_tab.info.func
+        func = self.manager.workspace.info.peak_shape_tab.func
 
-        spectra = self.manager.workspace.calibration_tab.calibrated_spectra
+        spectra = self.manager.workspace.data.calibrated_spectra
 
         func_args = {"mz_range_list": [(s.position_min, s.position_max)
                                        for s in series], "func": func}
@@ -133,15 +124,15 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
 
         series = yield CalcTimeseries(spectra, func_kwargs=func_args, write_kwargs=write_args), "calculate time series"
 
-        info = self.timeseries.info
+        info = self.info
         info.series.extend(series)
 
         self.showTimeseries()
 
     def showTimeseries(self):
-        series = self.timeseries.info.series
+        series = self.info.series
 
-        table = self.tableWidget
+        table = self.ui.tableWidget
         table.clearContents()
         table.setRowCount(0)
         table.setRowCount(len(series))
@@ -164,7 +155,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
             if index in shown_series:
                 return
 
-            series = self.timeseries.info.series
+            series = self.info.series
             s = series[index]
             lines = ax.plot(s.times, s.intensity, label=s.tag)
             shown_series[index] = lines[-1]
@@ -181,14 +172,14 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
     @state_node(withArgs=True)
     def seriesClicked(self, item: QtWidgets.QTableWidgetItem):
         row = item.row()
-        self.timeseries.info.show_index = row
+        self.info.show_index = row
 
         self.click_series.emit()
 
     @state_node
     def removeSelect(self):
-        indexes = get_tablewidget_selected_row(self.tableWidget)
-        timeseries = self.timeseries.info.series
+        indexes = get_tablewidget_selected_row(self.ui.tableWidget)
+        timeseries = self.info.series
         for index in reversed(indexes):
             timeseries.pop(index)
         self.shown_series = {
@@ -197,14 +188,14 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
 
     @state_node
     def removeAll(self):
-        self.timeseries.info.series.clear()
+        self.info.series.clear()
         self.shown_series.clear()
         self.showTimeseries()
         self.plot.ax.clear()
 
     @state_node
     def export(self):
-        series = self.timeseries.info.series
+        series = self.info.series
         if len(series) == 0 or all(len(s.times) == 0 for s in series):
             return
         time_min = min(min(s.times) for s in series if len(s.times) > 0)
@@ -252,7 +243,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
     @state_node(mode='x')
     def rescale(self):
         plot = self.plot
-        series = self.timeseries.info.series
+        series = self.info.series
         if len(plot.ax.get_lines()) == 0:
             return
         l, r = plot.ax.get_xlim()
@@ -270,7 +261,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
             if sli.stop > sli.start:
                 t = max(t, max(s.intensity[sli]))
 
-        if self.logScaleCheckBox.isChecked():
+        if self.ui.logScaleCheckBox.isChecked():
             t *= 10
             b = 1
         else:
@@ -282,7 +273,7 @@ class Widget(QtWidgets.QWidget, TimeseriesesUi.Ui_Form):
 
     @state_node
     def logScale(self):
-        log = self.logScaleCheckBox.isChecked()
+        log = self.ui.logScaleCheckBox.isChecked()
         ax = self.plot.ax
         ax.set_yscale('log' if log else 'linear')
         if not log:

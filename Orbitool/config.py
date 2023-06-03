@@ -78,4 +78,3 @@ else:
     setting = _Setting()
 
 setting.general.multi_cores = max(min(setting.general.multi_cores, multi_cores), 1)
-setting.save_setting()

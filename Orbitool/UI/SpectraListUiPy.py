@@ -44,14 +44,13 @@ class Widget(QtWidgets.QWidget):
     def restore(self):
         ui = self.ui
         ui.comboBox.currentIndexChanged.disconnect(self.comboBox_changed)
-        self.spectra_list.ui_state.set_state(ui)
+        self.info.ui_state.restore_state(ui)
         self.former_index = -1
         self._comboBox_changed()
         ui.comboBox.currentIndexChanged.connect(self.comboBox_changed)
 
     def updateState(self):
-        self.spectra_list.ui_state.fromComponents(self.ui, [
-            self.ui.comboBox])
+        self.info.ui_state.store_state(self.ui)
 
     @state_node(mode='e')
     def comboBox_changed(self):
@@ -76,12 +75,12 @@ class Widget(QtWidgets.QWidget):
         self.former_index = current
 
     @property
-    def spectra_list(self):
-        return self.manager.workspace.spectra_list
+    def info(self):
+        return self.manager.workspace.info.spectra_list
 
     def show_file_infos(self):
         tableWidget = self.ui.tableWidget
-        spectrum_infos: List[FileSpectrumInfo] = self.manager.workspace.file_tab.info.spectrum_infos
+        spectrum_infos: List[FileSpectrumInfo] = self.manager.workspace.info.file_tab.spectrum_infos
 
         shown_indexes: List[int] = []
         infos: List[FileSpectrumInfo] = []
@@ -93,7 +92,7 @@ class Widget(QtWidgets.QWidget):
                 ends.append(info.end_time)
             else:
                 ends[-1] = info.end_time
-        self.spectra_list.info.shown_indexes = shown_indexes
+        self.info.shown_indexes = shown_indexes
         tableWidget.setRowCount(len(infos))
 
         for i, (info, end) in enumerate(zip(infos, ends)):
@@ -104,8 +103,8 @@ class Widget(QtWidgets.QWidget):
 
     def show_calibration_infos(self):
         tableWidget = self.ui.tableWidget
-        infos = self.manager.workspace.calibration_tab.info.calibrated_spectrum_infos
-        self.spectra_list.info.shown_indexes = list(range(len(infos)))
+        infos = self.manager.workspace.info.calibration_tab.calibrated_spectrum_infos
+        self.info.shown_indexes = list(range(len(infos)))
         tableWidget.setRowCount(len(infos))
         for i, info in enumerate(infos):
             tableWidget.setItem(i, 0, QtWidgets.QTableWidgetItem(
@@ -146,9 +145,9 @@ class Widget(QtWidgets.QWidget):
 
         manager = self.manager
         if data == FILE_TAB:
-            spectra = self.manager.workspace.noise_tab.raw_spectra
+            spectra = self.manager.workspace.data.raw_spectra
         elif data == CALIBRATE_TAB:
-            spectra = self.manager.workspace.calibration_tab.calibrated_spectra
+            spectra = self.manager.workspace.data.calibrated_spectra
 
         rows = get_tablewidget_selected_row(self.ui.tableWidget)
 

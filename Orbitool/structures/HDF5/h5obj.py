@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import io
-from typing import List, Type, TypeVar
+from pathlib import Path
+from typing import List, Literal, Type, TypeVar
 
 import h5py
 
@@ -30,20 +31,23 @@ class H5Obj:
     def __delitem__(self, path: str):
         del self._obj[path]
 
-    def visit_or_create(self, path: str):
-        if path in self:
-            return H5Obj(self._obj[path])
-        return H5Obj(self._obj.create_group(path))
+    def get_h5group(self, path: str):
+        """
+        will create if not exist
+        """
+        if path in self._obj:
+            return self._obj[path]
+        return self._obj.create_group(path)
 
 
 class H5File(H5Obj):
-    def __init__(self, path: str = None) -> None:
+    def __init__(self, path: Path = None, mode: Literal['a', 'r'] = 'a') -> None:
         if path:
             self._io = path
         else:
             self._io = io.BytesIO()
-        self._file: bool = bool(path)
-        self._obj: h5py.File = h5py.File(self._io, "a")
+        self._file: bool = path is not None
+        self._obj: h5py.File = h5py.File(self._io, mode)
 
     def tmp_path(self):
         pass

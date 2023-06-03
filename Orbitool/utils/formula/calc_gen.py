@@ -7,6 +7,7 @@ from pyteomics.mass import nist_mass
 from Orbitool.structures import BaseRowItem, field, BaseStructure, DictRow
 
 from ._formula import Formula
+from ._calc import Calculator
 
 Isotope = Tuple[str, int]
 
@@ -186,7 +187,7 @@ class CalculatorGenerator(BaseStructure):
         assert key in self.isotope_usable, f"Cannot find {key} in list"
         return self.isotope_usable[key]
 
-    def generate(self, cls: Type[T] = None) -> T:
+    def generate(self, cls: Union[Type[Calculator], None] = None):
         if cls is None:
             from ._calc import Calculator
             cls = Calculator
