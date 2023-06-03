@@ -57,7 +57,7 @@ class WorkSpace:
         self.info: WorkspaceInfo = None
         if use_proxy:
             self.file = H5File(path, 'r')
-            self.proxy_file = H5File(path.with_suffix(".obtl-temp"))
+            self.proxy_file = H5File(path.with_suffix(".orbt-temp"))
             if "info" in self.proxy_file:
                 self.info = self.proxy_file.read("info")
             self.data = WorkspaceData(
@@ -104,7 +104,7 @@ class WorkSpace:
 
     def close_as(self, path):
         path = Path(path)
-        if self.file._file:
+        if self.file._file and path.exists():
             assert not self.file._io.samefile(
                 path), "please choose another destination"
         if path.exists():

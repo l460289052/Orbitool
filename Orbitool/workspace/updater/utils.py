@@ -1,4 +1,4 @@
-from typing import Iterable, Type
+from typing import Iterable, Literal, Type
 import h5py
 import numpy as np
 
@@ -24,10 +24,13 @@ def copy_to(h5obj: h5py.Group, source: str, target: str):
         h5obj.copy(source, target)
 
 
-def create_group(h5obj: h5py.Group, name: str):
+def create_group(h5obj: h5py.Group, name: str, mode: Literal['a', 'w'] = 'w'):
     name = str(name)
     if name in h5obj:
-        del h5obj[name]
+        if mode == 'w':
+            del h5obj[name]
+        elif mode == 'a':
+            return h5obj[name]
     return h5obj.create_group(name)
 
 
@@ -58,3 +61,7 @@ def read_dict(h5obj: h5py.Group, name: str, key_type: Type = str):
     keys = group.attrs["indexes"]
     for index, key in enumerate(keys):
         yield group, index, key_type(key)
+
+def delete(h5obj: h5py.Group, name: str):
+    if name in h5obj:
+        del h5obj[name]

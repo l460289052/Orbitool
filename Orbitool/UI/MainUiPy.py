@@ -1,12 +1,14 @@
 from datetime import datetime
+import os
+from pathlib import Path
+import shutil
 from typing import Dict, Union
 
 from matplotlib.pyplot import get
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ..structures.HDF5 import h5_brokens
-from ..workspace import VERSION, WorkSpace, get_version, need_update
-from ..workspace import update as workspace_update
+from ..workspace import VERSION, WorkSpace, updater
 from . import (CalibrationUiPy, FileUiPy, FormulaUiPy, MainUi, MassDefectUiPy,
                MassListUiPy, NoiseUiPy, PeakFitUiPy, PeakListUiPy,
                PeakShapeUiPy, SpectraListUiPy, SpectrumUiPy, TimeseriesesUiPy,
@@ -101,7 +103,7 @@ class Window(QtWidgets.QMainWindow):
     def __init__(self, workspacefile=None) -> None:
         super().__init__()
         self.manager = Manager()
-        self.manager.workspace = WorkSpace(workspacefile)
+        self.manager.workspace = WorkSpace()
 
         self.ui = MainUi.Ui_MainWindow()
         self.setupUi()
@@ -109,10 +111,13 @@ class Window(QtWidgets.QMainWindow):
         self.manager.busy_signal.connect(self.set_busy)
 
         self.progress_bars: Dict[int, QtWidgets.QProgressBar] = {}
-        self.manager.init_or_restored.emit()
         self.manager.msg.connect(self.showMsg)
         self.manager.tqdm.tqdm_signal.connect(self.showBarLabelMessage)
         self.manager.set_busy(False)
+        if workspacefile is not None:
+            self._load_workspace(workspacefile)
+        else:
+            self.manager.init_or_restored.emit()
 
     @property
     def workspace(self):
@@ -159,11 +164,21 @@ class Window(QtWidgets.QMainWindow):
             "Load workspace", "Orbitool Workspace file(*.Orbitool)")
         if not ret:
             return
-        version = get_version(f)
-        if need_update(version):
-            UiUtils.showInfo(
-                f"will update file from {version} to {VERSION}, make sure you back it up")
-            workspace_update(f)
+        self._load_workspace(f)
+
+    def _load_workspace(self, f: str):
+        version = updater.get_version(f)
+        if updater.need_update(version):
+            ret, n = UiUtils.savefile( "Update workspace and save as a new file", "Orbitool Workspace file(*.Orbitool)")
+            if not ret:
+                return
+            shutil.copy(f, n)
+            n = Path(n)
+            if n.with_suffix(".orbt-tmp").exists():
+                n.with_suffix(".orbt-tmp").unlink()
+            n.chmod(0o666)
+            updater.update(n)
+            f = n
         workspace = WorkSpace(f)
         if h5_brokens:
             UiUtils.showInfo("I have try to save more data, but below data is lost\n" +

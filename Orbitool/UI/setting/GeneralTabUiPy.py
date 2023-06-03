@@ -28,13 +28,13 @@ class Tab(BaseTab):
         ui.timeFormatLineEdit.textChanged.connect(self.change_time_format)
         ui.timeFormatLineEdit.setText(general.time_format)
         ui.timeFormatRevertButton.clicked.connect(
-            lambda: ui.timeFormatLineEdit.setText(general.__fields__["format_time"].get_default()))
+            lambda: ui.timeFormatLineEdit.setText(general.__fields__["time_format"].get_default()))
 
         ui.exportTimeFormatLineEdit.textChanged.connect(
             self.change_export_time_format)
         ui.exportTimeFormatLineEdit.setText(general.export_time_format)
         ui.exportTimeFormatRevertButton.clicked.connect(
-            lambda: ui.exportTimeFormatLineEdit.setText(general.__fields__["format_export_time"].get_default()))
+            lambda: ui.exportTimeFormatLineEdit.setText(general.__fields__["export_time_format"].get_default()))
 
     def stash_setting(self, setting: _Setting):
         ui = self.ui
