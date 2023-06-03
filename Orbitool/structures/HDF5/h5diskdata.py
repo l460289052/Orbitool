@@ -1,4 +1,4 @@
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 from typing import Callable, Dict, Generator, Generic, Iterable, Iterator, List, Mapping, Set, Tuple, Type, TypeVar, Union
 import h5py
 
@@ -9,81 +9,70 @@ T = TypeVar('T')
 
 
 @dataclass
-class BaseDiskDataProxy:
+class BaseDiskData:
     group: h5py.Group
-    tmp_group: h5py.Group
+    proxy_group: Union[h5py.Group, None] = None
+    direct: bool = field(init=False)
 
-    def iter_disk(self, callable: Callable[[Union["DiskDictView", "DiskListView"]], None] = lambda x: x):
+    def iter_disk(self, callable: Callable[[Union["DiskDictDirectView", "DiskListDirectView", "DiskDictProxyView", "DiskListProxyView"]], None] = lambda x: x):
         for key, attr in type(self).__dict__.items():
             if isinstance(attr, (DiskDict, DiskList)):
                 callable(getattr(self, key))
 
     def __post_init__(self):
+        self.direct = self.proxy_group is None
         self.iter_disk()
 
     def save_to_disk(self):
-        self.iter_disk(lambda x: x.save_to_disk())
+        if not self.direct:
+            self.iter_disk(lambda x: x.save_to_disk())
 
 
 ATTR_KEYS = "keys"
 
 
-class DiskDictView(Generic[T]):
+class DiskDictDirectView(Generic[T]):
     key_type = str
 
     def __init__(
             self,
             group: h5py.Group,
-            tmp_group: h5py.Group,
-            key: str) -> None:
+            key: str,
+            proxy=False,
+            init_keys=[]) -> None:
         self.key = key
         self.group = group
-        self.tmp_group = tmp_group
+        self.proxy = proxy
         if key not in group:
-            self.obj = self.init_obj()
+            self.obj = self.group.create_group(self.key)
+            self.obj.attrs[ATTR_KEYS] = init_keys
         else:
             self.obj = group[key]
-        if key not in tmp_group:
-            self.tmp_obj = self.init_tmp_obj(self.obj)
-        else:
-            self.tmp_obj = tmp_group[key]
         self.handler: StructureTypeHandler = get_handler(BaseStructure)
         # use list for speed
-        self.keys: List[str] = self.tmp_obj.attrs[ATTR_KEYS].tolist()
-
-    def init_obj(self):
-        obj = self.group.create_group(self.key)
-        obj.attrs[ATTR_KEYS] = []
-        return obj
-
-    def init_tmp_obj(self, obj: h5py.Group):
-        tmp_obj = self.tmp_group.create_group(self.key)
-        tmp_obj.attrs[ATTR_KEYS] = obj.attrs[ATTR_KEYS].tolist()
-        return tmp_obj
-
-    # write to tmp group
+        self.keys: List[str] = self.obj.attrs[ATTR_KEYS].tolist()
 
     def __setitem__(self, key, value: T):
-        self.handler.write_to_h5(self.tmp_obj, str(key), value)
+        self.handler.write_to_h5(self.obj, str(key), value)
         key = self.key_type(key)
         if key not in self.keys:
             self.keys.append(key)
-            self.tmp_obj.attrs[ATTR_KEYS] = self.keys
+            self.obj.attrs[ATTR_KEYS] = self.keys
 
     def __delitem__(self, key):
         s = str(key)
-        if s in self.tmp_obj:
-            del self.tmp_obj[s]
+        if s in self.obj:
+            del self.obj[s]
         self.keys.remove(self.key_type(key))
-        self.tmp_obj.attrs[ATTR_KEYS] = self.keys
+        self.obj.attrs[ATTR_KEYS] = self.keys
 
     def clear(self):
-        self.tmp_obj.clear()
+        self.obj.clear()
         self.keys.clear()
-        self.tmp_obj.attrs[ATTR_KEYS] = self.keys
+        self.obj.attrs[ATTR_KEYS] = self.keys
 
     def update(self, it: Iterable[Tuple[str, T]]):
-        obj = self.tmp_obj
+        obj = self.obj
         handler = self.handler
 
         s = set(self.keys)
@@ -93,20 +82,73 @@ class DiskDictView(Generic[T]):
             key = self.key_type(key)
             if key not in s:
                 keys.append(key)
-        self.tmp_obj.attrs[ATTR_KEYS] = keys
+        self.obj.attrs[ATTR_KEYS] = keys
+
+    def __getitem__(self, key) -> T:
+        assert not self.proxy
+        key = str(key)
+        return self.handler.read_from_h5(self.obj, key)
+
+    def __len__(self):
+        return len(self.keys)
+
+    def items(self) -> Generator[Tuple[str, T], None, None]:
+        assert not self.proxy
+        obj = self.obj
+        handler = self.handler
+        for key in self.keys:
+            yield key, handler.read_from_h5(obj, key)
+
+
+class DiskDictProxyView(Generic[T]):
+    key_type = str
+    proxy_type = DiskDictDirectView
+
+    def __init__(
+            self,
+            group: h5py.Group,
+            proxy_group: h5py.Group,
+            key: str) -> None:
+        self.key = key
+        self.group = group
+        if key not in group:
+            self.obj = self.group.create_group(self.key)
+            self.obj.attrs[ATTR_KEYS] = []
+        else:
+            self.obj = group[key]
+        self.direct = self.proxy_type(
+            proxy_group, key, proxy=True, init_keys=self.obj.attrs[ATTR_KEYS].tolist())
+        self.handler: StructureTypeHandler = get_handler(BaseStructure)
+        # use list for speed
+        self.keys: List[str] = self.direct.keys
+
+    # write to tmp group
+
+    def __setitem__(self, key, value: T):
+        self.direct.__setitem__(key, value)
+
+    def __delitem__(self, key):
+        self.direct.__delitem__(key)
+
+    def clear(self):
+        self.direct.clear()
+
+    def update(self, it: Iterable[Tuple[str, T]]):
+        self.direct.update(it)
 
     # read from tmp / disk
 
     def __getitem__(self, key) -> T:
         key = str(key)
-        return self.handler.read_from_h5(self.tmp_obj if key in self.tmp_obj else self.obj, key)
+        tmp_obj = self.direct.obj
+        return self.handler.read_from_h5(tmp_obj if key in tmp_obj else self.obj, key)
 
     def __len__(self):
         return len(self.keys)
 
     def items(self) -> Generator[Tuple[str, T], None, None]:
         obj = self.obj
-        tmp_obj = self.tmp_obj
+        tmp_obj = self.direct.obj
         handler = self.handler
         for key in self.keys:
             yield key, handler.read_from_h5(tmp_obj if key in tmp_obj else obj, key)
@@ -118,11 +160,11 @@ class DiskDictView(Generic[T]):
         """
         keys = set(map(str, self.keys))
         obj_keys: Set[str] = set(self.obj.keys())
-        if len(self.tmp_obj) == 0 and keys == obj_keys:
+        obj = self.obj
+        tmp = self.direct.obj
+        if len(tmp) == 0 and keys == obj_keys:
             # no update
             return False
-        obj = self.obj
-        tmp = self.tmp_obj
         tmp_keys = set(tmp.keys())
 
         for to_delete in obj_keys - keys:
@@ -133,7 +175,7 @@ class DiskDictView(Generic[T]):
             handler.write_to_h5(
                 obj, to_update,
                 handler.read_from_h5(tmp, to_update))
-        self.tmp_obj.clear()
+        tmp.clear()
         self.obj.attrs[ATTR_KEYS] = self.keys
         return True
 
@@ -142,24 +184,26 @@ class DiskDict(Generic[T]):
     def __init__(self, item_type: Type[T]) -> None:
         self.item_type = item_type
 
-    def __set_name__(self, owner: BaseDiskDataProxy, name: str):
+    def __set_name__(self, owner: BaseDiskData, name: str):
         self.name = name
 
-    def __get__(self, ins: BaseDiskDataProxy, owner: Type[BaseDiskDataProxy]) -> DiskDictView[T]:
-        return DiskDictView(ins.group, ins.tmp_group, self.name)
+    def __get__(self, ins: BaseDiskData, owner: Type[BaseDiskData]) -> DiskDictProxyView[T]:
+        if ins.direct:
+            return DiskDictDirectView(ins.group, self.name)
+        else:
+            return DiskDictProxyView(ins.group, ins.proxy_group, self.name)
 
-    def __set__(self, ins: BaseDiskDataProxy, it: Iterable[Tuple[str, T]]):
-        view = DiskDictView(ins.group, ins.tmp_group, self.name)
+    def __set__(self, ins: BaseDiskData, it: Iterable[Tuple[str, T]]):
+        if ins.direct:
+            view = DiskDictDirectView(ins.group, self.name)
+        else:
+            view = DiskDictProxyView(ins.group, ins.proxy_group, self.name)
         view.clear()
         view.update(it)
 
 
-class DiskListView(DiskDictView[T]):
+class DiskListDirectView(DiskDictDirectView[T]):
     key_type = int
-
-    keys = items = update = None
-
-    # write to tmp group
 
     def __setitem__(self, key: int, value: T):
         index = self.keys[key]
@@ -167,7 +211,7 @@ class DiskListView(DiskDictView[T]):
 
     def __delitem__(self, key: int):
         index = self.keys[key]
-        super().__delitem__(index)
+        return super().__delitem__(index)
 
     def append(self, value: T):
         if self.keys:
@@ -179,6 +223,40 @@ class DiskListView(DiskDictView[T]):
     def extend(self, values: Iterable[T]):
         indexes = self.keys
         super().update(enumerate(values, indexes[-1] + 1 if indexes else 0))
+    
+    def __getitem__(self, key: int) -> T:
+        index = self.keys[key]
+        return super().__getitem__(index)
+
+    def __iter__(self) -> Generator[T, None, None]:
+        assert not self.proxy
+        for index in self.keys:
+            yield super().__getitem__(index)
+
+
+class DiskListProxyView(DiskDictProxyView[T]):
+    key_type = int
+    proxy_type = DiskListDirectView
+
+    items = update = None
+
+    def __init__(self, group: h5py.Group, proxy_group: h5py.Group, key: str) -> None:
+        super().__init__(group, proxy_group, key)
+        self.direct: DiskListDirectView
+
+    # write to tmp group
+
+    def __setitem__(self, key: int, value: T):
+        self.direct.__setitem__(key, value)
+
+    def __delitem__(self, key: int):
+        self.direct.__delitem__(key)
+
+    def append(self, value: T):
+        self.direct.append(value)
+
+    def extend(self, values: Iterable[T]):
+        self.direct.extend(values)
 
     # read from
 
@@ -195,13 +273,19 @@ class DiskList(Generic[T]):
     def __init__(self, item_type: Type[T]) -> None:
         self.item_type = item_type
 
-    def __set_name__(self, owner: Type[BaseDiskDataProxy], name: str):
+    def __set_name__(self, owner: Type[BaseDiskData], name: str):
         self.name = name
 
-    def __get__(self, ins: BaseDiskDataProxy, owner: Type[BaseDiskDataProxy]) -> DiskListView[T]:
-        return DiskListView(ins.group, ins.tmp_group, self.name)
+    def __get__(self, ins: BaseDiskData, owner: Type[BaseDiskData]) -> DiskListProxyView[T]:
+        if ins.direct:
+            return DiskListDirectView(ins.group, self.name)
+        else:
+            return DiskListProxyView(ins.group, ins.proxy_group, self.name)
 
-    def __set__(self, ins: BaseDiskDataProxy, values: Iterable[T]):
-        view = DiskListView(ins.group, ins.tmp_group, self.name)
+    def __set__(self, ins: BaseDiskData, values: Iterable[T]):
+        if ins.direct:
+            view = DiskListDirectView(ins.group, self.name)
+        else:
+            view = DiskListProxyView(ins.group, ins.proxy_group, self.name)
         view.clear()
         view.extend(values)
