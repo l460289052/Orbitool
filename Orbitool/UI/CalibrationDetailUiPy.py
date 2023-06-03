@@ -6,32 +6,48 @@ import matplotlib.ticker
 
 
 from PyQt5 import QtWidgets, QtGui
+from ..structures.spectrum import Spectrum
 from . import CalibrationDetailUi
 from .component import Plot
 
 
-class Widget(QtWidgets.QWidget, CalibrationDetailUi.Ui_Form):
+class Widget(QtWidgets.QWidget):
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager = manager
-        self.setupUi(self)
-        self.spectrumPlot = Plot(self.spectrumPlotWidget)
-        self.filePlot = Plot(self.filePlotWidget)
 
-        self.spectraTableWidget.itemDoubleClicked.connect(self.showSpectrumAt)
-        self.filesTableWidget.itemDoubleClicked.connect(self.showFileAt)
+        ui = self.ui = CalibrationDetailUi.Ui_Form()
+        ui.setupUi(self)
+        self.spectrum_plot = Plot(ui.spectrumPlotWidget)
+        self.filePlot = Plot(ui.filePlotWidget)
+
+        ui.spectraTableWidget.itemDoubleClicked.connect(self.showSpectrumAt)
+        ui.spectrumIonsTableWidget.itemDoubleClicked.connect(self.showIonAt)
+        ui.filesTableWidget.itemDoubleClicked.connect(self.showFileAt)
+
+        self.spectrum: Spectrum = None
+        self.inner_index: int = None
 
         self.init()
 
+        self.current_ion_index: int = None
+
+        self.previousIonsShortCut = QtWidgets.QShortcut("Left", self)
+        self.previousIonsShortCut.activated.connect(lambda: self.next_ion(-1))
+        self.nextIonShortCut = QtWidgets.QShortcut("Right", self)
+        self.nextIonShortCut.activated.connect(lambda: self.next_ion(1))
+
+
+    @property
     def info(self):
-        return self.manager.workspace.calibration_tab.info
+        return self.manager.workspace.info.calibration_tab
 
     def init(self):
         workspace = self.manager.workspace
-        info = self.info()
+        info = self.info
 
-        spectrum_infos = workspace.noise_tab.info.denoised_spectrum_infos
-        table = self.spectraTableWidget
+        spectrum_infos = workspace.info.noise_tab.denoised_spectrum_infos
+        table = self.ui.spectraTableWidget
         table.clearContents()
         table.setRowCount(len(spectrum_infos))
         for row, spectrum_info in enumerate(spectrum_infos):
@@ -40,7 +56,7 @@ class Widget(QtWidgets.QWidget, CalibrationDetailUi.Ui_Form):
             table.setItem(row, 0, item)
 
         paths = list(info.calibrator_segments.keys())
-        table = self.filesTableWidget
+        table = self.ui.filesTableWidget
         table.clearContents()
         table.setRowCount(len(paths))
         for row, path in enumerate(paths):
@@ -59,14 +75,14 @@ class Widget(QtWidgets.QWidget, CalibrationDetailUi.Ui_Form):
         self.showSpcetrum(index)
 
     def showSpcetrum(self, index: int):
-        info = self.info()
+        info = self.info
         if not info.path_ion_infos:
             return
-        spectrum = self.manager.workspace.noise_tab.raw_spectra[index]
+        spectrum = self.manager.workspace.data.raw_spectra[index]
 
         ion_infos = info.path_ion_infos[spectrum.path]
         inner_index = index
-        for ion_info in info.path_ion_infos.values():
+        for ion_info in info.path_ion_infos.values(): # to find current spectrum corresponding ion-infos and inner-index
             if ion_info:
                 i = next(iter(ion_info.values()))
                 if inner_index < len(i.raw_position):
@@ -75,7 +91,11 @@ class Widget(QtWidgets.QWidget, CalibrationDetailUi.Ui_Form):
             else:
                 break
 
-        table = self.spectrumIonsTableWidget
+        self.spectrum = spectrum
+        self.inner_index = index
+        self.current_ion_index = None
+
+        table = self.ui.spectrumIonsTableWidget
         table.clearContents()
         table.setRowCount(0)
         table.setRowCount(len(info.last_ions))
@@ -84,7 +104,7 @@ class Widget(QtWidgets.QWidget, CalibrationDetailUi.Ui_Form):
 
         color = QtGui.QColor(0xB6EEA6)
 
-        plot = self.spectrumPlot
+        plot = self.spectrum_plot
         ax = plot.ax
         ax.clear()
         ax.axhline(color='black', linewidth=.5)
@@ -130,18 +150,48 @@ class Widget(QtWidgets.QWidget, CalibrationDetailUi.Ui_Form):
         plot.canvas.draw()
 
     @state_node(withArgs=True)
+    def showIonAt(self, item:QtWidgets.QTableWidgetItem):
+        self.showIon(item.row())
+
+    @state_node(withArgs=True)
+    def next_ion(self, step:int):
+        if self.spectrum is None:
+            return
+        if self.current_ion_index is None:
+            self.showIon(0)
+        else:
+            self.showIon((self.current_ion_index + step) % len(self.info.ions))
+
+    def showIon(self, index: int):
+        self.current_ion_index = index
+        ion_info = self.info.path_ion_infos[self.spectrum.path][self.info.ions[index].formula]
+        ion_position = ion_info.raw_position[self.inner_index]
+        ion_intensity = ion_info.raw_intensity[self.inner_index]
+
+        x_min = ion_position - .1
+        x_max = ion_position + .1
+        y_min = -ion_intensity * .1
+        y_max = ion_intensity * 1.2
+
+        plot = self.spectrum_plot
+        ax = plot.ax
+        ax.set_xlim(x_min, x_max)
+        ax.set_ylim(y_min, y_max)
+        plot.canvas.draw()
+
+    @state_node(withArgs=True)
     def showFileAt(self, item: QtWidgets.QTableWidgetItem):
         self.showFile(item.row())
 
     def showFile(self, index: int):
-        info = self.info()
+        info = self.info
         if not info.calibrator_segments:
             return
         path = list(info.calibrator_segments.keys())[index]
 
         ion_infos = info.path_ion_infos[path]
 
-        table = self.fileIonsTableWidget
+        table = self.ui.fileIonsTableWidget
         table.setRowCount(0)
         table.setRowCount(len(ion_infos))
         color = QtGui.QColor(0xB6EEA6)
@@ -173,7 +223,7 @@ class Widget(QtWidgets.QWidget, CalibrationDetailUi.Ui_Form):
             if cali_info.end_point is not math.inf:
                 ax.axvline(cali_info.end_point, color='blue')
 
-        formula_info = self.manager.workspace.formula_docker.info
+        formula_info = self.manager.workspace.info.formula_docker
         start_point = formula_info.mz_min
         for cali_info, cali in zip(info.last_calibrate_info_segments, info.calibrator_segments[path]):
             x = np.linspace(start_point, min(

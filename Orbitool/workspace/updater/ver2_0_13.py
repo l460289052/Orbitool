@@ -1,7 +1,6 @@
 import numpy as np
 import h5py
 
-from .base import register
 from .utils import write_to
 
 
@@ -15,5 +14,3 @@ def update(path: str):
             [intensity for _, intensity in peaks]))
         write_to(info, "shown_residual", info["residual_intensity"])
 
-
-register("2.0.13", update)

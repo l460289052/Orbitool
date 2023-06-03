@@ -91,18 +91,33 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
         results: Deque[AsyncResult] = deque()
         queue = Queue()
         length = self.read_len(file, **self.read_kwargs)
+        lock = QtCore.QMutex()
 
-        def iter_queue():
+        def read_iter():
+            it = iter(self.read(file, **self.read_kwargs))
+            while True:
+                try:
+                    lock.lock()
+                    value = next(it)
+                except StopIteration as e:
+                    return
+                finally:
+                    lock.unlock()
+                yield value
+
+        def write_queue():
             tqdm = self.tqdm(msg="write", length=length)
             while True:
-                tqdm.update()
                 result = queue.get()
                 if result is None:
                     break
+                lock.lock()
                 yield result
+                lock.unlock()
+                tqdm.update()
 
         write_thread = Thread(
-            self.write, (file, iter_queue()), self.write_kwargs)
+            self.write, (file, write_queue()), self.write_kwargs)
         write_thread.start()
 
         multi_cores = setting.general.multi_cores
@@ -137,7 +152,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                     queue.put(ret)
 
             for i, input_data in self.tqdm(
-                    enumerate(self.read(file, **self.read_kwargs)),
+                    enumerate(read_iter()),
                     length=length, msg="read",
                     immediate=True):
 

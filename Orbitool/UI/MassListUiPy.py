@@ -12,52 +12,52 @@ from .manager import Manager, state_node
 from .utils import get_tablewidget_selected_row, openfile, savefile
 
 
-class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
+class Widget(QtWidgets.QWidget):
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager = manager
-        self.setupUi(self)
+        self.ui = MassListUi.Ui_Form()
+        self.setupUi()
         manager.getters.mass_list_selected_indexes.connect(
             self.get_selected_index)
         self.manager.init_or_restored.connect(self.restore)
 
-    def setupUi(self, Form):
-        super().setupUi(Form)
+    def setupUi(self):
+        ui = self.ui
+        ui.setupUi(self)
 
-        self.doubleSpinBox.valueChanged.connect(self.updateRtol)
+        ui.doubleSpinBox.valueChanged.connect(self.updateRtol)
 
-        self.addPushButton.clicked.connect(self.addMass)
-        self.removePushButton.clicked.connect(self.rmMass)
+        ui.addPushButton.clicked.connect(self.addMass)
+        ui.removePushButton.clicked.connect(self.rmMass)
 
-        self.groupPlusPushButton.clicked.connect(lambda: self.group_plus(1))
-        self.groupMinusPushButton.clicked.connect(lambda: self.group_plus(-1))
+        ui.groupPlusPushButton.clicked.connect(lambda: self.group_plus(1))
+        ui.groupMinusPushButton.clicked.connect(lambda: self.group_plus(-1))
 
-        self.mergePushButton.clicked.connect(self.merge)
-        self.importPushButton.clicked.connect(self.import_masslist)
-        self.exportPushButton.clicked.connect(self.export)
+        ui.mergePushButton.clicked.connect(self.merge)
+        ui.importPushButton.clicked.connect(self.import_masslist)
+        ui.exportPushButton.clicked.connect(self.export)
 
     @property
-    def masslist(self):
-        return self.manager.workspace.masslist_docker.info
+    def info(self):
+        return self.manager.workspace.info.masslist_docker
 
     def restore(self):
         self.showMasslist()
-        self.manager.workspace.masslist_docker.ui_state.set_state(self)
+        self.info.ui_state.restore_state(self.ui)
 
     def updateState(self):
-        self.manager.workspace.masslist_docker.ui_state.fromComponents(self, [
-            self.addItemLineEdit,
-            self.groupLineEdit,
-            self.splitFormulaCheckBox])
+        self.info.ui_state.store_state(self.ui)
 
     def showMasslist(self):
-        self.doubleSpinBox.setValue(self.masslist.rtol * 1e6)
+        ui = self.ui
+        ui.doubleSpinBox.setValue(self.info.rtol * 1e6)
 
-        table = self.tableWidget
+        table = ui.tableWidget
         table.clearContents()
         table.setRowCount(0)
-        table.setRowCount(len(self.masslist.masslist))
-        for index, mass in enumerate(self.masslist.masslist):
+        table.setRowCount(len(self.info.masslist))
+        for index, mass in enumerate(self.info.masslist):
             table.setItem(index, 0, QtWidgets.QTableWidgetItem(
                 format(mass.position, '.5f')))
             table.setItem(index, 1, QtWidgets.QTableWidgetItem(
@@ -65,13 +65,14 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
 
     @state_node
     def updateRtol(self):
-        self.masslist.rtol = self.doubleSpinBox.value() * 1e-6
+        self.info.rtol = self.ui.doubleSpinBox.value() * 1e-6
 
     @state_node
     def addMass(self):
-        text = self.addItemLineEdit.text()
-        rtol = self.masslist.rtol
-        masslist = self.masslist.masslist
+        ui = self.ui
+        text = ui.addItemLineEdit.text()
+        rtol = self.info.rtol
+        masslist = self.info.masslist
         for item in text.split(','):
             item = item.strip()
             if not item:
@@ -89,20 +90,20 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
 
     @state_node
     def rmMass(self):
-        indexes = get_tablewidget_selected_row(self.tableWidget)
-        masslist = self.masslist.masslist
+        indexes = get_tablewidget_selected_row(self.ui.tableWidget)
+        masslist = self.info.masslist
         for index in reversed(indexes):
             masslist.pop(index)
         self.showMasslist()
 
     @state_node(withArgs=True)
-    def group_plus(self, times):
+    def group_plus(self, times: float):
         abs_times = abs(times)
         sign = times / abs_times
-        group = Formula(self.groupLineEdit.text())
+        group = Formula(self.ui.groupLineEdit.text())
         group *= abs_times
         mass_delta = sign * group.mass()
-        for item in self.masslist.masslist:
+        for item in self.info.masslist:
             if len(item.formulas) > 0:
                 for f in item.formulas:
                     if sign > 0:
@@ -118,10 +119,10 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
         self.showMasslist()
 
     def get_selected_index(self):
-        return get_tablewidget_selected_row(self.tableWidget)
+        return get_tablewidget_selected_row(self.ui.tableWidget)
 
     def read_masslist_from(self, f):
-        rtol = self.masslist.rtol
+        rtol = self.info.rtol
         ret = []
         with open(f, "r") as file:
             reader = csv.reader(file)
@@ -142,8 +143,8 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
         if not ret:
             return
 
-        rtol = self.masslist.rtol
-        masslist = self.masslist.masslist
+        rtol = self.info.rtol
+        masslist = self.info.masslist
 
         def func():
             imported = self.read_masslist_from(f)
@@ -158,7 +159,7 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
         if not ret:
             return
 
-        self.masslist.masslist = yield partial(self.read_masslist_from, f), "read mass list"
+        self.info.masslist = yield partial(self.read_masslist_from, f), "read mass list"
         self.showMasslist()
 
     @state_node
@@ -167,8 +168,8 @@ class Widget(QtWidgets.QWidget, MassListUi.Ui_Form):
         if not ret:
             return
 
-        masslist = self.masslist.masslist
-        export_split = self.splitFormulaCheckBox.isChecked()
+        masslist = self.info.masslist
+        export_split = self.ui.splitFormulaCheckBox.isChecked()
 
         def func():
             if export_split:

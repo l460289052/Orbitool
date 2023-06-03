@@ -7,8 +7,6 @@ import numpy as np
 from Orbitool.structures.HDF5.h5type_handlers.dict_handler import DictHandler
 from Orbitool.utils.formula import Formula
 
-from ..workspace import WorkSpace
-from .base import register
 from .utils import create_group, move_to, copy_to, read_dict, read_dict_keys, write_dict_keys, write_to
 
 
@@ -59,6 +57,3 @@ def update(path: str):
                     ion_group.attrs["position"] = position
                     ion_group.attrs["rtol"] = rtol
                     ion_group.attrs["h5_type"] = "calibration path ion info"
-
-
-register("2.1.5", update)

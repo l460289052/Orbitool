@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Iterable, List
 import numpy as np
 from h5py import Group
 
-from ..functions import spectrum
 from ..utils.formula import Formula, FormulaList
 from .base import field
 from .base_row import BaseRowItem, RowDTypeHandler
@@ -26,7 +25,7 @@ class Peak(BaseRowItem):
 
     @cached_property
     def isPeak(self):
-        return spectrum.getPeaksPositions(self.intensity)
+        return spectrum_func.getPeaksPositions(self.intensity)
 
     @cached_property
     def idPeak(self):
@@ -71,3 +70,6 @@ class MassListItem(BaseRowItem):
     item_name = "MassList"
     position: float
     formulas: FormulaList = field(list)
+
+
+from ..functions import spectrum as spectrum_func # to avoid circular import

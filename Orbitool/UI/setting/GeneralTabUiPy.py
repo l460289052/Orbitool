@@ -26,23 +26,23 @@ class Tab(BaseTab):
         ui.multiCoresSpinBox.setValue(general.multi_cores)
 
         ui.timeFormatLineEdit.textChanged.connect(self.change_time_format)
-        ui.timeFormatLineEdit.setText(general.format_time)
+        ui.timeFormatLineEdit.setText(general.time_format)
         ui.timeFormatRevertButton.clicked.connect(
-            lambda: ui.timeFormatLineEdit.setText(general.__fields__["format_time"].get_default()))
+            lambda: ui.timeFormatLineEdit.setText(general.__fields__["time_format"].get_default()))
 
         ui.exportTimeFormatLineEdit.textChanged.connect(
             self.change_export_time_format)
-        ui.exportTimeFormatLineEdit.setText(general.format_export_time)
+        ui.exportTimeFormatLineEdit.setText(general.export_time_format)
         ui.exportTimeFormatRevertButton.clicked.connect(
-            lambda: ui.exportTimeFormatLineEdit.setText(general.__fields__["format_export_time"].get_default()))
+            lambda: ui.exportTimeFormatLineEdit.setText(general.__fields__["export_time_format"].get_default()))
 
     def stash_setting(self, setting: _Setting):
         ui = self.ui
         general = setting.general
         general.multi_cores = ui.multiCoresSpinBox.value()
         general.default_select = ui.defaultSelectCheckBox.isChecked()
-        general.format_time = ui.timeFormatLineEdit.text()
-        general.format_export_time = ui.exportTimeFormatLineEdit.text()
+        general.time_format = ui.timeFormatLineEdit.text()
+        general.export_time_format = ui.exportTimeFormatLineEdit.text()
 
     def change_time_format(self, text: str):
         try:

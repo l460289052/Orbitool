@@ -17,79 +17,70 @@ from .manager import Manager, Thread, state_node
 from .utils import set_header_sizes, showInfo
 
 
-class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
+class Widget(QtWidgets.QWidget):
     callback = QtCore.pyqtSignal()
 
-    def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
+    def __init__(self, manager: Manager, parent: Optional[QtWidgets.QWidget] = None) -> None:
         super().__init__(parent=parent)
         self.manager = manager
-        self.setupUi(self)
+        self.ui = FileUi.Ui_Form()
+        self.setupUi()
 
         manager.init_or_restored.connect(self.init_or_restore)
         manager.save.connect(self.updateState)
 
-    def setupUi(self, Form):
-        super().setupUi(self)
+    def setupUi(self):
+        self.ui.setupUi(self)
 
-        set_header_sizes(self.tableWidget.horizontalHeader(), [150, 100, 100])
+        ui = self.ui
+        set_header_sizes(ui.tableWidget.horizontalHeader(), [150, 100, 100])
 
-        self.tableWidget.dragEnterEvent = self.tableDragEnterEvent
-        self.tableWidget.dragMoveEvent = self.tableDragMoveEvent
-        self.tableWidget.dropEvent = self.tableDropEvent
+        ui.tableWidget.dragEnterEvent = self.tableDragEnterEvent
+        ui.tableWidget.dragMoveEvent = self.tableDragMoveEvent
+        ui.tableWidget.dropEvent = self.tableDropEvent
 
-        self.addFilePushButton.clicked.connect(self.addThermoFile)
-        self.addFolderPushButton.clicked.connect(self.addFolder)
-        self.removeFilePushButton.clicked.connect(self.removePath)
+        ui.addFilePushButton.clicked.connect(self.addThermoFile)
+        ui.addFolderPushButton.clicked.connect(self.addFolder)
+        ui.removeFilePushButton.clicked.connect(self.removePath)
 
-        self.timeAdjustPushButton.clicked.connect(self.adjust_time)
+        ui.timeAdjustPushButton.clicked.connect(self.adjust_time)
 
-        self.nSpectraRadioButton.clicked.connect(self.radioButtonChanged)
-        self.nMinutesRadioButton.clicked.connect(self.radioButtonChanged)
-        self.periodRadioButton.clicked.connect(self.radioButtonChanged)
+        ui.nSpectraRadioButton.clicked.connect(self.radioButtonChanged)
+        ui.nMinutesRadioButton.clicked.connect(self.radioButtonChanged)
+        ui.periodRadioButton.clicked.connect(self.radioButtonChanged)
 
-        self.periodImportToolButton.clicked.connect(self.importPeriod)
-        self.exportPeriodPushButton.clicked.connect(self.exportPeriod)
+        ui.periodImportToolButton.clicked.connect(self.importPeriod)
+        ui.exportPeriodPushButton.clicked.connect(self.exportPeriod)
 
-        self.selectedPushButton.clicked.connect(self.processSelected)
-        self.allPushButton.clicked.connect(self.processAll)
+        ui.selectedPushButton.clicked.connect(self.processSelected)
+        ui.allPushButton.clicked.connect(self.processAll)
 
     @property
-    def file(self):
-        return self.manager.workspace.file_tab
+    def info(self):
+        return self.manager.workspace.info.file_tab
 
     @property
     def pathlist(self) -> PathList:
-        return self.manager.workspace.file_tab.info.pathlist
+        return self.info.pathlist
 
     def init_or_restore(self):
         self.showPaths()
-        self.file.ui_state.set_state(self)
+        self.info.ui_state.restore_state(self.ui)
 
     def updateState(self):
-        self.file.ui_state.fromComponents(self, [
-            self.recursionCheckBox,
-            self.nSpectraRadioButton,
-            self.nMinutesRadioButton,
-            self.periodRadioButton,
-            self.nSpectraSpinBox,
-            self.nMinutesDoubleSpinBox,
-            self.autoTimeCheckBox,
-            self.startDateTimeEdit,
-            self.endDateTimeEdit,
-            self.rtolDoubleSpinBox,
-            self.positiveRadioButton,
-            self.negativeRadioButton,
-            self.averageCheckBox])
+        ui = self.ui
+        self.info.ui_state.store_state(ui)
 
     @state_node(mode='n')
     def radioButtonChanged(self):
-        if self.nSpectraRadioButton.isChecked():
-            self.exportPeriodPushButton.setEnabled(False)
-        elif self.nMinutesRadioButton.isChecked():
-            self.exportPeriodPushButton.setEnabled(True)
-        elif self.periodRadioButton.isChecked():
-            self.exportPeriodPushButton.setEnabled(
-                self.file.info.periods is not None)
+        ui = self.ui
+        if ui.nSpectraRadioButton.isChecked():
+            ui.exportPeriodPushButton.setEnabled(False)
+        elif ui.nMinutesRadioButton.isChecked():
+            ui.exportPeriodPushButton.setEnabled(True)
+        elif ui.periodRadioButton.isChecked():
+            ui.exportPeriodPushButton.setEnabled(
+                self.info.periods is not None)
 
     @state_node
     def importPeriod(self):
@@ -110,9 +101,9 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
                         row[0]), time_parser.parse(row[1]))
                     ret.append(item)
             return ret
-        self.file.info.periods = yield func, "Read periods"
-        if not self.exportPeriodPushButton.isEnabled():
-            self.exportPeriodPushButton.setEnabled(True)
+        self.info.periods = yield func, "Read periods"
+        if not self.ui.exportPeriodPushButton.isEnabled():
+            self.ui.exportPeriodPushButton.setEnabled(True)
 
     @state_node
     def exportPeriod(self):
@@ -120,15 +111,16 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         if not success:
             return
 
-        period_checked = self.periodRadioButton.isChecked()
-        minutes_checked = self.nMinutesRadioButton.isChecked()
-        start_point = self.startDateTimeEdit.dateTime().toPyDateTime()
-        end_point = self.endDateTimeEdit.dateTime().toPyDateTime()
-        interval = timedelta(minutes=self.nMinutesDoubleSpinBox.value())
+        ui = self.ui
+        period_checked = ui.periodRadioButton.isChecked()
+        minutes_checked = ui.nMinutesRadioButton.isChecked()
+        start_point = ui.startDateTimeEdit.dateTime().toPyDateTime()
+        end_point = ui.endDateTimeEdit.dateTime().toPyDateTime()
+        interval = timedelta(minutes=ui.nMinutesDoubleSpinBox.value())
 
         def func():
             if period_checked:
-                periods = self.file.info.periods
+                periods = self.info.periods
             elif minutes_checked:
                 def generator():
                     for s, e in generage_periods(start_point, end_point, interval):
@@ -174,7 +166,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         manager = self.manager
 
         def func():
-            for path in manager.tqdm(utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.recursionCheckBox.isChecked())):
+            for path in manager.tqdm(utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.ui.recursionCheckBox.isChecked())):
                 pathlist.addThermoFile(path)
             pathlist.sort()
 
@@ -190,7 +182,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         data = event.mimeData()
         text = data.text().splitlines()
         if text and text[0].startswith("file:///"):
-            event.setDropAction(QtCore.Qt.LinkAction)
+            event.setDropAction(QtCore.Qt.DropAction.LinkAction)
             event.accept()
 
     def tableDragMoveEvent(self, event: QtGui.QDragMoveEvent):
@@ -198,12 +190,13 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
 
     @state_node(withArgs=True)
     def tableDropEvent(self, event: QtGui.QDropEvent):
+        paths = event.mimeData().text().splitlines()
         def func():
             pathlist = self.pathlist
-            for file in event.mimeData().text().splitlines():
+            for file in paths:
                 p = pathlib.Path(file[len("file:///"):])
                 if p.is_dir():
-                    for path in self.manager.tqdm(utils.files.FolderTraveler(str(p), ext=".RAW", recurrent=self.recursionCheckBox.isChecked())):
+                    for path in self.manager.tqdm(utils.files.FolderTraveler(str(p), ext=".RAW", recurrent=self.ui.recursionCheckBox.isChecked())):
                         pathlist.addThermoFile(path)
                 elif p.suffix.lower() == ".raw":
                     pathlist.addThermoFile(str(p))
@@ -214,7 +207,7 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
 
     @state_node
     def removePath(self):
-        indexes = UiUtils.get_tablewidget_selected_row(self.tableWidget)
+        indexes = UiUtils.get_tablewidget_selected_row(self.ui.tableWidget)
         self.pathlist.rmPath(indexes)
         self.showPaths()
 
@@ -223,7 +216,8 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
         self.showPaths()
 
     def showPaths(self):
-        table = self.tableWidget
+        ui = self.ui
+        table = ui.tableWidget
         pathlist = self.pathlist
         table.setRowCount(0)
         table.setRowCount(len(pathlist))
@@ -234,67 +228,69 @@ class Widget(QtWidgets.QWidget, FileUi.Ui_Form):
             for j, vv in enumerate(v):
                 table.setItem(i, j, QtWidgets.QTableWidgetItem(str(vv)))
 
-        if self.autoTimeCheckBox.isChecked():
-            time_start, time_end = self.pathlist.timeRange
+        if ui.autoTimeCheckBox.isChecked():
+            time_start, time_end = pathlist.timeRange
             if time_start is None:
                 return
-            self.startDateTimeEdit.setDateTime(time_start)
-            self.endDateTimeEdit.setDateTime(time_end)
+            ui.startDateTimeEdit.setDateTime(time_start)
+            ui.endDateTimeEdit.setDateTime(time_end)
 
     @state_node
     def adjust_time(self):
-        slt = UiUtils.get_tablewidget_selected_row(self.tableWidget)
+        ui = self.ui
+        slt = UiUtils.get_tablewidget_selected_row(ui.tableWidget)
         paths = self.pathlist.subList(slt)
         start, end = paths.timeRange
         if start is None:
             return
-        self.startDateTimeEdit.setDateTime(start)
-        self.endDateTimeEdit.setDateTime(end)
+        ui.startDateTimeEdit.setDateTime(start)
+        ui.endDateTimeEdit.setDateTime(end)
 
     @state_node
     def processSelected(self):
-        indexes = UiUtils.get_tablewidget_selected_row(self.tableWidget)
+        indexes = UiUtils.get_tablewidget_selected_row(self.ui.tableWidget)
         if len(indexes) == 0:
             return None
 
         paths = self.pathlist.subList(indexes)
-        self.file.info.spectrum_infos = yield self.processPaths(paths.paths), "get infomations from selected spectra"
+        self.info.spectrum_infos = yield self.processPaths(paths.paths), "get infomations from selected spectra"
 
         self.callback.emit()
 
     @state_node
     def processAll(self):
-        self.file.info.spectrum_infos = yield self.processPaths(self.pathlist.paths), "get infomations from spectra"
+        self.info.spectrum_infos = yield self.processPaths(self.pathlist.paths), "get infomations from spectra"
 
         self.callback.emit()
 
     def processPaths(self, paths: List[Path]):
-        time_range = (self.startDateTimeEdit.dateTime().toPyDateTime(),
-                      self.endDateTimeEdit.dateTime().toPyDateTime())
+        ui = self.ui
+        time_range = (ui.startDateTimeEdit.dateTime().toPyDateTime(),
+                      ui.endDateTimeEdit.dateTime().toPyDateTime())
 
         paths = self.manager.tqdm(paths)
 
-        self.file.info.rtol = self.rtolDoubleSpinBox.value() * 1e-6
-        if self.positiveRadioButton.isChecked():
+        self.info.rtol = ui.rtolDoubleSpinBox.value() * 1e-6
+        if ui.positiveRadioButton.isChecked():
             polarity = 1
-        elif self.negativeRadioButton.isChecked():
+        elif ui.negativeRadioButton.isChecked():
             polarity = -1
         else:
             raise ValueError("Please select a polarity")
 
-        if self.averageCheckBox.isChecked():
-            if self.nSpectraRadioButton.isChecked():
-                num = self.nSpectraSpinBox.value()
+        if ui.averageCheckBox.isChecked():
+            if ui.nSpectraRadioButton.isChecked():
+                num = ui.nSpectraSpinBox.value()
                 func = partial(FileSpectrumInfo.generate_infos_from_paths_by_number,
                                paths, num, polarity, time_range)
-            elif self.nMinutesRadioButton.isChecked():
+            elif ui.nMinutesRadioButton.isChecked():
                 interval = timedelta(
-                    minutes=self.nMinutesDoubleSpinBox.value())
+                    minutes=ui.nMinutesDoubleSpinBox.value())
                 func = partial(FileSpectrumInfo.generate_infos_from_paths_by_time_interval,
                                paths, interval, polarity, time_range)
-            elif self.periodRadioButton.isChecked():
+            elif ui.periodRadioButton.isChecked():
                 func = partial(FileSpectrumInfo.generate_infos_from_paths_by_periods,
-                               paths, polarity, [(p.start_time, p.end_time)for p in self.file.info.periods])
+                               paths, polarity, [(p.start_time, p.end_time)for p in self.info.periods])
         else:
             func = partial(FileSpectrumInfo.generate_infos_from_paths,
                            paths, polarity, time_range)

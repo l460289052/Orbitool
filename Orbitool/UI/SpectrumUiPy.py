@@ -8,21 +8,23 @@ from .utils import savefile
 from ..structures.spectrum import Spectrum
 
 
-class Widget(QtWidgets.QWidget, SpectrumUi.Ui_Form):
+class Widget(QtWidgets.QWidget):
     def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
         super().__init__()
-        self.setupUi(self)
+        self.ui = SpectrumUi.Ui_Form()
+        self.setupUi()
         self.manager = manager
         manager.init_or_restored.connect(self.restore)
 
-    def setupUi(self, Form):
-        super().setupUi(Form)
+    def setupUi(self):
+        ui = self.ui
+        ui.setupUi(self)
 
-        self.pushButton.clicked.connect(self.export)
+        self.ui.pushButton.clicked.connect(self.export)
 
     @property
     def info(self):
-        return self.manager.workspace.spectrum_docker.info
+        return self.manager.workspace.info.spectrum_docker
 
     def restore(self):
         self.show_spectrum(self.info.spectrum)
@@ -31,7 +33,7 @@ class Widget(QtWidgets.QWidget, SpectrumUi.Ui_Form):
         self.info.spectrum = spectrum
         if not spectrum:
             return
-        tableWidget = self.tableWidget
+        tableWidget = self.ui.tableWidget
         tableWidget.setRowCount(0)
         mass = spectrum.mz
         intensity = spectrum.intensity

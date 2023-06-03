@@ -1,6 +1,6 @@
 import numpy as np
 
-from .base import Widget as BaseWidget
+from .base import BaseInfo
 from .. import setting
 from ..structures import BaseRowItem, BaseStructure, Row, field
 from ..structures.file import FileSpectrumInfo
@@ -67,7 +67,7 @@ class NoiseGeneralResult(BaseStructure):
     LOD: np.ndarray = None
 
 
-class NoiseTabInfo(BaseStructure):
+class NoiseTabInfo(BaseInfo):
     h5_type = "noise tab"
 
     skip: bool = False
@@ -79,10 +79,3 @@ class NoiseTabInfo(BaseStructure):
 
     denoised_spectrum_infos: Row[FileSpectrumInfo] = field(list)
     to_be_calibrate: bool = True
-
-
-class Widget(BaseWidget[NoiseTabInfo]):
-    raw_spectra = StructureList(Spectrum)
-
-    def __init__(self, obj):
-        super().__init__(obj, NoiseTabInfo)

@@ -4,7 +4,7 @@ import typing
 from PyQt5 import QtCore, QtGui, QtWidgets
 from .SettingUi import Ui_Dialog
 from . import GeneralTabUiPy
-from Orbitool import setting
+from Orbitool import setting, VERSION
 
 
 class OptTab(Enum):
@@ -16,6 +16,7 @@ class Dialog(QtWidgets.QDialog):
         super().__init__()
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
+        self.setWindowTitle(f"Orbitool {VERSION} setting")
         self.init()
 
     def init(self):

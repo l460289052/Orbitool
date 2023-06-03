@@ -10,7 +10,7 @@ from ..utils.formula import Formula
 from ..structures import BaseStructure, BaseRowItem, field, Row
 from ..structures.spectrum import Spectrum, SpectrumInfo
 from ..structures.HDF5 import StructureList
-from .base import Widget as BaseWidget
+from .base import BaseInfo
 
 
 def default_ions():
@@ -29,7 +29,7 @@ class CalibratorInfoSegment(BaseStructure):
     n_ions: int = 3
 
 
-class CalibratorInfo(BaseStructure):
+class CalibratorInfo(BaseInfo):
     h5_type = "calibrator tab"
 
     skip: bool = False
@@ -161,10 +161,3 @@ class CalibratorInfo(BaseStructure):
                 raise ValueError(f"Error at file {path}:{e}") from e
         self.last_calibrate_info_segments = deepcopy(
             self.calibrate_info_segments)
-
-
-class Widget(BaseWidget[CalibratorInfo]):
-    calibrated_spectra = StructureList(Spectrum)
-
-    def __init__(self, obj) -> None:
-        super().__init__(obj, CalibratorInfo)

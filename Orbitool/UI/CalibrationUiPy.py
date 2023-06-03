@@ -11,7 +11,7 @@ import matplotlib.ticker
 from ..functions import spectrum as spectrum_func, binary_search, peakfit as peakfit_func
 from ..functions.calibration import Calibrator
 from ..functions.peakfit.normal_distribution import NormalDistributionFunc
-from ..structures.HDF5 import StructureListView
+from ..structures.HDF5 import StructureListView, DiskListDirectView
 from ..structures.spectrum import Spectrum, SpectrumInfo
 from ..workspace import WorkSpace
 from ..workspace.calibration import CalibratorInfoSegment
@@ -29,78 +29,69 @@ class ShownState(int, Enum):
     file = 2
 
 
-class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
+class Widget(QtWidgets.QWidget):
     callback = QtCore.pyqtSignal()
 
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager: Manager = manager
-        self.setupUi(self)
+        self.ui = CalibrationUi.Ui_Form()
+        self.setupUi()
         manager.init_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
 
-        self.spectrum_inner_index: int = None
-        self.spectrum_current_ion_index: int = None
+    def setupUi(self):
+        ui = self.ui
+        ui.setupUi(self)
 
-    def setupUi(self, Form):
-        super().setupUi(Form)
+        self.plot = Plot(ui.figureTabWidgetPage)
+        ui.tabWidget.setCurrentIndex(0)
 
-        self.plot = Plot(self.figureTabWidgetPage)
-        self.tabWidget.setCurrentIndex(0)
+        ui.separatorListWidget.itemDoubleClicked.connect(self.changeSegment)
+        ui.separatorListWidget.mouseReleaseEvent = self.mouseRelease
+        ui.separatorAddPushButton.clicked.connect(self.addSegment)
 
-        self.separatorListWidget.itemDoubleClicked.connect(self.changeSegment)
-        self.separatorListWidget.mouseReleaseEvent = self.mouseRelease
-        self.separatorAddPushButton.clicked.connect(self.addSegment)
-
-        self.addIonToolButton.clicked.connect(self.addIon)
-        self.delIonToolButton.clicked.connect(self.removeIon)
-        self.calcInfoPushButton.clicked.connect(self.calcInfo)
-        self.showDetailsPushButton.clicked.connect(self.showDetail)
-        self.finishPushButton.clicked.connect(
+        ui.addIonToolButton.clicked.connect(self.addIon)
+        ui.delIonToolButton.clicked.connect(self.removeIon)
+        ui.calcInfoPushButton.clicked.connect(self.calcInfo)
+        ui.showDetailsPushButton.clicked.connect(self.showDetail)
+        ui.finishPushButton.clicked.connect(
             lambda: self.calibrate(skip=False))
-        self.skipPushButton.clicked.connect(lambda: self.calibrate(skip=True))
-
-        self.previousIonsShortCut = QtWidgets.QShortcut("Left", self)
-        self.previousIonsShortCut.activated.connect(lambda: self.next_ion(-1))
-        self.nextIonShortCut = QtWidgets.QShortcut("Right", self)
-        self.nextIonShortCut.activated.connect(lambda: self.next_ion(1))
+        ui.skipPushButton.clicked.connect(lambda: self.calibrate(skip=True))
 
     @property
-    def calibration(self):
-        return self.manager.workspace.calibration_tab
+    def info(self):
+        return self.manager.workspace.info.calibration_tab
 
     def restore(self):
         self.showSegments()
         self.showCurrentSegment()
-        self.calibration.ui_state.set_state(self)
+        self.info.ui_state.restore_state(self.ui)
         self.showAllInfo()
 
     def updateState(self):
-        self.calibration.ui_state.fromComponents(self, [
-            self.rtolDoubleSpinBox,
-            self.filterSpinBox,
-            self.degreeSpinBox,
-            self.nIonsSpinBox])
+        self.info.ui_state.store_state(self)
 
     def showSegments(self):
         workspace = self.manager.workspace
-        begin_point = workspace.formula_docker.info.mz_min
-        end_point = workspace.formula_docker.info.mz_max
+        begin_point = workspace.info.formula_docker.mz_min
+        end_point = workspace.info.formula_docker.mz_max
 
-        listwidget = self.separatorListWidget
+        listwidget = self.ui.separatorListWidget
         listwidget.clear()
         points = [
-            seg.end_point for seg in self.calibration.info.calibrate_info_segments]
+            seg.end_point for seg in self.info.calibrate_info_segments]
         points.pop()
         for begin, end in zip([begin_point, *points], [*points, end_point]):
             listwidget.addItem("{:.2f}-{:.2f}".format(begin, end))
 
     def showCurrentSegment(self):
-        info = self.calibration.info
+        info = self.info
+        ui = self.ui
         ind = info.current_segment_index
-        self.separatorListWidget.setCurrentRow(ind)
+        ui.separatorListWidget.setCurrentRow(ind)
         seg = info.calibrate_info_segments[ind]
-        table = self.ionsTableWidget
+        table = ui.ionsTableWidget
         table.clearContents()
         ions = info.get_ions_for_segment(ind)
         table.setRowCount(len(ions))
@@ -109,30 +100,33 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             table.setItem(
                 index, 1, QtWidgets.QTableWidgetItem(format(ion.formula.mass(), ".4f")))
 
-        self.filterSpinBox.setValue(seg.intensity_filter)
-        self.degreeSpinBox.setValue(seg.degree)
-        self.nIonsSpinBox.setValue(seg.n_ions)
+        ui.filterSpinBox.setValue(seg.intensity_filter)
+        ui.degreeSpinBox.setValue(seg.degree)
+        ui.nIonsSpinBox.setValue(seg.n_ions)
 
     def saveCurrentSegment(self):
-        info = self.calibration.info
+        info = self.info
+        ui = self.ui
         seg = info.calibrate_info_segments[info.current_segment_index]
-        seg.intensity_filter = self.filterSpinBox.value()
-        seg.degree = self.degreeSpinBox.value()
-        seg.n_ions = self.nIonsSpinBox.value()
+        seg.intensity_filter = ui.filterSpinBox.value()
+        seg.degree = ui.degreeSpinBox.value()
+        seg.n_ions = ui.nIonsSpinBox.value()
 
     @state_node
     def addSegment(self):
-        separator = self.separatorDoubleSpinBox.value()
-        formula_info = self.manager.workspace.formula_docker.info
+        ui = self.ui
+        separator = ui.separatorDoubleSpinBox.value()
+        formula_info = self.manager.workspace.info.formula_docker
         assert formula_info.mz_min < separator < formula_info.mz_max, "please check mz range in formula docker"
-        self.calibration.info.add_segment(separator)
+        self.info.add_segment(separator)
         self.showSegments()
         self.showCurrentSegment()
 
     @state_node(mode='n', withArgs=True)
     def mouseRelease(self, e: QtGui.QMouseEvent):
+        ui = self.ui
         indexes = [ind.row()
-                   for ind in self.separatorListWidget.selectedIndexes()]
+                   for ind in ui.separatorListWidget.selectedIndexes()]
         if len(indexes) > 1:
             menu = QtWidgets.QMenu(self)
 
@@ -142,7 +136,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
             merge.triggered.connect(lambda: func())
             menu.addAction(merge)
             menu.popup(e.globalPos())
-        return QtWidgets.QListWidget.mouseReleaseEvent(self.separatorListWidget, e)
+        return QtWidgets.QListWidget.mouseReleaseEvent(ui.separatorListWidget, e)
 
     @state_node(withArgs=True)
     def mergeSegment(self, indexes: List[int]):
@@ -150,7 +144,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
         mi = min(indexes)
         assert ma - mi == len(indexes) - \
             1, "cannot merge unjoined segments"
-        info = self.calibration.info
+        info = self.info
         info.merge_segment(mi, ma + 1)
         if mi < info.current_segment_index:
             if info.current_segment_index <= ma:
@@ -165,49 +159,48 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
     def changeSegment(self, item: QtWidgets.QListWidgetItem):
         self.saveCurrentSegment()
 
-        ind = self.separatorListWidget.row(item)
-        self.calibration.info.current_segment_index = ind
+        ind = self.ui.separatorListWidget.row(item)
+        self.info.current_segment_index = ind
 
         self.showCurrentSegment()
 
     @state_node
     def addIon(self):
-        self.calibration.info.add_ions(self.ionLineEdit.text().split(','))
+        self.info.add_ions(self.ui.ionLineEdit.text().split(','))
         self.showCurrentSegment()
 
     @state_node
     def removeIon(self):
         remove_ions = set()
-        for index in get_tablewidget_selected_row(self.ionsTableWidget):
-            remove_ions.add(self.ionsTableWidget.item(index, 0).text())
-        self.calibration.info.ions = [
-            ion for ion in self.calibration.info.ions if ion.shown_text not in remove_ions]
+        for index in get_tablewidget_selected_row(self.ui.ionsTableWidget):
+            remove_ions.add(self.ui.ionsTableWidget.item(index, 0).text())
+        self.info.ions = [
+            ion for ion in self.info.ions if ion.shown_text not in remove_ions]
         self.showCurrentSegment()
 
     @state_node
     def calcInfo(self):
         workspace = self.manager.workspace
-        calibration_tab = self.calibration
-        info = calibration_tab.info
+        info = self.info
 
         intensity_filter = 100
         self.saveCurrentSegment()
 
-        rtol = self.rtolDoubleSpinBox.value() * 1e-6
-        if workspace.noise_tab.info.to_be_calibrate or abs(info.rtol / rtol - 1) > 1e-6:
+        rtol = self.ui.rtolDoubleSpinBox.value() * 1e-6
+        if workspace.info.noise_tab.to_be_calibrate or abs(info.rtol / rtol - 1) > 1e-6:
             formulas = [ion.formula for ion in info.ions]
             all_ions = True
         else:
             formulas = info.need_split()
             all_ions = False
 
-        raw_spectra = workspace.noise_tab.raw_spectra
+        raw_spectra = workspace.data.raw_spectra
 
         if formulas:
             func = SplitAndFitPeak(
                 raw_spectra,
                 func_kwargs=dict(
-                    fit_func=workspace.peak_shape_tab.info.func,
+                    fit_func=workspace.info.peak_shape_tab.func,
                     ions=[formula.mass() for formula in formulas],
                     segments=info.calibrate_info_segments,
                     rtol=rtol))
@@ -216,7 +209,7 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
             def func():
                 info.path_times = {
-                    path.path: path.createDatetime for path in workspace.file_tab.info.pathlist}
+                    path.path: path.createDatetime for path in workspace.info.file_tab.pathlist}
                 if all_ions:
                     info.last_ions.clear()
                     info.path_ion_infos.clear()
@@ -231,36 +224,10 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
 
         self.showAllInfo()
 
-    @state_node(withArgs=True)
-    def next_ion(self, step):
-        if self.spectrum_current_ion_index is None:
-            return
-
-        index = self.manager.getters.spectra_list_selected_index.get()
-        infos = self.manager.workspace.file_tab.info.spectrum_infos
-        calibrator = self.calibration.info.calibrators[infos[index].path]
-
-        index = self.spectrum_current_ion_index = (
-            self.spectrum_current_ion_index + step) % len(calibrator.ions)
-        inner_index = self.spectrum_inner_index
-        ion_position = calibrator.ions_raw_position[inner_index, index]
-        ion_intensity = calibrator.ions_raw_intensity[inner_index, index]
-
-        x_min = ion_position - .1
-        x_max = ion_position + .1
-        y_min = -ion_intensity * .1
-        y_max = ion_intensity * 1.2
-
-        plot = self.plot
-        ax = plot.ax
-        ax.set_xlim(x_min, x_max)
-        ax.set_ylim(y_min, y_max)
-        plot.canvas.draw()
-
     def showAllInfo(self):
-        info = self.calibration.info
+        info = self.info
 
-        table = self.caliInfoTableWidget
+        table = self.ui.caliInfoTableWidget
         table.clearContents()
         table.setColumnCount(len(info.last_ions))
         hlables = [ion.shown_text for ion in info.last_ions]
@@ -324,8 +291,8 @@ class Widget(QtWidgets.QWidget, CalibrationUi.Ui_Form):
     @state_node(withArgs=True)
     def calibrate(self, skip: bool):
         workspace = self.manager.workspace
-        rtol = workspace.file_tab.info.rtol
-        noise_info = workspace.noise_tab.info
+        rtol = workspace.info.file_tab.rtol
+        noise_info = workspace.info.noise_tab
         noise_skip = noise_info.skip
         setting = noise_info.general_setting
         result = noise_info.general_result
@@ -424,13 +391,14 @@ class SplitAndFitPeak(MultiProcess):
 class CalibrateMergeDenoise(MultiProcess):
     @staticmethod
     def read(file: WorkSpace, **kwargs) -> Generator[List[Tuple[Spectrum, Calibrator]], Any, Any]:
-        noise_tab = file.noise_tab
+        data = file.data
+        noise_tab = file.info.noise_tab
         separators = np.array([
-            info.end_point for info in file.calibration_tab.info.last_calibrate_info_segments])
+            info.end_point for info in file.info.calibration_tab.last_calibrate_info_segments])
 
         batch = []
-        calibrators_segments = file.calibration_tab.info.calibrator_segments
-        for info, spectrum in zip(noise_tab.info.denoised_spectrum_infos, noise_tab.raw_spectra):
+        calibrators_segments = file.info.calibration_tab.calibrator_segments
+        for info, spectrum in zip(noise_tab.denoised_spectrum_infos, data.raw_spectra):
             item = (spectrum, separators,
                     calibrators_segments.get(spectrum.path, None))
             if info.average_index:
@@ -444,7 +412,7 @@ class CalibrateMergeDenoise(MultiProcess):
     @staticmethod
     def read_len(file: WorkSpace, **read_kwargs) -> int:
         cnt = 0
-        for info in file.noise_tab.info.denoised_spectrum_infos:
+        for info in file.info.noise_tab.denoised_spectrum_infos:
             if info.average_index == 0:
                 cnt += 1
         return cnt
@@ -493,20 +461,22 @@ class CalibrateMergeDenoise(MultiProcess):
 
     @staticmethod
     def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
-        tmp = StructureListView[Spectrum](file._obj, "tmp", True)
-        infos = file.calibration_tab.info.calibrated_spectrum_infos
-        infos.clear()
-        for ret in rets:
-            tmp.h5_append(ret)
-            infos.append(SpectrumInfo(ret.start_time, ret.end_time))
+        obj = (file.proxy_file or file.file)._obj
+        tmp = DiskListDirectView(obj, "tmp")
+        infos = []
 
-        target = file.calibration_tab.calibrated_spectra
-        path = target.h5_path
-        if path in file:
-            del file._obj[path]
-        file._obj.move(tmp.h5_path, path)
+        def it():
+            for spectrum in rets:
+                infos.append(SpectrumInfo(spectrum.start_time, spectrum.end_time))
+                yield spectrum
+        tmp.extend(it())
+        file.info.calibration_tab.calibrated_spectrum_infos = infos
+        path = file.data.calibrated_spectra.obj.name
+        del obj[path]
+        obj.move(tmp.obj.name, path)
 
     @staticmethod
-    def exception(file, **kwargs):
-        if "tmp" in file:
-            del file["tmp"]
+    def exception(file: WorkSpace, **kwargs):
+        obj = (file.proxy_file or file.file)._obj
+        if "tmp" in obj:
+            del obj["tmp"]

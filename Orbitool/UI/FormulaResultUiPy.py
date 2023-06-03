@@ -14,36 +14,39 @@ from .utils import get_tablewidget_selected_row
 from . import PeakFitFloatUiPy
 
 
-class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
+class Window(QtWidgets.QMainWindow):
     acceptSignal = QtCore.pyqtSignal(list)
 
     def __init__(self, manager: Manager, input: str, mass: float, formulas: List[Formula], peak_index: int) -> None:
         super().__init__()
         self.manager = manager
-        self.setupUi(self)
+        self.ui = FormulaResultUi.Ui_MainWindow()
+        self.setupUi()
 
-        self.lineEdit.setText(input)
+        self.ui.lineEdit.setText(input)
         self.mass = mass
         self.formulas = deepcopy(formulas)
         self.peak_index = peak_index
 
         self.showResult()
 
-    def setupUi(self, MainWindow):
-        super().setupUi(MainWindow)
-        self.resultTableWidget.horizontalHeader().setSectionResizeMode(
-            QtWidgets.QHeaderView.ResizeToContents)
-        self.isotopesTableWidget.horizontalHeader().setSectionResizeMode(
-            QtWidgets.QHeaderView.ResizeToContents)
+    def setupUi(self):
+        ui = self.ui
+        ui.setupUi(self)
 
-        self.plot = Plot(self.widget)
-        self.calcPushButton.clicked.connect(self.calc)
-        self.resultTableWidget.itemDoubleClicked.connect(self.plot_row)
-        self.isotopesTableWidget.itemDoubleClicked.connect(self.edit_peak)
-        self.showAllToolButton.clicked.connect(self.showResult)
-        self.closeToolButton.clicked.connect(self.close)
-        self.acceptToolButton.clicked.connect(self.accept)
-        self.acceptEmptyToolButton.clicked.connect(self.acceptEmpty)
+        ui.resultTableWidget.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
+        ui.isotopesTableWidget.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
+
+        self.plot = Plot(ui.widget)
+        ui.calcPushButton.clicked.connect(self.calc)
+        ui.resultTableWidget.itemDoubleClicked.connect(self.plot_row)
+        ui.isotopesTableWidget.itemDoubleClicked.connect(self.edit_peak)
+        ui.showAllToolButton.clicked.connect(self.showResult)
+        ui.closeToolButton.clicked.connect(self.close)
+        ui.acceptToolButton.clicked.connect(self.accept)
+        ui.acceptEmptyToolButton.clicked.connect(self.acceptEmpty)
 
     @classmethod
     def FactoryCalc(cls, manager: Manager, input: str):
@@ -51,7 +54,7 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
 
     @classmethod
     def FactoryPeak(cls, manager: Manager, peak_index: int):
-        peaks = manager.workspace.peakfit_tab.info.peaks
+        peaks = manager.workspace.info.peak_fit_tab.peaks
         peak = peaks[peak_index]
         return Window(manager, str(peak.peak_position), peak.peak_position, peak.formulas, peak_index)
 
@@ -60,11 +63,11 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
 
     @property
     def peaks(self):
-        return self.manager.workspace.peakfit_tab.info.peaks
+        return self.manager.workspace.info.peak_fit_tab.peaks
 
     @state_node
     def calc(self):
-        input = self.lineEdit.text()
+        input = self.ui.lineEdit.text()
         _, mass, formulas, peak_index = calc(self.manager, input)
         self.mass = mass
         self.formulas = formulas
@@ -76,7 +79,7 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
         mass = self.mass
         formulas = self.formulas
 
-        table: QtWidgets.QTableWidget = self.resultTableWidget
+        table: QtWidgets.QTableWidget = self.ui.resultTableWidget
         table.clearContents()
         table.setRowCount(0)
         table.setRowCount(len(formulas))
@@ -122,7 +125,7 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
         isotopes.sort(key=lambda i: i[0].mass())
         isotopes.insert(0, first)
 
-        rtol = self.manager.workspace.formula_docker.info.calc_gen.rtol
+        rtol = self.manager.workspace.info.formula_docker.calc_gen.rtol
 
         mass = formula.mass()
         if len(self.peaks) > 0:
@@ -137,7 +140,7 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
         else:
             intensity = 1 / origin
 
-        table = self.isotopesTableWidget
+        table = self.ui.isotopesTableWidget
         table.clearContents()
         table.setRowCount(0)
         table.setRowCount(len(isotopes))
@@ -183,7 +186,7 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
 
     @state_node(withArgs=True)
     def edit_peak(self, item: QtWidgets.QTableWidgetItem):
-        table = self.isotopesTableWidget
+        table = self.ui.isotopesTableWidget
         row = item.row()
         formula = Formula(table.item(row, 0).text())
         it = table.item(row, 2)
@@ -202,14 +205,14 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
             self.close()
             return
 
-        indexes = get_tablewidget_selected_row(self.resultTableWidget)
+        indexes = get_tablewidget_selected_row(self.ui.resultTableWidget)
         if len(indexes) == 0:
             ret = QtWidgets.QMessageBox.question(
                 self, "accept multi formulas?",
                 "or select one formula to accept",
-                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                QtWidgets.QMessageBox.No)
-            if ret == QtWidgets.QMessageBox.No:
+                QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
+                QtWidgets.QMessageBox.StandardButton.No)
+            if ret == QtWidgets.QMessageBox.StandardButton.No:
                 return
             formulas = self.formulas
         else:
@@ -223,21 +226,21 @@ class Window(QtWidgets.QMainWindow, FormulaResultUi.Ui_MainWindow):
         self.close()
 
 
-def peak_position(peaks: List[FittedPeak], index):
+def peak_position(peaks: List[FittedPeak], index: int):
     return peaks[index].peak_position
 
 
 def calc(manager: Manager, input: str):
+    info = manager.workspace.info
     try:
-        info = manager.workspace.formula_docker.info
         mass = float(input)
-        formulas = info.calc_gen.generate().get(mass, info.charge)
+        formulas = info.formula_docker.calc_gen.generate().get(mass, info.formula_docker.charge)
     except ValueError:
         formula = Formula(input)
         formulas = [formula]
         mass = formula.mass()
 
-    peaks = manager.workspace.peakfit_tab.info.peaks
+    peaks = info.peak_fit_tab.peaks
 
     if len(peaks) > 0:
         index = binary_search.indexNearest(

@@ -1,16 +1,18 @@
-import os
+from dataclasses import fields
+from pathlib import Path
 from typing import Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from .. import VERSION
-from ..structures import BaseStructure, BaseRowItem, StructureTypeHandler, get_handler
-from ..structures.HDF5 import H5File, H5Obj, h5_brokens
-from .base import UiState, Widget
-from .calibration import Widget as CalibrationWidget
+from ..structures import BaseStructure, BaseRowItem, StructureTypeHandler, get_handler, field
+from ..structures.HDF5 import H5File, H5Obj, h5_brokens, BaseDiskData, DiskDict, DiskList
+from ..structures.spectrum import Spectrum
+from .base import BaseInfo
+from .calibration import CalibratorInfo
 from .file_tab import FileTabInfo
 from .formula import FormulaInfo
 from .massdefect import MassDefectInfo
 from .masslist import MassListInfo
-from .noise_tab import Widget as NoiseWidget
+from .noise_tab import NoiseTabInfo
 from .peak_fit import PeakFitInfo
 from .peak_shape import PeakShapeInfo
 from .spectra_list import SpectraListInfo
@@ -24,102 +26,123 @@ class WorkspaceInfo(BaseStructure):
     h5_type = "workspace info"
 
     version: str = VERSION
+    file_tab: FileTabInfo = field(FileTabInfo)
+    noise_tab: NoiseTabInfo = field(NoiseTabInfo)
+    peak_shape_tab: PeakShapeInfo = field(PeakShapeInfo)
+    calibration_tab: CalibratorInfo = field(CalibratorInfo)
+    peak_fit_tab: PeakFitInfo = field(PeakFitInfo)
+    mass_defect_tab: MassDefectInfo = field(MassDefectInfo)
+    time_series_tab: TimeseriesInfo = field(TimeseriesInfo)
+
+    spectra_list: SpectraListInfo = field(SpectraListInfo)
+    formula_docker: FormulaInfo = field(FormulaInfo)
+    masslist_docker: MassListInfo = field(MassListInfo)
+    peaklist_docker: BaseStructure = field(BaseStructure)
+    spectrum_docker: SpectrumInfo = field(SpectrumInfo)
 
 
-class WorkSpace(H5File):
-    def __init__(self, path: str = None) -> None:
-        super().__init__(path)
-        self.info: WorkspaceInfo = self.read("info") if "info" in self else WorkspaceInfo(
-        )
-        self.widgets: Dict[str, Widget] = {}
+class WorkspaceData(BaseDiskData):
+    raw_spectra = DiskList(Spectrum)
+    calibrated_spectra = DiskList(Spectrum)
 
-        self.file_tab = self.visit_or_create_widget("file tab", FileTabInfo)
-        self.spectra_list = self.visit_or_create_widget(
-            "spectra list", SpectraListInfo)
-        self.noise_tab = self.visit_or_create_widget_specific(
-            "noise tab", NoiseWidget)
-        self.peak_shape_tab = self.visit_or_create_widget(
-            "peak shape tab", PeakShapeInfo)
-        self.calibration_tab = self.visit_or_create_widget_specific(
-            "calibration tab", CalibrationWidget)
-        self.peakfit_tab = self.visit_or_create_widget(
-            "peak fit tab", PeakFitInfo)
-        self.massdefect_tab = self.visit_or_create_widget(
-            "mass detect tab", MassDefectInfo)
-        self.timeseries_tab = self.visit_or_create_widget(
-            "time series tab", TimeseriesInfo)
 
-        self.formula_docker = self.visit_or_create_widget(
-            "formula docker", FormulaInfo)
-        self.masslist_docker = self.visit_or_create_widget(
-            "masslist docker", MassListInfo)
-        self.peaklist_docker = self.visit_or_create_widget(
-            "peaklist docker", BaseStructure)
-        self.spectrum_docker = self.visit_or_create_widget(
-            "spectrum docker", SpectrumInfo)
+class WorkSpace:
+    def __init__(self, path: Union[str, Path] = None, use_proxy=True) -> None:
+        if path is not None:
+            path = Path(path)
+        else:
+            use_proxy = False
+        self.use_proxy = use_proxy
+
+        self.info: WorkspaceInfo = None
+        if use_proxy:
+            self.file = H5File(path, 'r')
+            self.proxy_file = H5File(path.with_suffix(".orbt-temp"))
+            if "info" in self.proxy_file:
+                self.info = self.proxy_file.read("info")
+            self.data = WorkspaceData(
+                self.file.get_h5group("data"),
+                self.proxy_file.get_h5group("data"))
+        else:
+            self.file = H5File(path, 'a')
+            self.proxy_file = None
+            self.data = WorkspaceData(self.file.get_h5group("data"))
+        if self.info is None:
+            if "info" in self.file:
+                self.info = self.file.read("info")
+            else:
+                self.info = WorkspaceInfo()
 
     def save(self):
-        self.write("info", self.info)
-        for widget in self.widgets.values():
-            widget.save()
+        if self.use_proxy:
+            self.file.close()
+
+            file = H5File(self.file._io, 'a')
+            file.write("info", self.info)
+            data = WorkspaceData(file.get_h5group(
+                "data"), self.proxy_file.get_h5group("data"))
+            data.save_to_disk()
+            file.close()
+            self.proxy_file.close()
+            self.proxy_file._io.unlink()
+
+            self.file = H5File(self.file._io, 'r')
+            self.proxy_file = H5File(self.proxy_file._io)
+            self.data = WorkspaceData(self.file.get_h5group(
+                "data"), self.proxy_file.get_h5group("data"))
+        else:
+            self.file.write("info", self.info)
 
     def in_memory(self):
-        return not self._file
+        return not self.file._file
 
-    def close_as(self, path: str):
-        assert self._io != path, "please choose another destination"
-        if os.path.exists(path):
-            os.remove(path)
-        new_space = WorkSpace(path)
+    def close(self):
+        self.file.close()
+        if self.proxy_file:
+            self.proxy_file.write("info", self.info)
+            self.proxy_file.close()
+
+    def close_as(self, path):
+        path = Path(path)
+        if self.file._file and path.exists():
+            assert not self.file._io.samefile(
+                path), "please choose another destination"
+        if path.exists():
+            path.unlink()
+        new_space = WorkSpace(path, False)
         new_space.info = self.info
-        for path, widget in self.widgets.items():
-            new_widget = new_space.widgets[path]
-            new_widget.info = widget.info
-            new_widget.ui_state = widget.ui_state
-        new_space.save()
         try:
-            new_space.calibration_tab.calibrated_spectra = self.calibration_tab.calibrated_spectra
+            new_space.data.raw_spectra = self.data.raw_spectra
+        except:
+            h5_brokens.append(new_space.data.raw_spectra.obj.name)
+        try:
+            new_space.data.calibrated_spectra = self.data.calibrated_spectra
         except:
             h5_brokens.append(
-                new_space.calibration_tab.calibrated_spectra.h5_path)
-
-        try:
-            new_space.noise_tab.raw_spectra = self.noise_tab.raw_spectra
-        except:
-            h5_brokens.append(new_space.noise_tab.raw_spectra.h5_path)
+                new_space.data.calibrated_spectra.obj.name)
+        new_space.save()
         new_space.close()
+
         self.close()
 
-    def visit_or_create_widget(self, path: str, info_type: Type[T]) -> Widget[T]:
-        if path in self:
-            try:
-                widget = Widget(self._obj[path], info_type)
-            except:
-                h5_brokens.append('/'.join((self._obj.name, path)))
-                widget = Widget(self._obj.create_group(
-                    path + "-tmp"), info_type)
-        else:
-            widget = Widget(self._obj.create_group(path), info_type)
-        self.widgets[path] = widget
-        return widget
-
-    def visit_or_create_widget_specific(self, path: str, widget_type: Type[T]) -> T:
-        if path in self:
-            try:
-                widget = widget_type(self._obj[path])
-            except:
-                h5_brokens.append('/'.join((self._obj.name, path)))
-                widget = widget_type(self._obj.create_group(path + "-tmp"))
-        else:
-            widget = widget_type(self._obj.create_group(path))
-        self.widgets[path] = widget
-        return widget
+    def load_config_from_file(self, f: str):
+        file = H5File(f, 'r')
+        info = file.read("info")
+        self._load_config(info)
 
     def load_config(self, another: 'WorkSpace'):
-        for key, widget in self.widgets.items():
-            widget.ui_state = another.widgets[key].ui_state
+        self._load_config(another.info)
 
-        self.noise_tab.info.general_setting = another.noise_tab.info.general_setting
-        self.calibration_tab.info.ions = another.calibration_tab.info.ions
-        self.formula_docker.info = another.formula_docker.info
-        self.masslist_docker.info = another.masslist_docker.info
+    def _load_config(self, another: WorkspaceInfo):
+        info = self.info
+
+        for field in fields(info):
+            if issubclass(field.type, BaseInfo):
+                a: BaseInfo = getattr(info, field.name)
+                b: BaseInfo = getattr(another, field.name)
+                a.ui_state = b.ui_state
+
+        info.noise_tab.general_setting = another.noise_tab.general_setting
+        info.calibration_tab.ions = another.calibration_tab.ions
+        info.formula_docker = another.formula_docker
+        info.masslist_docker = another.masslist_docker

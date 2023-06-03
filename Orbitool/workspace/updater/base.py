@@ -2,7 +2,6 @@ import h5py
 from ...functions import binary_search
 from typing import List, Tuple, Callable
 from packaging.version import Version
-from ..workspace import WorkSpace
 
 start_versions: List[Tuple[Version, Callable]] = []
 
@@ -26,10 +25,7 @@ def update(path: str):
 
 def need_update(version: str):
     version = Version(version)
-    posi = binary_search.indexFirstBiggerThan(
-        start_versions, version, method=lambda a, i: a[i][0])
-    if posi < len(start_versions):
-        return True
+    return version < start_versions[-1][0]
 
 
 def get_version(path: str):

@@ -33,28 +33,30 @@ class LineAnimation:
         self.animation: matplotlib.animation.FuncAnimation = None
 
 
-class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
+class Widget(QtWidgets.QWidget):
     callback = QtCore.pyqtSignal(tuple)
 
-    def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
+    def __init__(self, manager: Manager, parent: Optional[QtWidgets.QWidget] = None) -> None:
         super().__init__(parent=parent)
         self.manager = manager
-        self.setupUi(self)
+        self.ui = PeakShapeUi.Ui_Form()
+        self.setupUi()
 
         self.animation = LineAnimation()
         self.manager.init_or_restored.connect(self.restore)
         self.manager.save.connect(self.updateState)
 
-    def setupUi(self, Form):
-        super().setupUi(Form)
+    def setupUi(self):
+        ui = self.ui
+        ui.setupUi(self)
 
-        self.comboBox.addItem("Norm distribution", 1)
-        self.showPushButton.clicked.connect(self.showButtonClicked)
-        self.cancelPushButton.clicked.connect(self.cancel)
-        self.finishPushButton.clicked.connect(self.finishPeakShape)
-        self.exportPushButton.clicked.connect(self.export)
+        ui.comboBox.addItem("Norm distribution", 1)
+        ui.showPushButton.clicked.connect(self.showButtonClicked)
+        ui.cancelPushButton.clicked.connect(self.cancel)
+        ui.finishPushButton.clicked.connect(self.finishPeakShape)
+        ui.exportPushButton.clicked.connect(self.export)
 
-        self.plot = component.Plot(self.widget)
+        self.plot = component.Plot(ui.widget)
 
         self.plot.canvas.mpl_connect('button_press_event', self.mouseToggle)
         self.plot.canvas.mpl_connect('button_release_event', self.mouseToggle)
@@ -62,16 +64,14 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
 
     def restore(self):
         self.showNormedPeaks()
-        self.peak_shape.ui_state.set_state(self)
+        self.info.ui_state.restore_state(self.ui)
 
     def updateState(self):
-        self.peak_shape.ui_state.fromComponents(self, [
-            self.spinBox,
-            self.comboBox])
+        self.info.ui_state.store_state(self.ui)
 
     @property
-    def peak_shape(self):
-        return self.manager.workspace.peak_shape_tab
+    def info(self):
+        return self.manager.workspace.info.peak_shape_tab
 
     @state_node
     def showButtonClicked(self):
@@ -79,13 +79,13 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
 
     @state_node
     def cancel(self):
-        self.peak_shape.info.peaks_manager.cancel()
+        self.info.peaks_manager.cancel()
 
         self.showNormedPeaks()
 
     def showPeak(self):
-        info = self.peak_shape.info
-        peak_num = self.spinBox.value()
+        info = self.info
+        peak_num = self.ui.spinBox.value()
         if info.spectrum is None:
             showInfo("please denoise first")
             return
@@ -116,20 +116,20 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
     def showNormedPeaks(self):
         ax = self.plot.ax
         ax.clear()
-        if self.peak_shape.info.peaks_manager is None:
+        if self.info.peaks_manager is None:
             return
         self.animation = LineAnimation()
         ax.xaxis.set_major_formatter(
             matplotlib.ticker.FormatStrFormatter(r"%.1e"))
         ax.yaxis.set_tick_params(rotation=15)
-        for peak in self.peak_shape.info.peaks_manager.peaks:
+        for peak in self.info.peaks_manager.peaks:
             ax.plot(peak.mz, peak.intensity)
 
         self.plotNormPeak()
         self.plot.canvas.draw()
 
     def plotNormPeak(self):
-        info = self.peak_shape.info
+        info = self.info
         if self.animation.norm_line is not None:
             self.animation.norm_line.remove()
             del self.animation.norm_line
@@ -162,9 +162,9 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
                 animation.end_point = None
                 animation.line = ax.plot([], [], color='red')[-1]
                 animation.animation = matplotlib.animation.FuncAnimation(
-                    plot.canvas.figure, self.mouseMovePrint, interval=1, blit=True, repeat=False, cache_frame_data=False)
+                    plot.fig, self.mouseMovePrint, interval=1, blit=True, repeat=False, cache_frame_data=False)
             elif animation.start_point is not None and event.name == 'button_release_event':
-                info = self.peak_shape.info
+                info = self.info
                 if info.func is not None and animation.end_point is not None:
                     line = (animation.start_point, animation.end_point)
                     peaks = info.peaks_manager.peaks
@@ -212,14 +212,14 @@ class Widget(QtWidgets.QWidget, PeakShapeUi.Ui_Form):
 
     @state_node
     def export(self):
-        spectrum = self.peak_shape.info.spectrum
+        spectrum = self.info.spectrum
         ret, f = savefile("Save Peak Shape Info", "CSV file(*.csv)",
-                          f"peak_shape_info {spectrum.start_time.strftime(setting.general.format_export_time)}"
-                          f"-{spectrum.end_time.strftime(setting.general.format_export_time)}")
+                          f"peak_shape_info {spectrum.start_time.strftime(setting.general.export_time_format)}"
+                          f"-{spectrum.end_time.strftime(setting.general.export_time_format)}")
         if not ret:
             return
 
-        info = self.peak_shape.info
+        info = self.info
         peaks = info.peaks_manager.peaks
         func = info.func
         with open(f, 'w', newline='') as file:

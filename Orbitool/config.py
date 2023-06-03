@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 from multiprocessing import cpu_count
 from typing import List
@@ -35,9 +35,10 @@ if multi_cores < 1:
 
 class General(BaseModel):
     default_select: bool = True
-    format_time: str = r"%Y-%m-%d %H:%M:%S"
-    format_export_time: str = r"%Y%m%d_%H%M%S"
+    time_format: str = r"%Y-%m-%d %H:%M:%S"
+    export_time_format: str = r"%Y%m%d_%H%M%S"
     multi_cores: int = multi_cores
+
 
 
 class Debug(BaseModel):
@@ -66,6 +67,10 @@ class _Setting(BaseModel):
         for key in new_config.__fields__.keys():
             setattr(self, key, getattr(new_config, key))
 
+    def format_time(self, dt: datetime):
+        return dt.strftime(self.general.time_format)
+    def format_export_time(self, dt: datetime):
+        return dt.strftime(self.general.export_time_format)
 
 if config_path.exists():
     setting = _Setting.parse_file(config_path)
@@ -73,4 +78,3 @@ else:
     setting = _Setting()
 
 setting.general.multi_cores = max(min(setting.general.multi_cores, multi_cores), 1)
-setting.save_setting()

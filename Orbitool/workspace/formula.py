@@ -1,7 +1,9 @@
 from typing import List
+
 from ..utils.formula.calc_gen import CalculatorGenerator, State, InitParams, IsotopeNum
 from ..utils.formula import Formula
 from ..structures import BaseStructure, field
+from .base import BaseInfo
 
 def Factory():
     ins = CalculatorGenerator(
@@ -19,7 +21,7 @@ def Factory():
     )
     return ins
 
-class FormulaInfo(BaseStructure):
+class FormulaInfo(BaseInfo):
     h5_type = "formula docker"
 
     charge: float = -1
