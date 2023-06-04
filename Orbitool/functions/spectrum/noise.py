@@ -25,11 +25,11 @@ def getNoiseParams(mass: np.ndarray, intensity: np.ndarray, quantile: float,
 def denoise(mass: np.ndarray, intensity: np.ndarray, quantile: float, n_sigma: float,
             mass_dependent: bool, mass_points: np.ndarray, mass_point_deltas: np.ndarray,
             subtract: bool) -> Tuple[np.ndarray, np.ndarray]:
-    poly_coef, _, slt, mass_point_params = getNoiseParams(mass, intensity, quantile, mass_dependent,
-                                                          mass_points, mass_point_deltas)
+    poly_coef, std, slt, mass_point_params = getNoiseParams(mass, intensity, quantile, mass_dependent,
+                                                            mass_points, mass_point_deltas)
     mass_points = mass_points[slt]
     mass_point_deltas = mass_point_deltas[slt]
-    mass, intensity = denoiseWithParams(mass, intensity, poly_coef,
-                                        mass_point_params, mass_points, mass_point_deltas,
-                                        n_sigma, subtract)
+    mass, intensity = denoiseWithParams(
+        mass, intensity, poly_coef, std, mass_point_params, mass_points,
+        mass_point_deltas, n_sigma, subtract)
     return mass, intensity

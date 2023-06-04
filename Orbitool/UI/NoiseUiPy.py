@@ -30,7 +30,7 @@ class Widget(QtWidgets.QWidget):
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager = manager
-        
+
         self.ui = NoiseUi.Ui_Form()
         self.setupUi()
 
@@ -188,7 +188,7 @@ class Widget(QtWidgets.QWidget):
             poly, std, slt, params = spectrum_func.getNoiseParams(
                 spectrum.mz, spectrum.intensity, quantile, mass_dependent, mass_points, mass_point_deltas)
             noise, LOD = spectrum_func.noiseLODFunc(
-                spectrum.mz, poly, params, mass_points, mass_point_deltas, n_sigma)
+                spectrum.mz, poly, std, params, mass_points, mass_point_deltas, n_sigma)
             return poly, std, slt, params, noise, LOD
 
         result = info.general_result
@@ -345,7 +345,8 @@ class Widget(QtWidgets.QWidget):
             params, points, deltas = noise_setting.get_params(True)
             mz, intensity = spectrum_func.denoiseWithParams(
                 spectrum.mz, spectrum.intensity, info.general_result.poly_coef,
-                params, points, deltas, noise_setting.n_sigma, subtract)
+                info.general_result.global_noise_std, params, points, deltas,
+                noise_setting.n_sigma, subtract)
 
             s = Spectrum(spectrum.path, mz, intensity,
                          spectrum.start_time, spectrum.end_time)
@@ -378,7 +379,7 @@ class Widget(QtWidgets.QWidget):
             params, points, deltas = noise_setting.get_params(True)
             mz, intensity = spectrum_func.getNoisePeaks(
                 spectrum.mz, spectrum.intensity, info.general_result.poly_coef,
-                params, points, deltas, noise_setting.n_sigma)
+                info.general_result.global_noise_std, params, points, deltas, noise_setting.n_sigma)
             return mz, intensity
 
         mz, intensity = yield func, "get noise peak"
@@ -402,7 +403,8 @@ class Widget(QtWidgets.QWidget):
             params, points, deltas = noise_setting.get_params(True)
             mz, intensity = spectrum_func.denoiseWithParams(
                 spectrum.mz, spectrum.intensity, info.general_result.poly_coef,
-                params, points, deltas, noise_setting.n_sigma, subtract)
+                info.general_result.global_noise_std, params, points, deltas,
+                noise_setting.n_sigma, subtract)
 
             s = Spectrum(spectrum.path, mz, intensity,
                          spectrum.start_time, spectrum.end_time)
@@ -425,11 +427,9 @@ class Widget(QtWidgets.QWidget):
         yield ReadFromFile(self.manager.workspace), "read and average all spectra"
         info = self.info
         info.skip = True
-        if info.current_spectrum is not None:
-            self.callback.emit((info.current_spectrum,))
-        else:
+        if info.current_spectrum is None:
             yield from self.readSelectedSpectrum()
-            self.callback.emit((info.current_spectrum,))
+        self.callback.emit((info.current_spectrum,))
 
     @state_node(withArgs=True)
     def moveToTableClickedNoise(self, item: QtWidgets.QTableWidgetItem):
@@ -602,7 +602,6 @@ class ReadFromFile(MultiProcess):
                 infos.append(info)
                 yield spectrum
         tmp.extend(it())
-
 
         file.info.noise_tab.denoised_spectrum_infos = infos
         file.info.noise_tab.to_be_calibrate = True

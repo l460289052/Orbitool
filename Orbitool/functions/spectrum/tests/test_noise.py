@@ -40,7 +40,7 @@ def test_denoise(mass_int):
     noise, LOD = noiseLODFunc(
         mass, poly, param, mass_points, mass_point_deltas, 3)
     new_mass, new_intensity = denoiseWithParams(
-        mass, intensity, poly, param, mass_points, mass_point_deltas, 3, True)
+        mass, intensity, poly, std, param, mass_points, mass_point_deltas, 3, True)
 
     # from matplotlib import pyplot as plt
     # plt.plot(mass, intensity, color='b')

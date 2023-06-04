@@ -113,19 +113,6 @@ def updateNoiseLODParam(DoubleArray2D params, double n_sigma, double noise, doub
     params[1, 0] = (lod-noise)*(math.sqrt(2*math.pi)*params[1,2]) / n_sigma
     return params
 
-cdef DoubleArray noiseFunc(DoubleArray mass, DoubleArray poly_coef, DoubleArray2D norm_params, double[:] mass_points, int[:] mass_point_deltas):
-    cdef np.ndarray[double, ndim=1] noise, tmp_noise
-    cdef np.ndarray[cbool, ndim=1] mask
-    cdef DoubleArray norm_param
-    cdef int i
-    noise = polynomial.polyval(mass, poly_coef)
-    for i, norm_param in enumerate(norm_params, 1):
-        mask = getMassPointMask(mass, mass_points[i-1], mass_point_deltas[i-1])
-        tmp_noise = normFunc(mass[mask], norm_param[0], norm_param[1], norm_param[2])
-        noise[mask] = np.maximum(noise[mask], tmp_noise)
-    return noise
-    
-
 def getNoiseParams(DoubleArray mass, DoubleArray intensity, double quantile,
         cbool mass_dependent, double[:] mass_points, int[:] mass_point_deltas):
     cdef np.ndarray[cbool, ndim=1] is_peak, global_mask, other_mask, quantile_mask
@@ -174,26 +161,41 @@ def getNoiseParams(DoubleArray mass, DoubleArray intensity, double quantile,
             std, mass_point, mass_point_deltas[i]))
     return poly_coef, std, ret
 
-cpdef tuple noiseLODFunc(DoubleArray mass, DoubleArray poly_coef,
+cdef DoubleArray noiseFunc(DoubleArray mass, poly_coef, DoubleArray2D norm_params, double[:] mass_points, int[:] mass_point_deltas):
+    """
+    poly_coef could be a double or a double array
+    """
+    cdef np.ndarray[double, ndim=1] noise, tmp_noise
+    cdef np.ndarray[cbool, ndim=1] mask
+    cdef DoubleArray norm_param
+    cdef int i
+    noise = polynomial.polyval(mass, poly_coef)
+    for i, norm_param in enumerate(norm_params, 1):
+        mask = getMassPointMask(mass, mass_points[i-1], mass_point_deltas[i-1])
+        tmp_noise = normFunc(mass[mask], norm_param[0], norm_param[1], norm_param[2])
+        noise[mask] = np.maximum(noise[mask], tmp_noise)
+    return noise
+    
+cpdef tuple noiseLODFunc(DoubleArray mass, DoubleArray poly_coef, double std,
         DoubleArray3D norm_params, double[:] mass_points, int[:] mass_point_deltas, double n_sigma):
     cdef DoubleArray noise, LOD
     noise = noiseFunc(mass, poly_coef, norm_params[:, 0], mass_points, mass_point_deltas)
-    LOD = noise + n_sigma*noiseFunc(mass, poly_coef[:1], norm_params[:, 1], mass_points, mass_point_deltas)
+    LOD = noise + n_sigma*noiseFunc(mass, std, norm_params[:, 1], mass_points, mass_point_deltas)
     return noise, LOD
 
-def getNoisePeaks(DoubleArray mass, DoubleArray intensity, DoubleArray poly_coef,
+def getNoisePeaks(DoubleArray mass, DoubleArray intensity, DoubleArray poly_coef, double std,
         DoubleArray3D norm_params, double[:] mass_point, int[:] mass_point_deltas,
         double n_sigma):
     cdef np.ndarray[cbool, ndim=1] is_peak = getPeaksPositions(intensity), mask
     mass = mass[1:-1][is_peak]
     intensity = intensity[1:-1][is_peak]
 
-    _, LOD = noiseLODFunc(mass, poly_coef, norm_params, mass_point, mass_point_deltas, n_sigma)
+    _, LOD = noiseLODFunc(mass, poly_coef, std, norm_params, mass_point, mass_point_deltas, n_sigma)
 
     mask = intensity<LOD
     return mass[mask], intensity[mask]
 
-def denoiseWithParams(DoubleArray mass, DoubleArray intensity, DoubleArray poly_coef,
+def denoiseWithParams(DoubleArray mass, DoubleArray intensity, DoubleArray poly_coef, double std,
         DoubleArray3D norm_params, double[:] mass_points, int[:] mass_point_deltas,
         double n_sigma, cbool subtract):
     cdef DoubleArray new_intensity, peak_mass, peak_intensity, noise, LOD
@@ -205,7 +207,7 @@ def denoiseWithParams(DoubleArray mass, DoubleArray intensity, DoubleArray poly_
     peak_mass = mass[1:-1][is_peak]
     peak_intensity = intensity[1:-1][is_peak]
 
-    noise, LOD = noiseLODFunc(mass, poly_coef, norm_params, mass_points, mass_point_deltas, n_sigma)
+    noise, LOD = noiseLODFunc(mass, poly_coef, std, norm_params, mass_points, mass_point_deltas, n_sigma)
 
     ind_peak = ind_peak[peak_intensity > LOD[1:-1][is_peak]]
 

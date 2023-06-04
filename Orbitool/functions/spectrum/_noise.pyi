@@ -2,7 +2,7 @@ from typing import List, Tuple
 import numpy as np
 
 
-def getNoisePeaks(mass: np.ndarray, intensity: np.ndarray, poly_coef: np.ndarray,
+def getNoisePeaks(mass: np.ndarray, intensity: np.ndarray, poly_coef: np.ndarray, std: float,
                   mass_point_params: np.ndarray, mass_points: np.ndarray, mass_point_deltas,
                   n_sigma: float):
     """
@@ -50,7 +50,7 @@ def updateNoiseLODParam(params: np.ndarray, n_sigma: float, noise: float, lod: f
     pass
 
 
-def noiseLODFunc(mass: np.ndarray, poly_coef: np.ndarray,
+def noiseLODFunc(mass: np.ndarray, poly_coef: np.ndarray, std: float,
                  mass_point_params: np.ndarray, mass_points: np.ndarray,
                  mass_point_deltas: np.ndarray, n_sigma: float) -> Tuple[np.ndarray, np.ndarray]:
     """
@@ -59,8 +59,8 @@ def noiseLODFunc(mass: np.ndarray, poly_coef: np.ndarray,
     pass
 
 
-def denoiseWithParams(mass: np.ndarray, intensity: np.ndarray, poly_coef: np.ndarray,
-                      mass_point_params: np.ndarray, mass_points: np.ndarray,
+def denoiseWithParams(mass: np.ndarray, intensity: np.ndarray, poly_coef: np.ndarray, 
+                      std: float, mass_point_params: np.ndarray, mass_points: np.ndarray,
                       mass_point_deltas: np.ndarray, n_sigma: float, subtract: bool) -> Tuple[np.ndarray, np.ndarray]:
     """
     return mz, intensity
