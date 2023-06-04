@@ -38,7 +38,7 @@ def test_denoise(mass_int):
     poly, std, slt, param = getNoiseParams(
         mass, intensity, 0.5, True, mass_points, mass_point_deltas)
     noise, LOD = noiseLODFunc(
-        mass, poly, param, mass_points, mass_point_deltas, 3)
+        mass, poly, std, param, mass_points, mass_point_deltas, 3)
     new_mass, new_intensity = denoiseWithParams(
         mass, intensity, poly, std, param, mass_points, mass_point_deltas, 3, True)
 
