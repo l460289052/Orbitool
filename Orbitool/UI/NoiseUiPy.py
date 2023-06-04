@@ -30,7 +30,7 @@ class Widget(QtWidgets.QWidget):
     def __init__(self, manager: Manager) -> None:
         super().__init__()
         self.manager = manager
-        
+
         self.ui = NoiseUi.Ui_Form()
         self.setupUi()
 
@@ -188,7 +188,7 @@ class Widget(QtWidgets.QWidget):
             poly, std, slt, params = spectrum_func.getNoiseParams(
                 spectrum.mz, spectrum.intensity, quantile, mass_dependent, mass_points, mass_point_deltas)
             noise, LOD = spectrum_func.noiseLODFunc(
-                spectrum.mz, poly, params, mass_points, mass_point_deltas, n_sigma)
+                spectrum.mz, poly, std, params, mass_points, mass_point_deltas, n_sigma)
             return poly, std, slt, params, noise, LOD
 
         result = info.general_result
@@ -239,6 +239,16 @@ class Widget(QtWidgets.QWidget):
                     param.param, info.general_setting.n_sigma, noise, lod)
                 param.selected = checked
 
+        noise_setting = info.general_setting
+        spectrum = info.current_spectrum
+        def func():
+            params, points, deltas = noise_setting.get_params()
+            noise, LOD = spectrum_func.noiseLODFunc(
+                spectrum.mz, result.poly_coef, result.global_noise_std,
+                params, points, deltas, noise_setting.n_sigma)
+            return noise, LOD
+        result.noise, result.LOD = yield func, "recalc noise"
+
         self.showNoise()
 
     def showNoise(self):
@@ -280,12 +290,11 @@ class Widget(QtWidgets.QWidget):
 
         for i, (useable, checked, name, noise, lod) in enumerate(zip(useables, checkeds, names, noises, lods)):
             checkBox = factory.CheckBox(checked)
-            noisespinbox = factory.DoubleSpinBox(0, 1e11, 1, 1, noise)
-            lodspinbox = factory.DoubleSpinBox(0, 1e11, 1, 1, lod)
-            enable = i and useable
-            checkBox.setEnabled(enable)
-            noisespinbox.setEnabled(enable)
-            lodspinbox.setEnabled(enable)
+            noisespinbox = factory.DoubleSpinBox(-1e10, 1e11, 1, 1, noise)
+            lodspinbox = factory.DoubleSpinBox(-1e10, 1e11, 1, 1, lod)
+            checkBox.setEnabled(useable and i)
+            noisespinbox.setEnabled(useable)
+            lodspinbox.setEnabled(useable)
 
             table.setCellWidget(i, 0, checkBox)
             table.setItem(i, 1, QtWidgets.QTableWidgetItem(name))
@@ -345,7 +354,8 @@ class Widget(QtWidgets.QWidget):
             params, points, deltas = noise_setting.get_params(True)
             mz, intensity = spectrum_func.denoiseWithParams(
                 spectrum.mz, spectrum.intensity, info.general_result.poly_coef,
-                params, points, deltas, noise_setting.n_sigma, subtract)
+                info.general_result.global_noise_std, params, points, deltas,
+                noise_setting.n_sigma, subtract)
 
             s = Spectrum(spectrum.path, mz, intensity,
                          spectrum.start_time, spectrum.end_time)
@@ -378,7 +388,7 @@ class Widget(QtWidgets.QWidget):
             params, points, deltas = noise_setting.get_params(True)
             mz, intensity = spectrum_func.getNoisePeaks(
                 spectrum.mz, spectrum.intensity, info.general_result.poly_coef,
-                params, points, deltas, noise_setting.n_sigma)
+                info.general_result.global_noise_std, params, points, deltas, noise_setting.n_sigma)
             return mz, intensity
 
         mz, intensity = yield func, "get noise peak"
@@ -402,7 +412,8 @@ class Widget(QtWidgets.QWidget):
             params, points, deltas = noise_setting.get_params(True)
             mz, intensity = spectrum_func.denoiseWithParams(
                 spectrum.mz, spectrum.intensity, info.general_result.poly_coef,
-                params, points, deltas, noise_setting.n_sigma, subtract)
+                info.general_result.global_noise_std, params, points, deltas,
+                noise_setting.n_sigma, subtract)
 
             s = Spectrum(spectrum.path, mz, intensity,
                          spectrum.start_time, spectrum.end_time)
@@ -425,11 +436,9 @@ class Widget(QtWidgets.QWidget):
         yield ReadFromFile(self.manager.workspace), "read and average all spectra"
         info = self.info
         info.skip = True
-        if info.current_spectrum is not None:
-            self.callback.emit((info.current_spectrum,))
-        else:
+        if info.current_spectrum is None:
             yield from self.readSelectedSpectrum()
-            self.callback.emit((info.current_spectrum,))
+        self.callback.emit((info.current_spectrum,))
 
     @state_node(withArgs=True)
     def moveToTableClickedNoise(self, item: QtWidgets.QTableWidgetItem):
@@ -479,12 +488,19 @@ class Widget(QtWidgets.QWidget):
         x_max = spectrum.mz[-1]
         yrange = polyval([x_min, x_max], result.poly_coef)
         y_min = yrange.min()
-        y_max = yrange.max() + info.general_setting.n_sigma * result.global_noise_std
+        y_max = abs(yrange.max() + info.general_setting.n_sigma * result.global_noise_std)
         if is_log:
-            y_min *= 0.5
+            if y_min > 0:
+                y_min *= 0.5
+            else:
+                y_min = 0
             y_max *= 10
         else:
-            y_min = 0
+            if y_min > 0:
+                y_min = 0
+            else:
+                y_min *= 2
+
             y_max *= 5
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(y_min, y_max)
@@ -602,7 +618,6 @@ class ReadFromFile(MultiProcess):
                 infos.append(info)
                 yield spectrum
         tmp.extend(it())
-
 
         file.info.noise_tab.denoised_spectrum_infos = infos
         file.info.noise_tab.to_be_calibrate = True
