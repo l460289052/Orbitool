@@ -37,14 +37,14 @@ class NoiseGeneralSetting(BaseStructure):
 
     spectrum_dependent: bool = True
 
-    def get_params(self, useable: bool = False):
+    def get_params(self, only_useable_point: bool = False):
         """
         useable params or all params
         return params, points, deltas
         """
         params, points, deltas = [], [], []
         for param in self.noise_formulas:
-            if not useable or param.selected:
+            if not only_useable_point or param.selected:
                 params.append(param.param)
                 points.append(param.formula.mass())
                 deltas.append(param.delta)

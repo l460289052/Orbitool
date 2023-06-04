@@ -239,6 +239,16 @@ class Widget(QtWidgets.QWidget):
                     param.param, info.general_setting.n_sigma, noise, lod)
                 param.selected = checked
 
+        noise_setting = info.general_setting
+        spectrum = info.current_spectrum
+        def func():
+            params, points, deltas = noise_setting.get_params()
+            noise, LOD = spectrum_func.noiseLODFunc(
+                spectrum.mz, result.poly_coef, result.global_noise_std,
+                params, points, deltas, noise_setting.n_sigma)
+            return noise, LOD
+        result.noise, result.LOD = yield func, "recalc noise"
+
         self.showNoise()
 
     def showNoise(self):
@@ -280,12 +290,11 @@ class Widget(QtWidgets.QWidget):
 
         for i, (useable, checked, name, noise, lod) in enumerate(zip(useables, checkeds, names, noises, lods)):
             checkBox = factory.CheckBox(checked)
-            noisespinbox = factory.DoubleSpinBox(0, 1e11, 1, 1, noise)
-            lodspinbox = factory.DoubleSpinBox(0, 1e11, 1, 1, lod)
-            enable = i and useable
-            checkBox.setEnabled(enable)
-            noisespinbox.setEnabled(enable)
-            lodspinbox.setEnabled(enable)
+            noisespinbox = factory.DoubleSpinBox(-1e10, 1e11, 1, 1, noise)
+            lodspinbox = factory.DoubleSpinBox(-1e10, 1e11, 1, 1, lod)
+            checkBox.setEnabled(useable and i)
+            noisespinbox.setEnabled(useable)
+            lodspinbox.setEnabled(useable)
 
             table.setCellWidget(i, 0, checkBox)
             table.setItem(i, 1, QtWidgets.QTableWidgetItem(name))
@@ -479,12 +488,19 @@ class Widget(QtWidgets.QWidget):
         x_max = spectrum.mz[-1]
         yrange = polyval([x_min, x_max], result.poly_coef)
         y_min = yrange.min()
-        y_max = yrange.max() + info.general_setting.n_sigma * result.global_noise_std
+        y_max = abs(yrange.max() + info.general_setting.n_sigma * result.global_noise_std)
         if is_log:
-            y_min *= 0.5
+            if y_min > 0:
+                y_min *= 0.5
+            else:
+                y_min = 0
             y_max *= 10
         else:
-            y_min = 0
+            if y_min > 0:
+                y_min = 0
+            else:
+                y_min *= 2
+
             y_max *= 5
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(y_min, y_max)
