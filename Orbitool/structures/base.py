@@ -97,7 +97,7 @@ def get_default(field: Field):
 
 def field(default_factory=MISSING, default=MISSING):
     assert (default is MISSING) ^ (default_factory is MISSING)
-    return Field(default, default_factory, True, True, None, True, None)
+    return Field(default, default_factory, True, True, None, True, None, False)
 
 
 # # Base Column Item

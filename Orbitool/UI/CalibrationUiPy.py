@@ -310,7 +310,8 @@ class Widget(QtWidgets.QWidget):
             "deltas": deltas,
             "params": params,
             "subtract": setting.subtract,
-            "poly_coef": result.poly_coef}
+            "poly_coef": result.poly_coef,
+            "std": result.global_noise_std}
         calibrate_merge = CalibrateMergeDenoise(
             self.manager.workspace, func_kwargs=func_kwargs)
         msg = []
@@ -422,7 +423,7 @@ class CalibrateMergeDenoise(MultiProcess):
              noise_skip: bool, calibrate_skip: bool, average_rtol: float,
              quantile: float, mass_dependent: bool, n_sigma: bool,
              dependent: bool, points: np.ndarray, deltas: np.ndarray,
-             params: np.ndarray, subtract: bool, poly_coef: np.ndarray) -> Spectrum:
+             params: np.ndarray, subtract: bool, poly_coef: np.ndarray, std: float) -> Spectrum:
         spectra = []
         paths = set()
         start_times = []
@@ -446,13 +447,13 @@ class CalibrateMergeDenoise(MultiProcess):
 
         if not noise_skip:
             if not dependent:
-                poly_coef, _, slt, params = spectrum_func.getNoiseParams(
+                poly_coef, std, slt, params = spectrum_func.getNoiseParams(
                     mz, intensity, quantile, mass_dependent, points, deltas)
                 points = points[slt]
                 deltas = deltas[slt]
 
             mz, intensity = spectrum_func.denoiseWithParams(
-                mz, intensity, poly_coef, params, points, deltas, n_sigma, subtract)
+                mz, intensity, poly_coef, std, params, points, deltas, n_sigma, subtract)
 
         start_time = min(start_times)
         end_time = max(end_times)

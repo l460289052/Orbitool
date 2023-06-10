@@ -24,7 +24,7 @@ def Factory():
 class FormulaInfo(BaseInfo):
     h5_type = "formula docker"
 
-    charge: float = -1
+    charge: int = -1
     mz_min: float = 50
     mz_max: float = 750
     calc_gen: CalculatorGenerator = field(Factory)

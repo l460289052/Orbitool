@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from multiprocessing import cpu_count
-from typing import List
+from typing import List, Literal
 from pydantic import BaseModel, Field
 from .version import VERSION
 
@@ -39,6 +39,8 @@ class General(BaseModel):
     export_time_format: str = r"%Y%m%d_%H%M%S"
     multi_cores: int = multi_cores
 
+class File(BaseModel):
+    dotnet_driver: Literal[".net framework", ".net core"] = ".net framework"
 
 
 class Debug(BaseModel):
@@ -48,6 +50,7 @@ class Debug(BaseModel):
 
 class _Setting(BaseModel):
     general: General = General()
+    file: File = File()
     debug: Debug = Debug()
 
     test_timeout: int = 1

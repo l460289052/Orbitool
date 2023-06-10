@@ -7,6 +7,13 @@ from datetime import datetime, timedelta
 from typing import List, Tuple
 
 import numpy as np
+from Orbitool import setting
+match setting.file.dotnet_driver:
+    case ".net framework":
+        pass
+    case ".net core":
+        from pythonnet import load
+        load("coreclr")
 import clr
 
 
@@ -44,6 +51,7 @@ def initRawFile(path):
 
 class File:
     def __init__(self, fullname):
+        assert os.path.exists(fullname), f"File not exists: {fullname}"
         self.path = fullname
         self.name = os.path.split(fullname)[1]
         self.rawfile = initRawFile(fullname)

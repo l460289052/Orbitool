@@ -53,7 +53,8 @@ class H5File(H5Obj):
         pass
 
     def close(self):
-        self._obj.close()
+        if hasattr(self, "_obj"):
+            self._obj.close()
 
     def __del__(self):
         self.close()
