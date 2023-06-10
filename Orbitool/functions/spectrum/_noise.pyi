@@ -59,10 +59,20 @@ def noiseLODFunc(mass: np.ndarray, poly_coef: np.ndarray, std: float,
     pass
 
 
-def denoiseWithParams(mass: np.ndarray, intensity: np.ndarray, poly_coef: np.ndarray, 
+def denoiseWithParams(mass: np.ndarray, intensity: np.ndarray, poly_coef: np.ndarray,
                       std: float, mass_point_params: np.ndarray, mass_points: np.ndarray,
                       mass_point_deltas: np.ndarray, n_sigma: float, subtract: bool) -> Tuple[np.ndarray, np.ndarray]:
     """
     return mz, intensity
+    """
+    pass
+
+
+def splitNoise(mass: np.ndarray, intensity: np.ndarray, poly_coef: np.ndarray,
+               std: float, mass_point_params: np.ndarray, mass_points: np.ndarray,
+               mass_point_deltas: np.ndarray, n_sigma: float
+               ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    return spectrum_mz, spectrum_intensity, noise_mz, noise_intensity
     """
     pass

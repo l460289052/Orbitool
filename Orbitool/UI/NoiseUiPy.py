@@ -189,11 +189,22 @@ class Widget(QtWidgets.QWidget):
                 spectrum.mz, spectrum.intensity, quantile, mass_dependent, mass_points, mass_point_deltas)
             noise, LOD = spectrum_func.noiseLODFunc(
                 spectrum.mz, poly, std, params, mass_points, mass_point_deltas, n_sigma)
-            return poly, std, slt, params, noise, LOD
+            if setting.noise.plot_noise_in_diff_color:
+                noise_split = spectrum_func.splitNoise(
+                    spectrum.mz, spectrum.intensity, poly, std, params,
+                    mass_points, mass_point_deltas, n_sigma)
+            else:
+                noise_split = (None,) * 4
+
+            return (poly, std, slt, params), (noise, LOD), noise_split
 
         result = info.general_result
 
-        result.poly_coef, result.global_noise_std, slt, params, result.noise, result.LOD = yield func, "get noise infomations"
+        rets, noises, noise_split = yield func, "get noise infomations"
+
+        result.poly_coef, result.global_noise_std, slt, params = rets
+        result.noise, result.LOD = noises
+        result.spectrum_mz, result.spectrum_intensity, result.noise_mz, result.noise_intensity = noise_split
 
         noise_setting = info.general_setting
 
@@ -241,13 +252,21 @@ class Widget(QtWidgets.QWidget):
 
         noise_setting = info.general_setting
         spectrum = info.current_spectrum
+        result.spectrum_mz, result.spectrum_intensity, result.noise_mz, result.noise_intensity = noise_split
+
         def func():
             params, points, deltas = noise_setting.get_params()
             noise, LOD = spectrum_func.noiseLODFunc(
                 spectrum.mz, result.poly_coef, result.global_noise_std,
                 params, points, deltas, noise_setting.n_sigma)
-            return noise, LOD
-        result.noise, result.LOD = yield func, "recalc noise"
+            if setting.noise.plot_noise_in_diff_color:
+                noise_split = spectrum_func.splitNoise(
+                    spectrum.mz, spectrum.intensity, result.poly_coef, result.global_noise_std,
+                    params, points, deltas, noise_setting.n_sigma)
+            else:
+                noise_split = (None,) * 4
+            return noise, LOD, noise_split
+        result.noise, result.LOD, noise_split = yield func, "recalc noise"
 
         self.showNoise()
 
@@ -326,12 +345,18 @@ class Widget(QtWidgets.QWidget):
             ax.yaxis.set_major_formatter(
                 matplotlib.ticker.FormatStrFormatter(r"%.1e"))
 
-        ax.plot(spectrum.mz, spectrum.intensity,
-                linewidth=1, color="#BF2138", label="Spectrum")
         ax.plot(spectrum.mz, result.LOD,
                 linewidth=1, color='k', label='LOD')
         ax.plot(spectrum.mz, result.noise,
                 linewidth=1, color='b', label='noise')
+        if setting.noise.plot_noise_in_diff_color and result.spectrum_mz is not None:
+            ax.plot(result.spectrum_mz, result.spectrum_intensity,
+                    linewidth=1, color="#1f77b4", label="Spectrum")
+            ax.plot(result.noise_mz, result.noise_intensity,
+                    linewidth=1, color="#BF2138", label="Noise")
+        else:
+            ax.plot(spectrum.mz, spectrum.intensity,
+                    linewidth=1, color="#BF2138", label="Spectrum")
         ax.legend(loc='upper right')
 
         self.moveToGlobalNoise()
@@ -488,7 +513,8 @@ class Widget(QtWidgets.QWidget):
         x_max = spectrum.mz[-1]
         yrange = polyval([x_min, x_max], result.poly_coef)
         y_min = yrange.min()
-        y_max = abs(yrange.max() + info.general_setting.n_sigma * result.global_noise_std)
+        y_max = abs(yrange.max() + info.general_setting.n_sigma *
+                    result.global_noise_std)
         if is_log:
             if y_min > 0:
                 y_min *= 0.5

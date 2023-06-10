@@ -36,4 +36,5 @@ class Ui_Form(object):
         Form.setWindowTitle(_translate("Form", "Form"))
         self.dotnetDriverLabel.setToolTip(_translate("Form", "use first spectrum if nothing is selected"))
         self.dotnetDriverLabel.setText(_translate("Form", ".Net driver"))
-        self.label.setText(_translate("Form", "Takes effect after reopening"))
+        self.label.setText(_translate("Form", "Takes effect after reopening.\n"
+"Avoid non-ASCII chars in program and file paths"))
