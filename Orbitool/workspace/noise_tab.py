@@ -20,7 +20,7 @@ class NoiseFormulaParameter(BaseRowItem):
 
 
 def default_formula_parameter():
-    return [NoiseFormulaParameter(Formula(f)) for f in setting.noise_formulas]
+    return [NoiseFormulaParameter(Formula(f)) for f in setting.denoise.noise_formulas]
 
 
 class NoiseGeneralSetting(BaseStructure):
@@ -65,6 +65,10 @@ class NoiseGeneralResult(BaseStructure):
     global_noise_std: float = 0
     noise: np.ndarray = None
     LOD: np.ndarray = None
+    spectrum_mz: np.ndarray = None
+    spectrum_intensity: np.ndarray = None
+    noise_mz: np.ndarray = None
+    noise_intensity: np.ndarray = None
 
 
 class NoiseTabInfo(BaseInfo):

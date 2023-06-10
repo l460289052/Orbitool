@@ -231,3 +231,40 @@ def denoiseWithParams(DoubleArray mass, DoubleArray intensity, DoubleArray poly_
     cdef np.ndarray[cbool, ndim=1] slt = getNotZeroPositions(new_intensity)
     return mass[slt], new_intensity[slt]
     
+
+def splitNoise(
+        DoubleArray mass, DoubleArray intensity, DoubleArray poly_coef, double std,
+        DoubleArray3D norm_params, double[:] mass_points, int[:] mass_point_deltas,
+        double n_sigma):
+
+    cdef DoubleArray spectrum_intensity, noise_intensity, peak_mass, peak_intensity, noise, LOD, peak_LOD
+    cdef np.ndarray[cbool, ndim=1] is_peak = getPeaksPositions(intensity)
+    cdef np.ndarray[np.int32_t, ndim=1] ind_peak
+    cdef int length = mass.size
+
+    ind_peak = np.arange(0, length, dtype=np.int32)[1:-1][is_peak]
+    peak_mass = mass[1:-1][is_peak]
+    peak_intensity = intensity[1:-1][is_peak]
+
+    noise, LOD = noiseLODFunc(mass, poly_coef, std, norm_params, mass_points, mass_point_deltas, n_sigma)
+
+    spectrum_intensity = np.zeros_like(intensity)
+    noise_intensity = np.zeros_like(intensity)
+    
+    cdef int l, r, ind
+    with cython.boundscheck(False), cython.wraparound(False):
+        for ind in ind_peak:
+            l = ind-1
+            r = ind+1
+            while l>0 and intensity[l-1] < intensity[l]:
+                predec(l)
+            while r<length and intensity[r] > intensity[r+1]:
+                preinc(r)
+            if intensity[ind] > LOD[ind]:
+                spectrum_intensity[l:r+1] = intensity[l:r+1]
+            else:
+                noise_intensity[l:r+1] = intensity[l:r+1]
+    
+    cdef np.ndarray[cbool, ndim=1] spectrum_slt = getNotZeroPositions(spectrum_intensity)
+    cdef np.ndarray[cbool, ndim=1] noise_slt = getNotZeroPositions(noise_intensity)
+    return mass[spectrum_slt], spectrum_intensity[spectrum_slt], mass[noise_slt], noise_intensity[noise_slt]

@@ -1,20 +1,20 @@
-import os
 import csv
+import os
+import pathlib
 from datetime import datetime, timedelta
 from functools import partial
-import pathlib
-from typing import List, Optional, Union, Iterable
+from typing import Iterable, List, Optional, Union
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .. import utils
-from ..structures.file import Path, PathList, FileSpectrumInfo, PeriodItem
 from ..functions.file import generage_periods
+from ..structures.file import FileSpectrumInfo, Path, PathList, PeriodItem
 from ..workspace import UiNameGetter, UiState
 from . import FileUi
 from . import utils as UiUtils
 from .manager import Manager, Thread, state_node
-from .utils import set_header_sizes, showInfo
+from .utils import DragHelper, set_header_sizes, showInfo
 
 
 class Widget(QtWidgets.QWidget):
@@ -24,6 +24,7 @@ class Widget(QtWidgets.QWidget):
         super().__init__(parent=parent)
         self.manager = manager
         self.ui = FileUi.Ui_Form()
+        self.drag_helper = DragHelper(("file",))
         self.setupUi()
 
         manager.init_or_restored.connect(self.init_or_restore)
@@ -179,9 +180,7 @@ class Widget(QtWidgets.QWidget):
         self.showPaths()
 
     def tableDragEnterEvent(self, event: QtGui.QDragEnterEvent):
-        data = event.mimeData()
-        text = data.text().splitlines()
-        if text and text[0].startswith("file:///"):
+        if self.drag_helper.accept(event.mimeData()):
             event.setDropAction(QtCore.Qt.DropAction.LinkAction)
             event.accept()
 
@@ -190,11 +189,10 @@ class Widget(QtWidgets.QWidget):
 
     @state_node(withArgs=True)
     def tableDropEvent(self, event: QtGui.QDropEvent):
-        paths = event.mimeData().text().splitlines()
+        data = event.mimeData()
         def func():
             pathlist = self.pathlist
-            for file in paths:
-                p = pathlib.Path(file[len("file:///"):])
+            for p in self.drag_helper.yield_file(data):
                 if p.is_dir():
                     for path in self.manager.tqdm(utils.files.FolderTraveler(str(p), ext=".RAW", recurrent=self.ui.recursionCheckBox.isChecked())):
                         pathlist.addThermoFile(path)

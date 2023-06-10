@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from multiprocessing import cpu_count
-from typing import List
+from typing import List, Literal
 from pydantic import BaseModel, Field
 from .version import VERSION
 
@@ -16,6 +16,7 @@ class TempFile:
 ROOT_PATH = Path(__file__).parent.parent
 
 LOG_PATH = ROOT_PATH / 'log.txt'
+RESOURCE_PATH = ROOT_PATH / "resources"
 
 logLevel = "DEBUG"
 
@@ -33,12 +34,25 @@ multi_cores = cpu_count() - 1
 if multi_cores < 1:
     multi_cores = 1
 
+
 class General(BaseModel):
     default_select: bool = True
     time_format: str = r"%Y-%m-%d %H:%M:%S"
     export_time_format: str = r"%Y%m%d_%H%M%S"
     multi_cores: int = multi_cores
 
+
+class File(BaseModel):
+    dotnet_driver: Literal[".net framework", ".net core"] = ".net framework"
+
+
+class Denoise(BaseModel):
+    plot_noise_in_diff_color: bool = True
+    noise_formulas: List[str] = ["NO3-", "HNO3NO3-"]
+
+
+class Calibration(BaseModel):
+    dragdrop_ion_replace: bool = False
 
 
 class Debug(BaseModel):
@@ -48,13 +62,14 @@ class Debug(BaseModel):
 
 class _Setting(BaseModel):
     general: General = General()
+    file: File = File()
+    denoise: Denoise = Denoise()
+    calibration: Calibration = Calibration()
+
     debug: Debug = Debug()
 
     test_timeout: int = 1
     time_delta: timedelta = timedelta(seconds=1)
-
-
-    noise_formulas: List[str] = ["NO3-", "HNO3NO3-"]
 
     plot_refresh_interval: float = 1
 
@@ -69,12 +84,15 @@ class _Setting(BaseModel):
 
     def format_time(self, dt: datetime):
         return dt.strftime(self.general.time_format)
+
     def format_export_time(self, dt: datetime):
         return dt.strftime(self.general.export_time_format)
+
 
 if config_path.exists():
     setting = _Setting.parse_file(config_path)
 else:
     setting = _Setting()
 
-setting.general.multi_cores = max(min(setting.general.multi_cores, multi_cores), 1)
+setting.general.multi_cores = max(
+    min(setting.general.multi_cores, multi_cores), 1)
