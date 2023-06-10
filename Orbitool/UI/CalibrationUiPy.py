@@ -271,12 +271,16 @@ class Widget(QtWidgets.QWidget):
         ax.axhline(color="k", linewidth=.5)
 
         if len(devitions) > 0:
+            kwds = {}
+            if len(times) == 1:
+                kwds["marker"] = "."
             for index in range(devitions.shape[1]):
-                ax.plot(times, devitions[:, index],
+                ax.plot(times, devitions[:, index], **kwds,
                         label=info.last_ions[index].shown_text)
 
         ax.set_xlabel("starting time")
         ax.set_ylabel("Deviation (ppm)")
+        ax.xaxis.set_tick_params(rotation=15)
         ax.legend()
         ax.relim()
         ax.autoscale(True, True, True)

@@ -157,7 +157,10 @@ class Widget(QtWidgets.QWidget):
 
             series = self.info.series
             s = series[index]
-            lines = ax.plot(s.times, s.intensity, label=s.tag)
+            kwds = {}
+            if len(s.times) == 1:
+                kwds["marker"] = '.'
+            lines = ax.plot(s.times, s.intensity, label=s.tag, **kwds)
             shown_series[index] = lines[-1]
         else:
             if index not in shown_series:
