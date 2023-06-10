@@ -5,15 +5,21 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 from traceback import format_exception, print_exc, print_exception
-import traceback
 import zipfile
 
 import pytest
 
 from Orbitool.version import VERSION
 from utils import pyuic, setup
+
+try:
+    import jedi
+    assert False, "You should build in build environment"
+except AssertionError:
+    raise
+except:
+    pass
 
 
 @dataclass

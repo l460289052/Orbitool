@@ -3,12 +3,13 @@ from enum import Enum
 import typing
 from PyQt5 import QtCore, QtGui, QtWidgets
 from .SettingUi import Ui_Dialog
-from . import GeneralTabUiPy
+from . import GeneralTabUiPy, FileTabUiPy
 from Orbitool import setting, VERSION
 
 
 class OptTab(Enum):
     General = "General"
+    File = "File"
 
 
 class Dialog(QtWidgets.QDialog):
@@ -24,7 +25,8 @@ class Dialog(QtWidgets.QDialog):
         icon_getter = self.style().standardIcon
         ICONS = QtWidgets.QStyle.StandardPixmap
         options = [
-            (icon_getter(ICONS.SP_FileDialogInfoView), OptTab.General.value)
+            (icon_getter(ICONS.SP_FileDialogInfoView), OptTab.General.value),
+            (icon_getter(ICONS.SP_FileDialogDetailedView), OptTab.File.value)
         ]
         for icon, text in options:
             listWidget.addItem(
@@ -38,11 +40,14 @@ class Dialog(QtWidgets.QDialog):
 
     def show_tab(self, tab: OptTab):
         ui = self.ui
-        if tab == OptTab.General:
-            self.current_widget = GeneralTabUiPy.Tab(ui.scrollAreaWidgetContents, self.tmp_setting)
-            ui.scrollAreaLayout.addWidget(self.current_widget)
-        elif True:
-            pass
+        match tab:
+            case OptTab.General:
+                self.current_widget = GeneralTabUiPy.Tab(ui.scrollAreaWidgetContents, self.tmp_setting)
+                ui.scrollAreaLayout.addWidget(self.current_widget)
+            case OptTab.File:
+                self.current_widget = FileTabUiPy.Tab(ui.scrollAreaWidgetContents, self.tmp_setting)
+                ui.scrollAreaLayout.addWidget(self.current_widget)
+
     
     def stash_tab(self):
         if self.current_tab is None:
