@@ -8,7 +8,7 @@ a = Analysis(['Main.py'],
              binaries=[],
              datas=[
                 ('Orbitool/utils/readers/*.dll','Orbitool/utils/readers'),
-                ('resources/*', 'resources') ],
+                ('resources/icons/*', 'resources/icons') ],
             hiddenimports=['scipy.special._ufuncs_cxx',
                 'scipy.linalg.cython_blas',
                 'scipy.linalg.cython_lapack',
