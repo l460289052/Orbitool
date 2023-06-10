@@ -1,12 +1,12 @@
 from functools import partial
 import math
 from enum import Enum
+from pathlib import Path
 from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 from itertools import chain
 
 import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
-import matplotlib.ticker
 
 from ..functions import spectrum as spectrum_func, binary_search, peakfit as peakfit_func
 from ..functions.calibration import Calibrator
@@ -18,7 +18,8 @@ from ..workspace.calibration import CalibratorInfoSegment
 from . import CalibrationUi
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
-from .utils import get_tablewidget_selected_row, showInfo
+from .utils import get_tablewidget_selected_row, showInfo, DragHelper, openfile, savefile
+from Orbitool import setting
 
 from .CalibrationDetailUiPy import Widget as CalibrationDetailWin
 
@@ -36,6 +37,7 @@ class Widget(QtWidgets.QWidget):
         super().__init__()
         self.manager: Manager = manager
         self.ui = CalibrationUi.Ui_Form()
+        self.drag_helper = DragHelper(("file","text"))
         self.setupUi()
         manager.init_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
@@ -44,6 +46,14 @@ class Widget(QtWidgets.QWidget):
         ui = self.ui
         ui.setupUi(self)
 
+        ui.ionsTableWidget.dragEnterEvent = self.tableDragEnterEvent
+        ui.ionsTableWidget.dragMoveEvent = self.tableDragMoveEvent
+        ui.ionsTableWidget.dropEvent = self.tableDropEvent
+        ui.addIonToolButton.clicked.connect(self.addIon)
+        ui.delIonToolButton.clicked.connect(self.removeIon)
+        ui.ionsImportToolButton.clicked.connect(self.importIons)
+        ui.ionsExportToolButton.clicked.connect(self.exportIons)
+
         self.plot = Plot(ui.figureTabWidgetPage)
         ui.tabWidget.setCurrentIndex(0)
 
@@ -51,8 +61,6 @@ class Widget(QtWidgets.QWidget):
         ui.separatorListWidget.mouseReleaseEvent = self.mouseRelease
         ui.separatorAddPushButton.clicked.connect(self.addSegment)
 
-        ui.addIonToolButton.clicked.connect(self.addIon)
-        ui.delIonToolButton.clicked.connect(self.removeIon)
         ui.calcInfoPushButton.clicked.connect(self.calcInfo)
         ui.showDetailsPushButton.clicked.connect(self.showDetail)
         ui.finishPushButton.clicked.connect(
@@ -166,7 +174,7 @@ class Widget(QtWidgets.QWidget):
 
     @state_node
     def addIon(self):
-        self.info.add_ions(self.ui.ionLineEdit.text().split(','))
+        self.info.add_ions(self.ui.ionsLineEdit.text().split(','))
         self.showCurrentSegment()
 
     @state_node
@@ -177,6 +185,62 @@ class Widget(QtWidgets.QWidget):
         self.info.ions = [
             ion for ion in self.info.ions if ion.shown_text not in remove_ions]
         self.showCurrentSegment()
+
+    @state_node
+    def importIons(self):
+        ret, f = openfile("Open calibration ions file", "*.csv")
+        if not ret:
+            return
+        f = Path(f)
+        backup = self.info.ions
+        self.info.ions = []
+        try:
+            self.info.add_ions(f.read_text().split()[1:])
+        except:
+            self.info.ions = backup
+            raise
+    
+    @state_node
+    def exportIons(self):
+        ret, f = savefile("Save calibration ions", "*.csv")
+        if not ret:
+            return
+        f = Path(f)
+        l = ["Ion"]
+        l.extend(ion.shown_text for ion in self.info.ions)
+        f.write_text("\n".join(l))
+
+
+    @state_node(mode="e", withArgs=True)
+    def tableDragEnterEvent(self, event: QtGui.QDragEnterEvent):
+        if self.drag_helper.accept(event.mimeData()):
+            event.setDropAction(QtCore.Qt.DropAction.LinkAction)
+            event.accept()
+    
+    @state_node(mode="e", withArgs=True)
+    def tableDragMoveEvent(self, event: QtGui.QDragMoveEvent):
+        event.accept()
+    
+    @state_node(withArgs=True)
+    def tableDropEvent(self, event:QtGui.QDropEvent):
+        ions = []
+        for f in self.drag_helper.yield_file(event.mimeData()):
+            if f.suffix.lower() in {".txt", ".csv"}:
+                ions.extend(f.read_text().splitlines()[1:])
+        text = self.drag_helper.get_text(event.mimeData())
+        ions.extend(text.replace(",", "\t").split())
+        if setting.calibration.dragdrop_ion_replace:
+            backup = self.info.ions
+            self.info.ions = []
+            try:
+                self.info.add_ions(ions)
+            except:
+                self.info.ions = backup
+                raise
+        else:
+            self.info.add_ions(ions)
+        self.showCurrentSegment()
+
 
     @state_node
     def calcInfo(self):

@@ -1,5 +1,4 @@
 from datetime import datetime
-import os
 from pathlib import Path
 import shutil
 from typing import Dict, Union
@@ -15,7 +14,6 @@ from . import (CalibrationUiPy, FileUiPy, FormulaUiPy, MainUi, MassDefectUiPy,
                TimeseriesUiPy)
 from . import utils as UiUtils
 from .manager import Manager, MultiProcess, state_node
-from .setting import Dialog as SettingDialog
 
 
 class Window(QtWidgets.QMainWindow):
@@ -155,6 +153,7 @@ class Window(QtWidgets.QMainWindow):
 
     @state_node
     def setting_dialog(self):
+        from .setting import Dialog as SettingDialog
         dialog = SettingDialog()
         dialog.exec()
 

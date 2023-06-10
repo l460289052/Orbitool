@@ -13,28 +13,27 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
+  </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="0" column="0">
-    <widget class="QLabel" name="dotnetDriverLabel">
+    <widget class="QLabel" name="dragDropReplaceLabel">
      <property name="toolTip">
-      <string/>
+      <string>Drag and drop csv-files or text into ions table will replace current ions</string>
      </property>
      <property name="text">
-      <string>.Net driver</string>
+      <string>Drag drop replace ions</string>
      </property>
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QComboBox" name="dotnetDriverComboBox"/>
-   </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Takes effect after reopening.
-Avoid non-ASCII chars in program and file paths</string>
+    <widget class="QCheckBox" name="dragDropReplaceCheckBox">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
      </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     <property name="text">
+      <string/>
      </property>
     </widget>
    </item>

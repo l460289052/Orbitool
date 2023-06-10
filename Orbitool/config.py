@@ -16,6 +16,7 @@ class TempFile:
 ROOT_PATH = Path(__file__).parent.parent
 
 LOG_PATH = ROOT_PATH / 'log.txt'
+RESOURCE_PATH = ROOT_PATH / "resources"
 
 logLevel = "DEBUG"
 
@@ -45,8 +46,13 @@ class File(BaseModel):
     dotnet_driver: Literal[".net framework", ".net core"] = ".net framework"
 
 
-class Noise(BaseModel):
+class Denoise(BaseModel):
     plot_noise_in_diff_color: bool = True
+    noise_formulas: List[str] = ["NO3-", "HNO3NO3-"]
+
+
+class Calibration(BaseModel):
+    dragdrop_ion_replace: bool = False
 
 
 class Debug(BaseModel):
@@ -57,14 +63,13 @@ class Debug(BaseModel):
 class _Setting(BaseModel):
     general: General = General()
     file: File = File()
-    noise: Noise = Noise()
+    denoise: Denoise = Denoise()
+    calibration: Calibration = Calibration()
 
     debug: Debug = Debug()
 
     test_timeout: int = 1
     time_delta: timedelta = timedelta(seconds=1)
-
-    noise_formulas: List[str] = ["NO3-", "HNO3NO3-"]
 
     plot_refresh_interval: float = 1
 

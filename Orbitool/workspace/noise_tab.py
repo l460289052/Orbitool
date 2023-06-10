@@ -20,7 +20,7 @@ class NoiseFormulaParameter(BaseRowItem):
 
 
 def default_formula_parameter():
-    return [NoiseFormulaParameter(Formula(f)) for f in setting.noise_formulas]
+    return [NoiseFormulaParameter(Formula(f)) for f in setting.denoise.noise_formulas]
 
 
 class NoiseGeneralSetting(BaseStructure):

@@ -104,7 +104,7 @@ cdef class Formula:
                     dic.update(formula)
                 self._parse_dict_from(dic)
         except ValueError as e:
-            raise ValueError('wrong formula, ' + str(e)) from e
+            raise ValueError('wrong formula: ' + str(formula) + "," + str(e)) from e
 
     @classmethod
     def parse_str(cls, str formula):
