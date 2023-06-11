@@ -57,6 +57,16 @@
        <string>intensity</string>
       </property>
      </column>
+     <column>
+      <property name="text">
+       <string>position</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>deviation(ppm)</string>
+      </property>
+     </column>
     </widget>
    </item>
    <item>

@@ -16,6 +16,7 @@ from ..structures.spectrum import (FittedPeak, MassListItem, Peak, PeakTags,
                                    Spectrum)
 from ..utils.formula import Formula, formula_range
 from . import PeakFitUi
+from Orbitool import setting
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
 
@@ -356,7 +357,7 @@ class Widget(QtWidgets.QWidget):
                 arrowprops={"arrowstyle": "-", "alpha": .5})
 
             cnt += 1
-            if cnt == 5:
+            if cnt == setting.peakfit.plot_show_formulas:
                 break
         self.plot.canvas.draw()
 

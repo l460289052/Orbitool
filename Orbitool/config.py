@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from multiprocessing import cpu_count
-from typing import List, Literal
+from typing import List, Literal, Set
 from pydantic import BaseModel, Field
 from .version import VERSION
 
@@ -54,10 +54,15 @@ class Denoise(BaseModel):
 class Calibration(BaseModel):
     dragdrop_ion_replace: bool = False
 
+class Peakfit(BaseModel):
+    plot_show_formulas: int = 5
 
 class TimeSeries(BaseModel):
     mz_sum_target: Literal["peak_intensity", "area"] = "peak_intensity"
     mz_sum_func: Literal["nofit", "norm"] = "nofit"
+
+    export_time_formats: Set[Literal[
+        "iso", "igor", "matlab", "excel"]] = {"iso"}
 
 
 class Debug(BaseModel):
@@ -70,6 +75,7 @@ class _Setting(BaseModel):
     file: File = File()
     denoise: Denoise = Denoise()
     calibration: Calibration = Calibration()
+    peakfit: Peakfit = Peakfit()
     timeseries: TimeSeries = TimeSeries()
 
     debug: Debug = Debug()

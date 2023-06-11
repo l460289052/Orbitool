@@ -44,7 +44,7 @@ class BaseFunc:
 
         if len(peaks) > 0:
             peak = max(peaks, key=lambda p: getattr(p, target))
-            return peak.peak_position, peak.intensity
+            return peak.peak_position, peak.peak_intensity
 
         return None
 

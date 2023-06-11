@@ -1,4 +1,5 @@
 from typing import List
+from datetime import datetime
 
 from ..structures import BaseStructure, field, Row, BaseRowItem
 from ..structures.timeseries import TimeSeries
@@ -12,6 +13,8 @@ class TimeSeriesInfoRow(BaseRowItem):
     position_min: float
     position_max: float
     range_sum: bool = False
+    time_min: datetime = None
+    time_max: datetime = None
     formulas: FormulaList = field(list)
 
     @classmethod
@@ -20,6 +23,8 @@ class TimeSeriesInfoRow(BaseRowItem):
             position_min=timeseries.position_min,
             position_max=timeseries.position_max,
             range_sum=timeseries.range_sum,
+            time_min=timeseries.times[0] if timeseries.times else None,
+            time_max=timeseries.times[-1] if timeseries.times else None,
             formulas=timeseries.formulas
         )
 
