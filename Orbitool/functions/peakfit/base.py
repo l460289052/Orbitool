@@ -1,22 +1,22 @@
 from itertools import chain
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 import numpy as np
 
 from ...structures.spectrum import FittedPeak, Peak, Spectrum
 from ..binary_search import indexBetween_np, indexNearest, indexFirstBiggerThan
-from ..spectrum import splitPeaks
+from ..spectrum import splitPeaks, safeCutSpectrum
 
 
-def get_peak_mz_min(peaks: List[Peak], index):
+def get_peak_mz_min(peaks: List[Peak], index: int):
     return peaks[index].mz.min()
 
 
-def get_peak_mz_max(peaks: List[Peak], index):
+def get_peak_mz_max(peaks: List[Peak], index: int):
     return peaks[index].mz.max()
 
 
-def get_peak_position(peaks: List[FittedPeak], index):
+def get_peak_position(peaks: List[FittedPeak], index: int):
     return peaks[index].peak_position
 
 
@@ -31,7 +31,7 @@ class BaseFunc:
     def splitPeak(self, peak: Peak, split_num=None, force=False) -> List[FittedPeak]:
         pass
 
-    def fetchTimeseries(self, peaks: List[Peak], min_mz: float, max_mz: float):
+    def get_peak_max(self, peaks: List[Peak], min_mz: float, max_mz: float, target: Literal["peak_intensity", "area"] = "peak_intensity"):
         lindex = indexFirstBiggerThan(peaks, min_mz, method=get_peak_mz_max)
         rindex = indexFirstBiggerThan(peaks, max_mz, method=get_peak_mz_min)
 
@@ -43,6 +43,10 @@ class BaseFunc:
                  if min_mz < peak.peak_position < max_mz]
 
         if len(peaks) > 0:
-            peak: FittedPeak = max(peaks, key=get_peak_intensity)
-            return peak.peak_intensity
+            peak = max(peaks, key=lambda p: getattr(p, target))
+            return peak.peak_position, peak.intensity
+
         return None
+
+    def get_peak_sum(self, peaks: List[Peak], target: Literal["peak_intensity", "area"] = "peak_intensity") -> float:
+        return sum(sum(getattr(p, target) for p in self.splitPeak(peak)) for peak in peaks)

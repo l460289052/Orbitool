@@ -31,7 +31,7 @@ class Widget(QtWidgets.QWidget):
         index = self.info.show_index
         if index < 0:
             return
-        series = self.info.series[index]
+        series = self.manager.workspace.data.time_series[index]
 
         table = self.ui.tableWidget
         table.clearContents()
@@ -50,7 +50,7 @@ class Widget(QtWidgets.QWidget):
         if index < 0:
             return
 
-        series = self.info.series[index]
+        series = self.manager.workspace.data.time_series[index]
         ret, f = savefile("timeseries", "CSV file(*.csv)",
                           f"timeseries {series.tag}")
         if not ret:

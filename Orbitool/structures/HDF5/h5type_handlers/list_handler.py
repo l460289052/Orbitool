@@ -16,10 +16,10 @@ class ListHandler(StructureTypeHandler, List):
             del h5group[key]
         inner_type = self.inner_type
         if inner_type in (int, float):
-            h5group.create_dataset(key, dtype=inner_type, data=value)
+            h5group.create_dataset(key, dtype=inner_type, data=value, compression="gzip", compression_opts=1)
         elif inner_type is datetime:
             value = np.array(value, dtype='M8[s]').astype(int)
-            h5group.create_dataset(key, dtype=int, data=value)
+            h5group.create_dataset(key, dtype=int, data=value, compression="gzip", compression_opts=1)
         else:
             group = h5group.create_group(key)
             handler: StructureTypeHandler = get_handler(inner_type)

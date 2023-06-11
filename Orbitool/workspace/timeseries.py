@@ -1,12 +1,40 @@
 from typing import List
-from ..structures import BaseStructure, field, Row
+
+from ..structures import BaseStructure, field, Row, BaseRowItem
 from ..structures.timeseries import TimeSeries
+from ..utils.formula import FormulaList
 from .base import BaseInfo
+
+
+class TimeSeriesInfoRow(BaseRowItem):
+    h5_type = "time series info row"
+
+    position_min: float
+    position_max: float
+    range_sum: bool = False
+    formulas: FormulaList = field(list)
+
+    @classmethod
+    def FromTimeSeries(cls, timeseries: TimeSeries):
+        return cls(
+            position_min=timeseries.position_min,
+            position_max=timeseries.position_max,
+            range_sum=timeseries.range_sum,
+            formulas=timeseries.formulas
+        )
+
+    def get_name(self):
+        if self.formulas:
+            return ','.join(str(f) for f in self.formulas)
+        else:
+            if self.range_sum:
+                return f"{self.position_min:.2f}-{self.position_max:.2f}"
+            else:
+                return format((self.position_min + self.position_max) / 2, '.5f')
 
 
 class TimeseriesInfo(BaseInfo):
     h5_type = "timeseries tab"
 
-    series: List[TimeSeries] = field(list)
-
+    timeseries_infos: Row[TimeSeriesInfoRow] = field(list)
     show_index: int = -1

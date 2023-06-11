@@ -55,6 +55,11 @@ class Calibration(BaseModel):
     dragdrop_ion_replace: bool = False
 
 
+class TimeSeries(BaseModel):
+    mz_sum_target: Literal["peak_intensity", "area"] = "peak_intensity"
+    mz_sum_func: Literal["nofit", "norm"] = "nofit"
+
+
 class Debug(BaseModel):
     thread_block_gui: bool = False
     NO_MULTIPROCESS: bool = False
@@ -65,6 +70,7 @@ class _Setting(BaseModel):
     file: File = File()
     denoise: Denoise = Denoise()
     calibration: Calibration = Calibration()
+    timeseries: TimeSeries = TimeSeries()
 
     debug: Debug = Debug()
 

@@ -6,6 +6,7 @@ from .. import VERSION
 from ..structures import BaseStructure, BaseRowItem, StructureTypeHandler, get_handler, field
 from ..structures.HDF5 import H5File, H5Obj, h5_brokens, BaseDiskData, DiskDict, DiskList
 from ..structures.spectrum import Spectrum
+from ..structures.timeseries import TimeSeries
 from .base import BaseInfo
 from .calibration import CalibratorInfo
 from .file_tab import FileTabInfo
@@ -44,6 +45,7 @@ class WorkspaceInfo(BaseStructure):
 class WorkspaceData(BaseDiskData):
     raw_spectra = DiskList(Spectrum)
     calibrated_spectra = DiskList(Spectrum)
+    time_series = DiskList(TimeSeries)
 
 
 class WorkSpace:

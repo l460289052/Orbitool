@@ -190,9 +190,10 @@ class Widget(QtWidgets.QWidget):
     @state_node(withArgs=True)
     def tableDropEvent(self, event: QtGui.QDropEvent):
         data = event.mimeData()
+        paths = list(self.drag_helper.yield_file(data))
         def func():
             pathlist = self.pathlist
-            for p in self.drag_helper.yield_file(data):
+            for p in paths:
                 if p.is_dir():
                     for path in self.manager.tqdm(utils.files.FolderTraveler(str(p), ext=".RAW", recurrent=self.ui.recursionCheckBox.isChecked())):
                         pathlist.addThermoFile(path)
