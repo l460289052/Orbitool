@@ -189,7 +189,7 @@ class Widget(QtWidgets.QWidget):
                 spectrum.mz, spectrum.intensity, quantile, mass_dependent, mass_points, mass_point_deltas)
             noise, LOD = spectrum_func.noiseLODFunc(
                 spectrum.mz, poly, std, params, mass_points, mass_point_deltas, n_sigma)
-            if setting.noise.plot_noise_in_diff_color:
+            if setting.denoise.plot_noise_in_diff_color:
                 noise_split = spectrum_func.splitNoise(
                     spectrum.mz, spectrum.intensity, poly, std, params,
                     mass_points, mass_point_deltas, n_sigma)
@@ -259,7 +259,7 @@ class Widget(QtWidgets.QWidget):
             noise, LOD = spectrum_func.noiseLODFunc(
                 spectrum.mz, result.poly_coef, result.global_noise_std,
                 params, points, deltas, noise_setting.n_sigma)
-            if setting.noise.plot_noise_in_diff_color:
+            if setting.denoise.plot_noise_in_diff_color:
                 noise_split = spectrum_func.splitNoise(
                     spectrum.mz, spectrum.intensity, result.poly_coef, result.global_noise_std,
                     params, points, deltas, noise_setting.n_sigma)
@@ -349,7 +349,7 @@ class Widget(QtWidgets.QWidget):
                 linewidth=1, color='k', label='LOD')
         ax.plot(spectrum.mz, result.noise,
                 linewidth=1, color='b', label='noise')
-        if setting.noise.plot_noise_in_diff_color and result.spectrum_mz is not None:
+        if setting.denoise.plot_noise_in_diff_color and result.spectrum_mz is not None:
             ax.plot(result.spectrum_mz, result.spectrum_intensity,
                     linewidth=1, color="#1f77b4", label="Spectrum")
             ax.plot(result.noise_mz, result.noise_intensity,

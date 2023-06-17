@@ -308,25 +308,25 @@ class Widget(QtWidgets.QWidget):
 
         segment_ions = list(info.yield_segment_ions())
         times = [time for _, time in path_times]
-        devitions = []
+        deviations = []
         color = QtGui.QColor(0xB6EEA6)
         for row, (path, time) in enumerate(path_times):
             ion_infos = path_ion_infos[path]
-            devition = []
+            deviation = []
             for col, (ion, used) in enumerate(info.yield_ion_used(path)):
                 rtol = ion_infos[ion.formula].rtol
                 item = QtWidgets.QTableWidgetItem(format(rtol * 1e6, ".5f"))
                 if used:
                     item.setBackground(color)
                 table.setItem(row, col, item)
-                devition.append(rtol)
-            devitions.append(devition)
+                deviation.append(rtol)
+            deviations.append(deviation)
 
         vlabels = [str(time.replace(microsecond=0))[:-3] for time in times]
 
         table.setVerticalHeaderLabels(vlabels)
 
-        devitions = np.array(devitions) * 1e6
+        deviations = np.array(deviations) * 1e6
 
         plot = self.plot
 
@@ -334,12 +334,12 @@ class Widget(QtWidgets.QWidget):
         ax.clear()
         ax.axhline(color="k", linewidth=.5)
 
-        if len(devitions) > 0:
+        if len(deviations) > 0:
             kwds = {}
             if len(times) == 1:
                 kwds["marker"] = "."
-            for index in range(devitions.shape[1]):
-                ax.plot(times, devitions[:, index], **kwds,
+            for index in range(deviations.shape[1]):
+                ax.plot(times, deviations[:, index], **kwds,
                         label=info.last_ions[index].shown_text)
 
         ax.set_xlabel("starting time")

@@ -10,6 +10,7 @@ class OptTab(Enum):
     Denoise = "Denoise"
     File = "File"
     Calibration = "Calibration"
+    Timeseries = "Timeseries"
 
 
 class Dialog(QtWidgets.QDialog):
@@ -29,6 +30,7 @@ class Dialog(QtWidgets.QDialog):
             (icon_getter(ICONS.SP_FileDialogDetailedView), OptTab.File.value),
             (resources.Icons.SpectrumIcon, OptTab.Denoise.value),
             (icon_getter(ICONS.SP_DialogApplyButton), OptTab.Calibration.value),
+            (resources.Icons.MeanIcon, OptTab.Timeseries.value),
         ]
         for icon, text in options:
             listWidget.addItem(
@@ -42,7 +44,7 @@ class Dialog(QtWidgets.QDialog):
 
     def show_tab(self, tab: OptTab):
         ui = self.ui
-        from . import GeneralTabUiPy, FileTabUiPy, CalibrationTabUiPy, DenoiseTabUiPy
+        from . import GeneralTabUiPy, FileTabUiPy, CalibrationTabUiPy, DenoiseTabUiPy, TimeseriesTabUiPy
         match tab:
             case OptTab.General:
                 self.current_widget = GeneralTabUiPy.Tab(
@@ -58,6 +60,10 @@ class Dialog(QtWidgets.QDialog):
                 ui.scrollAreaLayout.addWidget(self.current_widget)
             case OptTab.Calibration:
                 self.current_widget = CalibrationTabUiPy.Tab(
+                    ui.scrollAreaWidgetContents, self.tmp_setting)
+                ui.scrollAreaLayout.addWidget(self.current_widget)
+            case OptTab.Timeseries:
+                self.current_widget = TimeseriesTabUiPy.Tab(
                     ui.scrollAreaWidgetContents, self.tmp_setting)
                 ui.scrollAreaLayout.addWidget(self.current_widget)
 

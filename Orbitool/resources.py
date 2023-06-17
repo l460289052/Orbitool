@@ -12,6 +12,7 @@ class _IconGetter:
 
 class _Icons:
     SpectrumIcon = _IconGetter("spectrum.png")
+    MeanIcon = _IconGetter("mean.png")
 
 Icons = _Icons()
 
