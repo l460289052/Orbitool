@@ -12,7 +12,8 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(261, 300)
+        Form.resize(274, 300)
+        Form.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
@@ -25,6 +26,8 @@ class Ui_Form(object):
         self.horizontalLayout_2.addWidget(self.comboBox)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.tableWidget = QtWidgets.QTableWidget(parent=Form)
+        self.tableWidget.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.tableWidget.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.SizeAdjustPolicy.AdjustIgnored)
         self.tableWidget.setHorizontalScrollMode(QtWidgets.QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(2)

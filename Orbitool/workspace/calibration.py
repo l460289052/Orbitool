@@ -27,6 +27,7 @@ class CalibratorInfoSegment(BaseStructure):
     intensity_filter: int = 100
     degree: int = 2
     n_ions: int = 3
+    rtol: float = 2e-6
 
 
 class CalibratorInfo(BaseInfo):

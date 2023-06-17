@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(1000, 800)
+        Form.resize(996, 641)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.calibrationSplitter = QtWidgets.QSplitter(parent=Form)
@@ -76,6 +76,10 @@ class Ui_Form(object):
         self.verticalLayout_6.addWidget(self.spectrumIonsTableWidget)
         self.horizontalLayout.addLayout(self.verticalLayout_6)
         self.verticalLayout_4.addLayout(self.horizontalLayout)
+        self.label = QtWidgets.QLabel(parent=self.layoutWidget)
+        self.label.setWordWrap(True)
+        self.label.setObjectName("label")
+        self.verticalLayout_4.addWidget(self.label)
         self.spectrumPlotWidget = QtWidgets.QWidget(parent=self.layoutWidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -170,6 +174,11 @@ class Ui_Form(object):
         item.setText(_translate("Form", "rtol"))
         item = self.spectrumIonsTableWidget.horizontalHeaderItem(2)
         item.setText(_translate("Form", "intensity"))
+        self.label.setToolTip(_translate("Form", "sometimes the position of the highest value of the original peak\n"
+" is closer to the calibrated ion,\n"
+"but please note that Orbitool  treats the peak as a Gaussian curve,\n"
+"so the highest value is not the position of the actual peak"))
+        self.label.setText(_translate("Form", "Tips: the highest value is not the position of the actual peak"))
         self.label_3.setText(_translate("Form", "File List"))
         item = self.filesTableWidget.horizontalHeaderItem(0)
         item.setText(_translate("Form", "create time"))

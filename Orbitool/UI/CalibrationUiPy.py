@@ -37,7 +37,7 @@ class Widget(QtWidgets.QWidget):
         super().__init__()
         self.manager: Manager = manager
         self.ui = CalibrationUi.Ui_Form()
-        self.drag_helper = DragHelper(("file","text"))
+        self.drag_helper = DragHelper(("file", "text"))
         self.setupUi()
         manager.init_or_restored.connect(self.restore)
         manager.save.connect(self.updateState)
@@ -111,6 +111,7 @@ class Widget(QtWidgets.QWidget):
         ui.filterSpinBox.setValue(seg.intensity_filter)
         ui.degreeSpinBox.setValue(seg.degree)
         ui.nIonsSpinBox.setValue(seg.n_ions)
+        ui.segmentRtolDoubleSpinBox.setValue(seg.rtol * 1e6)
 
     def saveCurrentSegment(self):
         info = self.info
@@ -119,6 +120,7 @@ class Widget(QtWidgets.QWidget):
         seg.intensity_filter = ui.filterSpinBox.value()
         seg.degree = ui.degreeSpinBox.value()
         seg.n_ions = ui.nIonsSpinBox.value()
+        seg.rtol = ui.segmentRtolDoubleSpinBox.value() * 1e-6
 
     @state_node
     def addSegment(self):
@@ -138,12 +140,12 @@ class Widget(QtWidgets.QWidget):
         if len(indexes) > 1:
             menu = QtWidgets.QMenu(self)
 
-            merge = QtWidgets.QAction('merge', menu)
+            merge = QtGui.QAction('merge', menu)
 
             func = partial(self.mergeSegment, indexes)
             merge.triggered.connect(lambda: func())
             menu.addAction(merge)
-            menu.popup(e.globalPos())
+            menu.popup(e.globalPosition().toPoint())
         return QtWidgets.QListWidget.mouseReleaseEvent(ui.separatorListWidget, e)
 
     @state_node(withArgs=True)
@@ -174,7 +176,7 @@ class Widget(QtWidgets.QWidget):
 
     @state_node
     def addIon(self):
-        self.info.add_ions(self.ui.ionsLineEdit.text().split(','))
+        self.info.add_ions(self.ui.ionLineEdit.text().split(','))
         self.showCurrentSegment()
 
     @state_node
@@ -199,7 +201,8 @@ class Widget(QtWidgets.QWidget):
         except:
             self.info.ions = backup
             raise
-    
+        self.showCurrentSegment()
+
     @state_node
     def exportIons(self):
         ret, f = savefile("Save calibration ions", "*.csv")
@@ -210,19 +213,18 @@ class Widget(QtWidgets.QWidget):
         l.extend(ion.shown_text for ion in self.info.ions)
         f.write_text("\n".join(l))
 
-
     @state_node(mode="e", withArgs=True)
     def tableDragEnterEvent(self, event: QtGui.QDragEnterEvent):
         if self.drag_helper.accept(event.mimeData()):
             event.setDropAction(QtCore.Qt.DropAction.LinkAction)
             event.accept()
-    
+
     @state_node(mode="e", withArgs=True)
     def tableDragMoveEvent(self, event: QtGui.QDragMoveEvent):
         event.accept()
-    
+
     @state_node(withArgs=True)
-    def tableDropEvent(self, event:QtGui.QDropEvent):
+    def tableDropEvent(self, event: QtGui.QDropEvent):
         ions = []
         for f in self.drag_helper.yield_file(event.mimeData()):
             if f.suffix.lower() in {".txt", ".csv"}:
@@ -241,13 +243,11 @@ class Widget(QtWidgets.QWidget):
             self.info.add_ions(ions)
         self.showCurrentSegment()
 
-
     @state_node
     def calcInfo(self):
         workspace = self.manager.workspace
         info = self.info
 
-        intensity_filter = 100
         self.saveCurrentSegment()
 
         rtol = self.ui.rtolDoubleSpinBox.value() * 1e-6
@@ -306,7 +306,6 @@ class Widget(QtWidgets.QWidget):
                       for path in path_ion_infos.keys()]
         path_times.sort(key=lambda t: t[1])
 
-        segment_ions = list(info.yield_segment_ions())
         times = [time for _, time in path_times]
         deviations = []
         color = QtGui.QColor(0xB6EEA6)
@@ -411,6 +410,7 @@ class SplitAndFitPeak(MultiProcess):
         for ion in ions:
             while segments[segment_index].end_point < ion:
                 segment_index += 1
+            segment = segments[segment_index]
             delta = ion * rtol
             mz_, intensity_ = spectrum_func.safeCutSpectrum(
                 mz, intensity, ion - delta, ion + delta)
@@ -419,7 +419,7 @@ class SplitAndFitPeak(MultiProcess):
 
             # intensity filter for noise
             peaks = [peak for peak in peaks if peak.maxIntensity >
-                     segments[segment_index].intensity_filter]
+                     segment.intensity_filter]
 
             # find highest peak within rtol
             find = False
@@ -434,7 +434,7 @@ class SplitAndFitPeak(MultiProcess):
                     index = np.argmax(
                         [peak.peak_intensity for peak in target_peaks])
                     peak = target_peaks[index]
-                    if abs(peak.peak_position / ion - 1) < rtol:
+                    if abs(peak.peak_position / ion - 1) < segment.rtol:
                         ions_peak.append(
                             (peak.peak_position, peak.peak_intensity))
                         find = True
@@ -536,7 +536,8 @@ class CalibrateMergeDenoise(MultiProcess):
 
         def it():
             for spectrum in rets:
-                infos.append(SpectrumInfo(spectrum.start_time, spectrum.end_time))
+                infos.append(SpectrumInfo(
+                    spectrum.start_time, spectrum.end_time))
                 yield spectrum
         tmp.extend(it())
         file.info.calibration_tab.calibrated_spectrum_infos = infos
