@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from multiprocessing import cpu_count
 from typing import List, Literal, Set
+import weakref
 from pydantic import BaseModel, Field
 from .version import VERSION
 
@@ -99,6 +100,37 @@ class _Setting(BaseModel):
 
     def format_export_time(self, dt: datetime):
         return dt.strftime(self.general.export_time_format)
+
+    def get_global_var(self, key: str, default=None):
+        if key in vars:
+            try:
+                return vars[key]()
+            except:
+                pass
+        return default
+
+    def pop_global_var(self, key: str, default=None):
+        if key in vars:
+            try:
+                return vars.pop(key)()
+            except:
+                pass
+        return default
+
+    def set_global_var(self, key: str, variable):
+        vars[key] = weakref.ref(variable)
+
+    def get_global_val(self, key: str, default=None):
+        return vals.get(key, default)
+
+    def pop_global_val(self, key: str, default=None):
+        return vals.pop(key, default)
+
+    def set_global_val(self, key: str, value):
+        vals[key] = value
+
+vars = {}
+vals = {}
 
 
 if config_path.exists():

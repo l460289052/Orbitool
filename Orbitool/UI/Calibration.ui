@@ -308,7 +308,6 @@
             <font>
              <family>Consolas</family>
              <pointsize>12</pointsize>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -369,7 +368,6 @@
             <font>
              <family>Consolas</family>
              <pointsize>12</pointsize>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -385,7 +383,7 @@
           <widget class="QToolButton" name="ionsImportToolButton">
            <property name="maximumSize">
             <size>
-             <width>30</width>
+             <width>35</width>
              <height>16777215</height>
             </size>
            </property>
@@ -403,7 +401,7 @@
           <widget class="QToolButton" name="ionsExportToolButton">
            <property name="maximumSize">
             <size>
-             <width>30</width>
+             <width>35</width>
              <height>16777215</height>
             </size>
            </property>
