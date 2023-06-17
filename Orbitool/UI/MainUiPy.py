@@ -8,7 +8,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 from ..structures.HDF5 import h5_brokens
 from ..workspace import VERSION, WorkSpace, updater
-from . import (CalibrationUiPy, FileUiPy, FormulaUiPy, MainUi, MassDefectUiPy,
+from . import (CalibrationUiPy, file_tab, FormulaUiPy, MainUi, MassDefectUiPy,
                MassListUiPy, NoiseUiPy, PeakFitUiPy, PeakListUiPy,
                PeakShapeUiPy, SpectraListUiPy, SpectrumUiPy, TimeseriesesUiPy,
                TimeseriesUiPy)
@@ -39,8 +39,8 @@ class Window(QtWidgets.QMainWindow):
         # tab widgets
         ui.abortPushButton.clicked.connect(self.abort_process)
 
-        self.fileTab: FileUiPy.Widget = self.add_tab(
-            FileUiPy.Widget(manager), "File")
+        self.fileTab: file_tab.Widget = self.add_tab(
+            file_tab.Widget(manager), "File")
         self.fileTab.callback.connect(self.file_tab_finish)
 
         self.noiseTab: NoiseUiPy.Widget = self.add_tab(

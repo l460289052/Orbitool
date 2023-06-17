@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import math
 from typing import Dict, Iterable, List, Tuple, Union
 
 import numpy as np
@@ -98,8 +99,10 @@ class PathList(BaseStructure):
 
 class PeriodItem(BaseRowItem):
     item_name = "spectrum period item"
-    start_time: datetime
-    end_time: datetime
+    start_time: datetime = None
+    end_time: datetime = None
+    start_num: int = -1
+    end_num: int = -1
 
 
 class FileSpectrumInfo(spectrum.SpectrumInfo):

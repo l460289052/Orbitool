@@ -97,9 +97,15 @@ class _Setting(BaseModel):
 
     def format_time(self, dt: datetime):
         return dt.strftime(self.general.time_format)
+    
+    def parse_time(self, s: str):
+        return datetime.strptime(s,self.general.time_format)
 
     def format_export_time(self, dt: datetime):
         return dt.strftime(self.general.export_time_format)
+
+    def parse_export_time(self, s: str):
+        return datetime.strptime(s,self.general.export_time_format)
 
     def get_global_var(self, key: str, default=None):
         if key in vars:

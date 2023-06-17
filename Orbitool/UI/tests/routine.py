@@ -2,7 +2,8 @@ import os
 
 from PyQt6 import QtWidgets, QtCore
 from Orbitool import config, setting
-from .. import MainUiPy, FileUiPy
+from .. import MainUiPy
+from .. import file_tab
 
 from ..utils import test
 

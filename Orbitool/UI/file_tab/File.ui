@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>699</width>
-    <height>434</height>
+    <height>479</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -259,7 +259,7 @@
          <property name="title">
           <string>Average according to</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_9">
+         <layout class="QGridLayout" name="gridLayout">
           <property name="leftMargin">
            <number>0</number>
           </property>
@@ -272,16 +272,54 @@
           <property name="bottomMargin">
            <number>0</number>
           </property>
+          <property name="horizontalSpacing">
+           <number>3</number>
+          </property>
           <item row="0" column="0">
            <widget class="QRadioButton" name="nSpectraRadioButton">
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
-             <string>N spectra</string>
+             <string>every</string>
             </property>
             <property name="checked">
              <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QToolButton" name="periodToolButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>custom</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QRadioButton" name="nMinutesRadioButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>every</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -292,6 +330,12 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>18</height>
+             </size>
             </property>
             <property name="minimum">
              <number>1</number>
@@ -304,53 +348,79 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QRadioButton" name="nMinutesRadioButton">
+          <item row="2" column="0">
+           <widget class="QRadioButton" name="periodRadioButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
-             <string>N minutes</string>
+             <string/>
             </property>
             <property name="checked">
-             <bool>true</bool>
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>spectra</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="label_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>minutes</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="label_4">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>periods</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="nMinutesDoubleSpinBox">
+           <widget class="QLineEdit" name="nMinutesLineEdit">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="minimum">
-             <double>0.010000000000000</double>
+            <property name="toolTip">
+             <string>1000s ( 1000 seconds )
+10m5s ( 10 minutes and 5 seconds )
+1h ( 1 hour )</string>
             </property>
-            <property name="maximum">
-             <double>9999.989999999999782</double>
-            </property>
-            <property name="value">
-             <double>125.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QRadioButton" name="periodRadioButton">
             <property name="text">
-             <string>Imported periods</string>
+             <string>2h5m</string>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QToolButton" name="periodImportToolButton">
-            <property name="text">
-             <string>Import periods</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="2">
-           <widget class="QPushButton" name="exportPeriodPushButton">
-            <property name="text">
-             <string>Export periods</string>
+            <property name="placeholderText">
+             <string>2h5m</string>
             </property>
            </widget>
           </item>
@@ -370,7 +440,7 @@
           <string>tolerance(ppm)</string>
          </property>
          <property name="text">
-          <string>tolerance</string>
+          <string>tolerance(ppm)</string>
          </property>
         </widget>
        </item>
