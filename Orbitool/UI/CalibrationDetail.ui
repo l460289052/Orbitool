@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>800</height>
+    <width>996</width>
+    <height>641</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -122,6 +122,22 @@
           </layout>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="toolTip">
+          <string>sometimes the position of the highest value of the original peak
+ is closer to the calibrated ion,
+but please note that Orbitool  treats the peak as a Gaussian curve,
+so the highest value is not the position of the actual peak</string>
+         </property>
+         <property name="text">
+          <string>Tips: the highest value is not the position of the actual peak</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QWidget" name="spectrumPlotWidget" native="true">
