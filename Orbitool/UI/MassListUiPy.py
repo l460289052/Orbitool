@@ -2,7 +2,7 @@ import csv
 from typing import Optional, Union
 from functools import partial
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 from ..functions.peakfit import masslist as masslist_func
 from ..structures.spectrum import MassListItem

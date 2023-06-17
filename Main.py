@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# python 3.8
+# python 3.11
 try:
     import os
     import sys
@@ -7,6 +7,9 @@ try:
     import argparse
 
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = '1'
+    # os.environ["QT_FONT_DPI"] = "144"
+    # os.environ["QT_SCALE_FACTOR"] = "1.0"
+
     os.environ["OPENBLAS_NUM_THREADS"] = '1'
     os.environ["GOTO_NUM_THREADS"] = '1'
     os.environ["OMP_NUM_THREADS"] = '1'
@@ -34,20 +37,22 @@ try:
             setting.debug.NO_MULTIPROCESS = True
 
         import matplotlib as mpl
+        mpl.use("QtAgg")
         mpl.rcParams['agg.path.chunksize'] = 10000
 
-        from PyQt5 import QtCore, QtWidgets
-        # QtWidgets.QApplication.setAttribute(QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
-        QtWidgets.QApplication.setAttribute(QtCore.Qt.ApplicationAttribute.AA_EnableHighDpiScaling)
-        QtWidgets.QApplication.setAttribute(QtCore.Qt.ApplicationAttribute.AA_UseHighDpiPixmaps)
+        from PyQt6 import QtCore, QtWidgets, QtGui
+        # QtWidgets.QApplication.setAttribute(QtCore.Qt.ApplicationAttribute.AA_Use96Dpi)
 
         app = QtWidgets.QApplication(sys.argv)
-        app.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
+        style = QtWidgets.QStyleFactory.create('Fusion')
+        app.setStyle(style)
 
         from Orbitool.UI import MainUiPy
 
         MainWin = MainUiPy.Window(args.workspacefile)
         MainWin.show()
+
+
         if args.to_step:
             steps = {
                 "file": 0,
@@ -65,7 +70,7 @@ try:
                 routine.noise(MainWin)
             if step > 2:
                 routine.peak_shape(MainWin)
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
 except Exception as e:
     import traceback

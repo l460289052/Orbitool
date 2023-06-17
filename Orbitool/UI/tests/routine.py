@@ -1,6 +1,6 @@
 import os
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore
 from Orbitool import config, setting
 from .. import MainUiPy, FileUiPy
 
@@ -12,7 +12,7 @@ loop: QtCore.QEventLoop = None
 
 def wait_not_busy():
     if not setting.debug.DEBUG:
-        loop.exec_()
+        loop.exec()
     sleep()
 
 
@@ -23,12 +23,12 @@ def sleep(timeout=None):
         timer = QtCore.QTimer()
         timer.timeout.connect(loop.quit)
         timer.start(timeout * 1000)
-        loop.exec_()
+        loop.exec()
 
 
 def wait(thread: QtCore.QThread):
     thread.finished.connect(loop.quit)
-    loop.exec_()
+    loop.exec()
 
 
 def init(window: MainUiPy.Window):

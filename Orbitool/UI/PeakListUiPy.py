@@ -2,7 +2,7 @@ import csv
 from typing import Dict, List, Optional, Tuple, Union
 import contextlib
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt6 import QtCore, QtWidgets, QtGui
 
 from .. import setting
 from ..functions import binary_search

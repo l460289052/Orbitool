@@ -3,7 +3,7 @@ from copy import deepcopy
 
 import matplotlib.ticker
 import numpy as np
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from ..functions import binary_search
 from ..functions.peakfit import get_peak_position

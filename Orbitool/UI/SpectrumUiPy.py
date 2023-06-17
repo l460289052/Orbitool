@@ -1,7 +1,7 @@
 import csv
 from typing import Union, Optional
 from . import SpectrumUi
-from PyQt5 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore
 from .manager import state_node, Manager
 from .utils import savefile
 
@@ -42,7 +42,7 @@ class Widget(QtWidgets.QWidget):
             for j, v in enumerate((m_row, i_row)):
                 item = QtWidgets.QTableWidgetItem(
                     format(v, '.6f') if v > 1e-6 else '0.0')
-                item.setTextAlignment(QtCore.Qt.AlignRight)
+                item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
                 tableWidget.setItem(i, j, item)
 
     @state_node

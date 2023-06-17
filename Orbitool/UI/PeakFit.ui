@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>826</width>
-    <height>624</height>
+    <height>677</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,328 +36,374 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="1" column="3">
-           <widget class="QToolButton" name="filterFormulaNToolButton">
-            <property name="text">
-             <string>N</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Tag</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QToolButton" name="filterTagYToolButton">
-            <property name="text">
-             <string>Y</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="filterTagComboBox"/>
-          </item>
-          <item row="1" column="2">
-           <widget class="QToolButton" name="filterFormulaYToolButton">
-            <property name="text">
-             <string>Y</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QToolButton" name="filterSelectNToolButton">
-            <property name="text">
-             <string>N</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QToolButton" name="filterSelectYToolButton">
-            <property name="text">
-             <string>Y</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1" colspan="2">
-           <widget class="QDoubleSpinBox" name="filterIntensityMinDoubleSpinBox">
-            <property name="decimals">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <double>1000000000000.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>10000.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="2">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Selected</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Formula</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>larger than</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="3">
-           <widget class="QToolButton" name="filterTagNToolButton">
-            <property name="text">
-             <string>N</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Stable isotope</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="3">
-           <widget class="QToolButton" name="filterIntensityMaxToolButton">
-            <property name="text">
-             <string>Y</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="3">
-           <widget class="QToolButton" name="filterIntensityMinToolButton">
-            <property name="text">
-             <string>Y</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1" colspan="2">
-           <widget class="QDoubleSpinBox" name="filterIntensityMaxDoubleSpinBox">
-            <property name="decimals">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <double>1000000000000.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>100.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>less than</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QToolButton" name="filterStableIsotopeYToolButton">
-            <property name="text">
-             <string>Y</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3">
-           <widget class="QToolButton" name="filterStableIsotopeNToolButton">
-            <property name="text">
-             <string>N</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>Has group</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>Mass defect</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
-           <widget class="QDoubleSpinBox" name="filterMassDefectMinDoubleSpinBox">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="minimum">
-             <double>-0.500000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>0.500000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="value">
-             <double>-0.500000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="2">
-           <widget class="QDoubleSpinBox" name="filterMassDefectMaxDoubleSpinBox">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="minimum">
-             <double>-0.500000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>0.500000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="value">
-             <double>0.500000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="3">
-           <widget class="QToolButton" name="filterMassDefectToolButton">
-            <property name="text">
-             <string>Y</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="1">
-           <widget class="QLineEdit" name="filterGroupLineEdit">
-            <property name="text">
-             <string>NO3-</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="2">
-           <widget class="QToolButton" name="filterGroupYToolButton">
-            <property name="text">
-             <string>Y</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="3">
-           <widget class="QToolButton" name="filterGroupNToolButton">
-            <property name="text">
-             <string>N</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="groupBox_3">
-          <property name="title">
-           <string>Step</string>
+         <widget class="QToolBox" name="toolBox">
+          <property name="currentIndex">
+           <number>1</number>
           </property>
-          <layout class="QGridLayout" name="gridLayout_3">
-           <item row="0" column="3">
-            <widget class="QLineEdit" name="stepMinusLineEdit"/>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_13">
-             <property name="text">
-              <string>Step range</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QSpinBox" name="stepMinSpinBox">
-             <property name="minimum">
-              <number>-99</number>
-             </property>
-             <property name="maximum">
-              <number>99</number>
-             </property>
-             <property name="value">
-              <number>-2</number>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QLabel" name="label_12">
-             <property name="text">
-              <string>Group-</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_11">
-             <property name="text">
-              <string>Group+</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="stepPlusLineEdit">
-             <property name="text">
-              <string>HO2</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="3">
-            <widget class="QPushButton" name="stepPushButton">
-             <property name="text">
-              <string>step</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="2" colspan="2">
-            <widget class="QSpinBox" name="stepMaxSpinBox">
-             <property name="minimum">
-              <number>-99</number>
-             </property>
-             <property name="maximum">
-              <number>99</number>
-             </property>
-             <property name="value">
-              <number>2</number>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="2">
-            <widget class="QDoubleSpinBox" name="stepRtolDoubleSpinBox">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="value">
-              <double>2.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QLabel" name="label_14">
-             <property name="text">
-              <string>tolerance(ppm)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QCheckBox" name="stepAccordToMassCheckBox">
-             <property name="toolTip">
-              <string>step according to mass instead of formula</string>
-             </property>
-             <property name="text">
-              <string>mass</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <widget class="QWidget" name="singlePage">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>-1</y>
+             <width>316</width>
+             <height>236</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>single</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Selected</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QToolButton" name="filterSelectYToolButton">
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QToolButton" name="filterSelectNToolButton">
+              <property name="text">
+               <string>N</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Formula</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QToolButton" name="filterFormulaYToolButton">
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QToolButton" name="filterFormulaNToolButton">
+              <property name="text">
+               <string>N</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="2">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Stable isotope</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QToolButton" name="filterStableIsotopeYToolButton">
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3">
+             <widget class="QToolButton" name="filterStableIsotopeNToolButton">
+              <property name="text">
+               <string>N</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Tag</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="filterTagComboBox">
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QToolButton" name="filterTagYToolButton">
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="3">
+             <widget class="QToolButton" name="filterTagNToolButton">
+              <property name="text">
+               <string>N</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>less than</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QDoubleSpinBox" name="filterIntensityMaxDoubleSpinBox">
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
+              <property name="decimals">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <double>1000000000000.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>100.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="3">
+             <widget class="QToolButton" name="filterIntensityMaxToolButton">
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>larger than</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QDoubleSpinBox" name="filterIntensityMinDoubleSpinBox">
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
+              <property name="decimals">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <double>1000000000000.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>10000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="3">
+             <widget class="QToolButton" name="filterIntensityMinToolButton">
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>Mass defect</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QDoubleSpinBox" name="filterMassDefectMinDoubleSpinBox">
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
+              <property name="minimum">
+               <double>-0.500000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>0.500000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="value">
+               <double>-0.500000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="2">
+             <widget class="QDoubleSpinBox" name="filterMassDefectMaxDoubleSpinBox">
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
+              <property name="minimum">
+               <double>-0.500000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>0.500000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="value">
+               <double>0.500000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="3">
+             <widget class="QToolButton" name="filterMassDefectToolButton">
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>Has group</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1">
+             <widget class="QLineEdit" name="filterGroupLineEdit">
+              <property name="text">
+               <string>NO3-</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="2">
+             <widget class="QToolButton" name="filterGroupYToolButton">
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="3">
+             <widget class="QToolButton" name="filterGroupNToolButton">
+              <property name="text">
+               <string>N</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="stepPage">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>333</width>
+             <height>129</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>step</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_11">
+              <property name="text">
+               <string>Group+</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="stepPlusLineEdit">
+              <property name="text">
+               <string>HO2</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>Group-</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLineEdit" name="stepMinusLineEdit"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QCheckBox" name="stepAccordToMassCheckBox">
+              <property name="toolTip">
+               <string>step according to mass instead of formula</string>
+              </property>
+              <property name="text">
+               <string>mass</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_14">
+              <property name="text">
+               <string>tolerance(ppm)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QDoubleSpinBox" name="stepRtolDoubleSpinBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="value">
+               <double>2.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3">
+             <widget class="QPushButton" name="stepPushButton">
+              <property name="text">
+               <string>step</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QSpinBox" name="stepMaxSpinBox">
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
+              <property name="minimum">
+               <number>-99</number>
+              </property>
+              <property name="maximum">
+               <number>99</number>
+              </property>
+              <property name="value">
+               <number>2</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>Step range</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="2">
+             <widget class="QSpinBox" name="stepMinSpinBox">
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
+              <property name="minimum">
+               <number>-99</number>
+              </property>
+              <property name="maximum">
+               <number>99</number>
+              </property>
+              <property name="value">
+               <number>-2</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
         <item>

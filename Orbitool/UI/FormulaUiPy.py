@@ -4,7 +4,7 @@ import enum
 from functools import partial
 from typing import Callable, List, Union, Optional
 
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt6 import QtWidgets, QtCore, QtGui
 from itertools import chain
 from .manager import Manager, state_node
 from .component import factory

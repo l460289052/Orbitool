@@ -6,7 +6,7 @@ from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 from itertools import chain
 
 import numpy as np
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt6 import QtCore, QtWidgets, QtGui
 
 from ..functions import spectrum as spectrum_func, binary_search, peakfit as peakfit_func
 from ..functions.calibration import Calibrator

@@ -1,5 +1,5 @@
 import numpy as np
-from PyQt5 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore
 
 from . import test
 
@@ -19,4 +19,4 @@ def sleep(second):
         timer = QtCore.QTimer()
         timer.timeout.connect(loop.quit)
         timer.start(int(second * 1000))
-        loop.exec_()
+        loop.exec()

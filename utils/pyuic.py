@@ -13,7 +13,7 @@ def pyuic(path):
                 print("Override old version", ui)
             else:
                 print("Generate", ui)
-            os.system(f'pyuic5 {ui} -o {uipy}')
+            os.system(f'pyuic6 {ui} -o {uipy}')
 
 
 def clear(path):

@@ -1,5 +1,5 @@
 from pathlib import Path
-from PyQt5.QtCore import QMimeData
+from PyQt6.QtCore import QMimeData
 from typing import Iterable, Literal 
 
 

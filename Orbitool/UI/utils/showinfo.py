@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox
 BTN = QMessageBox.StandardButton
 
 def showInfo(content:str, cap=None):

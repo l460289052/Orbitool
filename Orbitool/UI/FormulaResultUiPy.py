@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import List
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore
 from pyteomics.mass.mass import isotopologues
 
 from ..structures.spectrum import FittedPeak

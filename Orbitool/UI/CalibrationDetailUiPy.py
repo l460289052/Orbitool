@@ -5,7 +5,7 @@ from .manager import Manager, state_node
 import matplotlib.ticker
 
 
-from PyQt5 import QtWidgets, QtGui
+from PyQt6 import QtWidgets, QtGui
 from ..structures.spectrum import Spectrum
 from . import CalibrationDetailUi
 from .component import Plot
@@ -32,9 +32,9 @@ class Widget(QtWidgets.QWidget):
 
         self.current_ion_index: int = None
 
-        self.previousIonsShortCut = QtWidgets.QShortcut("Left", self)
+        self.previousIonsShortCut = QtGui.QShortcut("Left", self)
         self.previousIonsShortCut.activated.connect(lambda: self.next_ion(-1))
-        self.nextIonShortCut = QtWidgets.QShortcut("Right", self)
+        self.nextIonShortCut = QtGui.QShortcut("Right", self)
         self.nextIonShortCut.activated.connect(lambda: self.next_ion(1))
 
 

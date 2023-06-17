@@ -9,7 +9,7 @@ from .base import BaseFunc
 
 class NoFitFunc(BaseFunc):
     def func(self, mz: np.ndarray, params):
-        return mz
+        return mz # BUG
 
     def splitPeak(self, peak: Peak, split_num=None, force=False) -> List[FittedPeak]:
         id_split = np.where(

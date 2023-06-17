@@ -5,7 +5,7 @@ from typing import Optional, Union
 import numpy as np
 from matplotlib.cm import rainbow as rainbow_color_map
 from matplotlib.figure import Figure
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 from ..structures.spectrum import FittedPeak
 from . import MassDefectUi

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Literal, Optional, Union
 import os
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 from .. import setting
 from ..structures.file import FileSpectrumInfo

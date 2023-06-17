@@ -6,7 +6,7 @@ packaging==23.1
 pandas==2.0.1
 pydantic==1.10.7
 pyinstaller==5.11.0
-PyQt5==5.15.9
+PyQt6==6.5.1
 pyteomics==4.6
 pytest==7.3.1
 pythonnet==3.0.1

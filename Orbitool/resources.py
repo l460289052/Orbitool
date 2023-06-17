@@ -7,7 +7,7 @@ class _IconGetter:
         self.name = name
 
     def __get__(self, ins, own):
-        from PyQt5.QtGui import QIcon
+        from PyQt6.QtGui import QIcon
         return QIcon(str(ICON_PATH / self.name))
 
 class _Icons:

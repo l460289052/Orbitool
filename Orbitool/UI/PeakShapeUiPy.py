@@ -9,7 +9,7 @@ import matplotlib.backend_bases
 import matplotlib.lines
 import matplotlib.ticker
 import numpy as np
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 from .. import setting
 from ..functions import peakfit as peakfit_func

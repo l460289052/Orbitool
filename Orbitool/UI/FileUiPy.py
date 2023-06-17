@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from functools import partial
 from typing import Iterable, List, Optional, Union
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from .. import utils
 from ..functions.file import generage_periods

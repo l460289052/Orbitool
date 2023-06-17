@@ -1,6 +1,6 @@
 from pathlib import Path
 from .. import ThermoFile
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 
 # class TestThermo:
 #     def setup_class(self):

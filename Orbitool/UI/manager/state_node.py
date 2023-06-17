@@ -2,7 +2,7 @@ import functools
 import logging
 from enum import Enum
 from typing import Any, Callable, Generator, overload
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 
 from ... import setting
 from ..utils import showInfo, sleep

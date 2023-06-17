@@ -9,7 +9,7 @@ from queue import Queue
 from typing import (Any, Deque, Generator, Generic, Iterable, List, Tuple,
                     TypeVar, final)
 
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 
 from ... import setting
 from ..utils import sleep

@@ -7,7 +7,7 @@ from typing import Generator, Iterable, List, Optional, Tuple, Union
 import matplotlib.ticker
 import numpy as np
 from numpy.polynomial.polynomial import polyval
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 from .. import workspace, setting
 from ..functions import spectrum as spectrum_func, binary_search
