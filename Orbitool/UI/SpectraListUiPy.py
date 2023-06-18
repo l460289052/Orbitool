@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Literal, Optional, Union
 import os
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 from .. import setting
 from ..structures.file import FileSpectrumInfo
@@ -60,6 +60,7 @@ class Widget(QtWidgets.QWidget):
         ui = self.ui
         current = ui.comboBox.currentData()
         if self.former_index == current:
+            ui.tableWidget.resizeColumnsToContents()
             return
         if self.former_index != -1:
             self.comboBox_position[self.former_index] = ui.tableWidget.verticalScrollBar(
@@ -100,6 +101,7 @@ class Widget(QtWidgets.QWidget):
                           setting.format_time(end))
             for j, v in enumerate(time_range):
                 tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(v))
+        tableWidget.resizeColumnsToContents()
 
     def show_calibration_infos(self):
         tableWidget = self.ui.tableWidget
@@ -111,6 +113,7 @@ class Widget(QtWidgets.QWidget):
                 setting.format_time(info.start_time)))
             tableWidget.setItem(i, 1, QtWidgets.QTableWidgetItem(
                 setting.format_time(info.end_time)))
+        tableWidget.resizeColumnsToContents()
 
     def show_combobox_selection(self):
         comboBox = self.ui.comboBox

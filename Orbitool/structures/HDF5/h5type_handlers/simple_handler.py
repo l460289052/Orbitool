@@ -72,9 +72,13 @@ class DatetimeConverter(AttrHandler, RowDTypeHandler):
         return np.dtype(np.int64)
 
     def convert_to_h5(self, value):
+        if value is None:
+            return 0
         return np.datetime64(value, 's').astype(np.int64)
 
-    def convert_from_h5(self, value):
+    def convert_from_h5(self, value) -> datetime | None:
+        if value == 0:
+            return None
         return value.astype('M8[s]').astype(datetime)
 
 
@@ -89,7 +93,8 @@ class DateConverter(DatetimeConverter):
         return date.fromisoformat(h5group.attrs[key])
 
     def convert_from_h5(self, value):
-        return super().convert_from_h5(value).date()
+        ret = super().convert_from_h5(value)
+        return ret.date() if ret is not None else None
 
 
 class AsciiLimit(StrHandler, RowDTypeHandler, str):

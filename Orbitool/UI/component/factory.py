@@ -1,5 +1,5 @@
 from typing import Callable, Union
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt6 import QtWidgets, QtCore, QtGui
 
 
 def CheckBox(checked: bool, text: str="", enable: bool = True, direction: QtCore.Qt.LayoutDirection = QtCore.Qt.LayoutDirection.LayoutDirectionAuto) -> QtWidgets.QCheckBox:

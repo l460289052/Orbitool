@@ -1,6 +1,4 @@
 import logging
-import os
-from abc import ABC, abstractmethod
 from collections import deque
 from enum import Enum
 from multiprocessing import Pool
@@ -9,7 +7,7 @@ from queue import Queue
 from typing import (Any, Deque, Generator, Generic, Iterable, List, Tuple,
                     TypeVar, final)
 
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 
 from ... import setting
 from ..utils import sleep
@@ -49,6 +47,11 @@ class Thread(QtCore.QThread):
 Data = TypeVar("Data")
 Result = TypeVar("Result")
 
+def init_process():
+    import os
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"
+    os.environ["GOTO_NUM_THREADS"] = "1"
+    os.environ["OMP_NUM_THREADS"] = "1"
 
 class MultiProcess(QtCore.QThread, Generic[Data, Result]):
     finished = QtCore.pyqtSignal(tuple)
@@ -121,8 +124,9 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
         write_thread.start()
 
         multi_cores = setting.general.multi_cores
+        times = setting.pop_global_val("multi-process-tmp-times", 1.)
 
-        with Pool(multi_cores) as pool:
+        with Pool(multi_cores, initializer=init_process) as pool:
             def abort():
                 queue.put(None)
                 pool.terminate()
@@ -137,7 +141,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
                         not_ready_num = len(
                             [r for r in results if not r.ready()])
                         # could put more task
-                        if not_ready_num < multi_cores and len(results) < 2.5 * multi_cores:
+                        if not_ready_num < multi_cores and len(results) < times * multi_cores:
                             return
                     sleep(.1)
                     if self.aborted:

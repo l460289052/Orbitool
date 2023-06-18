@@ -10,8 +10,8 @@ from typing import (
 from types import MethodType
 
 import numpy as np
-from PyQt5.QtCore import QObject, QThread, QTimer, pyqtSignal
-from PyQt5.QtWidgets import QMainWindow, QTableWidget
+from PyQt6.QtCore import QObject, QThread, QTimer, pyqtSignal
+from PyQt6.QtWidgets import QMainWindow, QTableWidget
 
 from ...workspace import WorkSpace
 

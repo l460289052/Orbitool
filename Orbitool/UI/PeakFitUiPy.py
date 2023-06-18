@@ -5,7 +5,7 @@ from typing import Callable, List, Optional, Set, Tuple, cast
 import matplotlib.text
 import matplotlib.ticker
 import numpy as np
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 from ..functions import binary_search
 from ..functions import formula as formula_func
@@ -51,6 +51,7 @@ class Widget(QtWidgets.QWidget):
         ui.setupUi(self)
 
         ui.showSelectedPushButton.clicked.connect(self.showSelect)
+        ui.toolBox.setCurrentIndex(0)
 
         # filters
         ui.filterSelectYToolButton.clicked.connect(self.filterSelected)
@@ -141,6 +142,7 @@ class Widget(QtWidgets.QWidget):
         spectrum, raw_peaks = yield read, "read spectrum"
         raw_peaks: List[Peak]
 
+        setting.set_global_val("multi-process-tmp-times", 20)
         raw_split_num, original_indexes, peaks = yield SplitPeaks(raw_peaks, func_kwargs={
             "func": workspace.info.peak_shape_tab.func}), "fit use peak shape func"
 

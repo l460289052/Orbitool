@@ -1,6 +1,6 @@
 from copy import deepcopy
 from enum import Enum
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 from .SettingUi import Ui_Dialog
 from Orbitool import setting, VERSION, resources
 

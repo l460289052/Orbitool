@@ -5,16 +5,16 @@ from datetime import datetime, timedelta
 from functools import partial
 from typing import Iterable, List, Optional, Union
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
-from .. import utils
-from ..functions.file import generage_periods
-from ..structures.file import FileSpectrumInfo, Path, PathList, PeriodItem
-from ..workspace import UiNameGetter, UiState
+from ... import utils
+from ...functions.file import generage_periods
+from ...structures.file import FileSpectrumInfo, Path, PathList, PeriodItem
+from .. import utils as UiUtils
+from ..manager import Manager, Thread, state_node
+from ..utils import DragHelper, set_header_sizes, showInfo
 from . import FileUi
-from . import utils as UiUtils
-from .manager import Manager, Thread, state_node
-from .utils import DragHelper, set_header_sizes, showInfo
+from .utils import str2timedelta
 
 
 class Widget(QtWidgets.QWidget):
@@ -46,12 +46,7 @@ class Widget(QtWidgets.QWidget):
 
         ui.timeAdjustPushButton.clicked.connect(self.adjust_time)
 
-        ui.nSpectraRadioButton.clicked.connect(self.radioButtonChanged)
-        ui.nMinutesRadioButton.clicked.connect(self.radioButtonChanged)
-        ui.periodRadioButton.clicked.connect(self.radioButtonChanged)
-
-        ui.periodImportToolButton.clicked.connect(self.importPeriod)
-        ui.exportPeriodPushButton.clicked.connect(self.exportPeriod)
+        ui.periodToolButton.clicked.connect(self.edit_period)
 
         ui.selectedPushButton.clicked.connect(self.processSelected)
         ui.allPushButton.clicked.connect(self.processAll)
@@ -72,70 +67,19 @@ class Widget(QtWidgets.QWidget):
         ui = self.ui
         self.info.ui_state.store_state(ui)
 
-    @state_node(mode='n')
-    def radioButtonChanged(self):
-        ui = self.ui
-        if ui.nSpectraRadioButton.isChecked():
-            ui.exportPeriodPushButton.setEnabled(False)
-        elif ui.nMinutesRadioButton.isChecked():
-            ui.exportPeriodPushButton.setEnabled(True)
-        elif ui.periodRadioButton.isChecked():
-            ui.exportPeriodPushButton.setEnabled(
-                self.info.periods is not None)
-
     @state_node
-    def importPeriod(self):
-        success, file = UiUtils.openfile(
-            "Select one period file", "CSV files(*.csv)")
-        if not success:
-            return
-
-        def func():
-            ret = []
-            with open(file, 'r') as f:
-                reader = csv.reader(f)
-                it = iter(reader)
-                next(it)  # skip row
-                time_parser = utils.TimeParser()
-                for row in it:
-                    item = PeriodItem(time_parser.parse(
-                        row[0]), time_parser.parse(row[1]))
-                    ret.append(item)
-            return ret
-        self.info.periods = yield func, "Read periods"
-        if not self.ui.exportPeriodPushButton.isEnabled():
-            self.ui.exportPeriodPushButton.setEnabled(True)
-
-    @state_node
-    def exportPeriod(self):
-        success, file = UiUtils.savefile("Save to", "CSV files(*.csv)")
-        if not success:
-            return
-
+    def edit_period(self):
+        from .CustonPeriodUiPy import Dialog
         ui = self.ui
-        period_checked = ui.periodRadioButton.isChecked()
-        minutes_checked = ui.nMinutesRadioButton.isChecked()
-        start_point = ui.startDateTimeEdit.dateTime().toPyDateTime()
-        end_point = ui.endDateTimeEdit.dateTime().toPyDateTime()
-        interval = timedelta(minutes=ui.nMinutesDoubleSpinBox.value())
-
-        def func():
-            if period_checked:
-                periods = self.info.periods
-            elif minutes_checked:
-                def generator():
-                    for s, e in generage_periods(start_point, end_point, interval):
-                        yield PeriodItem(s, e)
-                periods = generator()
-            else:
-                periods: List[PeriodItem] = []
-            with open(file, 'w', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow(('start time', 'end time'))
-                for p in periods:
-                    writer.writerow((str(p.start_time), str(p.end_time)))
-
-        yield func, "exporting periods"
+        dialog = Dialog(
+            self.manager, 
+            ui.startDateTimeEdit.dateTime().toPyDateTime(),
+            ui.endDateTimeEdit.dateTime().toPyDateTime(),
+            ui.nSpectraSpinBox.value(),
+            ui.nMinutesLineEdit.text(),
+            "minutes")
+        dialog.exec()
+        
 
     @state_node
     def addThermoFile(self):
@@ -283,8 +227,7 @@ class Widget(QtWidgets.QWidget):
                 func = partial(FileSpectrumInfo.generate_infos_from_paths_by_number,
                                paths, num, polarity, time_range)
             elif ui.nMinutesRadioButton.isChecked():
-                interval = timedelta(
-                    minutes=ui.nMinutesDoubleSpinBox.value())
+                interval = str2timedelta(ui.nMinutesLineEdit.text())
                 func = partial(FileSpectrumInfo.generate_infos_from_paths_by_time_interval,
                                paths, interval, polarity, time_range)
             elif ui.periodRadioButton.isChecked():

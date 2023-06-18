@@ -2,7 +2,7 @@ from typing import List, Tuple
 from multiprocessing import freeze_support
 from time import sleep
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore
 from .. import MultiProcess, Manager
 from Orbitool import setting
 
@@ -80,7 +80,7 @@ def test_single():
 #     timer = QtCore.QTimer()
 #     timer.timeout.connect(loop.quit)
 #     timer.start(1)
-#     loop.exec_()
+#     loop.exec()
 #     timer.stop()
 
 #     pp.abort()

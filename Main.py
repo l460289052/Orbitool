@@ -1,24 +1,21 @@
 # -*- coding: utf-8 -*-
-# python 3.8
+# python 3.11
 try:
     import os
-    import sys
     import multiprocessing
-    import argparse
-
-    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = '1'
-    os.environ["OPENBLAS_NUM_THREADS"] = '1'
-    os.environ["GOTO_NUM_THREADS"] = '1'
-    os.environ["OMP_NUM_THREADS"] = '1'
 
     multiprocessing.set_start_method('spawn', True)
 
     if __name__ == "__main__":
         multiprocessing.freeze_support()
 
+        os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = '1'
+        # os.environ["QT_SCALE_FACTOR"] = "1"
+
         # import pythoncom
         # pythoncom.CoInitialize()
 
+        import argparse
         parser = argparse.ArgumentParser()
         parser.add_argument("workspacefile", nargs='?')
         parser.add_argument("--debug", action="store_true")
@@ -34,20 +31,24 @@ try:
             setting.debug.NO_MULTIPROCESS = True
 
         import matplotlib as mpl
+        mpl.use("QtAgg")
         mpl.rcParams['agg.path.chunksize'] = 10000
 
-        from PyQt5 import QtCore, QtWidgets
-        # QtWidgets.QApplication.setAttribute(QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
-        QtWidgets.QApplication.setAttribute(QtCore.Qt.ApplicationAttribute.AA_EnableHighDpiScaling)
-        QtWidgets.QApplication.setAttribute(QtCore.Qt.ApplicationAttribute.AA_UseHighDpiPixmaps)
+        from PyQt6 import QtCore, QtWidgets, QtGui
 
+        import sys
         app = QtWidgets.QApplication(sys.argv)
-        app.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
+        style = QtWidgets.QStyleFactory.create('Fusion')
+        app.setStyle(style)
+
+        setting.set_global_var("app", app)
 
         from Orbitool.UI import MainUiPy
 
         MainWin = MainUiPy.Window(args.workspacefile)
         MainWin.show()
+
+
         if args.to_step:
             steps = {
                 "file": 0,
@@ -65,7 +66,7 @@ try:
                 routine.noise(MainWin)
             if step > 2:
                 routine.peak_shape(MainWin)
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
 except Exception as e:
     import traceback

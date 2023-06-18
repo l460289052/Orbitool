@@ -4,11 +4,11 @@ import shutil
 from typing import Dict, Union
 
 from matplotlib.pyplot import get
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from ..structures.HDF5 import h5_brokens
 from ..workspace import VERSION, WorkSpace, updater
-from . import (CalibrationUiPy, FileUiPy, FormulaUiPy, MainUi, MassDefectUiPy,
+from . import (CalibrationUiPy, file_tab, FormulaUiPy, MainUi, MassDefectUiPy,
                MassListUiPy, NoiseUiPy, PeakFitUiPy, PeakListUiPy,
                PeakShapeUiPy, SpectraListUiPy, SpectrumUiPy, TimeseriesesUiPy,
                TimeseriesUiPy)
@@ -25,6 +25,9 @@ class Window(QtWidgets.QMainWindow):
         manager = self.manager
         self.setWindowTitle(f"Orbitool {manager.workspace.info.version}")
 
+        dock_opt = self.DockOption
+
+        self.setDockOptions(dock_opt.AllowNestedDocks|dock_opt.AllowTabbedDocks|dock_opt.AnimatedDocks|dock_opt.GroupedDragging|dock_opt.VerticalTabs)
         ui.settingAction.triggered.connect(self.setting_dialog)
         ui.workspaceLoadAction.triggered.connect(self.load)
         ui.workspaceSaveAction.triggered.connect(self.save)
@@ -36,8 +39,8 @@ class Window(QtWidgets.QMainWindow):
         # tab widgets
         ui.abortPushButton.clicked.connect(self.abort_process)
 
-        self.fileTab: FileUiPy.Widget = self.add_tab(
-            FileUiPy.Widget(manager), "File")
+        self.fileTab: file_tab.Widget = self.add_tab(
+            file_tab.Widget(manager), "File")
         self.fileTab.callback.connect(self.file_tab_finish)
 
         self.noiseTab: NoiseUiPy.Widget = self.add_tab(
@@ -67,30 +70,30 @@ class Window(QtWidgets.QMainWindow):
         # docker widgets
 
         self.formula = FormulaUiPy.Widget(manager)
-        self.formulaDw = self.add_dockerwidget(
+        self.formulaDw = self.add_dock_widget(
             "Formula", self.formula)
 
         self.masslist = MassListUiPy.Widget(manager)
-        self.massListDw = self.add_dockerwidget(
+        self.massListDw = self.add_dock_widget(
             "Mass List", self.masslist, self.formulaDw)
 
         self.peakFitTab.show_masslist.connect(self.masslist.showMasslist)
 
         self.spectraList = SpectraListUiPy.Widget(manager)
-        self.spectraListDw = self.add_dockerwidget(
+        self.spectraListDw = self.add_dock_widget(
             "Spectra List", self.spectraList, self.massListDw)
 
         self.spectrum = SpectrumUiPy.Widget(manager)
-        self.spectrumDw = self.add_dockerwidget(
+        self.spectrumDw = self.add_dock_widget(
             "Spectrum", self.spectrum, self.spectraListDw)
 
         self.peakList = PeakListUiPy.Widget(manager)
-        self.peakListDw = self.add_dockerwidget(
+        self.peakListDw = self.add_dock_widget(
             "Peak List", self.peakList, self.spectrumDw)
         self.peakFitTab.filter_selected.connect(self.peakList.filterSelected)
 
         self.timeseries = TimeseriesUiPy.Widget(manager)
-        self.timeseriesDw = self.add_dockerwidget(
+        self.timeseriesDw = self.add_dock_widget(
             "Timeseries", self.timeseries, self.peakListDw)
         self.timeseriesesTab.click_series.connect(self.timeseries.showSeries)
 
@@ -132,12 +135,12 @@ class Window(QtWidgets.QMainWindow):
                 bar.deleteLater()
             self.progress_bars.clear()
 
-    def add_dockerwidget(self, title, widget, after=None):
+    def add_dock_widget(self, title, widget, after=None):
         dw = QtWidgets.QDockWidget(title)
         dw.setWidget(widget)
         dw.setAllowedAreas(QtCore.Qt.DockWidgetArea.AllDockWidgetAreas)
-        dw.setFeatures(dw.DockWidgetMovable | dw.DockWidgetFloatable)
-        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, dw)
+        dw.setFeatures(dw.DockWidgetFeature.DockWidgetMovable | dw.DockWidgetFeature.DockWidgetFloatable)
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.LeftDockWidgetArea, dw)
         if after is not None:
             self.tabifyDockWidget(after, dw)
         return dw

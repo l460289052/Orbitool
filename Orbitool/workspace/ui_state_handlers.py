@@ -2,7 +2,7 @@ from datetime import datetime
 from .base import state_handlers, BaseStateHandler
 
 def init_handlers():
-    from PyQt5.QtWidgets import (
+    from PyQt6.QtWidgets import (
         QCheckBox, QDateTimeEdit, QDoubleSpinBox, QLineEdit,
         QSpinBox, QRadioButton, QComboBox, QSlider)
 

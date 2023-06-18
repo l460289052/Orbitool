@@ -5,8 +5,9 @@ from .manager import Manager, state_node
 import matplotlib.ticker
 
 
-from PyQt5 import QtWidgets, QtGui
+from PyQt6 import QtWidgets, QtGui
 from ..structures.spectrum import Spectrum
+from ..functions import spectrum as spectrum_func
 from . import CalibrationDetailUi
 from .component import Plot
 
@@ -32,11 +33,10 @@ class Widget(QtWidgets.QWidget):
 
         self.current_ion_index: int = None
 
-        self.previousIonsShortCut = QtWidgets.QShortcut("Left", self)
+        self.previousIonsShortCut = QtGui.QShortcut("Left", self)
         self.previousIonsShortCut.activated.connect(lambda: self.next_ion(-1))
-        self.nextIonShortCut = QtWidgets.QShortcut("Right", self)
+        self.nextIonShortCut = QtGui.QShortcut("Right", self)
         self.nextIonShortCut.activated.connect(lambda: self.next_ion(1))
-
 
     @property
     def info(self):
@@ -82,7 +82,8 @@ class Widget(QtWidgets.QWidget):
 
         ion_infos = info.path_ion_infos[spectrum.path]
         inner_index = index
-        for ion_info in info.path_ion_infos.values(): # to find current spectrum corresponding ion-infos and inner-index
+        # to find current spectrum corresponding ion-infos and inner-index
+        for ion_info in info.path_ion_infos.values():
             if ion_info:
                 i = next(iter(ion_info.values()))
                 if inner_index < len(i.raw_position):
@@ -108,10 +109,19 @@ class Widget(QtWidgets.QWidget):
         ax = plot.ax
         ax.clear()
         ax.axhline(color='black', linewidth=.5)
-        ax.plot(spectrum.mz, spectrum.intensity, color='black')
-        for cali_info in info.last_calibrate_info_segments:
-            if cali_info.end_point is not math.inf:
-                ax.axvline(cali_info.end_point, color='blue')
+
+        ax.plot(spectrum.mz, spectrum.intensity, color='red', label="raw")
+
+        if True:
+            cali_mz = []
+            for mz_part, calibrator in zip(
+                    spectrum_func.safeSplitSpectrum(
+                        spectrum.mz, spectrum.intensity, 
+                        np.array([info.end_point for info in info.last_calibrate_info_segments])),
+                    info.calibrator_segments[spectrum.path]):
+                cali_mz.append(calibrator.calibrate_mz(mz_part))
+            cali_mz = np.concatenate(cali_mz)
+            ax.plot(cali_mz, spectrum.intensity, color='black', label="calibrated")
 
         for index, (ion, used) in enumerate(info.yield_ion_used(spectrum.path)):
             formula = ion.formula
@@ -133,7 +143,7 @@ class Widget(QtWidgets.QWidget):
 
             if math.isnan(position):
                 continue
-            ax.plot([position, position], [0, intensity], color='r')
+            ax.plot([position, position], [0, intensity], color="blue")
             if used:
                 ax.annotate(ion.shown_text, (position, intensity), color='g')
             else:
@@ -150,11 +160,11 @@ class Widget(QtWidgets.QWidget):
         plot.canvas.draw()
 
     @state_node(withArgs=True)
-    def showIonAt(self, item:QtWidgets.QTableWidgetItem):
+    def showIonAt(self, item: QtWidgets.QTableWidgetItem):
         self.showIon(item.row())
 
     @state_node(withArgs=True)
-    def next_ion(self, step:int):
+    def next_ion(self, step: int):
         if self.spectrum is None:
             return
         if self.current_ion_index is None:
