@@ -4,7 +4,7 @@ matplotlib==3.7.1
 numpy==1.24.3
 packaging==23.1
 pandas==2.0.1
-pydantic==1.10.7
+pydantic==2.1.1
 pyinstaller==5.11.0
 PyQt6==6.5.1
 pyteomics==4.6

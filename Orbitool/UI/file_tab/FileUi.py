@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'Orbitool\UI\File.ui'
+# Form implementation generated from reading ui file 'Orbitool\UI\file_tab\File.ui'
 #
 # Created by: PyQt6 UI code generator 6.5.1
 #
@@ -179,14 +179,6 @@ class Ui_Form(object):
         self.label.setSizePolicy(sizePolicy)
         self.label.setObjectName("label")
         self.gridLayout.addWidget(self.label, 0, 2, 1, 1)
-        self.label_3 = QtWidgets.QLabel(parent=self.groupBox_5)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_3.sizePolicy().hasHeightForWidth())
-        self.label_3.setSizePolicy(sizePolicy)
-        self.label_3.setObjectName("label_3")
-        self.gridLayout.addWidget(self.label_3, 1, 2, 1, 1)
         self.label_4 = QtWidgets.QLabel(parent=self.groupBox_5)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -202,7 +194,7 @@ class Ui_Form(object):
         sizePolicy.setHeightForWidth(self.nMinutesLineEdit.sizePolicy().hasHeightForWidth())
         self.nMinutesLineEdit.setSizePolicy(sizePolicy)
         self.nMinutesLineEdit.setObjectName("nMinutesLineEdit")
-        self.gridLayout.addWidget(self.nMinutesLineEdit, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.nMinutesLineEdit, 1, 1, 1, 2)
         self.formLayout_10.setWidget(1, QtWidgets.QFormLayout.ItemRole.SpanningRole, self.groupBox_5)
         self.line = QtWidgets.QFrame(parent=Form)
         self.line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
@@ -305,7 +297,6 @@ class Ui_Form(object):
         self.periodToolButton.setText(_translate("Form", "custom"))
         self.nMinutesRadioButton.setText(_translate("Form", "every"))
         self.label.setText(_translate("Form", "spectra"))
-        self.label_3.setText(_translate("Form", "minutes"))
         self.label_4.setText(_translate("Form", "periods"))
         self.nMinutesLineEdit.setToolTip(_translate("Form", "1000s ( 1000 seconds )\n"
 "10m5s ( 10 minutes and 5 seconds )\n"

@@ -1,4 +1,5 @@
 import logging
+import multiprocessing
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -89,7 +90,7 @@ class _Setting(BaseModel):
     version: str = VERSION
 
     def save_setting(self):
-        config_path.write_text(self.json(indent=4))
+        config_path.write_text(self.model_dump_json(indent=4))
 
     def update_from(self, new_config: "_Setting"):
         for key in new_config.__fields__.keys():
@@ -138,11 +139,4 @@ class _Setting(BaseModel):
 vars = {}
 vals = {}
 
-
-if config_path.exists():
-    setting = _Setting.parse_file(config_path)
-else:
-    setting = _Setting()
-
-setting.general.multi_cores = max(
-    min(setting.general.multi_cores, multi_cores), 1)
+setting = _Setting()

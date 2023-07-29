@@ -22,7 +22,13 @@ try:
         parser.add_argument("--no_multiprocess", action="store_true")
         parser.add_argument("--to_step")
 
-        from Orbitool.config import setting
+        from Orbitool.config import setting, config_path, multi_cores
+        if config_path.exists():
+            setting.update_from(
+                setting.model_validate_json(config_path.read_text()))
+            setting.general.multi_cores = max(
+                1, min(setting.general.multi_cores, multi_cores - 1))
+
         setting.save_setting()
         args = parser.parse_args()
         if args.debug:
@@ -47,7 +53,6 @@ try:
 
         MainWin = MainUiPy.Window(args.workspacefile)
         MainWin.show()
-
 
         if args.to_step:
             steps = {
