@@ -1,15 +1,11 @@
 import contextlib
-from copy import copy
-import enum
 from functools import partial
 from typing import Callable, List, Union, Optional
 
 from PyQt6 import QtWidgets, QtCore, QtGui
-from itertools import chain
-from .manager import Manager, state_node
-from .component import factory
-from ..utils.formula import Formula, parse_element, ElementState
-from .utils import get_tablewidget_selected_row, showInfo
+from Orbitool.UI.manager import Manager, state_node
+from Orbitool.utils.formula import Formula, parse_element, ElementState
+from Orbitool.UI.utils import get_tablewidget_selected_row, showInfo
 from . import FormulaResultUiPy
 
 from . import FormulaUi
@@ -121,17 +117,21 @@ class Widget(QtWidgets.QWidget):
             return cb
 
         def custom_func(key: str, e: int):
-            if e == QtCore.Qt.CheckState.Checked:
-                gen.add_EI(key)
-            elif e == QtCore.Qt.CheckState.Unchecked:
-                gen.del_EI(key)
+            e = QtCore.Qt.CheckState(e)
+            match e:
+                case QtCore.Qt.CheckState.Checked:
+                    gen.add_EI(key)
+                case QtCore.Qt.CheckState.Unchecked:
+                    gen.del_EI(key)
             self.show_isotopes()
 
         def global_limit_func(key: str, e: int):
-            if e == QtCore.Qt.CheckState.Checked:
-                gen.isotope_usable[key].global_limit = True
-            elif e == QtCore.Qt.CheckState.Unchecked:
-                gen.isotope_usable[key].global_limit = False
+            e = QtCore.Qt.CheckState(e)
+            match e:
+                case QtCore.Qt.CheckState.Checked:
+                    gen.isotope_usable[key].global_limit = True
+                case QtCore.Qt.CheckState.Unchecked:
+                    gen.isotope_usable[key].global_limit = False
             self.show_isotopes()
 
         for e, e_num in gen.get_E_iter():
@@ -261,8 +261,9 @@ class Widget(QtWidgets.QWidget):
                     i_num.min = sb.value()
                 else:
                     i_num.max = sb.value()
-                self.show_isotopes()
+                tree.setItemWidget(item, col, QtWidgets.QLabel(str(sb.value())))
             sb.focusOutEvent = focus_out
+            # tree.removeItemWidget(item, col)
             tree.setItemWidget(item, col, sb)
             sb.setFocus()
 
@@ -360,6 +361,6 @@ class Widget(QtWidgets.QWidget):
         if manager.formulas_result_win is not None:
             manager.formulas_result_win.close()
             del manager.formulas_result_win
-        manager.formulas_result_win = FormulaResultUiPy.Window.FactoryCalc(
+        manager.formulas_result_win = FormulaResultUiPy.Window.fromInputStr(
             manager, text)
         manager.formulas_result_win.show()

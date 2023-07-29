@@ -4,14 +4,13 @@ from typing import List
 from PyQt6 import QtWidgets, QtCore
 from pyteomics.mass.mass import isotopologues
 
-from ..structures.spectrum import FittedPeak
-from ..functions import binary_search
-from ..utils.formula import Formula
+from Orbitool.structures.spectrum import FittedPeak
+from Orbitool.functions import binary_search
+from Orbitool.utils.formula import Formula
 from . import FormulaResultUi
-from .manager import Manager, state_node
-from .component import Plot
-from .utils import get_tablewidget_selected_row
-from . import PeakFitFloatUiPy
+from Orbitool.UI.manager import Manager, state_node
+from Orbitool.UI.component import Plot
+from Orbitool.UI.utils import get_tablewidget_selected_row
 
 
 class Window(QtWidgets.QMainWindow):
@@ -49,11 +48,11 @@ class Window(QtWidgets.QMainWindow):
         ui.acceptEmptyToolButton.clicked.connect(self.acceptEmpty)
 
     @classmethod
-    def FactoryCalc(cls, manager: Manager, input: str):
+    def fromInputStr(cls, manager: Manager, input: str):
         return Window(manager, *calc(manager, input))
 
     @classmethod
-    def FactoryPeak(cls, manager: Manager, peak_index: int):
+    def fromFittedPeak(cls, manager: Manager, peak_index: int):
         peaks = manager.workspace.info.peak_fit_tab.peaks
         peak = peaks[peak_index]
         return Window(manager, str(peak.peak_position), peak.peak_position, peak.formulas, peak_index)
@@ -192,6 +191,7 @@ class Window(QtWidgets.QMainWindow):
         it = table.item(row, 2)
         if it and it.text():
             index = self.find_peak_index(formula.mass())
+            from Orbitool.UI import PeakFitFloatUiPy
             win = PeakFitFloatUiPy.Window.get_or_create(self.manager, index)
             win.set_formulas(index, [formula])
             win.raise_()
