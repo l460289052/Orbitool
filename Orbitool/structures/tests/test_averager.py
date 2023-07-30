@@ -20,7 +20,7 @@ class TmpInfo(FileSpectrumInfo):
 
 
 def test_num_average_half():
-    infos = TmpInfo.generate_infos_from_paths_by_number(
+    infos = TmpInfo.infosFromNumInterval(
         map(str, range(10)), 5, 1, None)
 
     for info in infos:
@@ -29,7 +29,7 @@ def test_num_average_half():
 
 
 def test_num_average_double():
-    infos = TmpInfo.generate_infos_from_paths_by_number(
+    infos = TmpInfo.infosFromNumInterval(
         map(str, range(10)), 20, 1, None)
 
     for index, info in enumerate(infos):
@@ -38,7 +38,7 @@ def test_num_average_double():
 
 
 def test_num_average_some():
-    infos = TmpInfo.generate_infos_from_paths_by_number(
+    infos = TmpInfo.infosFromNumInterval(
         map(str, range(10)), 3, 1, None)
 
     cnt = 3

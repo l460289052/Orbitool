@@ -78,6 +78,10 @@ class File:
     def endDatetime(self):
         return self.creationDatetime + self.endTimedelta
 
+    @property
+    def totalScanNum(self):
+        return self.lastScanNumber - self.firstScanNumber + 1
+
     def getSpectrumRetentionTime(self, scanNum):
         retentionTime = timedelta(
             minutes=self.rawfile.RetentionTimeFromScanNumber(scanNum))
@@ -131,21 +135,21 @@ class File:
         time = retentimeTime + self.creationDatetime
         # return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
 
-    def datetimeRange2NumRange(self, datetimeRange: Tuple[datetime, datetime]):
-        return self.timeRange2NumRange((datetimeRange[0] - self.creationDatetime, datetimeRange[1] - self.creationDatetime))
+    def datetimeRange2ScanNumRange(self, datetimeRange: Tuple[datetime, datetime]):
+        return self.timeRange2ScanNumRange((datetimeRange[0] - self.creationDatetime, datetimeRange[1] - self.creationDatetime))
 
-    def timeRange2NumRange(self, timeRange: Tuple[timedelta, timedelta]):
+    def timeRange2ScanNumRange(self, timeRange: Tuple[timedelta, timedelta]):
         s: slice = functions.binary_search.indexBetween(
             self, timeRange, (self.firstScanNumber, self.lastScanNumber + 1),
             method=(lambda _, i: self.getSpectrumRetentionTime(i)))
         return (s.start, s.stop)
 
-    def numRange2TimeRange(self, numRange: Tuple[int, int]) -> Tuple[timedelta, timedelta]:
+    def scanNumRange2TimeRange(self, numRange: Tuple[int, int]) -> Tuple[timedelta, timedelta]:
         return self.getSpectrumRetentionTime(numRange[0]), self.getSpectrumRetentionTime(numRange[1] - 1)
 
     def checkAverageEmpty(self, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
         if timeRange is not None and numRange is None:
-            start, end = self.timeRange2NumRange(timeRange)
+            start, end = self.timeRange2ScanNumRange(timeRange)
         elif numRange is not None and timeRange is None:
             start, end = numRange
         else:
@@ -164,7 +168,7 @@ class File:
             return
         # Due to a bug related to scan time during data acquisition, AverageScansInTimeRange should not be used
         #averaged = Extensions.AverageScansInTimeRange(self.rawfile, start, end, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
-        startNum, endNum = self.datetimeRange2NumRange((start, end))
+        startNum, endNum = self.datetimeRange2ScanNumRange((start, end))
         averaged = Extensions.AverageScansInScanRange(
             self.rawfile, startNum, endNum, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
         if averaged is None:
@@ -177,7 +181,7 @@ class File:
         return mass, intensity
 
     def getAveragedSpectrum(self, ppm, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
-        start, end = self.bothToNumRange(timeRange, numRange)
+        start, end = self.bothToScanNumRange(timeRange, numRange)
 
         scanfilter = self.getFilter(start, end, polarity)
         if scanfilter is None:
@@ -200,9 +204,9 @@ class File:
         numRange = (start, end)
         return mz, intensity
 
-    def bothToNumRange(self, timeRange: Tuple[timedelta, timedelta], numRange: Tuple[int, int]) -> Tuple[int, int]:
+    def bothToScanNumRange(self, timeRange: Tuple[timedelta, timedelta], numRange: Tuple[int, int]) -> Tuple[int, int]:
         if timeRange is not None and numRange is None:
-            return self.timeRange2NumRange(timeRange)
+            return self.timeRange2ScanNumRange(timeRange)
         elif numRange is not None and timeRange is None:
             return numRange
         else:

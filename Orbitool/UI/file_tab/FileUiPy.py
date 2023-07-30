@@ -22,7 +22,7 @@ class Widget(QtWidgets.QWidget):
 
     def __init__(self, manager: Manager, parent: Optional[QtWidgets.QWidget] = None) -> None:
         super().__init__(parent=parent)
-        self.manager = manager
+        self.manager: Manager = manager
         self.ui = FileUi.Ui_Form()
         self.drag_helper = DragHelper(("file",))
         self.setupUi()
@@ -224,17 +224,17 @@ class Widget(QtWidgets.QWidget):
         if ui.averageCheckBox.isChecked():
             if ui.nSpectraRadioButton.isChecked():
                 num = ui.nSpectraSpinBox.value()
-                func = partial(FileSpectrumInfo.generate_infos_from_paths_by_number,
+                func = partial(FileSpectrumInfo.infosFromNumInterval,
                                paths, num, polarity, time_range)
             elif ui.nMinutesRadioButton.isChecked():
                 interval = str2timedelta(ui.nMinutesLineEdit.text())
-                func = partial(FileSpectrumInfo.generate_infos_from_paths_by_time_interval,
+                func = partial(FileSpectrumInfo.infosFromTimeInterval,
                                paths, interval, polarity, time_range)
             elif ui.periodRadioButton.isChecked():
-                func = partial(FileSpectrumInfo.generate_infos_from_paths_by_periods,
+                func = partial(FileSpectrumInfo.infosFromPeriods,
                                paths, polarity, [(p.start_time, p.end_time)for p in self.info.periods])
         else:
-            func = partial(FileSpectrumInfo.generate_infos_from_paths,
+            func = partial(FileSpectrumInfo.infosFromPath_withoutAveraging,
                            paths, polarity, time_range)
 
         return func
