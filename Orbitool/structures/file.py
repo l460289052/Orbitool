@@ -104,6 +104,10 @@ class PeriodItem(BaseRowItem):
     start_num: int = -1
     end_num: int = -1
 
+    def length(self):
+        return self.start_time and (self.end_time - self.start_time) or (self.end_num - self.start_num)
+        
+
 
 class FileSpectrumInfo(spectrum.SpectrumInfo):
     item_name = "file spectrum info"
@@ -126,7 +130,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
                         yield path.path, f.getSpectrumDatetime(scan_num)
 
     @classmethod
-    def generate_infos_from_paths_by_number(cls, paths: List[Path], N: int, polarity, timeRange):
+    def generate_infos_from_paths_by_number(cls, paths: List[Path], N: int, polarity, timeRange): # TODO: need to change according to ignore charge
         delta_time = timedelta(seconds=1)
 
         results: List[cls] = []

@@ -12,16 +12,17 @@ from ... import setting
 
 
 class Plot:
-    def __init__(self, parentWidget: QtWidgets.QWidget):
+    def __init__(self, parentWidget: QtWidgets.QWidget, tool_bar=True):
         self.parent = parentWidget
         parentWidget.setMinimumSize(100, 100)
         parentWidget.setLayout(QtWidgets.QVBoxLayout())
         self.canvas: FigureCanvasBase = FigureCanvas(
             Figure(figsize=(20, 20)))
         self.fig: Figure = self.canvas.figure
-        self.toolBar = NavigationToolbar2QT(
-            self.canvas, parentWidget)
-        parentWidget.layout().addWidget(self.toolBar)
+        if tool_bar:
+            self.toolBar = NavigationToolbar2QT(
+                self.canvas, parentWidget)
+            parentWidget.layout().addWidget(self.toolBar)
         parentWidget.layout().addWidget(self.canvas)
 
         self.clear()
