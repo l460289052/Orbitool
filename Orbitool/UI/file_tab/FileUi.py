@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'Orbitool\UI\File.ui'
+# Form implementation generated from reading ui file 'Orbitool\UI\file_tab\File.ui'
 #
 # Created by: PyQt6 UI code generator 6.5.1
 #
@@ -51,6 +51,7 @@ class Ui_Form(object):
         self.verticalLayout_5.addItem(spacerItem1)
         self.horizontalLayout.addLayout(self.verticalLayout_5)
         self.tableWidget = QtWidgets.QTableWidget(parent=Form)
+        self.tableWidget.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.SizeAdjustPolicy.AdjustIgnored)
         self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
         self.tableWidget.setDragEnabled(True)
         self.tableWidget.setDragDropMode(QtWidgets.QAbstractItemView.DragDropMode.DropOnly)
@@ -58,7 +59,7 @@ class Ui_Form(object):
         self.tableWidget.setTextElideMode(QtCore.Qt.TextElideMode.ElideNone)
         self.tableWidget.setHorizontalScrollMode(QtWidgets.QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(4)
+        self.tableWidget.setColumnCount(5)
         self.tableWidget.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(0, item)
@@ -68,6 +69,8 @@ class Ui_Form(object):
         self.tableWidget.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(3, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(4, item)
         self.tableWidget.horizontalHeader().setCascadingSectionResizes(False)
         self.tableWidget.horizontalHeader().setDefaultSectionSize(150)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
@@ -90,6 +93,7 @@ class Ui_Form(object):
         sizePolicy.setHeightForWidth(self.startDateTimeEdit.sizePolicy().hasHeightForWidth())
         self.startDateTimeEdit.setSizePolicy(sizePolicy)
         self.startDateTimeEdit.setMaximumDateTime(QtCore.QDateTime(QtCore.QDate(9999, 12, 31), QtCore.QTime(23, 59, 59)))
+        self.startDateTimeEdit.setCalendarPopup(True)
         self.startDateTimeEdit.setObjectName("startDateTimeEdit")
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.ItemRole.FieldRole, self.startDateTimeEdit)
         self.label_8 = QtWidgets.QLabel(parent=self.groupBox)
@@ -101,6 +105,7 @@ class Ui_Form(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.endDateTimeEdit.sizePolicy().hasHeightForWidth())
         self.endDateTimeEdit.setSizePolicy(sizePolicy)
+        self.endDateTimeEdit.setCalendarPopup(True)
         self.endDateTimeEdit.setObjectName("endDateTimeEdit")
         self.formLayout.setWidget(2, QtWidgets.QFormLayout.ItemRole.FieldRole, self.endDateTimeEdit)
         self.autoTimeCheckBox = QtWidgets.QCheckBox(parent=self.groupBox)
@@ -179,14 +184,6 @@ class Ui_Form(object):
         self.label.setSizePolicy(sizePolicy)
         self.label.setObjectName("label")
         self.gridLayout.addWidget(self.label, 0, 2, 1, 1)
-        self.label_3 = QtWidgets.QLabel(parent=self.groupBox_5)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_3.sizePolicy().hasHeightForWidth())
-        self.label_3.setSizePolicy(sizePolicy)
-        self.label_3.setObjectName("label_3")
-        self.gridLayout.addWidget(self.label_3, 1, 2, 1, 1)
         self.label_4 = QtWidgets.QLabel(parent=self.groupBox_5)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -202,7 +199,7 @@ class Ui_Form(object):
         sizePolicy.setHeightForWidth(self.nMinutesLineEdit.sizePolicy().hasHeightForWidth())
         self.nMinutesLineEdit.setSizePolicy(sizePolicy)
         self.nMinutesLineEdit.setObjectName("nMinutesLineEdit")
-        self.gridLayout.addWidget(self.nMinutesLineEdit, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.nMinutesLineEdit, 1, 1, 1, 2)
         self.formLayout_10.setWidget(1, QtWidgets.QFormLayout.ItemRole.SpanningRole, self.groupBox_5)
         self.line = QtWidgets.QFrame(parent=Form)
         self.line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
@@ -292,6 +289,8 @@ class Ui_Form(object):
         item = self.tableWidget.horizontalHeaderItem(2)
         item.setText(_translate("Form", "End time"))
         item = self.tableWidget.horizontalHeaderItem(3)
+        item.setText(_translate("Form", "Scan num"))
+        item = self.tableWidget.horizontalHeaderItem(4)
         item.setText(_translate("Form", "Path"))
         self.groupBox.setTitle(_translate("Form", "Average time range"))
         self.label_7.setText(_translate("Form", "from"))
@@ -305,7 +304,6 @@ class Ui_Form(object):
         self.periodToolButton.setText(_translate("Form", "custom"))
         self.nMinutesRadioButton.setText(_translate("Form", "every"))
         self.label.setText(_translate("Form", "spectra"))
-        self.label_3.setText(_translate("Form", "minutes"))
         self.label_4.setText(_translate("Form", "periods"))
         self.nMinutesLineEdit.setToolTip(_translate("Form", "1000s ( 1000 seconds )\n"
 "10m5s ( 10 minutes and 5 seconds )\n"

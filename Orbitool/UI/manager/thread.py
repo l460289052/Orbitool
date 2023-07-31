@@ -10,6 +10,7 @@ from typing import (Any, Deque, Generator, Generic, Iterable, List, Tuple,
 from PyQt6 import QtCore
 
 from ... import setting
+from Orbitool.config import _Setting
 from ..utils import sleep
 from . import manager
 
@@ -47,11 +48,12 @@ class Thread(QtCore.QThread):
 Data = TypeVar("Data")
 Result = TypeVar("Result")
 
-def init_process():
+def init_process(main_setting: _Setting):
     import os
     os.environ["OPENBLAS_NUM_THREADS"] = "1"
     os.environ["GOTO_NUM_THREADS"] = "1"
     os.environ["OMP_NUM_THREADS"] = "1"
+    setting.update_from(main_setting)
 
 class MultiProcess(QtCore.QThread, Generic[Data, Result]):
     finished = QtCore.pyqtSignal(tuple)
@@ -126,7 +128,7 @@ class MultiProcess(QtCore.QThread, Generic[Data, Result]):
         multi_cores = setting.general.multi_cores
         times = setting.pop_global_val("multi-process-tmp-times", 1.)
 
-        with Pool(multi_cores, initializer=init_process) as pool:
+        with Pool(multi_cores, initializer=init_process, initargs=(setting,)) as pool:
             def abort():
                 queue.put(None)
                 pool.terminate()

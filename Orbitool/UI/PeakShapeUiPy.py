@@ -132,7 +132,6 @@ class Widget(QtWidgets.QWidget):
         info = self.info
         if self.animation.norm_line is not None:
             self.animation.norm_line.remove()
-            del self.animation.norm_line
             self.animation.norm_line = None
         ax = self.plot.ax
 
@@ -176,18 +175,16 @@ class Widget(QtWidgets.QWidget):
                         info.peaks_manager.rm(indexes)
                         indexes.reverse()
                         for index in indexes:
-                            line = ax.lines.pop(index)
-                            del line
+                            line: matplotlib.lines.Line2D = ax.lines[index]
+                            line.remove()
                         info.func = peakfit_func.normal_distribution.NormalDistributionFunc.FromNormPeaks(
                             info.peaks_manager.peaks)
                         self.plotNormPeak()
 
                 animation.animation._stop()
 
-                del animation.animation
                 animation.animation = None
                 animation.line.remove()
-                del animation.line
                 animation.line = None
                 plot.canvas.draw()
 

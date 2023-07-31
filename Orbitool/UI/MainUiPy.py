@@ -8,7 +8,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 from ..structures.HDF5 import h5_brokens
 from ..workspace import VERSION, WorkSpace, updater
-from . import (CalibrationUiPy, file_tab, FormulaUiPy, MainUi, MassDefectUiPy,
+from . import (CalibrationUiPy, file_tab, formulas, MainUi, MassDefectUiPy,
                MassListUiPy, NoiseUiPy, PeakFitUiPy, PeakListUiPy,
                PeakShapeUiPy, SpectraListUiPy, SpectrumUiPy, TimeseriesesUiPy,
                TimeseriesUiPy)
@@ -69,7 +69,7 @@ class Window(QtWidgets.QMainWindow):
 
         # docker widgets
 
-        self.formula = FormulaUiPy.Widget(manager)
+        self.formula = formulas.FormulaWidget(manager)
         self.formulaDw = self.add_dock_widget(
             "Formula", self.formula)
 

@@ -14,7 +14,7 @@ from . import PeakFitFloatUi
 from .component import Plot
 from .manager import Manager, state_node
 from .utils import set_header_sizes
-from . import FormulaResultUiPy
+from .formulas import FormulaResultWindow
 
 
 class Window(QtWidgets.QMainWindow):
@@ -85,7 +85,7 @@ class Window(QtWidgets.QMainWindow):
         if manager.formulas_result_win is not None:
             manager.formulas_result_win.close()
             del manager.formulas_result_win
-        manager.formulas_result_win = FormulaResultUiPy.Window.FactoryPeak(
+        manager.formulas_result_win = FormulaResultWindow.fromFittedPeak(
             manager, peak_index)
         manager.formulas_result_win.show()
         manager.formulas_result_win.acceptSignal.connect(

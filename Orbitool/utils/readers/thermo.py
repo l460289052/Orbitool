@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from functools import cached_property
 from ... import functions
 
 import os
@@ -64,33 +65,41 @@ class File:
             minutes=self.rawfile.RunHeader.StartTime)
         self.endTimedelta = timedelta(
             minutes=self.rawfile.RunHeader.EndTime)
-        self.firstScanNumber = self.rawfile.RunHeader.FirstSpectrum
-        self.lastScanNumber = self.rawfile.RunHeader.LastSpectrum
+        self.firstRawScanNum = self.rawfile.RunHeader.FirstSpectrum
+        self.lastRawScanNum = self.rawfile.RunHeader.LastSpectrum
         extra_info = self.rawfile.GetTrailerExtraInformation(1)
         extra_info_dict = dict(zip(extra_info.Labels, extra_info.Values))
         self.massResolution = float(extra_info_dict.get("FT Resolution:"))
 
-    @property
+    @cached_property
     def startDatetime(self):
         return self.creationDatetime + self.startTimedelta
 
-    @property
+    @cached_property
     def endDatetime(self):
         return self.creationDatetime + self.endTimedelta
 
+    @cached_property
+    def totalScanNum(self):
+        return self.lastRawScanNum - self.firstRawScanNum + 1
+
+    def getRawScanNum(self, scan_num):
+        return int(scan_num) + self.firstRawScanNum
+
     def getSpectrumRetentionTime(self, scanNum):
+        rawScanNum = self.getRawScanNum(scanNum)
         retentionTime = timedelta(
-            minutes=self.rawfile.RetentionTimeFromScanNumber(scanNum))
-        if scanNum == self.lastScanNumber:
+            minutes=self.rawfile.RetentionTimeFromScanNumber(rawScanNum))
+        if rawScanNum == self.lastRawScanNum:
             lastRetentionTime = self.getSpectrumRetentionTime(scanNum - 1)
             if retentionTime < lastRetentionTime:
                 averageTimeDelta = (self.endTimedelta - self.startTimedelta) / \
-                    (self.lastScanNumber - self.firstScanNumber)
+                    (self.lastRawScanNum - self.firstRawScanNum)
                 retentionTime = lastRetentionTime + averageTimeDelta
-        return timedelta(minutes=self.rawfile.RetentionTimeFromScanNumber(scanNum))
+        return timedelta(minutes=self.rawfile.RetentionTimeFromScanNumber(rawScanNum))
 
     def getSpectrumRetentionTimes(self):
-        return [self.getSpectrumRetentionTime(scanNum) for scanNum in range(self.firstScanNumber, self.lastScanNumber + 1)]
+        return [self.getSpectrumRetentionTime(raw_scan_num) for raw_scan_num in range(self.firstRawScanNum, self.lastRawScanNum + 1)]
 
     def getSpectrumDatetime(self, scanNum):
         return self.creationDatetime + self.getSpectrumRetentionTime(scanNum)
@@ -116,36 +125,28 @@ class File:
         return None
 
     def getSpectrumPolarity(self, scanNum):
-        scanfilter = self.rawfile.GetFilterForScanNumber(scanNum)
+        rawScanNum = int(scanNum) + self.firstRawScanNum
+        scanfilter = self.rawfile.GetFilterForScanNumber(rawScanNum)
         return convertPolarity[scanfilter.Polarity]
 
-    def getSpectrum(self, scanNum):
-        rawfile = self.rawfile
-        retentimeTime = timedelta(
-            minutes=rawfile.RetentionTimeFromScanNumber(scanNum))
-        scanStatistics = rawfile.GetScanStatsForScanNumber(scanNum)
-        segmentedScan = rawfile.GetSegmentedScanFromScanNumber(
-            scanNum, scanStatistics)
-        mz = np.array(list(segmentedScan.Positions), dtype=np.float)
-        intensity = np.array(list(segmentedScan.Intensities), dtype=np.float)
-        time = retentimeTime + self.creationDatetime
-        # return OrbitoolBase.Spectrum(self.creationDatetime, mz, intensity, (time, time), (scanNum, scanNum))
+    def datetimeRange2ScanNumRange(self, datetimeRange: Tuple[datetime, datetime]):
+        return self.timeRange2ScanNumRange((datetimeRange[0] - self.creationDatetime, datetimeRange[1] - self.creationDatetime))
 
-    def datetimeRange2NumRange(self, datetimeRange: Tuple[datetime, datetime]):
-        return self.timeRange2NumRange((datetimeRange[0] - self.creationDatetime, datetimeRange[1] - self.creationDatetime))
-
-    def timeRange2NumRange(self, timeRange: Tuple[timedelta, timedelta]):
+    def timeRange2ScanNumRange(self, timeRange: Tuple[timedelta, timedelta]):
         s: slice = functions.binary_search.indexBetween(
-            self, timeRange, (self.firstScanNumber, self.lastScanNumber + 1),
+            self, timeRange, (0, self.totalScanNum),
             method=(lambda _, i: self.getSpectrumRetentionTime(i)))
         return (s.start, s.stop)
 
-    def numRange2TimeRange(self, numRange: Tuple[int, int]) -> Tuple[timedelta, timedelta]:
+    def scanNumRange2TimeRange(self, numRange: Tuple[int, int]) -> Tuple[timedelta, timedelta]:
         return self.getSpectrumRetentionTime(numRange[0]), self.getSpectrumRetentionTime(numRange[1] - 1)
+
+    def scanNumRange2DatetimeRange(self, numRange: Tuple[int, int]):
+        return self.creationDatetime + self.getSpectrumRetentionTime(numRange[0]), self.creationDatetime + self.getSpectrumRetentionTime(numRange[1])
 
     def checkAverageEmpty(self, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
         if timeRange is not None and numRange is None:
-            start, end = self.timeRange2NumRange(timeRange)
+            start, end = self.timeRange2ScanNumRange(timeRange)
         elif numRange is not None and timeRange is None:
             start, end = numRange
         else:
@@ -163,10 +164,10 @@ class File:
         if (scanfilter := self.getFilterInTimeRange(startFloat, endFloat, polarity)) is None:
             return
         # Due to a bug related to scan time during data acquisition, AverageScansInTimeRange should not be used
-        #averaged = Extensions.AverageScansInTimeRange(self.rawfile, start, end, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
-        startNum, endNum = self.datetimeRange2NumRange((start, end))
+        # averaged = Extensions.AverageScansInTimeRange(self.rawfile, start, end, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
+        startNum, endNum = self.datetimeRange2ScanNumRange((start, end))
         averaged = Extensions.AverageScansInScanRange(
-            self.rawfile, startNum, endNum, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
+            self.rawfile, self.getRawScanNum(startNum), self.getRawScanNum(endNum), scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
         if averaged is None:
             return
         # if (averaged := Extensions.AverageScansInTimeRange(self.rawfile, start, end, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))) is None:
@@ -175,47 +176,6 @@ class File:
         mass = np.fromiter(averaged.Positions, np.float64)
         intensity = np.fromiter(averaged.Intensities, np.float64)
         return mass, intensity
-
-    def getAveragedSpectrum(self, ppm, timeRange: Tuple[timedelta, timedelta] = None, numRange: Tuple[int, int] = None, polarity=-1):
-        start, end = self.bothToNumRange(timeRange, numRange)
-
-        scanfilter = self.getFilter(start, end, polarity)
-        if scanfilter is None:
-            return None
-
-        last = end - 1
-        massOption = MassOptions(ppm, ToleranceUnits.ppm)
-        sTime = self.creationDatetime + self.getSpectrumRetentionTime(start)
-        if start <= last:
-            averaged = Extensions.AverageScansInScanRange(
-                self.rawfile, start, last, scanfilter, massOption)
-            if averaged is None:  # I don't know why it could be a None
-                return None
-            mz, intensity, eTime = self.parseSpectrum(averaged, last)
-        else:
-            return None
-
-        timeRange = (sTime, eTime)
-
-        numRange = (start, end)
-        return mz, intensity
-
-    def bothToNumRange(self, timeRange: Tuple[timedelta, timedelta], numRange: Tuple[int, int]) -> Tuple[int, int]:
-        if timeRange is not None and numRange is None:
-            return self.timeRange2NumRange(timeRange)
-        elif numRange is not None and timeRange is None:
-            return numRange
-        else:
-            raise ValueError(
-                "`timeRange` or `numRange` must be provided and only one can be provided")
-
-    def parseSpectrum(self, averaged, last):
-        averaged = averaged.SegmentedScan
-        mz = np.array(list(averaged.Positions), dtype=np.float)
-        intensity = np.array(list(averaged.Intensities), dtype=np.float)
-        eTime = self.creationDatetime + self.getSpectrumRetentionTime(last)
-
-        return mz, intensity, eTime
 
     def __del__(self):
         self.rawfile.Dispose()

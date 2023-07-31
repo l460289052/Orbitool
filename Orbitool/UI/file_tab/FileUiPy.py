@@ -1,7 +1,3 @@
-import csv
-import os
-import pathlib
-from datetime import datetime, timedelta
 from functools import partial
 from typing import Iterable, List, Optional, Union
 
@@ -22,7 +18,7 @@ class Widget(QtWidgets.QWidget):
 
     def __init__(self, manager: Manager, parent: Optional[QtWidgets.QWidget] = None) -> None:
         super().__init__(parent=parent)
-        self.manager = manager
+        self.manager: Manager = manager
         self.ui = FileUi.Ui_Form()
         self.drag_helper = DragHelper(("file",))
         self.setupUi()
@@ -34,7 +30,6 @@ class Widget(QtWidgets.QWidget):
         self.ui.setupUi(self)
 
         ui = self.ui
-        set_header_sizes(ui.tableWidget.horizontalHeader(), [150, 100, 100])
 
         ui.tableWidget.dragEnterEvent = self.tableDragEnterEvent
         ui.tableWidget.dragMoveEvent = self.tableDragMoveEvent
@@ -71,13 +66,14 @@ class Widget(QtWidgets.QWidget):
     def edit_period(self):
         from .CustonPeriodUiPy import Dialog
         ui = self.ui
+        start_time = ui.startDateTimeEdit.dateTime().toPyDateTime()
+        end_time = ui.endDateTimeEdit.dateTime().toPyDateTime()
+        time_interval = ui.nMinutesLineEdit.text()
         dialog = Dialog(
-            self.manager, 
-            ui.startDateTimeEdit.dateTime().toPyDateTime(),
-            ui.endDateTimeEdit.dateTime().toPyDateTime(),
-            ui.nSpectraSpinBox.value(),
-            ui.nMinutesLineEdit.text(),
-            "minutes")
+            self.manager, start_time, end_time,
+            ui.nSpectraSpinBox.value(), time_interval)
+        dialog.init_periods(start_time, end_time, time_interval)
+        dialog.show_periods()
         dialog.exec()
         
 
@@ -166,10 +162,12 @@ class Widget(QtWidgets.QWidget):
         table.setRowCount(len(pathlist))
 
         for i, f in enumerate(pathlist):
-            v = [os.path.split(f.path)[1], f.startDatetime.replace(microsecond=0),
-                 f.endDatetime.replace(microsecond=0), f.path]
+            v = [f.get_show_name(), f.startDatetime.replace(microsecond=0),
+                 f.endDatetime.replace(microsecond=0), f.scanNum, f.path]
             for j, vv in enumerate(v):
                 table.setItem(i, j, QtWidgets.QTableWidgetItem(str(vv)))
+        table.resizeColumnsToContents()
+        table.setColumnWidth(0, 150)
 
         if ui.autoTimeCheckBox.isChecked():
             time_start, time_end = pathlist.timeRange
@@ -224,17 +222,16 @@ class Widget(QtWidgets.QWidget):
         if ui.averageCheckBox.isChecked():
             if ui.nSpectraRadioButton.isChecked():
                 num = ui.nSpectraSpinBox.value()
-                func = partial(FileSpectrumInfo.generate_infos_from_paths_by_number,
+                func = partial(FileSpectrumInfo.infosFromNumInterval,
                                paths, num, polarity, time_range)
             elif ui.nMinutesRadioButton.isChecked():
                 interval = str2timedelta(ui.nMinutesLineEdit.text())
-                func = partial(FileSpectrumInfo.generate_infos_from_paths_by_time_interval,
+                func = partial(FileSpectrumInfo.infosFromTimeInterval,
                                paths, interval, polarity, time_range)
             elif ui.periodRadioButton.isChecked():
-                func = partial(FileSpectrumInfo.generate_infos_from_paths_by_periods,
-                               paths, polarity, [(p.start_time, p.end_time)for p in self.info.periods])
+                func = partial(FileSpectrumInfo.infosFromPeriods, paths, polarity, self.info.periods)
         else:
-            func = partial(FileSpectrumInfo.generate_infos_from_paths,
+            func = partial(FileSpectrumInfo.infosFromPath_withoutAveraging,
                            paths, polarity, time_range)
 
         return func
