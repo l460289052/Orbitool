@@ -123,6 +123,7 @@ class node:
 
                 elif self._mode in _busy_reset:
                     manager.set_busy(False)
+                    return ret
             except Exception as e:
                 logger = logging.getLogger("Orbitool")
                 logger.error(str(e), exc_info=e)

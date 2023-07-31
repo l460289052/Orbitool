@@ -40,7 +40,7 @@ class Dialog(QtWidgets.QDialog):
         self.plot = Plot(self.ui.plotWidget, False)
         self.plot.ax.axis(False)
         ui.tableWidget.setItemDelegate(
-            TableEditDelegate(ui.tableWidget, weakref.ref(self)))
+            TableEditDelegate(ui.tableWidget, self.manager, weakref.ref(self)))
         ui.plotPositionHorizontalSlider.valueChanged.connect(
             self.refresh_plot)
         ui.plotFactorDoubleSpinBox.valueChanged.connect(self.refresh_plot)
@@ -338,8 +338,9 @@ class Dialog(QtWidgets.QDialog):
 
 
 class TableEditDelegate(QtWidgets.QItemDelegate):
-    def __init__(self, parent, dialog: weakref.ReferenceType[Dialog]) -> None:
+    def __init__(self, parent, manager, dialog: weakref.ReferenceType[Dialog]) -> None:
         super().__init__(parent)
+        self.manager = manager
         self.dialog_ref = dialog
 
     @property
@@ -350,6 +351,7 @@ class TableEditDelegate(QtWidgets.QItemDelegate):
     def periods(self):
         return self.dialog_ref().periods
 
+    # @state_node(withArgs=True, mode="e")
     def createEditor(self, parent: QWidget, option: QStyleOptionViewItem, index: QtCore.QModelIndex) -> QWidget:
         periods = self.periods
         period = periods[index.row()]
@@ -378,6 +380,7 @@ class TableEditDelegate(QtWidgets.QItemDelegate):
                     de.setMaximumDateTime(periods[index.row() + 1].start_time)
         return de
 
+    # @state_node(withArgs=True, mode="e")
     def setEditorData(self, editor: Union[QtWidgets.QSpinBox, QtWidgets.QDateTimeEdit], index: QtCore.QModelIndex) -> None:
         period = self.periods[index.row()]
         if period.start_num >= 0:
@@ -386,12 +389,14 @@ class TableEditDelegate(QtWidgets.QItemDelegate):
                     editor.setValue(period.start_num)
                 case 1:
                     editor.setValue(period.stop_num)
-        match index.column():
-            case 0:
-                editor.setDateTime(period.start_time)
-            case 1:
-                editor.setDateTime(period.end_time)
+        else:
+            match index.column():
+                case 0:
+                    editor.setDateTime(period.start_time)
+                case 1:
+                    editor.setDateTime(period.end_time)
 
+    # @state_node(withArgs=True, mode="e")
     def setModelData(self, editor: Union[QtWidgets.QSpinBox, QtWidgets.QDateTimeEdit], model: QtCore.QAbstractItemModel, index: QtCore.QModelIndex) -> None:
         period = self.periods[index.row()]
         if period.start_num >= 0:
