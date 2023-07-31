@@ -60,7 +60,7 @@
      <item row="1" column="3">
       <widget class="QPushButton" name="generateNumPeriodPushButton">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="toolTip">
         <string>coming soon</string>
@@ -131,13 +131,13 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>50</height>
+       <height>60</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>50</height>
+       <height>60</height>
       </size>
      </property>
     </widget>
@@ -181,6 +181,16 @@
        </property>
        <property name="value">
         <double>1.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="plotHideLabelCheckBox">
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>hide label</string>
        </property>
       </widget>
      </item>

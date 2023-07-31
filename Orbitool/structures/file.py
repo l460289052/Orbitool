@@ -1,12 +1,13 @@
+from copy import copy
 from datetime import datetime, timedelta
-import math
+from enum import Enum
+from pathlib import Path as FilePath
 from typing import Dict, Iterable, List, Tuple, Union
 
 import numpy as np
 
 from ..functions.file import (
-     part_by_periods, generage_periods, 
-     generate_num_periods)
+    generage_periods, get_num_range_from_ranges, generate_num_periods)
 from ..utils.readers import ThermoFile
 from . import spectrum
 from .base import field
@@ -22,25 +23,32 @@ class Path(BaseRowItem):
     createDatetime: datetime
     startDatetime: datetime
     endDatetime: datetime
-    scanNum: int = 0
+    scanNum: int = -1 
 
     def getFileHandler(self):
         typ, path = self.path.split(":", 1)
         match typ:
-            case PATH_THERMOFILE:
+            case PATH_TYPE.THERMO.value:
                 return ThermoFile(path)
 
     @classmethod
     def fromThermoFile(cls, filepath):
         handler = ThermoFile(filepath)
         return cls(
-            f"{PATH_THERMOFILE}:{filepath}",
+            f"{PATH_TYPE.THERMO.value}:{filepath}",
             handler.creationDatetime, handler.startDatetime,
             handler.endDatetime, handler.totalScanNum)
 
+    def get_show_name(self):
+        typ, path = self.path.split(":", 1)
+        match typ:
+            case PATH_TYPE.THERMO.value:
+                return FilePath(path).stem
 
-PATH_THERMOFILE = "Thermo"
-PATH_HDF5 = "HDF5"
+
+class PATH_TYPE(str, Enum):
+    THERMO = "Thermo"
+    HDF5 = "HDF5"
 
 
 class PathList(BaseStructure):
@@ -70,7 +78,8 @@ class PathList(BaseStructure):
     def addThermoFile(self, filepath):
         path = Path.fromThermoFile(filepath)
 
-        crossed, crossed_file = self._crossed(path.startDatetime, path.endDatetime)
+        crossed, crossed_file = self._crossed(
+            path.startDatetime, path.endDatetime)
         if crossed:
             raise ValueError(
                 f'file "{filepath}" and "{crossed_file}" have crossed scan time')
@@ -117,11 +126,10 @@ class PeriodItem(BaseRowItem):
     start_time: datetime = None
     end_time: datetime = None
     start_num: int = -1
-    end_num: int = -1
+    stop_num: int = -1
 
     def length(self):
-        return self.start_time and (self.end_time - self.start_time) or (self.end_num - self.start_num)
-        
+        return self.start_time and (self.end_time - self.start_time) or (self.stop_num - self.start_num)
 
 
 class FileSpectrumInfo(spectrum.SpectrumInfo):
@@ -135,22 +143,22 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
 
     @classmethod
     def infosFromNumInterval(cls, paths: List[Path], N: int, polarity, timeRange):
-        scan_num_sum = 0
-        start_scan_num = -1
-        stop_scan_num = -1
-        for path in paths:
-            handler = path.getFileHandler()
-            start, stop = handler.datetimeRange2ScanNumRange(timeRange)
-            if start < stop:
-                if start_scan_num < 0:
-                    start_scan_num = scan_num_sum + start
-                stop_scan_num = scan_num_sum + stop
-            scan_num_sum += handler.totalScanNum
-        periods = generate_num_periods(start_scan_num, stop_scan_num, N) 
-        return cls.infosFromNumPeriods(paths, polarity, periods)
+        start_scan_num, stop_scan_num, total_scan_num = get_num_range_from_ranges(
+            (p.getFileHandler() for p in paths), timeRange)
+        periods = [PeriodItem(
+            start_num=int(s), stop_num=int(e)
+        ) for s, e in generate_num_periods(start_scan_num, stop_scan_num, N)]
+        return cls.infosFromPeriods(paths, polarity, periods)
 
     @classmethod
-    def infosFromNumPeriods(cls, paths: List[Path], polarity, periods: List[Tuple[int, int]]):
+    def infosFromTimeInterval(cls, paths: List[Path], interval: timedelta, polarity, timeRange):
+        periods = [PeriodItem(
+            start_time=s, end_time=e
+        ) for s, e in generage_periods(timeRange[0], timeRange[1], interval)]
+        return cls.infosFromPeriods(paths, polarity, periods)
+
+    @classmethod
+    def infosFromPeriods(cls, paths: List[Path], polarity, periods: List[PeriodItem]):
         delta_time = timedelta(seconds=1)
 
         results: List[cls] = []
@@ -158,47 +166,46 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
         scan_num_sum = 0
 
         i = 0
-        start, end = periods[i]
+        period = periods[i]
         average_index = 0
+        next_period = False
+
         for path in paths:
             handler = path.getFileHandler()
-            if scan_num_sum <= start < scan_num_sum + handler.totalScanNum:
-                time_range = handler.scanNumRange2TimeRange((start-scan_num_sum, end-scan_num_sum))
+            while True:
+                if period.start_num >= 0:
+                    if period.start_num < scan_num_sum + handler.totalScanNum and period.stop_num > scan_num_sum:
+                        time_range = handler.scanNumRange2DatetimeRange(
+                            (max(period.start_num - scan_num_sum, 0),
+                             min(period.stop_num - scan_num_sum, handler.totalScanNum - 1)))
+                        next_period = period.stop_num <= scan_num_sum + handler.totalScanNum
+                    else:
+                        break
+                else:
+                    if period.start_time < handler.endDatetime and period.end_time > handler.startDatetime:
+                        time_range = (
+                            max(period.start_time, handler.startDatetime),
+                            min(period.end_time, handler.endDatetime))
+                        next_period = period.end_time <= handler.endDatetime
+                    else:
+                        break
+
                 info = cls(
-                    start_time=time_range[0] - delta_time,
-                    end_time=time_range[1] + delta_time,
-                    path=path.path,
-                    polarity=polarity,
-                    average_index=average_index)
+                    start_time=time_range[0] - delta_time, end_time=time_range[1] + delta_time,
+                    path=path.path, polarity=polarity, average_index=average_index)
                 results.append(info)
-                if end < scan_num_sum + handler.totalScanNum:
+                if next_period:
                     average_index = 0
                     i += 1
-                    if len(periods) >= i:
-                        break
-                    start, end = periods[i]
-                else:
+                    if i >= len(periods):
+                        return results
+                    period = periods[i]
+                else: # next file
                     average_index += 1
-                    start = scan_num_sum + handler.totalScanNum
-                scan_num_sum += handler.totalScanNum
+                    break
 
+            scan_num_sum += handler.totalScanNum
         return results
-
-    @classmethod
-    def infosFromTimeInterval(cls, paths: List[Path], interval: timedelta, polarity, timeRange):
-        periods = generage_periods(timeRange[0], timeRange[1], interval)
-        return cls.infosFromPeriods(paths, polarity, periods)
-
-    @classmethod
-    def infosFromPeriods(cls, paths: List[Path], polarity, periods: Iterable[Tuple[datetime, datetime]]):
-        start_times, end_times = zip(
-            *((p.startDatetime, p.endDatetime) for p in paths))
-        paths_str = [path.path for path in paths]
-        rets = part_by_periods(paths_str, start_times, end_times, periods)
-        ret = [cls(
-            path=path, start_time=start, end_time=end, polarity=polarity,
-            average_index=index) for path, start, end, index in rets]
-        return ret
 
     @classmethod
     def infosFromPath_withoutAveraging(cls, paths: List[Path], polarity, timeRange):
@@ -217,7 +224,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
 
     def get_spectrum_from_info(self, rtol: float = 1e-6, with_minutes=False):
         origin, realpath = self.path.split(':', 1)
-        if origin == PATH_THERMOFILE:
+        if origin == PATH_TYPE.THERMO.value:
             reader = ThermoFile(realpath)
             ret = reader.getAveragedSpectrumInTimeRange(
                 self.start_time, self.end_time, rtol, self.polarity)

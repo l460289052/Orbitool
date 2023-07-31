@@ -47,7 +47,10 @@ class H5File(H5Obj):
         else:
             self._io = io.BytesIO()
         self._file: bool = path is not None
-        self._obj: h5py.File = h5py.File(self._io, mode)
+        try:
+            self._obj: h5py.File = h5py.File(self._io, mode)
+        except Exception as e:
+            raise Exception(f"failed to open file {path}.if it's a tmp file, you can delete it and reopen the origin file") from e
 
     def tmp_path(self):
         pass

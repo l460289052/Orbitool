@@ -65,6 +65,9 @@ class SpectrumInfo(BaseRowItem):
     start_time: datetime
     end_time: datetime
 
+    def get_show_str(self):
+        return f"{self.start_time}-{self.end_time}"
+
 
 class MassListItem(BaseRowItem):
     item_name = "MassList"

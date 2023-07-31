@@ -1,1 +1,1 @@
-from .part import generage_periods, part_by_periods, generate_num_periods
+from .part import generage_periods, generate_num_periods, get_num_range_from_ranges
