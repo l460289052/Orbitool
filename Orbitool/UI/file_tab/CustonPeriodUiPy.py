@@ -94,6 +94,9 @@ class Dialog(QtWidgets.QDialog):
         ax.cla()
         ax.axis(False)
 
+        if not self.periods or not self.paths:
+            return
+
         plot_time = all(p.start_time is not None for p in self.periods)
         plot_num = all(p.start_num >= 0 for p in self.periods)
 
