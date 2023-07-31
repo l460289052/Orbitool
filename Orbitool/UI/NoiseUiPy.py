@@ -330,7 +330,7 @@ class Widget(QtWidgets.QWidget):
         if spectrum is None:
             return
         result = info.general_result
-        if result.LOD and spectrum.mz.shape != result.LOD.shape:
+        if result.LOD and spectrum.mz.shape[0] != result.LOD.shape[0]:
             return # show another spectrum after calc noise
 
         is_log = self.ui.yLogCheckBox.isChecked()
