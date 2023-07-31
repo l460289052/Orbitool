@@ -1,9 +1,11 @@
+from ast import mod
 from copy import deepcopy
 import csv
 from datetime import datetime, timedelta
-from typing import List, Literal
+from typing import List, Literal, Union
+import weakref
 from PyQt6 import QtCore, QtWidgets, QtGui
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QStyleOptionViewItem, QWidget
 import numpy as np
 
 from Orbitool import setting
@@ -37,10 +39,12 @@ class Dialog(QtWidgets.QDialog):
 
         self.plot = Plot(self.ui.plotWidget, False)
         self.plot.ax.axis(False)
-        self.ui.plotPositionHorizontalSlider.valueChanged.connect(
+        ui.tableWidget.setItemDelegate(
+            TableEditDelegate(ui.tableWidget, weakref.ref(self)))
+        ui.plotPositionHorizontalSlider.valueChanged.connect(
             self.refresh_plot)
-        self.ui.plotFactorDoubleSpinBox.valueChanged.connect(self.refresh_plot)
-        self.ui.plotHideLabelCheckBox.toggled.connect(self.plot_periods)
+        ui.plotFactorDoubleSpinBox.valueChanged.connect(self.refresh_plot)
+        ui.plotHideLabelCheckBox.toggled.connect(self.plot_periods)
 
         ui.generateNumPeriodPushButton.clicked.connect(
             self.generate_num_periods)
@@ -141,12 +145,12 @@ class Dialog(QtWidgets.QDialog):
             period_lengths, np.zeros_like(period_starts, dtype=float),
             color="#00cc00", align="edge", edgecolor='k', linewidth=1,
             label="period to average")
-        
+
         hide_label = self.ui.plotHideLabelCheckBox.isChecked()
         if not hide_label:
             ax.bar_label(period_bar, period_label)
             ax.bar_label(period_bar, [
-                        f"{i}-th" for i in range(1, len(period_starts) + 1)], label_type="center")
+                f"{i}-th" for i in range(1, len(period_starts) + 1)], label_type="center")
 
             for file, label, s, l in zip(self.paths, file_start_label, file_starts, file_lengths):
                 ax.text(s, 1.1, label, horizontalalignment="left")
@@ -328,3 +332,80 @@ class Dialog(QtWidgets.QDialog):
                         writer.writerow(("", "", p.start_num, p.stop_num))
 
         yield func, "exporting periods"
+
+
+class TableEditDelegate(QtWidgets.QItemDelegate):
+    def __init__(self, parent, dialog: weakref.ReferenceType[Dialog]) -> None:
+        super().__init__(parent)
+        self.dialog_ref = dialog
+
+    @property
+    def paths(self):
+        return self.dialog_ref().paths
+
+    @property
+    def periods(self):
+        return self.dialog_ref().periods
+
+    def createEditor(self, parent: QWidget, option: QStyleOptionViewItem, index: QtCore.QModelIndex) -> QWidget:
+        periods = self.periods
+        period = periods[index.row()]
+        if period.start_num >= 0:
+            sb = QtWidgets.QSpinBox(parent)
+            match index.column():
+                case 0:
+                    sb.setRange(
+                        0 if index.row() == 0 else self.periods[index.row() - 1].stop_num, period.stop_num - 1)
+                case 1:
+                    sb.setRange(
+                        period.start_num + 1,
+                        sum(p.scanNum for p in self.paths) if index.row() == len(
+                            self.periods) - 1 else self.periods[index.row() + 1].start_num)
+            return sb
+        de = QtWidgets.QDateTimeEdit(parent)
+        match index.column():
+            case 0:
+                if index.row():
+                    de.setMinimumDateTime(
+                        self.periods[index.row() - 1].end_time)
+                de.setMaximumDateTime(period.end_time)
+            case 1:
+                de.setMinimumDateTime(period.start_time)
+                if index.row() < len(periods) - 1:
+                    de.setMaximumDateTime(periods[index.row() + 1].start_time)
+        return de
+
+    def setEditorData(self, editor: Union[QtWidgets.QSpinBox, QtWidgets.QDateTimeEdit], index: QtCore.QModelIndex) -> None:
+        period = self.periods[index.row()]
+        if period.start_num >= 0:
+            match index.column():
+                case 0:
+                    editor.setValue(period.start_num)
+                case 1:
+                    editor.setValue(period.stop_num)
+        match index.column():
+            case 0:
+                editor.setDateTime(period.start_time)
+            case 1:
+                editor.setDateTime(period.end_time)
+
+    def setModelData(self, editor: Union[QtWidgets.QSpinBox, QtWidgets.QDateTimeEdit], model: QtCore.QAbstractItemModel, index: QtCore.QModelIndex) -> None:
+        period = self.periods[index.row()]
+        if period.start_num >= 0:
+            value = editor.value()
+            match index.column():
+                case 0:
+                    period.start_num = value
+                case 1:
+                    period.stop_num = value
+            model.setData(index, str(value))
+        else:
+            value = editor.dateTime().toPyDateTime()
+            match index.column():
+                case 0:
+                    period.start_time = value
+                case 1:
+                    period.end_time = value
+            model.setData(index, setting.format_time(value))
+
+        self.dialog_ref().plot_periods()

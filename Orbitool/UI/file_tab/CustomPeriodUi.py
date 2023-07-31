@@ -62,7 +62,7 @@ class Ui_Dialog(object):
         self.gridLayout.addWidget(self.generateTimePeriodPushButton, 2, 3, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)
         self.tableWidget = QtWidgets.QTableWidget(parent=Dialog)
-        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.DoubleClicked|QtWidgets.QAbstractItemView.EditTrigger.EditKeyPressed)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setRowCount(0)
