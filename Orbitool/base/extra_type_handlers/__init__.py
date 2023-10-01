@@ -1,4 +1,4 @@
-from . import simple_handler
+from . import simple_handlers
 from .array_handler import Array
 from .np_handler import NdArray
 # from . import list_handler, np_handler, simple_handler, structure_handler, dict_handler

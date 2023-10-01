@@ -50,3 +50,28 @@ def test_np():
     nptest.assert_equal(mz, b.mz)
     nptest.assert_equal(intensity, b.intensity)
     assert time == b.time
+
+
+def test_dt():
+    with pytest.raises(AnnotationError):
+        class DT(BaseStructure):
+            dts: NdArray[datetime]
+    with pytest.raises(AnnotationError):
+        class DT(BaseStructure):
+            dts: NdArray["datetime64[ns]"]
+
+    class DT(BaseStructure):
+        dts: NdArray["datetime64[us]"]
+
+    f = H5File()
+
+    dt = datetime(2020, 1, 1, 1, 1, 1)
+    a = DT(dts=None)
+    assert a.dts is None
+    a.dts = [dt] * 10
+
+    f.write("dt", a)
+    b = f.read("dt", DT)
+
+    assert b.dts.dtype == np.dtype("datetime64[us]")
+    assert all(dt == t for t in b.dts.astype(datetime))

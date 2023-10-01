@@ -9,6 +9,7 @@ from pydantic_core import CoreSchema, core_schema
 import numpy as np
 
 from .base import *
+from .np_helper import HomogeneousArrayHelper
 
 array_dtypes = {
     "b": np.int8,
@@ -63,6 +64,8 @@ class Array(array):
         type_code = args[0]
 
         def validate(value):
+            if value is None:
+                return None
             if isinstance(value, array) and value.typecode == type_code:
                 return value
             if isinstance(value, Iterable):
@@ -76,11 +79,10 @@ class ArrayTypeHandler(DatasetTypeHandler):
 
     def __post_init__(self):
         self.type_code: _TypeCode = self.args[0]
+        self.helper = HomogeneousArrayHelper(np.dtype(self.type_code))
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value):
-        h5g.create_dataset(
-            key, data=value, dtype=array_dtypes[self.type_code], **H5_DT_ARGS
-        )
+        HomogeneousArrayHelper.write(h5g, key, value)
 
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any:
-        return array(self.type_code, dataset[()])
+        return array(self.type_code, HomogeneousArrayHelper.read(dataset))

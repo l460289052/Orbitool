@@ -1,13 +1,13 @@
-import math
 from types import EllipsisType, GenericAlias
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple, Sequence, Tuple, Union, get_args, overload
 
 import numpy as np
-from h5py import Dataset as H5Dataset, Group as H5Group, vlen_dtype
+from h5py import Dataset as H5Dataset, Group as H5Group
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import CoreSchema, core_schema
 
 from .base import *
+from .np_helper import HomogeneousArrayHelper, support
 
 
 class ParsedArgs(NamedTuple):
@@ -26,9 +26,14 @@ def parse_args(args):
         case 2:
             dtype, shape = args
         case _:
-            raise AnnotationError(f"Ndarray args error, args should be [dtype, shape]: {args}")
+            raise AnnotationError(
+                f"Ndarray args error, args should be [dtype, shape]: {args}")
     if dtype is not ...:
         dtype = np.dtype(dtype)
+        if not support(dtype):
+            raise AnnotationError(
+                f"Ndarray args error, type is not supported: {args}")
+
     ind = -1
     if shape is not ...:
         if not isinstance(shape, tuple):
@@ -67,6 +72,8 @@ class NdArray(np.ndarray):
         dtype, shape, ind = parse_args(get_args(source_type))
 
         def validate(value):
+            if value is None:
+                return None
             if not isinstance(value, np.ndarray):
                 if dtype is not ...:
                     value = np.array(value, dtype)
@@ -89,11 +96,10 @@ class NdArrayTypeHandler(DatasetTypeHandler):
 
     def __post_init__(self):
         self.dtype, self.shape, self.index = parse_args(self.args)
+        self.helper = HomogeneousArrayHelper(self.dtype)
 
-    def write_dataset_to_h5(self, h5g: H5Group, key: str, value):
-        h5g.create_dataset(
-            key, data=value, dtype=self.dtype, **H5_DT_ARGS
-        )
+    def write_dataset_to_h5(self, h5g: H5Group, key: str, value: np.ndarray):
+        HomogeneousArrayHelper.write(h5g, key, value, self.dtype)
 
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any:
-        return dataset[()]
+        return HomogeneousArrayHelper.read(dataset, self.dtype)
