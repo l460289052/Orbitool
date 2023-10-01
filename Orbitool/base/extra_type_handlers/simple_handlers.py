@@ -1,8 +1,6 @@
-import abc
 from datetime import date, datetime, timedelta
-from typing import Any, List, final
 
-from h5py import string_dtype
+# from h5py import string_dtype
 import numpy as np
 
 from .base import *
@@ -43,14 +41,13 @@ class BoolTypeHandler(AttrTypeHandler, RowTypeHandler):
 
 class StrTypeHandler(AttrTypeHandler, RowTypeHandler):
     target_type = str
-    h5_dtype = string_dtype(encoding="utf-8")
+    # h5_dtype = string_dtype(encoding="utf-8")
+    h5_dtype = np.dtype("U")
 
     def convert_to_attr(self, value):
         return str(value)
 
     def convert_from_attr(self, value):
-        if isinstance(value, bytes):
-            return value.decode()
         return value
 
 
