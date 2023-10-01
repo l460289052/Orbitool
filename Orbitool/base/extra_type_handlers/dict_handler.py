@@ -25,10 +25,12 @@ handlers[dict] = DictTypeHandler
 
 
 class DictRowTypeHandler(DatasetTypeHandler):
+    args: Tuple[Any, Type[BaseRowStructure]]
+
     def __post_init__(self):
         super().__post_init__()
         kt = self.args[0]
-        vt: BaseRowStructure = self.args[1]
+        vt = self.args[1]
 
         titles = []
         types = []
@@ -38,7 +40,7 @@ class DictRowTypeHandler(DatasetTypeHandler):
             types.append(annotation)
         self.titles = titles
         self.column_helper = PyColumnsHelper(
-            ("_key_index",) + titles, (kt,) + types)
+            ("_key_index", *titles), (kt, *types))
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value: Dict[Any, BaseRowStructure]):
         return self.column_helper.write_columns_to_h5(
@@ -48,18 +50,18 @@ class DictRowTypeHandler(DatasetTypeHandler):
     def read_dataset_from_h5(self, dataset: H5Dataset) -> List[Tuple[Any, BaseRowStructure]]:
         index, rows = self.get_rows_from_dataset(dataset)
         titles = self.titles
-        cls: Type[BaseRowStructure] = self.args[1]
-        ret = {}
-        for ind, row in zip(index, rows):
-            ret[ind] = cls(**dict(zip(titles, row)))
-        return ret
+        cls = self.args[1]
+        return {
+            ind: cls(**dict(zip(titles, row))) for ind, row in zip(index, rows)
+        }
 
     def get_columns_from_objs(self, value: Dict[Any, BaseRowStructure]):
         """
         Put in a single function to gc `rows`
         """
         titles = self.titles
-        rows = [(k, *(getattr(v, t) for t in titles)) for k, v in value.items()]
+        rows = [(k, *(getattr(v, t) for t in titles))
+                for k, v in value.items()]
         return list(zip(*rows))
 
     def get_rows_from_dataset(self, dataset: H5Dataset):
@@ -75,12 +77,12 @@ class DictSimpleTypeHandler(DatasetTypeHandler):
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value: Dict[Any, Any]):
         return self.column_helper.write_columns_to_h5(
-            h5g, key, len(value), [list(value.keys()), list(value.items())]
+            h5g, key, len(value), [list(value.keys()), list(value.values())]
         )
 
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any:
         columns = self.column_helper.read_columns_from_h5(dataset)
-        return dict(columns)
+        return dict(zip(*columns))
 
 
 class DictStructureTypeHandler(GroupTypeHandler):
@@ -92,8 +94,8 @@ class DictStructureTypeHandler(GroupTypeHandler):
         handler = self.handler
         for index, v in enumerate(value.values()):
             handler.write_to_h5(group, str(index), v)
-        
-        self.index_helper.write_to_h5(group, "_index", value.keys())
+
+        self.index_helper.write_to_h5(group, "_index", list(value.keys()))
 
     def read_group_from_h5(self, group: H5Group) -> Any:
         keys = self.index_helper.read_from_h5(group["_index"])

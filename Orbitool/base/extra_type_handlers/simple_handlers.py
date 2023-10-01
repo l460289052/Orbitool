@@ -8,7 +8,7 @@ import numpy as np
 from .base import *
 
 
-class IntHandler(AttrTypeHandler, RowTypeHandler):
+class IntTypeHandler(AttrTypeHandler, RowTypeHandler):
     target_type = int
     h5_dtype = np.dtype("int64")
 
@@ -19,7 +19,7 @@ class IntHandler(AttrTypeHandler, RowTypeHandler):
         return int(value)
 
 
-class FloatHandler(AttrTypeHandler, RowTypeHandler):
+class FloatTypeHandler(AttrTypeHandler, RowTypeHandler):
     target_type = float
     h5_dtype = np.dtype("float64")
 
@@ -30,7 +30,7 @@ class FloatHandler(AttrTypeHandler, RowTypeHandler):
         return float(value)
 
 
-class BoolHandler(AttrTypeHandler, RowTypeHandler):
+class BoolTypeHandler(AttrTypeHandler, RowTypeHandler):
     target_type = bool
     h5_dtype = np.dtype("bool")
 
@@ -41,7 +41,7 @@ class BoolHandler(AttrTypeHandler, RowTypeHandler):
         return bool(value)
 
 
-class StrHandler(AttrTypeHandler, RowTypeHandler):
+class StrTypeHandler(AttrTypeHandler, RowTypeHandler):
     target_type = str
     h5_dtype = string_dtype(encoding="utf-8")
 
@@ -54,7 +54,7 @@ class StrHandler(AttrTypeHandler, RowTypeHandler):
         return value
 
 
-class DatetimeConverter(AttrTypeHandler, RowTypeHandler):
+class DatetimeTypeHandler(AttrTypeHandler, RowTypeHandler):
     target_type = datetime
     h5_dtype = np.dtype("datetime64[us]")
 
@@ -65,7 +65,7 @@ class DatetimeConverter(AttrTypeHandler, RowTypeHandler):
         return datetime.fromisoformat(value)
 
 
-class DateConverter(AttrTypeHandler, RowTypeHandler):
+class DateTypeHandler(AttrTypeHandler, RowTypeHandler):
     target_type = date
     h5_dtype = np.dtype("datetime64[D]")
 
@@ -76,7 +76,7 @@ class DateConverter(AttrTypeHandler, RowTypeHandler):
         return date.fromisoformat(value)
 
 
-class TimedeltaConverter(AttrTypeHandler, RowTypeHandler):
+class TimedeltaTypeHandler(AttrTypeHandler, RowTypeHandler):
     target_type = timedelta
     h5_dtype = np.dtype("timedelta64[us]")
 

@@ -97,6 +97,22 @@ class StringConverter(Converter):
             return value
 
     def convert_from_h5(self, value: np.ndarray):
+        """
+        stupid h5py
+        ```python
+            sd = string_dtype(encoding='utf-8')
+            a = np.array(['123']*10, dtype=sd)
+            assert type(a[0]) == str
+
+            d = f.create_dataset('s', shape=10, dtype=sd)
+            d[:] = a
+
+            # Error! type of d[0] is bytes!
+            assert type(d[0]) == str
+        ```
+        """
+        if len(value) and isinstance(value[0], bytes):
+            value = value.astype(str) 
         return value
 
 

@@ -1,5 +1,6 @@
 import io
 import h5py
+from pydantic import BaseModel, ValidationError
 import pytest
 from numpy import testing as nptest
 
@@ -14,6 +15,15 @@ class FormulaItem(BaseRowItem):
     item_name = "test_formula_item"
 
     formula: Formula
+
+
+def test_pydantic_validate():
+    class Formulas(BaseModel):
+        formula: FormulaType
+    Formulas(formula="CH4")
+
+    with pytest.raises(ValidationError):
+        Formulas(formula=123)
 
 
 def test_formula():

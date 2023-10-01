@@ -1,11 +1,10 @@
 import abc
 from functools import lru_cache
-from typing import Any, Callable, ClassVar, Dict, List, Tuple, Type, final, get_args, get_origin
+from typing import Any, Callable, ClassVar, Dict, Generic, List, Tuple, Type, TypeVar, final, get_args, get_origin
 
 from h5py import Group as H5Group, Dataset as H5Dataset
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
-import pytest
 
 STRUCT_BASE = "_struct_base"
 
@@ -20,16 +19,12 @@ class BaseStructure(BaseModel):
     def h5_type_handler(cls):
         return StructureTypeHandler
 
-    def h5_write_handle(self, group: H5Group) -> List[str]:
-        return [STRUCT_BASE]
 
-    @classmethod
-    def h5_read_handle(cls, group: H5Group) -> Dict[str, Any]:
-        return {STRUCT_BASE: None}
+T = TypeVar("T")
 
 
-class _BaseTypeHandler(abc.ABC):
-    target_type: Type = None
+class _BaseTypeHandler(Generic[T], abc.ABC):
+    target_type: Type[T] = None
 
     @final
     def __init__(self, origin, args: tuple) -> None:
@@ -47,15 +42,15 @@ class _BaseTypeHandler(abc.ABC):
             handlers[cls.target_type] = cls
 
     @abc.abstractmethod
-    def read_from_h5(self, h5g: H5Group, key: str) -> Any:
+    def read_from_h5(self, h5g: H5Group, key: str) -> T:
         pass
 
     @abc.abstractmethod
-    def write_to_h5(self, h5g: H5Group, key: str, value):
+    def write_to_h5(self, h5g: H5Group, key: str, value: T):
         pass
 
 
-handlers: Dict[type, Callable[[Any, tuple], _BaseTypeHandler]] = {}
+handlers: Dict[type, Callable[[T, tuple], _BaseTypeHandler[T]]] = {}
 
 
 class AttrTypeHandler(_BaseTypeHandler):
@@ -128,33 +123,17 @@ class RowTypeHandler:
 
 class StructureTypeHandler(GroupTypeHandler):
     target_type = BaseStructure
+    origin: BaseStructure
 
     def write_group_to_h5(self, group: H5Group, value: BaseStructure):
-        fields = value.model_fields.copy()
-        handle_fields = value.h5_write_handle(group)
-        assert handle_fields.pop(
-            0) == STRUCT_BASE, f"{type(value)}.struct_handle_write must append after super().struct_handle_write"
-        for hf in handle_fields:
-            fields.pop(hf)
-
-        for k, field in fields.items():
+        for k, field in value.model_fields.items():
             if (v := getattr(value, k, None)) is None:
                 continue
             get_handler(field.annotation).write_to_h5(group, k, v)
 
     def read_group_from_h5(self, group) -> Any:
-        cls: BaseStructure = self.origin
-
-        fields = cls.model_fields.copy()
-        # TODO: catch exceptions more exactly
-        values = cls.h5_read_handle(group)
-        assert STRUCT_BASE in values, f"{cls}.struct_handle_read must append after super().struct_handle_read"
-        values.pop(STRUCT_BASE)
-
-        for k in values:
-            fields.pop(k)
-
-        for k, field in fields.items():
+        values = {}
+        for k, field in self.origin.model_fields.items():
             handler = get_handler(field.annotation)
             try:
                 v = handler.read_from_h5(group, k)
@@ -162,7 +141,7 @@ class StructureTypeHandler(GroupTypeHandler):
                 broken_entries.append('/'.join((group.name, k)))
                 v = field.get_default(call_default_factory=True)
             values[k] = v
-        return cls(**values)
+        return self.origin(**values)
 
 
 @ lru_cache(None)  # TODO: clear after r/w

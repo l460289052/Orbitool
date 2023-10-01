@@ -1,4 +1,4 @@
-from typing import Any, List, Type
+from typing import Any, List, Tuple, Type
 from datetime import datetime
 from h5py import Dataset as H5Dataset, Group as H5Group
 
@@ -10,8 +10,6 @@ from ..row_structure import BaseRowStructure
 from ..structure import handlers
 
 from .base import *
-
-# TODO
 
 
 def ListTypeHandler(origin, args):
@@ -29,9 +27,11 @@ handlers[list] = ListTypeHandler
 
 
 class ListRowTypeHandler(DatasetTypeHandler):
+    origin: Type[list]
+    args: Tuple[Type[BaseRowStructure]]
     def __post_init__(self):
         super().__post_init__()
-        vt: BaseRowStructure = self.args[0]
+        vt = self.args[0]
 
         titles = []
         types = []

@@ -13,11 +13,12 @@ from libcpp cimport bool
 from libc.math cimport round, ceil, floor
 import pyteomics.mass 
 import re
-from typing import Union
+from typing import Union, Any
 
 import cython
 import numpy as np
 cimport numpy as np
+from pydantic_core import core_schema
 
 from ._element cimport elements, elementsMap, elementMass,\
      elementMassNum, elementMassDist, str2element, element2str,\
