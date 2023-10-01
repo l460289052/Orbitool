@@ -56,9 +56,9 @@ def test_dt():
     with pytest.raises(AnnotationError):
         class DT(BaseStructure):
             dts: NdArray[datetime]
-    with pytest.raises(AnnotationError):
-        class DT(BaseStructure):
-            dts: NdArray["datetime64[ns]"]
+
+    class DT(BaseStructure):
+        dts: NdArray["datetime64[ns]"]
 
     class DT(BaseStructure):
         dts: NdArray["datetime64[us]"]
@@ -68,7 +68,7 @@ def test_dt():
     dt = datetime(2020, 1, 1, 1, 1, 1)
     a = DT(dts=None)
     assert a.dts is None
-    a.dts = [dt] * 10
+    a.dts = np.array([dt] * 10, "datetime64[us]")
 
     f.write("dt", a)
     b = f.read("dt", DT)

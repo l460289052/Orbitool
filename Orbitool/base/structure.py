@@ -5,6 +5,7 @@ from typing import Any, Callable, ClassVar, Dict, List, Tuple, Type, final, get_
 from h5py import Group as H5Group, Dataset as H5Dataset
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
+import pytest
 
 STRUCT_BASE = "_struct_base"
 
@@ -52,6 +53,9 @@ class _BaseTypeHandler(abc.ABC):
     @abc.abstractmethod
     def write_to_h5(self, h5g: H5Group, key: str, value):
         pass
+
+
+handlers: Dict[type, Callable[[Any, tuple], _BaseTypeHandler]] = {}
 
 
 class AttrTypeHandler(_BaseTypeHandler):
@@ -161,7 +165,7 @@ class StructureTypeHandler(GroupTypeHandler):
         return cls(**values)
 
 
-@ lru_cache(None) # TODO: clear after r/w
+@ lru_cache(None)  # TODO: clear after r/w
 def get_handler(typ: type) -> _BaseTypeHandler:
     if hasattr(typ, "h5_type_handler"):
         Handler = getattr(typ, "h5_type_handler")()
@@ -174,9 +178,6 @@ def get_handler(typ: type) -> _BaseTypeHandler:
 
 class AnnotationError(Exception):
     ...
-
-
-handlers: Dict[type, Callable[[Any, tuple], _BaseTypeHandler]] = {}
 
 
 broken_entries: List[str] = []

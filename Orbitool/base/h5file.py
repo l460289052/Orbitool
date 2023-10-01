@@ -6,7 +6,7 @@ from typing import List, Literal, Type, TypeVar
 
 import h5py
 
-from .structure import BaseStructure
+from .structure import get_handler
 
 T = TypeVar("T")
 
@@ -15,11 +15,11 @@ class H5Obj:
     def __init__(self, obj) -> None:
         self._obj: h5py.Group = obj
 
-    def write(self, path: str, value: BaseStructure):
-        value.h5_write(self._obj, path)
+    def write(self, path: str, value):
+        get_handler(type(value)).write_to_h5(self._obj, path, value)
 
     def read(self, path: str, typ: Type[T]) -> T:
-        return typ.h5_read(self._obj, path)
+        return get_handler(typ).read_from_h5(self._obj, path)
 
     def __contains__(self, path: str) -> bool:
         return path in self._obj

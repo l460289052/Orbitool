@@ -78,7 +78,7 @@ class DateConverter(AttrTypeHandler, RowTypeHandler):
 
 class TimedeltaConverter(AttrTypeHandler, RowTypeHandler):
     target_type = timedelta
-    h5_dtype = np.dtype("timedelta[us]")
+    h5_dtype = np.dtype("timedelta64[us]")
 
     def convert_to_attr(self, value: timedelta):
         return value.total_seconds()

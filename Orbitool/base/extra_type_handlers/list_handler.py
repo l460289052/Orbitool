@@ -83,4 +83,4 @@ class ListStructureTypeHandler(GroupTypeHandler):
         
     def read_group_from_h5(self, group: H5Group) -> Any:
         handler = self.handler
-        return [handler.read_from_h5(group[str(i)]) for i in range(len(group))]
+        return [handler.read_from_h5(group, str(i)) for i in range(len(group))]

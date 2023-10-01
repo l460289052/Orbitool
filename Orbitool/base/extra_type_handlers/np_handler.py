@@ -99,7 +99,7 @@ class NdArrayTypeHandler(DatasetTypeHandler):
         self.helper = HomogeneousArrayHelper(self.dtype)
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value: np.ndarray):
-        HomogeneousArrayHelper.write(h5g, key, value, self.dtype)
+        self.helper.write(h5g, key, value)
 
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any:
-        return HomogeneousArrayHelper.read(dataset, self.dtype)
+        return self.helper.read(dataset)
