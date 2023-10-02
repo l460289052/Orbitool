@@ -1,11 +1,10 @@
 from datetime import datetime
-
+from typing import Dict
 
 import h5py
 import numpy as np
 
-from Orbitool.structures.HDF5.h5type_handlers.dict_handler import DictHandler
-from Orbitool.utils.formula import Formula
+from Orbitool.models.formula import Formula
 
 from .utils import create_group, move_to, copy_to, read_dict, read_dict_keys, write_dict_keys, write_to
 
@@ -26,12 +25,16 @@ def update(path: str):
             calibrator = info["calibrators"]["0"]
             copy_to(info, "calibrators/0/ions", "last_ions")
 
-            path_times = {}
+            path_times: Dict[str, datetime] = {}
             for path in f["file tab/info/pathlist/paths"]:
                 path_times[path['path'].decode()] = datetime.fromtimestamp(
                     path['createDatetime'])
-            handler = DictHandler((str, datetime))
-            handler.write_to_h5(info, "path_times", path_times)
+            if "path_times" in info:
+                del info["path_times"]
+            ptg = info.create_group("path_times")
+            for index, v in enumerate(path_times.values()):
+                ptg.attrs[str(index)] = str(v)
+            ptg.attrs["indexes"] = list(path_times.keys())
 
             keys = read_dict_keys(info, "calibrators")
             path_ion_infos = write_dict_keys(info, "path_ion_infos", keys)
