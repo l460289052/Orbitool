@@ -1,6 +1,6 @@
 import abc
 from functools import lru_cache
-from typing import Any, Callable, ClassVar, Dict, Generic, List, Tuple, Type, TypeVar, final, get_args, get_origin
+from typing import Any, Callable, ClassVar, Dict, Generic, List, Tuple, Type, TypeVar, Union, final, get_args, get_origin
 
 from h5py import Group as H5Group, Dataset as H5Dataset
 import numpy as np
@@ -101,6 +101,7 @@ class GroupTypeHandler(_BaseTypeHandler):
             del h5g[key]
         group = h5g.create_group(key)
         self.write_group_to_h5(group, value)
+        return group
 
     @final
     def read_from_h5(self, h5g: H5Group, key: str) -> Any:
@@ -119,7 +120,7 @@ class DatasetTypeHandler(_BaseTypeHandler):
     def write_to_h5(self, h5g: H5Group, key: str, value):
         if key in h5g:
             del h5g[key]
-        self.write_dataset_to_h5(h5g, key, value)
+        return self.write_dataset_to_h5(h5g, key, value)
 
     @final
     def read_from_h5(self, h5g: H5Group, key: str) -> Any:
@@ -128,13 +129,16 @@ class DatasetTypeHandler(_BaseTypeHandler):
         return self.read_dataset_from_h5(h5g[key])
 
     @abc.abstractmethod
-    def write_dataset_to_h5(self, h5g: H5Group, key: str, value): ...
+    def write_dataset_to_h5(
+        self, h5g: H5Group, key: str, value) -> H5Dataset: ...
+
     @abc.abstractmethod
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any: ...
 
 
 class RowTypeHandler:
     h5_dtype = ...
+    h5_shape = ...
 
     def convert_to_column(self, value: List[Any]) -> np.ndarray:
         return np.array(value, self.h5_dtype)

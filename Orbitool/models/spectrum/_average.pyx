@@ -8,7 +8,7 @@ cimport numpy as np
 import numpy as np
 import cython
 
-from ._spectrum cimport (DoubleArray, DoubleArray2D, DoubleArray3D, 
+from ._functions cimport (DoubleArray, DoubleArray2D, DoubleArray3D, 
     DoubleOrArray)
 
 npdouble = np.float64

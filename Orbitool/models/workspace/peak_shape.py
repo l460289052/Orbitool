@@ -1,7 +1,5 @@
-from ..structures import BaseStructure
-from ..models.spectrum.spectrum import Spectrum, FittedPeak
-from ..functions import peakfit
-from ..functions.peakfit import normal_distribution
+from ..spectrum import Spectrum
+from ..peakfit import PeaksManager, normal_distribution
 from .base import BaseInfo
 
 
@@ -10,5 +8,5 @@ class PeakShapeInfo(BaseInfo):
 
     spectrum: Spectrum = None
 
-    peaks_manager: peakfit.PeaksManager = None
+    peaks_manager: PeaksManager = None
     func: normal_distribution.NormalDistributionFunc = None

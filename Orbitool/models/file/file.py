@@ -5,9 +5,10 @@ from typing import Dict, Iterable, List, Tuple, Union
 
 import numpy as np
 
-from Orbitool.base import BaseStructure, BaseRowStructure
+from Orbitool.base import BaseRowStructure, BaseDatasetStructure
+from Orbitool.utils.readers import ThermoFile
+
 from ..spectrum import spectrum
-from ...utils.readers import ThermoFile
 from .part_file import (generage_periods, generate_num_periods,
                         get_num_range_from_ranges)
 
@@ -45,7 +46,7 @@ class Path(BaseRowStructure):
                 return FilePath(path).stem
 
 
-class PathList(BaseStructure):
+class PathList(BaseDatasetStructure):
     paths: List[Path] = []
 
     def _crossed(self, start: datetime, end: datetime) -> Tuple[bool, str]:
@@ -114,20 +115,21 @@ class PathList(BaseStructure):
         return len(self.paths)
 
 
+base_dt = datetime(1, 1, 1)
+
+
 class PeriodItem(BaseRowStructure):
-    start_time: datetime = None
-    end_time: datetime = None
+    start_time: datetime = base_dt
+    end_time: datetime = base_dt
     start_num: int = -1
     stop_num: int = -1
 
     def length(self):
-        return self.start_time and (self.end_time - self.start_time) or (self.stop_num - self.start_num)
+        return self.start_time == base_dt and (self.end_time - self.start_time) or (self.stop_num - self.start_num)
 
 
-class FileSpectrumInfo(spectrum.SpectrumInfo): # TODO
-    item_name = "file spectrum info"
-
-    path: str  # "type:path"
+class FileSpectrumInfo(spectrum.SpectrumInfo):
+    path: str
     polarity: int
 
     # index from 0, 1, 2, 3... with different times together to make up a whole spectrum

@@ -1,14 +1,15 @@
 from typing import List
 
-from ..utils.formula.calc_gen import CalculatorGenerator, State, InitParams, IsotopeNum
-from ..utils.formula import Formula
-from ..structures import BaseStructure, field
+from pydantic import Field
+
+from ..formula import CalculatorGenerator, Formula, ElementState, GenInitParams, IsotopeNum
 from .base import BaseInfo
+
 
 def Factory():
     ins = CalculatorGenerator(
         element_states={
-            row[0]: State(*row[1:]) for row in InitParams},
+            row[0]: ElementState(*row[1:]) for row in GenInitParams},
         isotope_usable={
             "C": IsotopeNum(12, 0, 0, 20, False),
             # "C[12]": IsotopeNum(12, 12, 0, 10, False),
@@ -17,17 +18,16 @@ def Factory():
             "O": IsotopeNum(16, 0, 0, 15, False),
             "O[18]": IsotopeNum(16, 18, 0, 2, True),
             "N": IsotopeNum(14, 0, 0, 3, False)
-            }
+        }
     )
     return ins
 
-class FormulaInfo(BaseInfo):
-    h5_type = "formula docker"
 
+class FormulaInfo(BaseInfo):
     charge: int = -1
     mz_min: float = 50
     mz_max: float = 750
-    calc_gen: CalculatorGenerator = field(Factory)
+    calc_gen: CalculatorGenerator = Field(default_factory=Factory)
 
     def get_calcer(self):
         calc = self.calc_gen.generate()

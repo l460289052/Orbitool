@@ -2,9 +2,8 @@ from typing import Optional, List
 from array import array
 import numpy as np
 
-from ..structures import BaseStructure, field, Row
-from ..structures.HDF5 import Array
-from ..models.spectrum.spectrum import Spectrum, FittedPeak, Peak
+from ..spectrum import Spectrum, Peak, FittedPeak
+from Orbitool.base import Array, NdArray
 from .base import BaseInfo
 
 
@@ -13,20 +12,19 @@ def array_int():
 
 
 class PeakFitInfo(BaseInfo):
-    h5_type = "peak fit tab"
     spectrum: Spectrum = None
 
-    raw_peaks: Row[Peak] = field(list)
-    raw_split_num: Array[int] = field(array_int)
+    raw_peaks: List[Peak] = []
+    raw_split_num: Array['i'] = array('i')
 
-    original_indexes: Array[int] = field(array_int)
-    peaks: Row[FittedPeak] = field(list)
+    original_indexes: Array['i'] = array('i')
+    peaks: List[FittedPeak] = []
 
-    residual_mz: np.ndarray = None
-    residual_intensity: np.ndarray = None
+    residual_mz: NdArray[float, -1] = None
+    residual_intensity: NdArray[float, -1] = None
 
-    shown_indexes: Array[int] = field(array_int)
+    shown_indexes: Array['i'] = []
 
-    shown_mz: np.ndarray = None
-    shown_intensity: np.ndarray = None
-    shown_residual: np.ndarray = None
+    shown_mz: NdArray[float, -1] = None
+    shown_intensity: NdArray[float, -1] = None
+    shown_residual: NdArray[float, -1] = None

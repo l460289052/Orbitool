@@ -1,9 +1,10 @@
 from typing import List
-from ..binary_search import indexBetween
-from ...models.spectrum.spectrum import Formula, FittedPeak
+from Orbitool.utils.binary_search import indexBetween
+from ._formula import Formula
+from ..spectrum import FittedPeak
 
 
-def get_peak_position(peaks, index):
+def get_peak_position(peaks: List[FittedPeak], index: int):
     return peaks[index].peak_position
 
 

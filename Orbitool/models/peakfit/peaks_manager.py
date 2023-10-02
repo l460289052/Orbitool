@@ -1,9 +1,7 @@
 from typing import List, Union, Iterable
 
 from Orbitool.base import BaseStructure
-from Orbitool.base.structure import get_handler
 from ...models.spectrum import spectrum
-from ...structures import BaseStructure
 import numpy as np
 
 

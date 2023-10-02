@@ -6,13 +6,13 @@ from numpy.polynomial import polynomial
 from Orbitool.base import (BaseDatasetStructure, BaseRowStructure,
                            BaseStructure, NdArray)
 
-from ...utils.formula import Formula, FormulaList
+from ..formula import Formula, FormulaType, FormulaList
 from .polynomial import polyfit_with_fixed_points
 
 
 class Ion(BaseRowStructure):
     shown_text: str
-    formula: Formula
+    formula: FormulaType
 
     @classmethod
     def fromText(cls, text):

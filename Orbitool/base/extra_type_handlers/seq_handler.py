@@ -1,11 +1,14 @@
 from collections import deque
-from typing import Any, Iterable, List, Tuple, Type, Union
+from types import GenericAlias
+from typing import Any, Iterable, List, Sequence, Tuple, Type, Union, cast, get_args
 from datetime import datetime
 from h5py import Dataset as H5Dataset, Group as H5Group
 
 import numpy as np
+from pydantic import GetCoreSchemaHandler, TypeAdapter
+from pydantic_core import CoreSchema, core_schema
 
-from .np_helper import PyColumnsHelper, PyListHelper
+from .np_helper import PyColumnsHelper, PyListHelper, get_converter
 
 from ..row_structure import BaseRowStructure
 from ..structure import handlers
@@ -99,3 +102,33 @@ class ListStructureTypeHandler(GroupTypeHandler):
     def read_group_from_h5(self, group: H5Group) -> Any:
         handler = self.handler
         return self.origin(handler.read_from_h5(group, str(i)) for i in range(len(group)))
+
+
+class AttrList(list):
+    def __class_getitem__(cls, args):
+        return GenericAlias(AttrList, args)
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: GetCoreSchemaHandler
+    ) -> CoreSchema:
+        args = get_args(source_type)
+        ta = TypeAdapter(List[*args])
+        return core_schema.no_info_before_validator_function(ta.validate_python, handler(Any))
+
+
+class AttrSeqTypeHandler(AttrTypeHandler):
+    target_type = AttrList
+
+    def __post_init__(self):
+        super().__post_init__()
+        inner_type = self.args[0]
+        self.handler = cast(RowTypeHandler, get_handler(inner_type))
+        self.converter = get_converter(self.handler.h5_dtype)
+        assert isinstance(self.handler, RowTypeHandler)
+
+    def convert_to_attr(self, value):
+        return self.converter.convert_to_h5(self.handler.convert_to_column(value))
+
+    def convert_from_attr(self, value):
+        return self.handler.convert_from_column(self.converter.convert_from_h5(value))

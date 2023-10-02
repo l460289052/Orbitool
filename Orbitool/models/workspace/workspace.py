@@ -2,11 +2,12 @@ from dataclasses import fields
 from pathlib import Path
 from typing import Dict, Generic, List, Optional, Type, TypeVar, Union
 
-from .. import VERSION
-from ..structures import BaseStructure, BaseRowItem, StructureTypeHandler, get_handler, field
-from ..structures.HDF5 import H5File, H5Obj, h5_brokens, BaseDiskData, DiskDict, DiskList
-from ..models.spectrum.spectrum import Spectrum
-from ..structures.timeseries import TimeSeries
+from Orbitool.base import BaseDiskData, BaseStructure, DiskList, H5File
+from Orbitool.base.structure import broken_entries
+
+from ...version import VERSION
+from ..spectrum import Spectrum
+from ..timeseries import TimeSeries
 from .base import BaseInfo
 from .calibration import CalibratorInfo
 from .file_tab import FileTabInfo
@@ -24,22 +25,20 @@ T = TypeVar("T")
 
 
 class WorkspaceInfo(BaseStructure):
-    h5_type = "workspace info"
-
     version: str = VERSION
-    file_tab: FileTabInfo = field(FileTabInfo)
-    noise_tab: NoiseTabInfo = field(NoiseTabInfo)
-    peak_shape_tab: PeakShapeInfo = field(PeakShapeInfo)
-    calibration_tab: CalibratorInfo = field(CalibratorInfo)
-    peak_fit_tab: PeakFitInfo = field(PeakFitInfo)
-    mass_defect_tab: MassDefectInfo = field(MassDefectInfo)
-    time_series_tab: TimeseriesInfo = field(TimeseriesInfo)
+    file_tab: FileTabInfo = FileTabInfo()
+    noise_tab: NoiseTabInfo = NoiseTabInfo()
+    peak_shape_tab: PeakShapeInfo = PeakShapeInfo()
+    calibration_tab: CalibratorInfo = CalibratorInfo()
+    peak_fit_tab: PeakFitInfo = PeakFitInfo()
+    mass_defect_tab: MassDefectInfo = MassDefectInfo()
+    time_series_tab: TimeseriesInfo = TimeseriesInfo()
 
-    spectra_list: SpectraListInfo = field(SpectraListInfo)
-    formula_docker: FormulaInfo = field(FormulaInfo)
-    masslist_docker: MassListInfo = field(MassListInfo)
-    peaklist_docker: BaseStructure = field(BaseStructure)
-    spectrum_docker: SpectrumInfo = field(SpectrumInfo)
+    spectra_list: SpectraListInfo = SpectraListInfo()
+    formula_docker: FormulaInfo = FormulaInfo()
+    masslist_docker: MassListInfo = MassListInfo()
+    # peaklist_docker: BaseStructure = field(BaseStructure)
+    spectrum_docker: SpectrumInfo = SpectrumInfo()
 
 
 class WorkspaceData(BaseDiskData):
@@ -116,11 +115,11 @@ class WorkSpace:
         try:
             new_space.data.raw_spectra = self.data.raw_spectra
         except:
-            h5_brokens.append(new_space.data.raw_spectra.obj.name)
+            broken_entries.append(new_space.data.raw_spectra.obj.name)
         try:
             new_space.data.calibrated_spectra = self.data.calibrated_spectra
         except:
-            h5_brokens.append(
+            broken_entries.append(
                 new_space.data.calibrated_spectra.obj.name)
         new_space.save()
         new_space.close()

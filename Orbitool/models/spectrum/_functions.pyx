@@ -4,7 +4,7 @@
 from typing import Tuple
 import numpy as np
 cimport numpy as np
-from Orbitool.functions cimport _binary_search
+from Orbitool.utils.binary_search cimport _binary_search
 import cython
 from libc cimport math
 

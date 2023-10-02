@@ -1,7 +1,9 @@
 import numpy as np
 
 from .base import BaseInfo
-from .. import setting
+from Orbitool.config import setting
+from Orbitool.base import BaseRowStructure, AttrNdArray
+from ..formula import Formula, FormulaType
 from ..structures import BaseRowItem, BaseStructure, Row, field
 from ..models.file.file import FileSpectrumInfo
 from ..structures.HDF5 import NdArray, StructureList
@@ -9,14 +11,13 @@ from ..models.spectrum.spectrum import Spectrum, SpectrumInfo
 from ..utils.formula import Formula
 
 
-class NoiseFormulaParameter(BaseRowItem):
-    item_name = "noise formula parameter"
-    formula: Formula
+class NoiseFormulaParameter(BaseRowStructure):
+    formula: FormulaType
     delta: float = 5
 
     useable: bool = True
     selected: bool = True
-    param: NdArray[float, (2, 3)] = field(lambda: np.zeros((2, 3), float))
+    param: NdArray[float, (2, 3)] = field(lambda: np.zeros((2, 3), float)) # TODO
 
 
 def default_formula_parameter():

@@ -6,7 +6,7 @@ import numpy as np
 from Orbitool.base import BaseStructure
 
 from ..spectrum.spectrum import FittedPeak, Peak, Spectrum
-from Orbitool.functions.binary_search import indexBetween_np, indexNearest, indexFirstBiggerThan
+from Orbitool.utils.binary_search import indexBetween_np, indexNearest, indexFirstBiggerThan
 
 
 def get_peak_mz_min(peaks: List[Peak], index: int):

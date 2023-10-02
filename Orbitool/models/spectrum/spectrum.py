@@ -8,7 +8,7 @@ from Orbitool.base import (AttrNdArray, BaseDatasetStructure, BaseRowStructure,
                            BaseStructure)
 from Orbitool.base.extra_type_handlers import NdArray
 
-from ...utils.formula import Formula, FormulaList
+from ..formula import Formula, FormulaList
 
 
 class PeakTags(str, Enum):

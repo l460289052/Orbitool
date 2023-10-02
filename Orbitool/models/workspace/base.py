@@ -1,8 +1,6 @@
 from typing import Any, Dict, Generic, Iterable, Type, TypeVar
 
-from h5py import Group
-
-from ..structures import BaseStructure, register_handler, StructureTypeHandler, get_handler, field
+from Orbitool.base import BaseStructure, BaseDatasetStructure
 
 T = TypeVar("T")
 
@@ -23,9 +21,12 @@ class UiNameGetter:
         list(map(self.register_component, components))
 
 
-class UiState:
-    def __init__(self, states: Dict[str, str] = None) -> None:
-        self.states = states or {}
+class UiState(BaseDatasetStructure):
+    states: Dict[str, str] = {}
+
+    @classmethod
+    def h5_type_handler(cls):
+        return super().h5_type_handler()
 
     def store_state(self, ui: object):
         types = tuple(state_handlers)
@@ -44,25 +45,6 @@ class UiState:
                 state_handlers[type(attr)].set(attr, state)
 
 
-class UiStateHandler(StructureTypeHandler):
-    def read_from_h5(self, h5group: Group, key: str):
-        if key in h5group:
-            states = dict(h5group[key].attrs.items())
-        else:
-            states = {}
-        return UiState(states)
-
-    def write_to_h5(self, h5group: Group, key: str, value: UiState):
-        if key in h5group:
-            del h5group[key]
-        group = h5group.create_group(key)
-        for key, state in value.states.items():
-            group.attrs[key] = state
-
-
-register_handler(UiState, UiStateHandler)
-
-
 class BaseStateHandler:
     @staticmethod
     def get(obj) -> str:
@@ -77,5 +59,4 @@ state_handlers: Dict[Type, BaseStateHandler] = {}
 
 
 class BaseInfo(BaseStructure):
-    h5_type = "base info"
-    ui_state: UiState = field(UiState)
+    ui_state: UiState = UiState()

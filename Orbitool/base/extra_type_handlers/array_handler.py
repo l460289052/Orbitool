@@ -86,7 +86,7 @@ class ArrayTypeHandler(DatasetTypeHandler, RowTypeHandler):
         self.helper = HomogeneousArrayHelper(self.h5_dtype)
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value):
-        self.helper.write(h5g, key, value)
+        return self.helper.write(h5g, key, value)
 
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any:
         return array(self.type_code, self.helper.read(dataset))

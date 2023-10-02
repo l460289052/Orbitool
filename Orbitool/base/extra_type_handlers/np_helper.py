@@ -158,7 +158,7 @@ class HeteroGeneousArrayHelper:
         self.dtypes = dtypes
         self.converters = list(map(get_converter, dtypes))
         self.h5_dtype = np.dtype(
-            [(title, cvt.h5_dtype) for title, cvt in zip(titles, self.converters)])
+            [(title, cvt.h5_dtype) for title, cvt in zip(titles, self.converters)]) # add a shape
         self.s_type = [cvt.h5_dtype.char == "S" for cvt in self.converters]
         self.has_s = any(self.s_type)
 
@@ -208,7 +208,7 @@ class PyColumnsHelper:
             handler = get_handler(typ)
             assert isinstance(handler, RowTypeHandler)
             handlers.append(handler)
-            dtypes.append(handler.h5_dtype)
+            dtypes.append(handler.h5_dtype) # TODO: add a shape for type
         self.titles = titles
         self.handlers = handlers
         self.dtypes = dtypes

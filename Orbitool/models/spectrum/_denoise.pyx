@@ -11,7 +11,7 @@ cimport numpy as np
 from numpy.polynomial import polynomial
 from scipy.optimize import curve_fit
 
-from ._spectrum cimport (getPeaksPositions, getNotZeroPositions,
+from ._functions cimport (getPeaksPositions, getNotZeroPositions,
     DoubleArray, DoubleArray2D, DoubleArray3D, DoubleOrArray)
 
 npdouble = np.float64

@@ -1,10 +1,9 @@
-from collections import deque
 from datetime import datetime
-from typing import Deque, List
+from typing import Deque, Dict, List
 import numpy as np
-from numpy import testing as nptest
 import pytest
 
+from ..row_structure import BaseRowStructure
 from ..h5file import H5File
 from ..extra_type_handlers import AttrNdArray, NdArray, Array
 from ..dataset_structure import BaseDatasetStructure
@@ -59,3 +58,30 @@ def test_dataset_list():
     a.intensity.pop()
     with pytest.raises(Exception):
         f.write("exception", a)
+
+
+def test_dataset_dict():
+    class Item(BaseRowStructure):
+        a: int
+        b: float
+        c: str
+        d: datetime
+
+    class DD(BaseDatasetStructure):
+        dd: Dict[str, Item]
+        a: int
+        b: float
+        c: str
+        d: datetime
+
+    values = dict(
+        a=1, b=2.5, c="123", d=datetime.now()
+    )
+
+    a = DD(dd={str(i):Item(**values) for i in range(10)}, **values)
+
+    f = H5File()
+    f.write("dd", a)
+    b = f.read("dd", DD)
+
+    assert a == b

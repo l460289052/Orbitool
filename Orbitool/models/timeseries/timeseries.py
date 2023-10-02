@@ -3,7 +3,7 @@ from typing import List
 from datetime import datetime
 
 from Orbitool.base import BaseDatasetStructure, Array
-from ...utils.formula import Formula, FormulaList
+from ..formula import Formula, FormulaList
 
 
 class TimeSeries(BaseDatasetStructure):

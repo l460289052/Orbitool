@@ -4,12 +4,14 @@ from typing import Iterable, List, Dict, Tuple, Union
 import math
 
 import numpy as np
+from pydantic import Field
 
-from ..functions.calibration import Ion, PathIonInfo, Calibrator
-from ..utils.formula import Formula
-from ..structures import BaseStructure, BaseRowItem, field, Row
-from ..models.spectrum.spectrum import Spectrum, SpectrumInfo
-from ..structures.HDF5 import StructureList
+from Orbitool.base import BaseRowStructure
+
+from ..spectrum import Spectrum, SpectrumInfo
+from ..calibration import Ion, PathIonInfo, Calibrator
+from ..formula import Formula
+
 from .base import BaseInfo
 
 
@@ -19,9 +21,7 @@ def default_ions():
                      "C6H4O5N2NO3-", "C8H12O10N2NO3-", "C10H17O10N3NO3-"]))
 
 
-class CalibratorInfoSegment(BaseStructure):
-    h5_type = "calibrator info segment"
-
+class CalibratorInfoSegment(BaseRowStructure):
     end_point: float = math.inf
 
     intensity_filter: int = 100
@@ -31,27 +31,25 @@ class CalibratorInfoSegment(BaseStructure):
 
 
 class CalibratorInfo(BaseInfo):
-    h5_type = "calibrator tab"
-
     skip: bool = False
 
     current_segment_index: int = 0
 
     rtol: float = 2e-6
-    ions: Row[Ion] = field(default_ions)
-    last_ions: Row[Ion] = field(list)
+    ions: List[Ion] = Field(default_factory=default_ions)
+    last_ions: List[Ion] = []
 
-    calibrate_info_segments: List[CalibratorInfoSegment] = field(
-        lambda: [CalibratorInfoSegment()])
-    last_calibrate_info_segments: List[CalibratorInfoSegment] = field(list)
+    calibrate_info_segments: List[CalibratorInfoSegment] = [
+        CalibratorInfoSegment()]
+    last_calibrate_info_segments: List[CalibratorInfoSegment] = []
 
-    path_times: Dict[str, datetime] = field(dict)
-    path_ion_infos: Dict[str, Dict[Formula, PathIonInfo]] = field(dict)
-    calibrator_segments: Dict[str, List[Calibrator]] = field(
-        dict)  # path -> [calibrator for each segments]
+    path_times: Dict[str, datetime] = {}
+    path_ion_infos: Dict[str, Dict[Formula, PathIonInfo]] = {}
+    # path -> [calibrator for each segments]
+    calibrator_segments: Dict[str, List[Calibrator]] = {}
 
-    calibrated_spectrum_infos: Row[SpectrumInfo] = field(
-        list)  # [calibrated spectrum info for each spectrum]
+    # [calibrated spectrum info for each spectrum]
+    calibrated_spectrum_infos: List[SpectrumInfo] = []
 
     def add_segment(self, separator: float):
         pos = 0
@@ -155,7 +153,7 @@ class CalibratorInfo(BaseInfo):
                         seg_info.degree,
                         start_point)
                     start_point = (seg_info.end_point,
-                                cali.predict_point(seg_info.end_point))
+                                   cali.predict_point(seg_info.end_point))
                     calibrators.append(cali)
                 self.calibrator_segments[path] = calibrators
             except Exception as e:

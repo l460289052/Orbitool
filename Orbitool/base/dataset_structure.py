@@ -1,4 +1,3 @@
-from array import array
 from collections import deque
 from h5py import Group as H5Group, Dataset as H5Dataset
 
@@ -12,7 +11,7 @@ from .extra_type_handlers import np_helper, Array
 STRUCT_BASE = "_dataset_struct_base"
 
 SUPPORT_DATA = {
-    NdArray, list, Array, deque
+    NdArray, list, Array, deque, dict
 }
 
 
@@ -31,12 +30,16 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
         types: Dict[str, Type] = {}
         handlers: Dict[str, RowTypeHandler] = {}
         dtypes = []
+        dict_handler = None
         for key, field in self.origin.model_fields.items():
             annotation = field.annotation
             if (origin := get_origin(annotation)) in SUPPORT_DATA:
                 dataset_fields.append(key)
                 if origin == NdArray:
                     dtypes.append(np.dtype(get_args(annotation)[0]))
+                elif origin == dict:
+                    dict_handler = get_handler(annotation)
+                    assert isinstance(dict_handler, DatasetTypeHandler)
                 else:
                     if origin == Array:
                         handler = get_handler(annotation)
@@ -53,38 +56,52 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
 
         self.dataset_fields = dataset_fields
         self.types = types
+        self.dict_handler = dict_handler
         self.handlers = handlers
         self.dtypes = dtypes
         self.annotations = fields
-        self.helper = np_helper.HeteroGeneousArrayHelper(
-            dataset_fields, dtypes
-        )
+        if dict_handler is not None:
+            assert len(
+                dataset_fields) == 1, "Dict cannot exist with other lists or arrays"
+        else:
+            self.helper = np_helper.HeteroGeneousArrayHelper(
+                dataset_fields, dtypes
+            )
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value: BaseDatasetStructure):
-        length = len(getattr(value, self.dataset_fields[0]))
-        handlers = self.handlers
-        dataset = self.helper.columns_write(
-            h5g, key, length, [
-                getattr(value, df)
-                if (handler := handlers.get(df, None)) is None
-                else handler.convert_to_column(getattr(value, df))
-                for df in self.dataset_fields]
-        )
+        if self.dict_handler is None:
+            length = len(getattr(value, self.dataset_fields[0]))
+            handlers = self.handlers
+            dataset = self.helper.columns_write(
+                h5g, key, length, [
+                    getattr(value, df)
+                    if (handler := handlers.get(df, None)) is None
+                    else handler.convert_to_column(getattr(value, df))
+                    for df in self.dataset_fields]
+            )
+        else:
+            dataset = self.dict_handler.write_dataset_to_h5(
+                h5g, key, getattr(value, self.dataset_fields[0]))
 
         for k, annotation in self.annotations.items():
             handler = get_handler(annotation)
             if (v := getattr(value, k, None)) is None:
                 continue
             handler.write_to_h5(dataset, k, v)
+        return dataset
 
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any:
         cls: Type[BaseDatasetStructure] = self.origin
 
-        columns_iter = self.helper.columns_read(dataset)
-        values = dict(zip(self.dataset_fields, columns_iter))
-        for key, handler in self.handlers.items():
-            values[key] = recover_from_list(
-                self.types[key], handler.convert_from_column(values[key]))
+        if self.dict_handler is None:
+            columns_iter = self.helper.columns_read(dataset)
+            values = dict(zip(self.dataset_fields, columns_iter))
+            for key, handler in self.handlers.items():
+                values[key] = recover_from_list(
+                    self.types[key], handler.convert_from_column(values[key]))
+        else:
+            key = self.dataset_fields[0]
+            values = {key: self.dict_handler.read_dataset_from_h5(dataset)}
 
         for k, annotation in self.annotations.items():
             handler = get_handler(annotation)

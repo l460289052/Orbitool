@@ -48,7 +48,7 @@ def validate_formula_list(value):
     assert False
 
 
-class FormulaList(list):
+class FormulaList(List[Formula]):
     @classmethod
     def __get_pydantic_core_schema__(
         cls, source_type: Any, handler: GetCoreSchemaHandler

@@ -1,21 +1,19 @@
 from typing import List
 from datetime import datetime
 
-from ..structures import BaseStructure, field, Row, BaseRowItem
-from ..structures.timeseries import TimeSeries
-from ..utils.formula import FormulaList
+from Orbitool.base import BaseRowStructure
+from ..formula import FormulaList
+from ..timeseries import TimeSeries
 from .base import BaseInfo
 
 
-class TimeSeriesInfoRow(BaseRowItem):
-    h5_type = "time series info row"
-
+class TimeSeriesInfoRow(BaseRowStructure):
     position_min: float
     position_max: float
     range_sum: bool = False
     time_min: datetime = None
     time_max: datetime = None
-    formulas: FormulaList = field(list)
+    formulas: FormulaList = []
 
     @classmethod
     def FromTimeSeries(cls, timeseries: TimeSeries):
@@ -39,7 +37,5 @@ class TimeSeriesInfoRow(BaseRowItem):
 
 
 class TimeseriesInfo(BaseInfo):
-    h5_type = "timeseries tab"
-
-    timeseries_infos: Row[TimeSeriesInfoRow] = field(list)
+    timeseries_infos: List[TimeSeriesInfoRow] = []
     show_index: int = -1

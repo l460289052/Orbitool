@@ -1,8 +1,8 @@
 from typing import List
 
 from Orbitool.base import BaseRowStructure
-from ...utils.formula import Formula, FormulaList
-from Orbitool.functions.binary_search import indexNearest, indexFirstBiggerThan
+from ..formula import Formula, FormulaList, FormulaType
+from Orbitool.utils.binary_search import indexNearest, indexFirstBiggerThan
 
 
 class MassListItem(BaseRowStructure):
