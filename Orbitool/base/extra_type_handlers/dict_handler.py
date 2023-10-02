@@ -12,7 +12,7 @@ from .np_helper import PyColumnsHelper, PyListHelper
 
 def DictTypeHandler(origin, args):
     inner_type = args[1]
-    if issubclass(inner_type, BaseRowStructure):
+    if isinstance(inner_type, type) and issubclass(inner_type, BaseRowStructure):
         return DictRowTypeHandler(origin, args)
     handler = get_handler(inner_type)
     if isinstance(handler, RowTypeHandler):

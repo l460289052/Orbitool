@@ -1,7 +1,7 @@
 from __future__ import annotations
 from array import array
 from types import GenericAlias
-from typing import Any, Iterable, Literal, Type, TypeVar, overload, Union, get_args
+from typing import Any, Iterable, List, Literal, Tuple, Type, TypeVar, overload, Union, get_args
 from h5py import Dataset as H5Dataset, Group as H5Group
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import CoreSchema, core_schema
@@ -44,6 +44,8 @@ py_dtypes = {
     float: "d"
 }
 
+dtype_convert = str_dtypes | py_dtypes
+
 _IntTypeCode = Literal["b", "B", "h", "H", "i", "I", "l", "L", "q", "Q"]
 _FloatTypeCode = Literal["f", "d"]
 _UnicodeTypeCode = Literal["u"]
@@ -52,6 +54,7 @@ _TypeCode = _IntTypeCode | _FloatTypeCode | _UnicodeTypeCode
 
 class Array(array):
     def __class_getitem__(cls, args: _TypeCode):
+        args = dtype_convert.get(args, args)
         return GenericAlias(Array, args)
 
     @classmethod
@@ -74,15 +77,22 @@ class Array(array):
         return core_schema.no_info_before_validator_function(validate, handler(Any))
 
 
-class ArrayTypeHandler(DatasetTypeHandler):
+class ArrayTypeHandler(DatasetTypeHandler, RowTypeHandler):
     target_type = Array
 
     def __post_init__(self):
         self.type_code: _TypeCode = self.args[0]
-        self.helper = HomogeneousArrayHelper(np.dtype(self.type_code))
+        self.h5_dtype = np.dtype(self.type_code)
+        self.helper = HomogeneousArrayHelper(self.h5_dtype)
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value):
         self.helper.write(h5g, key, value)
 
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any:
         return array(self.type_code, self.helper.read(dataset))
+
+    def convert_to_column(self, value: array) -> np.ndarray:
+        return np.array(value, dtype=self.h5_dtype)
+
+    def convert_from_column(self, value: np.ndarray) -> array:
+        return array(self.type_code, value)

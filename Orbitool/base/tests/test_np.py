@@ -1,9 +1,9 @@
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 from numpy import testing as nptest
 from pydantic import TypeAdapter, ValidationError
 import pytest
-from .. import BaseStructure, H5File, NdArray
+from .. import BaseStructure, H5File, NdArray, AttrNdArray
 from ..structure import AnnotationError
 from .spectrum import Spectrum
 
@@ -75,3 +75,24 @@ def test_dt():
 
     assert b.dts.dtype == np.dtype("datetime64[us]")
     assert all(dt == t for t in b.dts.astype(datetime))
+
+
+def test_attr():
+    class TA(BaseStructure):
+        i: AttrNdArray[int, -1]
+        s: AttrNdArray[str, -1]
+        d: AttrNdArray['datetime64[us]', -1]
+
+    ta = TA(
+        i=np.arange(10),
+        s=['123'] * 10,
+        d=[datetime.now() + timedelta(i) for i in range(10)]
+    )
+
+    f = H5File()
+
+    f.write("ta", ta)
+
+    tb = f.read("ta", TA)
+
+    assert ta == tb

@@ -7,7 +7,7 @@ from pydantic import GetCoreSchemaHandler
 from pydantic_core import CoreSchema, core_schema
 
 from .base import *
-from .np_helper import HomogeneousArrayHelper, support
+from .np_helper import HomogeneousArrayHelper, support, get_converter
 
 
 class ParsedArgs(NamedTuple):
@@ -63,7 +63,7 @@ class NdArray(np.ndarray):
     def __class_getitem__(cls, type_shape: Tuple[type, Tuple[int]]): ...
 
     def __class_getitem__(cls, args):
-        return GenericAlias(NdArray, args)
+        return GenericAlias(cls, args)
 
     @classmethod
     def __get_pydantic_core_schema__(
@@ -103,3 +103,21 @@ class NdArrayTypeHandler(DatasetTypeHandler):
 
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any:
         return self.helper.read(dataset)
+
+
+class AttrNdArray(NdArray):
+    pass
+
+
+class AttrNdArrayTypeHandler(AttrTypeHandler):
+    target_type = AttrNdArray
+
+    def __post_init__(self):
+        self.dtype, self.shape, self.index = parse_args(self.args)
+        self.converter = get_converter(self.dtype)
+
+    def convert_to_attr(self, value: np.ndarray):
+        return self.converter.convert_to_h5(value)
+
+    def convert_from_attr(self, value: np.ndarray):
+        return self.converter.convert_from_h5(value)

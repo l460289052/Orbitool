@@ -1,15 +1,17 @@
-from ..h5diskdata import DiskDict, DiskList, BaseDiskData
-
-from .spectrum import Spectrum
-from ..h5obj import H5File
-from numpy import testing as nptest
-import numpy as np
 from datetime import datetime
+
+import numpy as np
+from numpy import testing as nptest
+
+from ..disk_structure import BaseDiskData, DiskDict, DiskList
+from ..h5file import H5File
+from .spectrum import Spectrum
 
 
 class DiskData(BaseDiskData):
     spectrum_dict = DiskDict(Spectrum)
     spectrum_list = DiskList(Spectrum)
+
 
 def test_dict_direct():
     f = H5File()
@@ -42,6 +44,7 @@ def test_dict_direct():
 
     proxy.spectrum_dict.clear()
     assert len(fo[key]) == 0
+
 
 def test_dict_proxy():
     f = H5File()
@@ -98,7 +101,7 @@ def test_list_direct():
     for i in range(10):
         intensity = mz = np.ones(10) * i
         proxy.spectrum_list.append(Spectrum(mz=mz, intensity=intensity,
-                                               time=datetime(2000, 1, i + 1)))
+                                            time=datetime(2000, 1, i + 1)))
 
     spectrum_list = list(proxy.spectrum_list)
 
@@ -134,6 +137,7 @@ def test_list_direct():
     proxy.spectrum_list.clear()
     assert len(fo[key]) == 0
 
+
 def test_list_proxy():
     f = H5File()
     tmp = H5File()
@@ -148,7 +152,7 @@ def test_list_proxy():
     for i in range(10):
         intensity = mz = np.ones(10) * i
         proxy.spectrum_list.append(Spectrum(mz=mz, intensity=intensity,
-                                               time=datetime(2000, 1, i + 1)))
+                                            time=datetime(2000, 1, i + 1)))
 
     spectrum_list = list(proxy.spectrum_list)
 

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Deque, Dict, List, Set
 
 import numpy as np
 
@@ -30,13 +30,12 @@ class Struct(BaseStructure):
     spectrum: Spectrum
 
 
-def test_list():
-
+def t_seq(typ):
     class Lists(BaseStructure):
-        simples: List[int] = []
-        rows: List[Row] = []
-        datasets: List[Spectrum] = []
-        structs: List[Struct] = []
+        simples: typ[int] = []
+        rows: typ[Row] = []
+        datasets: typ[Spectrum] = []
+        structs: typ[Struct] = []
 
     rows = [Row(name=str(i), position=i * 1.5, time=datetime.now())
             for i in range(10)]
@@ -60,6 +59,47 @@ def test_list():
     assert lists_a.structs == lists_b.structs
 
 
+def test_list():
+    t_seq(List)
+
+
+def test_deque():
+    t_seq(Deque)
+
+
+def test_set():
+    class Sets(BaseStructure):
+        simples: Set[int] = set()
+
+    sets_a = Sets( simples=range(10))
+
+    f = H5File()
+    f.write("s", sets_a)
+
+    sets_b = f.read("s", Sets)
+
+    assert sets_a.simples == sets_b.simples
+
+
+def test_list_list():
+    class Lists(BaseStructure):
+        simples: List[List[int]] = []
+        datasets: List[List[Spectrum]] = []
+
+    lists_a = Lists(
+        simples=[list(range(i)) for i in range(10)],
+        datasets=[[Spectrum(mz=np.empty(j, float), intensity=np.empty(
+            j, float), time=datetime.now()) for j in range(i)] for i in range(10)])
+
+    f = H5File()
+    f.write("s", lists_a)
+
+    lists_b = f.read("s", Lists)
+
+    assert lists_a.simples == lists_b.simples
+    assert lists_a.datasets == lists_b.datasets
+
+
 def test_dict():
     class Dicts(BaseStructure):
         simples: Dict[datetime, int] = {}
@@ -72,7 +112,7 @@ def test_dict():
     datasets = {str(i): Spectrum(mz=np.empty(i, float), intensity=np.empty(
         i, float), time=datetime.now()) for i in range(10)}
     dicts_a = Dicts(
-        simples={datetime.now()+timedelta(i): i for i in range(10)},
+        simples={datetime.now() + timedelta(i): i for i in range(10)},
         rows=rows,
         datasets=datasets,
         structs={

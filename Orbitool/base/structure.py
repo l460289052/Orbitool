@@ -19,6 +19,28 @@ class BaseStructure(BaseModel):
     def h5_type_handler(cls):
         return StructureTypeHandler
 
+    def __eq__(self, other):
+        if type(self) != type(other):
+            return False
+        for key in self.model_fields:
+            v = getattr(self, key)
+            if isinstance(v, np.ndarray):
+                v2 = getattr(other, key)
+                if v is v2:
+                    continue
+                match v.dtype.char:
+                    case 'e' | 'f' | 'd' | 'g':
+                        if np.allclose(v, v2, equal_nan=True):
+                            continue
+                    case _:
+                        if (v == v2).all():
+                            continue
+                return False
+            else:
+                if v != getattr(other, key):
+                    return False
+        return True
+
 
 T = TypeVar("T")
 
