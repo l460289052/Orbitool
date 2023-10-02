@@ -14,7 +14,7 @@ from PyQt6 import QtCore, QtWidgets
 from .. import setting
 from ..functions import peakfit as peakfit_func
 from ..functions import spectrum as spectrum_func
-from ..structures.spectrum import FittedPeak
+from ..models.spectrum.spectrum import FittedPeak
 from ..workspace import UiNameGetter, UiState
 from . import PeakShapeUi, component
 from .manager import Manager, Thread, state_node

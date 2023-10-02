@@ -5,7 +5,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 from ... import utils
 from ...functions.file import generage_periods
-from ...structures.file import FileSpectrumInfo, Path, PathList, PeriodItem
+from ...models.file.file import FileSpectrumInfo, Path, PathList, PeriodItem
 from .. import utils as UiUtils
 from ..manager import Manager, Thread, state_node
 from ..utils import DragHelper, set_header_sizes, showInfo

@@ -7,7 +7,7 @@ import os
 from PyQt6 import QtCore, QtWidgets
 
 from .. import setting
-from ..structures.file import FileSpectrumInfo
+from ..models.file.file import FileSpectrumInfo
 from . import SpectraListUi, utils
 from .manager import Manager, state_node
 from .utils import openfolder, set_header_sizes, showInfo, get_tablewidget_selected_row

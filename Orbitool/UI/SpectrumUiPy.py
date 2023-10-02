@@ -5,7 +5,7 @@ from PyQt6 import QtWidgets, QtCore
 from .manager import state_node, Manager
 from .utils import savefile
 
-from ..structures.spectrum import Spectrum
+from ..models.spectrum.spectrum import Spectrum
 
 
 class Widget(QtWidgets.QWidget):

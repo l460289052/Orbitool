@@ -6,7 +6,7 @@ import matplotlib.ticker
 
 
 from PyQt6 import QtWidgets, QtGui
-from ..structures.spectrum import Spectrum
+from ..models.spectrum.spectrum import Spectrum
 from ..functions import spectrum as spectrum_func
 from . import CalibrationDetailUi
 from .component import Plot

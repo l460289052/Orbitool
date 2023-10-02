@@ -5,7 +5,7 @@ from functools import partial
 from PyQt6 import QtCore, QtWidgets
 
 from ..functions.peakfit import masslist as masslist_func
-from ..structures.spectrum import MassListItem
+from ..models.spectrum.spectrum import MassListItem
 from ..utils.formula import Formula
 from . import MassListUi
 from .manager import Manager, state_node

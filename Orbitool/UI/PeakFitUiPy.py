@@ -12,7 +12,7 @@ from ..functions import formula as formula_func
 from ..functions import peakfit as peakfit_func
 from ..functions import spectrum as spectrum_func
 from ..functions.peakfit import masslist as masslist_func
-from ..structures.spectrum import (FittedPeak, MassListItem, Peak, PeakTags,
+from ..models.spectrum.spectrum import (FittedPeak, MassListItem, Peak, PeakTags,
                                    Spectrum)
 from ..utils.formula import Formula, formula_range
 from . import PeakFitUi
@@ -158,7 +158,7 @@ class Widget(QtWidgets.QWidget):
                 peak.formulas = calc_get(peak.peak_position)
             if distribution:
                 for peak in manager.tqdm(peaks, msg="correct formulas to natural distribution"):
-                    peak.formulas = formula_func.correct(peak, peaks, rtol)
+                    peak.formulas = formula_func.correct_formula(peak, peaks, rtol)
 
             mz, residual = peakfit_func.calculateResidual(
                 raw_peaks, original_indexes, peaks, workspace.info.peak_shape_tab.func)
@@ -565,7 +565,7 @@ class Widget(QtWidgets.QWidget):
             if distribution:
                 for index in manager.tqdm(indexes, msg="correct formulas to natural distribution"):
                     peak = peaks[index]
-                    peak.formulas = formula_func.correct(peak, peaks, rtol)
+                    peak.formulas = formula_func.correct_formula(peak, peaks, rtol)
 
         yield func, "fit use calc"
 

@@ -6,7 +6,7 @@ from PyQt6 import QtCore, QtWidgets, QtGui
 
 from .. import setting
 from ..functions import binary_search
-from ..structures.spectrum import FittedPeak, PeakTags
+from ..models.spectrum.spectrum import FittedPeak, PeakTags
 from ..utils.formula import Formula
 from . import PeakListUi
 from .manager import Manager, state_node

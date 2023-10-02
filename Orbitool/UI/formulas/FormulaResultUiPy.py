@@ -4,7 +4,7 @@ from typing import List
 from PyQt6 import QtWidgets, QtCore
 from pyteomics.mass.mass import isotopologues
 
-from Orbitool.structures.spectrum import FittedPeak
+from Orbitool.models.spectrum.spectrum import FittedPeak
 from Orbitool.functions import binary_search
 from Orbitool.utils.formula import Formula
 from . import FormulaResultUi

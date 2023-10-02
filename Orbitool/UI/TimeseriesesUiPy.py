@@ -15,8 +15,8 @@ from ..functions.peakfit.base import BaseFunc as BaseFitFunc
 from ..functions.peakfit import NoFitFunc
 from ..functions.spectrum import splitPeaks, safeCutSpectrum
 from ..structures.HDF5 import StructureListView
-from ..structures.spectrum import MassListItem, Spectrum
-from ..structures.timeseries import TimeSeries
+from ..models.spectrum.spectrum import MassListItem, Spectrum
+from ..models.timeseries.timeseries import TimeSeries
 from ..workspace.timeseries import TimeSeriesInfoRow
 from ..utils.formula import Formula
 from ..utils.time_format.time_convert import getTimesExactToS, converters

@@ -11,9 +11,9 @@ from PyQt6 import QtCore, QtWidgets
 
 from .. import workspace, setting
 from ..functions import spectrum as spectrum_func, binary_search
-from ..structures.file import FileSpectrumInfo
+from ..models.file.file import FileSpectrumInfo
 from ..structures.HDF5 import StructureListView, DiskListDirectView
-from ..structures.spectrum import Spectrum
+from ..models.spectrum.spectrum import Spectrum
 from ..utils.formula import Formula
 from ..workspace import WorkSpace
 from . import NoiseUi, component

@@ -10,7 +10,7 @@ import numpy as np
 
 from Orbitool import setting
 from Orbitool.UI import Manager
-from Orbitool.structures.file import PeriodItem
+from Orbitool.models.file.file import PeriodItem
 from Orbitool.functions.file import generage_periods, generate_num_periods, get_num_range_from_ranges
 
 from .CustomPeriodUi import Ui_Dialog

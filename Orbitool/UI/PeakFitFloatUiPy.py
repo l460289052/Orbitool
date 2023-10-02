@@ -8,7 +8,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from ..functions import binary_search
 from ..functions.peakfit import get_peak_position
 from ..functions import formula as formula_func
-from ..structures.spectrum import FittedPeak
+from ..models.spectrum.spectrum import FittedPeak
 from ..utils.formula import Formula
 from . import PeakFitFloatUi
 from .component import Plot

@@ -7,7 +7,7 @@ from matplotlib.cm import rainbow as rainbow_color_map
 from matplotlib.figure import Figure
 from PyQt6 import QtCore, QtWidgets
 
-from ..structures.spectrum import FittedPeak
+from ..models.spectrum.spectrum import FittedPeak
 from . import MassDefectUi
 from .component import Plot
 from .manager import Manager, state_node

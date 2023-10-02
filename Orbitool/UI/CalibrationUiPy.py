@@ -12,7 +12,7 @@ from ..functions import spectrum as spectrum_func, binary_search, peakfit as pea
 from ..functions.calibration import Calibrator
 from ..functions.peakfit.normal_distribution import NormalDistributionFunc
 from ..structures.HDF5 import StructureListView, DiskListDirectView
-from ..structures.spectrum import Spectrum, SpectrumInfo
+from ..models.spectrum.spectrum import Spectrum, SpectrumInfo
 from ..workspace import WorkSpace
 from ..workspace.calibration import CalibratorInfoSegment
 from . import CalibrationUi
