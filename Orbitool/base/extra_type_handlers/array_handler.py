@@ -10,6 +10,7 @@ import numpy as np
 
 from .base import *
 from .np_helper import HomogeneousArrayHelper
+from .column_handler import ColumnHandler
 
 array_dtypes = {
     "b": np.int8,
@@ -77,13 +78,13 @@ class Array(array):
         return core_schema.no_info_before_validator_function(validate, handler(Any))
 
 
-class ArrayTypeHandler(DatasetTypeHandler, RowTypeHandler):
+class ArrayTypeHandler(ColumnHandler):
     target_type = Array
 
     def __post_init__(self):
         self.type_code: _TypeCode = self.args[0]
-        self.h5_dtype = np.dtype(self.type_code)
-        self.helper = HomogeneousArrayHelper(self.h5_dtype)
+        self.dtype = np.dtype(self.type_code)
+        self.helper = HomogeneousArrayHelper(self.dtype)
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value):
         return self.helper.write(h5g, key, value)
@@ -91,8 +92,8 @@ class ArrayTypeHandler(DatasetTypeHandler, RowTypeHandler):
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any:
         return array(self.type_code, self.helper.read(dataset))
 
-    def convert_to_column(self, value: array) -> np.ndarray:
-        return np.array(value, dtype=self.h5_dtype)
+    def convert_to_array(self, value: array) -> np.ndarray:
+        return np.array(value, dtype=self.dtype)
 
-    def convert_from_column(self, value: np.ndarray) -> array:
+    def convert_from_array(self, value: np.ndarray) -> array:
         return array(self.type_code, value)

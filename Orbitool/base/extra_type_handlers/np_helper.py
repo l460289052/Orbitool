@@ -1,6 +1,6 @@
 from functools import lru_cache
-from typing import Any, Generic, Iterable, List, Optional, Tuple, Type, TypeVar
-from h5py import Group as H5Group, Dataset as H5Dataset #, string_dtype
+from typing import Any, Generic, Iterable, List, Optional, Tuple, Type, TypeVar, Union
+from h5py import Group as H5Group, Dataset as H5Dataset  # , string_dtype
 import numpy as np
 from .base import *
 
@@ -29,8 +29,9 @@ SUPPORTED = INTS.union(FLOATS, STRS, OTHERS)
 
 # strdtype = string_dtype(encoding='utf-8')
 
+
 def support(dtype: np.dtype):
-    return dtype.char in SUPPORTED # or dtype == strdtype
+    return dtype.char in SUPPORTED  # or dtype == strdtype
 
 
 int64 = np.dtype('int64')
@@ -152,77 +153,48 @@ class HomogeneousArrayHelper:
 
 
 class HeteroGeneousArrayHelper:
-    def __init__(self, titles: List[str], dtypes: List[np.dtype]) -> None:
-        assert all(map(support, dtypes))
-        self.titles = titles
-        self.dtypes = dtypes
-        self.converters = list(map(get_converter, dtypes))
-        self.h5_dtype = np.dtype(
-            [(title, cvt.h5_dtype) for title, cvt in zip(titles, self.converters)]) # add a shape
-        self.s_type = [cvt.h5_dtype.char == "S" for cvt in self.converters]
-        self.has_s = any(self.s_type)
+    def __init__(self, dtype_list: List[Union[Tuple[str, np.dtype], Tuple[str, np.dtype, Union[int, Tuple[int]]]]]) -> None:
+        converters:List[Converter] = []
+        h5_dtype = []
+        s_type = []
+        has_s = False
+        for dtype in dtype_list:
+            typ = dtype[1]
+            assert support(typ)
+            converter = get_converter(typ)
+            converters.append(converter)
+
+            h5_dtype.append((dtype[0], converter.h5_dtype, *dtype[2:]))
+            if converter.h5_dtype.char == "S":
+                s_type.append(True)
+                has_s = True
+            else:
+                s_type.append(False)
+
+        self.dtype_list = dtype_list
+        self.converters = converters
+        self.h5_dtype_list = h5_dtype
+        self.h5_dtype = np.dtype(h5_dtype)
+        self.h5_dtype = h5_dtype
+        self.s_type = s_type
+        self.has_s = has_s
 
     def columns_write(self, h5g: H5Group, key: str, length: int, columns: Iterable[np.ndarray]):
         if self.has_s:
-            h5_dtype = self.h5_dtype
+            h5_dtype_list = self.h5_dtype_list
             columns = [cvt.convert_to_h5(column) for cvt, column in zip(
                 self.converters, columns)]
-            h5_dtype = [(name, col.dtype if s else h5_dtype[name])
-                        for name, s, col in zip(h5_dtype.names, self.s_type, columns)]
+            h5_dtype = [(dtype[0], col.dtype if s else dtype[1], *dtype[2:])
+                        for dtype, s, col in zip(h5_dtype_list, self.s_type, columns)]
             ds = h5g.create_dataset(key, length, h5_dtype, **H5_DT_ARGS)
-            for title, column in zip(self.titles, columns):
-                ds[title] = column
+            for dtype, column in zip(self.h5_dtype_list, columns):
+                ds[dtype[0]] = column
         else:
             ds = h5g.create_dataset(key, length, self.h5_dtype, **H5_DT_ARGS)
-            for title, cvt, column in zip(self.titles, self.converters, columns):
-                ds[title] = cvt.convert_to_h5(column)
+            for dtype, cvt, column in zip(self.h5_dtype_list, self.converters, columns):
+                ds[dtype[0]] = cvt.convert_to_h5(column)
         return ds
 
     def columns_read(self, dataset: H5Dataset):
-        for title, cvt in zip(self.titles, self.converters):
-            yield cvt.convert_from_h5(dataset[title])
-
-
-T = TypeVar("T")
-
-
-class PyListHelper(Generic[T]):
-    def __init__(self, typ: Type[T]) -> None:
-        self.handler: RowTypeHandler = get_handler(typ)
-        assert isinstance(self.handler, RowTypeHandler)
-        self.dtype = self.handler.h5_dtype
-        self.array_helper = HomogeneousArrayHelper(self.dtype)
-
-    def write_to_h5(self, h5g: H5Group, key: str, value: List[T]):
-        return self.array_helper.write(h5g, key, self.handler.convert_to_column(value))
-
-    def read_from_h5(self, dataset: H5Dataset):
-        return self.handler.convert_from_column(self.array_helper.read(dataset))
-
-
-class PyColumnsHelper:
-    def __init__(self, titles: Tuple[str], types: tuple) -> None:
-        handlers: List[RowTypeHandler] = []
-        dtypes: List[np.dtype] = []
-        for typ in types:
-            handler = get_handler(typ)
-            assert isinstance(handler, RowTypeHandler)
-            handlers.append(handler)
-            dtypes.append(handler.h5_dtype) # TODO: add a shape for type
-        self.titles = titles
-        self.handlers = handlers
-        self.dtypes = dtypes
-        self.array_helper = HeteroGeneousArrayHelper(titles, dtypes)
-
-    def write_columns_to_h5(self, h5g: H5Group, key: str, length: int, columns: Iterable[list]):
-        h5_columns = []
-        for handler, column in zip(self.handlers, columns):
-            h5_columns.append(handler.convert_to_column(column))
-        return self.array_helper.columns_write(h5g, key, length, h5_columns)
-
-    def read_columns_from_h5(self, dataset: H5Dataset):
-        columns_iter = self.array_helper.columns_read(dataset)
-        columns = []
-        for handler, column in zip(self.handlers, columns_iter):
-            columns.append(handler.convert_from_column(column))
-        return columns
+        for dtype, cvt in zip(self.h5_dtype_list, self.converters):
+            yield cvt.convert_from_h5(dataset[dtype[0]])

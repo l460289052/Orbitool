@@ -43,11 +43,13 @@ def test_dataset_list():
         intensity: Array["d"]
 
         bias: NdArray[float, -1]
+        some_array: NdArray[float, (-1, 2, 3)]
 
     a = Timeseries(
         time=[datetime.now()] * 10,
         intensity=[i * 2.5 for i in range(10)],
-        bias=np.arange(10, dtype=float)
+        bias=np.arange(10, dtype=float),
+        some_array=np.empty((10, 2, 3), float)
     )
 
     f = H5File()

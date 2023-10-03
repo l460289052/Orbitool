@@ -1,22 +1,26 @@
 
 from typing import Any, Dict, List, Tuple, Type
-from h5py import Dataset as H5Dataset, Group as H5Group
-import numpy as np
+
+from h5py import Dataset as H5Dataset
+from h5py import Group as H5Group
 
 from ..row_structure import BaseRowStructure
 from ..structure import get_handler, handlers
 from .base import *
-
-from .np_helper import PyColumnsHelper, PyListHelper
+from .column_handler import ColumnCellTypeHandler
+from .column_handler import ListTypeHandler as SimpleListTypeHandler
+from .column_handler import ColumnsHelper
+from .column_handler import get_handler as get_column_handler
 
 
 def DictTypeHandler(origin, args):
     inner_type = args[1]
     if isinstance(inner_type, type) and issubclass(inner_type, BaseRowStructure):
         return DictRowTypeHandler(origin, args)
-    handler = get_handler(inner_type)
-    if isinstance(handler, RowTypeHandler):
+    handler = get_column_handler(inner_type)
+    if isinstance(handler, ColumnCellTypeHandler):
         return DictSimpleTypeHandler(origin, args)
+    handler = get_handler(inner_type)
     assert isinstance(handler, (GroupTypeHandler, DatasetTypeHandler))
     return DictStructureTypeHandler(origin, args)
 
@@ -39,7 +43,7 @@ class DictRowTypeHandler(DatasetTypeHandler):
             annotation = field.annotation
             types.append(annotation)
         self.titles = titles
-        self.column_helper = PyColumnsHelper(
+        self.column_helper = ColumnsHelper(
             ("_key_index", *titles), (kt, *types))
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value: Dict[Any, BaseRowStructure]):
@@ -73,7 +77,7 @@ class DictRowTypeHandler(DatasetTypeHandler):
 class DictSimpleTypeHandler(DatasetTypeHandler):
     def __post_init__(self):
         super().__post_init__()
-        self.column_helper = PyColumnsHelper(("key", "value"), self.args)
+        self.column_helper = ColumnsHelper(("key", "value"), self.args)
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value: Dict[Any, Any]):
         return self.column_helper.write_columns_to_h5(
@@ -88,16 +92,16 @@ class DictSimpleTypeHandler(DatasetTypeHandler):
 class DictStructureTypeHandler(GroupTypeHandler):
     def __post_init__(self):
         self.handler = get_handler(self.args[1])
-        self.index_helper = PyListHelper(self.args[0])
+        self.index_handler = get_handler(List[self.args[0]])
 
     def write_group_to_h5(self, group: H5Group, value: dict):
         handler = self.handler
         for index, v in enumerate(value.values()):
             handler.write_to_h5(group, str(index), v)
 
-        self.index_helper.write_to_h5(group, "_index", list(value.keys()))
+        self.index_handler.write_to_h5(group, "_index", list(value.keys()))
 
     def read_group_from_h5(self, group: H5Group) -> Any:
-        keys = self.index_helper.read_from_h5(group["_index"])
+        keys = self.index_handler.read_from_h5(group, "_index")
         handler = self.handler
         return {key: handler.read_from_h5(group, str(index)) for index, key in enumerate(keys)}

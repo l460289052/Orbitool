@@ -5,8 +5,9 @@ from typing import Any, List, Type, final, get_args, get_origin, Dict
 import numpy as np
 
 from Orbitool.base.extra_type_handlers.np_handler import NdArray
-from .structure import AttrTypeHandler, BaseStructure, DatasetTypeHandler, get_handler, broken_entries, RowTypeHandler
+from .structure import AttrTypeHandler, BaseStructure, DatasetTypeHandler, get_handler, broken_entries
 from .extra_type_handlers import np_helper, Array
+from .extra_type_handlers.column_handler import ColumnCellTypeHandler, ColumnHandler
 
 STRUCT_BASE = "_dataset_struct_base"
 
@@ -27,35 +28,31 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
         self.origin: Type[BaseDatasetStructure]
         fields = {}
         dataset_fields = []
-        types: Dict[str, Type] = {}
-        handlers: Dict[str, RowTypeHandler] = {}
+        handlers: Dict[str, ColumnHandler] = {}
         dtypes = []
         dict_handler = None
         for key, field in self.origin.model_fields.items():
             annotation = field.annotation
-            if (origin := get_origin(annotation)) in SUPPORT_DATA:
+            if get_origin(annotation) == dict:
                 dataset_fields.append(key)
-                if origin == NdArray:
-                    dtypes.append(np.dtype(get_args(annotation)[0]))
-                elif origin == dict:
-                    dict_handler = get_handler(annotation)
-                    assert isinstance(dict_handler, DatasetTypeHandler)
+                dict_handler = get_handler(annotation)
+                assert isinstance(dict_handler, DatasetTypeHandler)
+                continue
+            handler = get_handler(annotation)
+            if isinstance(handler, ColumnHandler):
+                dataset_fields.append(key)
+                handlers[key] = handler
+                shape = handler.get_cell_shape()
+                if shape is None:
+                    dtypes.append((key, handler.dtype))
                 else:
-                    if origin == Array:
-                        handler = get_handler(annotation)
-                    else:
-                        handler = get_handler(get_args(annotation)[0])
-                    assert isinstance(handler, RowTypeHandler)
-                    types[key] = annotation
-                    handlers[key] = handler
-                    dtypes.append(handler.h5_dtype)
+                    dtypes.append((key, handler.dtype, shape))
             else:
                 handler = get_handler(annotation)
                 assert isinstance(handler, AttrTypeHandler)
                 fields[key] = annotation
 
         self.dataset_fields = dataset_fields
-        self.types = types
         self.dict_handler = dict_handler
         self.handlers = handlers
         self.dtypes = dtypes
@@ -64,9 +61,7 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
             assert len(
                 dataset_fields) == 1, "Dict cannot exist with other lists or arrays"
         else:
-            self.helper = np_helper.HeteroGeneousArrayHelper(
-                dataset_fields, dtypes
-            )
+            self.helper = np_helper.HeteroGeneousArrayHelper(dtypes)
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value: BaseDatasetStructure):
         if self.dict_handler is None:
@@ -76,7 +71,7 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
                 h5g, key, length, [
                     getattr(value, df)
                     if (handler := handlers.get(df, None)) is None
-                    else handler.convert_to_column(getattr(value, df))
+                    else handler.convert_to_array(getattr(value, df))
                     for df in self.dataset_fields]
             )
         else:
@@ -97,8 +92,7 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
             columns_iter = self.helper.columns_read(dataset)
             values = dict(zip(self.dataset_fields, columns_iter))
             for key, handler in self.handlers.items():
-                values[key] = recover_from_list(
-                    self.types[key], handler.convert_from_column(values[key]))
+                values[key] = handler.convert_from_array(values[key])
         else:
             key = self.dataset_fields[0]
             values = {key: self.dict_handler.read_dataset_from_h5(dataset)}
@@ -112,10 +106,3 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
                 v = cls.model_fields[k].get_default(call_default_factory=True)
             values[k] = v
         return cls(**values)
-
-
-def recover_from_list(annotation, value):
-    origin = get_origin(annotation)
-    if origin == deque:
-        return deque(origin)
-    return value

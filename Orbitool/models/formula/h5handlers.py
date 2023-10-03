@@ -3,6 +3,7 @@ from typing import Any, Iterable, List, Union
 import numpy as np
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import CoreSchema, core_schema
+from Orbitool.base.extra_type_handlers.column_handler import StrTypeHandler as StrCellTypeHandler
 
 from Orbitool.base.extra_type_handlers.simple_handlers import StrTypeHandler
 from ._formula import Formula
@@ -33,8 +34,11 @@ class FormulaTypeHandler(StrTypeHandler):
             value = value.decode()
         return Formula(value)
 
+class FormulaCellTypeHandler(StrCellTypeHandler):
+    column_target = FormulaType
+
     def convert_to_column(self, value: List[Formula]) -> np.ndarray:
-        return np.array(list(map(str, value)), self.h5_dtype)
+        return np.array(list(map(str, value)), self.dtype)
 
     def convert_from_column(self, value: np.ndarray) -> List[Formula]:
         return list(map(Formula, value.tolist()))
@@ -66,8 +70,11 @@ class FormulaListTypeHandler(StrTypeHandler):
     def convert_from_attr(self, value):
         return validate_formula_list(value)
 
+class FormulaListCellTypeHandler(StrCellTypeHandler):
+    column_target = FormulaList
+
     def convert_to_column(self, value: List[List[Formula]]) -> np.ndarray:
-        return np.array(list(map(self.convert_to_attr, value)), self.h5_dtype)
+        return np.array([', '.join(map(str, v)) for v in value], self.dtype)
     
     def convert_from_column(self, value: np.ndarray) -> list:
         return list(map(validate_formula_list, value.tolist()))

@@ -138,3 +138,23 @@ def test_dict():
     assert dicts_a.rows == dicts_b.rows
     assert dicts_a.datasets == dicts_b.datasets
     assert dicts_a.structs == dicts_b.structs
+
+
+def test_dict_cell_shape():
+    class Cell(BaseRowStructure):
+        a: int
+        b: NdArray[float, (2, 3)]
+
+    class D(BaseStructure):
+        rows: Dict[str, Cell] = {}
+
+    a = D(rows={
+        str(i): Cell(a=i, b=np.ones((2, 3), dtype=float))
+        for i in range(10)
+    })
+
+    f = H5File()
+    f.write("d", a)
+    b = f.read("d", D)
+
+    assert a == b

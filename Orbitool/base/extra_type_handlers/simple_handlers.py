@@ -6,9 +6,8 @@ import numpy as np
 from .base import *
 
 
-class IntTypeHandler(AttrTypeHandler, RowTypeHandler):
+class IntTypeHandler(AttrTypeHandler):
     target_type = int
-    h5_dtype = np.dtype("int64")
 
     def convert_to_attr(self, value):
         return int(value)
@@ -17,9 +16,8 @@ class IntTypeHandler(AttrTypeHandler, RowTypeHandler):
         return int(value)
 
 
-class FloatTypeHandler(AttrTypeHandler, RowTypeHandler):
+class FloatTypeHandler(AttrTypeHandler):
     target_type = float
-    h5_dtype = np.dtype("float64")
 
     def convert_to_attr(self, value):
         return float(value)
@@ -28,9 +26,8 @@ class FloatTypeHandler(AttrTypeHandler, RowTypeHandler):
         return float(value)
 
 
-class BoolTypeHandler(AttrTypeHandler, RowTypeHandler):
+class BoolTypeHandler(AttrTypeHandler):
     target_type = bool
-    h5_dtype = np.dtype("bool")
 
     def convert_to_attr(self, value):
         return bool(value)
@@ -39,10 +36,8 @@ class BoolTypeHandler(AttrTypeHandler, RowTypeHandler):
         return bool(value)
 
 
-class StrTypeHandler(AttrTypeHandler, RowTypeHandler):
+class StrTypeHandler(AttrTypeHandler):
     target_type = str
-    # h5_dtype = string_dtype(encoding="utf-8")
-    h5_dtype = np.dtype("U")
 
     def convert_to_attr(self, value):
         return str(value)
@@ -51,9 +46,8 @@ class StrTypeHandler(AttrTypeHandler, RowTypeHandler):
         return value
 
 
-class DatetimeTypeHandler(AttrTypeHandler, RowTypeHandler):
+class DatetimeTypeHandler(AttrTypeHandler):
     target_type = datetime
-    h5_dtype = np.dtype("datetime64[us]")
 
     def convert_to_attr(self, value: datetime):
         return str(value)
@@ -62,9 +56,8 @@ class DatetimeTypeHandler(AttrTypeHandler, RowTypeHandler):
         return datetime.fromisoformat(value)
 
 
-class DateTypeHandler(AttrTypeHandler, RowTypeHandler):
+class DateTypeHandler(AttrTypeHandler):
     target_type = date
-    h5_dtype = np.dtype("datetime64[D]")
 
     def convert_to_attr(self, value: date):
         return str(value)
@@ -73,9 +66,8 @@ class DateTypeHandler(AttrTypeHandler, RowTypeHandler):
         return date.fromisoformat(value)
 
 
-class TimedeltaTypeHandler(AttrTypeHandler, RowTypeHandler):
+class TimedeltaTypeHandler(AttrTypeHandler):
     target_type = timedelta
-    h5_dtype = np.dtype("timedelta64[us]")
 
     def convert_to_attr(self, value: timedelta):
         return value.total_seconds()

@@ -136,17 +136,6 @@ class DatasetTypeHandler(_BaseTypeHandler):
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any: ...
 
 
-class RowTypeHandler:
-    h5_dtype = ...
-    h5_shape = ...
-
-    def convert_to_column(self, value: List[Any]) -> np.ndarray:
-        return np.array(value, self.h5_dtype)
-
-    def convert_from_column(self, value: np.ndarray) -> list:
-        return value.tolist()
-
-
 class StructureTypeHandler(GroupTypeHandler):
     target_type = BaseStructure
     origin: BaseStructure
@@ -170,7 +159,7 @@ class StructureTypeHandler(GroupTypeHandler):
         return self.origin(**values)
 
 
-@ lru_cache(None)  # TODO: clear after r/w
+@lru_cache(None)  # TODO: clear after r/w
 def get_handler(typ: type) -> _BaseTypeHandler:
     if hasattr(typ, "h5_type_handler"):
         Handler = getattr(typ, "h5_type_handler")()
