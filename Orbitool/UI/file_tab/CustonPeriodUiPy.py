@@ -11,7 +11,7 @@ import numpy as np
 from Orbitool import setting
 from Orbitool.UI import Manager
 from Orbitool.models.file.file import PeriodItem
-from Orbitool.functions.file import generage_periods, generate_num_periods, get_num_range_from_ranges
+from Orbitool.models.file import PeriodItem, generage_periods, generate_num_periods, get_num_range_from_ranges
 
 from .CustomPeriodUi import Ui_Dialog
 from .utils import str2timedelta, timedelta2str
@@ -269,14 +269,13 @@ class Dialog(QtWidgets.QDialog):
         last_num: PeriodItem = None
         new_periods = deepcopy(self.periods)
         for period in new_periods:
-            if period.end_time is not None:
+            if period.use_time():
                 period.end_time += delta
                 assert period.start_time < period.end_time
                 if last_time:
                     assert period.start_time > last_time.end_time
                 last_time = period
             elif period.stop_num >= 0:
-                period: PeriodItem
                 period.stop_num += delta
                 assert period.start_num < period.stop_num
                 if last_num:

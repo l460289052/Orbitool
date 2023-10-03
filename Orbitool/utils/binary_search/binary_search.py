@@ -1,4 +1,4 @@
-from typing import Tuple, TypeVar, List, Callable, Any
+from typing import Sequence, Tuple, TypeVar, List, Callable, Any
 from ._binary_search import indexNearest as indexNearest_np, indexBetween as indexBetween_np
 
 
@@ -10,7 +10,7 @@ T = TypeVar("T")
 K = TypeVar("K")
 
 
-def indexFirstNotSmallerThan(array: List[T], value: K, indexRange: Tuple[int, int] = None, method: Callable[[List[T], int], K] = defaultMethod):
+def indexFirstNotSmallerThan(array: Sequence[T], value: K, indexRange: Tuple[int, int] = None, method: Callable[[Sequence[T], int], K] = defaultMethod):
     '''
     np.searchsorted(array,value,'left')
     or
@@ -26,7 +26,7 @@ def indexFirstNotSmallerThan(array: List[T], value: K, indexRange: Tuple[int, in
     return l
 
 
-def indexFirstBiggerThan(array: List[T], value: K, indexRange: Tuple[int, int] = None, method: Callable[[List[T], int], K] = defaultMethod):
+def indexFirstBiggerThan(array: Sequence[T], value: K, indexRange: Tuple[int, int] = None, method: Callable[[Sequence[T], int], K] = defaultMethod):
     '''
     np.searchsorted(array,value,'right')
     '''
@@ -40,7 +40,7 @@ def indexFirstBiggerThan(array: List[T], value: K, indexRange: Tuple[int, int] =
     return l
 
 
-def indexNearest(array: List[T], value: K, indexRange: Tuple[int, int] = None, method: Callable[[List[T], int], K] = defaultMethod) -> int:
+def indexNearest(array: Sequence[T], value: K, indexRange: Tuple[int, int] = None, method: Callable[[Sequence[T], int], K] = defaultMethod) -> int:
     '''
     `indexRange`: default=(0,len(array))
     '''
@@ -53,7 +53,7 @@ def indexNearest(array: List[T], value: K, indexRange: Tuple[int, int] = None, m
         return i
 
 
-def indexBetween(array: List[T], valueRange: Tuple[K, K], indexRange: Tuple[int, int] = None, method: Callable[[List[T], int], K] = defaultMethod) -> slice:
+def indexBetween(array: Sequence[T], valueRange: Tuple[K, K], indexRange: Tuple[int, int] = None, method: Callable[[Sequence[T], int], K] = defaultMethod) -> slice:
     """
     get range from sorted array for value in [l, r] (contains both)
     `indexRange`: (start,stop), contain array[start] to array[stop-1]

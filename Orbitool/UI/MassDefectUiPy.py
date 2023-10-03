@@ -7,7 +7,8 @@ from matplotlib.cm import rainbow as rainbow_color_map
 from matplotlib.figure import Figure
 from PyQt6 import QtCore, QtWidgets
 
-from ..models.spectrum.spectrum import FittedPeak
+from Orbitool.models.spectrum import FittedPeak
+from Orbitool.models.workspace.massdefect import Clr, Gry
 from . import MassDefectUi
 from .component import Plot
 from .manager import Manager, state_node
@@ -104,8 +105,9 @@ class Widget(QtWidgets.QWidget):
         elif is_atom:
             info.clr_title = "atoms"
 
-        info.clr_x, info.clr_y, info.clr_size, info.clr_color, info.clr_labels = clr_x, clr_y, clr_size, clr_color, clr_labels
-        info.gry_x, info.gry_y, info.gry_size = gry_x, gry_y, gry_size
+        info.clr = Clr(x=clr_x, y=clr_y, size=clr_size,
+                       color=clr_color, labels=clr_labels)
+        info.gry = Gry(x=gry_x, y=gry_y, size=gry_size)
 
     def plotMassDefect(self):
         plot = self.plot
@@ -128,18 +130,21 @@ class Widget(QtWidgets.QWidget):
             ui.maxSizeHorizontalSlider.value() / 10) * 10
 
         is_dbe = info.is_dbe
-        gry = ui.showGreyCheckBox.isChecked()
+        show_gry = ui.showGreyCheckBox.isChecked()
         is_log = ui.logCheckBox.isChecked()
         alpha = 1 - ui.transparencyDoubleSpinBox.value()
 
-        clr_x, clr_y, clr_size, clr_color, clr_labels = info.clr_x, info.clr_y, info.clr_size, info.clr_color, info.clr_labels
-        gry_x, gry_y, gry_size = info.gry_x, info.gry_y, info.gry_size
+        clr = info.clr
+        gry = info.gry
+
+        clr_size = clr.size
+        gry_size = gry.size
 
         if is_log:
             clr_size = np.log(clr_size + 1) - 1
             gry_size = np.log(gry_size + 1) - 1
 
-        if gry and len(gry_x) > 0:
+        if show_gry and len(gry.x) > 0:
             maximum = np.max((clr_size.max(), gry_size.max()))
             minimum = np.min((clr_size.min(), gry_size.min()))
         else:
@@ -154,20 +159,20 @@ class Widget(QtWidgets.QWidget):
         # minimum = 5 * min_factor
 
         ax = plot.ax
-        if gry:
+        if show_gry:
             gry_size = (gry_size - minimum) / (maximum - minimum) * \
                 (max_factor - min_factor) + min_factor
-            ax.scatter(gry_x, gry_y, s=gry_size, c='grey',
+            ax.scatter(gry.x, gry.y, s=gry_size, c='grey',
                        linewidths=0.5, edgecolors='k', alpha=alpha)
 
         clr_size = (clr_size - minimum) / (maximum - minimum) * \
             (max_factor - min_factor) + min_factor
-        sc = ax.scatter(clr_x, clr_y, s=clr_size, c=clr_color,
+        sc = ax.scatter(clr.x, clr.y, s=clr_size, c=clr.color,
                         cmap=rainbow_color_map, linewidths=0.5, edgecolors='k', alpha=alpha)
         clrb = plot.fig.colorbar(sc)
         clrb.ax.set_title(info.clr_title)
-        if clr_labels is not None:
-            clrb.ax.set_yticklabels(clr_labels)
+        if clr.labels is not None:
+            clrb.ax.set_yticklabels(clr.labels)
 
         ax.autoscale(True)
         plot.fig.tight_layout()
@@ -194,7 +199,7 @@ class Widget(QtWidgets.QWidget):
             return
 
         if info.clr_title == "atoms":
-            atoms = info.clr_labels
+            atoms = info.clr.labels
 
             def conv(value):
                 return atoms[value]
@@ -206,9 +211,9 @@ class Widget(QtWidgets.QWidget):
             writer = csv.writer(file)
             writer.writerow(['x', 'mass defect', 'intensity', 'color'])
 
-            writer.writerows(zip(info.clr_x, info.clr_y,
-                                 info.clr_size, map(conv, info.clr_color)))
-            writer.writerows(zip(info.gry_x, info.gry_y, info.gry_size))
+            writer.writerows(zip(info.clr.x, info.clr.y,
+                                 info.clr.size, map(conv, info.clr.color)))
+            writer.writerows(zip(info.gry.x, info.gry.y, info.gry.size))
 
 
 def find_formula(peak: FittedPeak):

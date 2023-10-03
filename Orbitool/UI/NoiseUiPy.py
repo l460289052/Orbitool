@@ -1,7 +1,7 @@
-from copy import copy
 import csv
 from collections import deque
-from datetime import datetime
+from copy import copy
+from tkinter import W
 from typing import Generator, Iterable, List, Optional, Tuple, Union
 
 import matplotlib.ticker
@@ -9,13 +9,16 @@ import numpy as np
 from numpy.polynomial.polynomial import polyval
 from PyQt6 import QtCore, QtWidgets
 
-from .. import workspace, setting
-from ..functions import spectrum as spectrum_func, binary_search
-from ..models.file.file import FileSpectrumInfo
-from ..structures.HDF5 import StructureListView, DiskListDirectView
-from ..models.spectrum.spectrum import Spectrum
-from ..utils.formula import Formula
-from ..workspace import WorkSpace
+from Orbitool import setting
+from Orbitool.base.disk_structure import DiskListDirectView
+from Orbitool.models.workspace.noise_tab import NoiseFormulaParameter
+from Orbitool.models import spectrum as spectrum_func
+from Orbitool.models.file import FileSpectrumInfo
+from Orbitool.models.formula import Formula
+from Orbitool.models.spectrum import Spectrum
+from Orbitool.models.workspace import WorkSpace
+from Orbitool.utils import binary_search
+
 from . import NoiseUi, component
 from .component import factory
 from .manager import Manager, MultiProcess, state_node
@@ -153,7 +156,7 @@ class Widget(QtWidgets.QWidget):
     def addFormula(self):
         formula = Formula(self.ui.lineEdit.text())
         self.info.general_setting.noise_formulas.append(
-            workspace.noise_tab.NoiseFormulaParameter(formula))
+            NoiseFormulaParameter(formula))
         self.showNoiseFormula()
 
     addFormula.except_node(showNoiseFormula)
@@ -331,7 +334,7 @@ class Widget(QtWidgets.QWidget):
             return
         result = info.general_result
         if result.LOD is not None and spectrum.mz.shape != result.LOD.shape:
-            return # show another spectrum after calc noise
+            return  # show another spectrum after calc noise
 
         is_log = self.ui.yLogCheckBox.isChecked()
         plot = self.plot

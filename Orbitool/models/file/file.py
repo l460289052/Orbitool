@@ -124,8 +124,11 @@ class PeriodItem(BaseRowStructure):
     start_num: int = -1
     stop_num: int = -1
 
+    def use_time(self):
+        return self.start_time > base_dt
+
     def length(self):
-        return self.start_time == base_dt and (self.end_time - self.start_time) or (self.stop_num - self.start_num)
+        return self.use_time() and (self.end_time - self.start_time) or (self.stop_num - self.start_num)
 
 
 class FileSpectrumInfo(spectrum.SpectrumInfo):

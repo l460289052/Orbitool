@@ -1,4 +1,4 @@
-from .spectrum import Spectrum, FittedPeak, Peak, SpectrumInfo
+from .spectrum import Spectrum, FittedPeak, Peak, SpectrumInfo, PeakTags
 from ._functions import getPeaksPositions, getNotZeroPositions, safeCutSpectrum, safeSplitSpectrum
 from .functions import removeZeroPositions, splitPeaks
 from ._denoise import getNoisePeaks, noiseLODFunc, getGlobalShownNoise, getNoiseLODFromParam, updateGlobalParam, updateNoiseLODParam, splitNoise

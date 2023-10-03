@@ -42,7 +42,7 @@ def getNormalizedPeak(peak: Peak, param=None) -> FittedPeak:
 
 class NormalDistributionFunc(BaseFunc, BaseRowStructure):
     peak_fit_sigma: float
-    peak_fir_res: float
+    peak_fit_res: float
 
     @classmethod
     def FromParams(cls, params: List[tuple]):

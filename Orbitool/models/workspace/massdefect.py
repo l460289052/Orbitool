@@ -7,7 +7,7 @@ from Orbitool.base import BaseDatasetStructure, AttrList
 
 from .base import BaseInfo
 
-zero = partial(np.zeros, 0)
+zero = np.zeros(0)
 
 
 class Gry(BaseDatasetStructure):

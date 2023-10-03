@@ -1,13 +1,15 @@
-import csv
-from typing import Dict, List, Optional, Tuple, Union
+from array import array
 import contextlib
+import csv
+from typing import Dict, List, Optional, Tuple, Union, cast
 
-from PyQt6 import QtCore, QtWidgets, QtGui
+from PyQt6 import QtCore, QtGui, QtWidgets
+
+from Orbitool.models.formula import Formula
+from Orbitool.models.spectrum import FittedPeak, PeakTags
+from Orbitool.utils import binary_search
 
 from .. import setting
-from ..functions import binary_search
-from ..models.spectrum.spectrum import FittedPeak, PeakTags
-from ..utils.formula import Formula
 from . import PeakListUi
 from .manager import Manager, state_node
 from .PeakFitFloatUiPy import Window as PeakFloatWin
@@ -228,7 +230,7 @@ class Widget(QtWidgets.QWidget):
             return
 
         peaks = info.peaks
-        shown_indexes = info.shown_indexes
+        shown_indexes = cast(array[int], info.shown_indexes)
 
         formula_map: Dict[Formula, List[Tuple[int, Formula]]] = {}
         for index, peak in enumerate(peaks):

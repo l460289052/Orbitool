@@ -1,11 +1,12 @@
 import csv
-from typing import Union, Optional
-from . import SpectrumUi
-from PyQt6 import QtWidgets, QtCore
-from .manager import state_node, Manager
-from .utils import savefile
+from typing import Optional, Union
+
+from PyQt6 import QtCore, QtWidgets
 
 from ..models.spectrum.spectrum import Spectrum
+from . import SpectrumUi
+from .manager import Manager, state_node
+from .utils import savefile
 
 
 class Widget(QtWidgets.QWidget):

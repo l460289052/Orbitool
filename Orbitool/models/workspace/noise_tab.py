@@ -1,14 +1,13 @@
+from typing import List
 import numpy as np
+from pydantic import Field
 
 from .base import BaseInfo
 from Orbitool.config import setting
-from Orbitool.base import BaseRowStructure, AttrNdArray
+from Orbitool.base import BaseRowStructure, NdArray, BaseStructure
 from ..formula import Formula, FormulaType
-from ..structures import BaseRowItem, BaseStructure, Row, field
-from ..models.file.file import FileSpectrumInfo
-from ..structures.HDF5 import NdArray, StructureList
-from ..models.spectrum.spectrum import Spectrum, SpectrumInfo
-from ..utils.formula import Formula
+from ..spectrum import Spectrum
+from ..file import FileSpectrumInfo
 
 
 class NoiseFormulaParameter(BaseRowStructure):
@@ -17,7 +16,7 @@ class NoiseFormulaParameter(BaseRowStructure):
 
     useable: bool = True
     selected: bool = True
-    param: NdArray[float, (2, 3)] = field(lambda: np.zeros((2, 3), float)) # TODO
+    param: NdArray[float, (2, 3)] = np.zeros((2, 3), float)
 
 
 def default_formula_parameter():
@@ -25,15 +24,14 @@ def default_formula_parameter():
 
 
 class NoiseGeneralSetting(BaseStructure):
-    h5_type = "noise general setting"
 
     quantile: float = 0
     mass_dependent: bool = False
     n_sigma: float = 0
     subtract: float = True
 
-    noise_formulas: Row[NoiseFormulaParameter] = field(
-        default_formula_parameter)
+    noise_formulas: List[NoiseFormulaParameter] = Field(
+        default_factory=default_formula_parameter)
     params_inited: bool = False
 
     spectrum_dependent: bool = True
@@ -73,14 +71,12 @@ class NoiseGeneralResult(BaseStructure):
 
 
 class NoiseTabInfo(BaseInfo):
-    h5_type = "noise tab"
-
     skip: bool = False
     current_spectrum: Spectrum = None
 
-    general_setting: NoiseGeneralSetting = field(NoiseGeneralSetting)
+    general_setting: NoiseGeneralSetting = NoiseGeneralSetting()
 
-    general_result: NoiseGeneralResult = field(NoiseGeneralResult)
+    general_result: NoiseGeneralResult = NoiseGeneralResult()
 
-    denoised_spectrum_infos: Row[FileSpectrumInfo] = field(list)
+    denoised_spectrum_infos: List[FileSpectrumInfo] = []
     to_be_calibrate: bool = True

@@ -9,17 +9,17 @@ import matplotlib.ticker
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
+from Orbitool.base.disk_structure import DiskListDirectView
+from Orbitool.models.formula import Formula
+from Orbitool.models.peakfit import BaseFunc as BaseFitFunc
+from Orbitool.models.peakfit import MassListItem, NoFitFunc
+from Orbitool.models.spectrum import Spectrum, safeCutSpectrum, splitPeaks
+from Orbitool.models.workspace.timeseries import TimeSeriesInfoRow
+from Orbitool.utils import binary_search
+
 from .. import setting
-from ..functions import binary_search
-from ..functions.peakfit.base import BaseFunc as BaseFitFunc
-from ..functions.peakfit import NoFitFunc
-from ..functions.spectrum import splitPeaks, safeCutSpectrum
-from ..structures.HDF5 import StructureListView
-from ..models.spectrum.spectrum import MassListItem, Spectrum
 from ..models.timeseries.timeseries import TimeSeries
-from ..workspace.timeseries import TimeSeriesInfoRow
-from ..utils.formula import Formula
-from ..utils.time_format.time_convert import getTimesExactToS, converters
+from ..utils.time_format.time_convert import converters
 from . import TimeseriesesUi
 from .component import Plot, factory
 from .manager import Manager, MultiProcess, state_node
@@ -282,7 +282,8 @@ class Widget(QtWidgets.QWidget):
                         svalues.append(deviation)
 
             formats = setting.timeseries.export_time_formats
-            time_formats = {k: v for k, (v, _) in converters.items() if k in formats}
+            time_formats = {k: v for k,
+                            (v, _) in converters.items() if k in formats}
             with open(file, 'w', newline='') as f:
                 writer = csv.writer(f)
                 row = [f"{time} time" for time in time_formats.keys()]
@@ -353,12 +354,12 @@ class Widget(QtWidgets.QWidget):
 
 class CalcTimeseries(MultiProcess):
     @staticmethod
-    def read(file: StructureListView[Spectrum], **kwargs):
+    def read(file: DiskListDirectView[Spectrum], **kwargs):
         for spectrum in file:
             yield spectrum
 
     @staticmethod
-    def read_len(file: StructureListView[Spectrum], **kwargs) -> int:
+    def read_len(file: DiskListDirectView[Spectrum], **kwargs) -> int:
         return len(file)
 
     @staticmethod
@@ -383,11 +384,11 @@ class CalcTimeseries(MultiProcess):
 
 class CalcSumTimeSeries(MultiProcess):
     @staticmethod
-    def read(file: StructureListView[Spectrum], **kwargs):
+    def read(file: DiskListDirectView[Spectrum], **kwargs):
         yield from file
 
     @staticmethod
-    def read_len(file: StructureListView[Spectrum], **read_kwargs) -> int:
+    def read_len(file: DiskListDirectView[Spectrum], **read_kwargs) -> int:
         return len(file)
 
     @staticmethod

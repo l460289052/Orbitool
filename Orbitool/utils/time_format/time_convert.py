@@ -43,11 +43,6 @@ def fromExcelTime(t: float):
     return excelTimeStandard + timedelta(seconds=t * 86400)
 
 
-def getTimesExactToS(dt: datetime):
-    dt = dt.replace(microsecond=0)
-    return [getIsoTime(dt), getIgorTime(dt), getMatlabTime(dt), getExcelTime(dt)]
-
-
 converters = {
     "iso": (getIsoTime, fromIsoTime),
     "igor": (getIgorTime, fromIgorTime),

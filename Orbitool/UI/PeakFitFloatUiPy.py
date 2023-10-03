@@ -1,20 +1,20 @@
-from typing import List, Optional, Union
 from copy import deepcopy
+from typing import List, Optional, Union
 
 import matplotlib.ticker
 import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from ..functions import binary_search
-from ..functions.peakfit import get_peak_position
-from ..functions import formula as formula_func
-from ..models.spectrum.spectrum import FittedPeak
-from ..utils.formula import Formula
+from Orbitool.models import peakfit
+from Orbitool.models.formula import Formula, correct_formula
+from Orbitool.models.spectrum import FittedPeak
+from Orbitool.utils import binary_search
+
 from . import PeakFitFloatUi
 from .component import Plot
+from .formulas import FormulaResultWindow
 from .manager import Manager, state_node
 from .utils import set_header_sizes
-from .formulas import FormulaResultWindow
 
 
 class Window(QtWidgets.QMainWindow):
@@ -117,7 +117,7 @@ class Window(QtWidgets.QMainWindow):
 
             setText(0, format(peak.peak_position, '.5f'))
             setText(1, ', '.join(str(f) for f in self.original_peaks[binary_search.indexNearest(
-                self.original_peaks, peak.peak_position, method=get_peak_position)].formulas))
+                self.original_peaks, peak.peak_position, method=peakfit.get_peak_position)].formulas))
             setText(2, ', '.join(str(f) for f in peak.formulas))
             setText(3, format(peak.peak_intensity, '.3e'))
             setText(5, format(peak.area, '.3e'))
@@ -231,7 +231,7 @@ class Window(QtWidgets.QMainWindow):
         calc_get = self.manager.workspace.info.formula_docker.get_calcer()
         for peak in fittedpeaks:
             peak.formulas = calc_get(peak.peak_position)
-            # peak.formulas = formula_func.correct(peak, info.peaks)
+            # peak.formulas = correct_formula(peak, info.peaks)
 
         self.peaks = fittedpeaks
 

@@ -11,11 +11,11 @@ import matplotlib.ticker
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
+from Orbitool.models import peakfit as peakfit_func
+from Orbitool.models import spectrum as spectrum_func
+from Orbitool.models.spectrum import FittedPeak
+
 from .. import setting
-from ..functions import peakfit as peakfit_func
-from ..functions import spectrum as spectrum_func
-from ..models.spectrum.spectrum import FittedPeak
-from ..workspace import UiNameGetter, UiState
 from . import PeakShapeUi, component
 from .manager import Manager, Thread, state_node
 from .utils import savefile, showInfo
