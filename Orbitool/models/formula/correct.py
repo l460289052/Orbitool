@@ -1,14 +1,15 @@
 from typing import List
 from Orbitool.utils.binary_search import indexBetween
 from ._formula import Formula
-from ..spectrum import FittedPeak
+
+from Orbitool.models import spectrum
 
 
-def get_peak_position(peaks: List[FittedPeak], index: int):
+def get_peak_position(peaks: List[spectrum.FittedPeak], index: int):
     return peaks[index].peak_position
 
 
-def correct_formula(peak: FittedPeak, peaks: List[FittedPeak], rtol=1e-6) -> List[Formula]:
+def correct_formula(peak: spectrum.FittedPeak, peaks: List[spectrum.FittedPeak], rtol=1e-6) -> List[Formula]:
     formulas = []
     intensity = peak.peak_intensity
     for formula in peak.formulas:

@@ -55,12 +55,12 @@ class WorkSpace:
             use_proxy = False
         self.use_proxy = use_proxy
 
-        self.info: WorkspaceInfo = None
+        info = None
         if use_proxy:
             self.file = H5File(path, 'r')
             self.proxy_file = H5File(path.with_suffix(".orbt-temp"))
             if "info" in self.proxy_file:
-                self.info = self.proxy_file.read("info")
+                info = self.proxy_file.read("info", WorkspaceInfo)
             self.data = WorkspaceData(
                 self.file.get_h5group("data"),
                 self.proxy_file.get_h5group("data"))
@@ -68,11 +68,12 @@ class WorkSpace:
             self.file = H5File(path, 'a')
             self.proxy_file = None
             self.data = WorkspaceData(self.file.get_h5group("data"))
-        if self.info is None:
+        if info is None:
             if "info" in self.file:
-                self.info = self.file.read("info")
+                info = self.file.read("info", WorkspaceInfo)
             else:
-                self.info = WorkspaceInfo()
+                info = WorkspaceInfo()
+        self.info = info
 
     def save(self):
         if self.use_proxy:
@@ -128,7 +129,7 @@ class WorkSpace:
 
     def load_config_from_file(self, f: str):
         file = H5File(f, 'r')
-        info = file.read("info")
+        info = file.read("info", WorkspaceInfo)
         self._load_config(info)
 
     def load_config(self, another: 'WorkSpace'):

@@ -16,14 +16,14 @@ class Ion(BaseRowStructure):
 
     @classmethod
     def fromText(cls, text):
-        return Ion(text, Formula(text))
+        return cls(shown_text=text, formula=Formula(text))
 
     def __eq__(self, other):
         assert isinstance(other, Ion)
         return self.formula == other.formula
 
 
-class PathIonInfo(BaseDatasetStructure()):
+class PathIonInfo(BaseDatasetStructure):
     raw_position: NdArray[float, -1]  # shape len(spectra)
     raw_intensity: NdArray[float, -1]  # shape len(spectra)
 

@@ -77,8 +77,8 @@ class NdArray(np.ndarray):
         dtype, shape, ind = parse_args(get_args(source_type))
 
         def validate(value):
-            if value is None:
-                return None
+            # because we need to store them to h5, and when load back, the shape is (0,)
+            assert value is not None, f"cannot be None."
             if not isinstance(value, np.ndarray):
                 if dtype is not None:
                     value = np.array(value, dtype)
@@ -88,16 +88,15 @@ class NdArray(np.ndarray):
                 value = value.astype(dtype)
             if shape is not None:
                 if ind > -1:
-                    assert shape[:ind] == value.shape[:ind]
-                    assert shape[ind + 1:] == value.shape[ind + 1:]
+                    assert shape[:ind] == value.shape[:ind], f"wrong shape, want {shape}, given {value.shape}"
+                    assert shape[ind + 1:] == value.shape[ind + 1:], f"wrong shape, want {shape}, given {value.shape}"
                 else:
-                    assert shape == value.shape
+                    assert shape == value.shape, f"wrong shape, want {shape}, given {value.shape}"
             return value
         return core_schema.no_info_before_validator_function(validate, handler(Any))
 
 # dataset -> ndarray as a column -> ColumnHandler, 现在只考虑一维的场景
 # list/dict -> ndarray in row as a column -> ColumnCellTypeHandler, 现在需要考虑多维场景
-
 
 class NdArrayTypeHandler(ColumnHandler):
     target_type = NdArray
@@ -164,7 +163,30 @@ class NdArrayCellTypeHandler(ColumnCellTypeHandler[NdArray]):
 
 
 class AttrNdArray(NdArray):
-    pass
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: GetCoreSchemaHandler
+    ) -> CoreSchema:
+        dtype, shape, ind = parse_args(get_args(source_type))
+
+        def validate(value):
+            if value is None:
+                return None  # for attr nd, it could be none
+            if not isinstance(value, np.ndarray):
+                if dtype is not None:
+                    value = np.array(value, dtype)
+                else:
+                    value = np.array(value)
+            if dtype is not None and value.dtype != dtype:
+                value = value.astype(dtype)
+            if shape is not None:
+                if ind > -1:
+                    assert shape[:ind] == value.shape[:ind], f"wrong shape, want {shape}, given {value.shape}"
+                    assert shape[ind + 1:] == value.shape[ind + 1:], f"wrong shape, want {shape}, given {value.shape}"
+                else:
+                    assert shape == value.shape, f"wrong shape, want {shape}, given {value.shape}"
+            return value
+        return core_schema.no_info_before_validator_function(validate, handler(Any))
 
 
 class AttrNdArrayTypeHandler(AttrTypeHandler):

@@ -11,7 +11,7 @@ from PyQt6 import QtCore, QtWidgets
 
 from Orbitool import setting
 from Orbitool.base.disk_structure import DiskListDirectView
-from Orbitool.models.workspace.noise_tab import NoiseFormulaParameter
+from Orbitool.models.workspace.noise_tab import MzIntensity, NoiseArray, NoiseFormulaParameter
 from Orbitool.models import spectrum as spectrum_func
 from Orbitool.models.file import FileSpectrumInfo
 from Orbitool.models.formula import Formula
@@ -206,8 +206,11 @@ class Widget(QtWidgets.QWidget):
         rets, noises, noise_split = yield func, "get noise infomations"
 
         result.poly_coef, result.global_noise_std, slt, params = rets
-        result.noise, result.LOD = noises
-        result.spectrum_mz, result.spectrum_intensity, result.noise_mz, result.noise_intensity = noise_split
+        result.noise = NoiseArray(noise=noises[0], LOD=noises[1])
+        result.spectrum_split = MzIntensity(
+            mz=noise_split[0], intensity=noise_split[1])
+        result.noise_split = MzIntensity(
+            mz=noise_split[2], intensity=noise_split[3])
 
         noise_setting = info.general_setting
 
@@ -255,7 +258,6 @@ class Widget(QtWidgets.QWidget):
 
         noise_setting = info.general_setting
         spectrum = info.current_spectrum
-        result.spectrum_mz, result.spectrum_intensity, result.noise_mz, result.noise_intensity = noise_split
 
         def func():
             params, points, deltas = noise_setting.get_params()
@@ -269,7 +271,12 @@ class Widget(QtWidgets.QWidget):
             else:
                 noise_split = (None,) * 4
             return noise, LOD, noise_split
-        result.noise, result.LOD, noise_split = yield func, "recalc noise"
+        noise, LOD, noise_split = yield func, "recalc noise"
+        result.noise = NoiseArray(noise=noise, LOD=LOD)
+        result.spectrum_split = MzIntensity(
+            mz=noise_split[0], intensity=noise_split[1])
+        result.noise_split = MzIntensity(
+            mz=noise_split[2], intensity=noise_split[3])
 
         self.showNoise()
 
@@ -333,7 +340,7 @@ class Widget(QtWidgets.QWidget):
         if spectrum is None:
             return
         result = info.general_result
-        if result.LOD is not None and spectrum.mz.shape != result.LOD.shape:
+        if not len(result.noise.LOD) or spectrum.mz.shape != result.noise.LOD.shape:
             return  # show another spectrum after calc noise
 
         is_log = self.ui.yLogCheckBox.isChecked()
@@ -350,14 +357,16 @@ class Widget(QtWidgets.QWidget):
             ax.yaxis.set_major_formatter(
                 matplotlib.ticker.FormatStrFormatter(r"%.1e"))
 
-        ax.plot(spectrum.mz, result.LOD,
+        ax.plot(spectrum.mz, result.noise.LOD,
                 linewidth=1, color='k', label='LOD')
-        ax.plot(spectrum.mz, result.noise,
+        ax.plot(spectrum.mz, result.noise.noise,
                 linewidth=1, color='b', label='noise')
-        if setting.denoise.plot_noise_in_diff_color and result.spectrum_mz is not None:
-            ax.plot(result.spectrum_mz, result.spectrum_intensity,
+        spectrum_split = result.spectrum_split
+        noise_split = result.noise_split
+        if setting.denoise.plot_noise_in_diff_color and spectrum_split.mz is not None:
+            ax.plot(spectrum_split.mz, spectrum_split.intensity,
                     linewidth=1, color="#1f77b4", label="Spectrum")
-            ax.plot(result.noise_mz, result.noise_intensity,
+            ax.plot(noise_split.mz, noise_split.intensity,
                     linewidth=1, color="#BF2138", label="Noise")
         else:
             ax.plot(spectrum.mz, spectrum.intensity,

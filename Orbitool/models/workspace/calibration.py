@@ -10,7 +10,7 @@ from Orbitool.base import BaseRowStructure
 
 from ..spectrum import Spectrum, SpectrumInfo
 from ..calibration import Ion, PathIonInfo, Calibrator
-from ..formula import Formula
+from ..formula import FormulaType
 
 from .base import BaseInfo
 
@@ -44,7 +44,7 @@ class CalibratorInfo(BaseInfo):
     last_calibrate_info_segments: List[CalibratorInfoSegment] = []
 
     path_times: Dict[str, datetime] = {}
-    path_ion_infos: Dict[str, Dict[Formula, PathIonInfo]] = {}
+    path_ion_infos: Dict[str, Dict[FormulaType, PathIonInfo]] = {}
     # path -> [calibrator for each segments]
     calibrator_segments: Dict[str, List[Calibrator]] = {}
 
@@ -111,7 +111,7 @@ class CalibratorInfo(BaseInfo):
             self.ions.append(ion)
         self.ions.sort(key=lambda ion: ion.formula.mass())
 
-    def need_split(self) -> List[Formula]:
+    def need_split(self) -> List[FormulaType]:
         """
             return [formula for each ion need to be split]
         """

@@ -1,5 +1,5 @@
 import h5py
-from ...functions import binary_search
+from Orbitool.utils import binary_search
 from typing import List, Tuple, Callable
 from packaging.version import Version
 

@@ -83,6 +83,8 @@ class SeqRowTypeHandler(DatasetTypeHandler):
         Put in a single function to gc `rows`
         """
         titles = self.titles
+        if not value:
+            return [()] * len(titles)
         rows = [tuple(getattr(v, t) for t in titles) for v in value]
         return list(zip(*rows))
 

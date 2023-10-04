@@ -3,7 +3,7 @@ from typing import List
 
 import numpy as np
 
-from Orbitool.base import BaseDatasetStructure, AttrList
+from Orbitool.base import BaseDatasetStructure, AttrList, NdArray
 
 from .base import BaseInfo
 
@@ -11,19 +11,17 @@ zero = np.zeros(0)
 
 
 class Gry(BaseDatasetStructure):
-    x: np.ndarray = zero
-    y: np.ndarray = zero
-    size: np.ndarray = zero
+    x: NdArray[float, -1] = zero
+    y: NdArray[float, -1] = zero
+    size: NdArray[float, -1] = zero
 
 
 class Clr(Gry):
-    color: np.ndarray = zero
-    labels: AttrList[str] = None
+    color: NdArray[float, -1] = zero
+    labels: AttrList[str] = []
 
 
 class MassDefectInfo(BaseInfo):
-    h5_type = "mass defect tab"
-
     is_dbe: bool = True
     clr_title: str = ""
 

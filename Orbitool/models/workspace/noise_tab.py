@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Optional
 import numpy as np
 from pydantic import Field
 
 from .base import BaseInfo
 from Orbitool.config import setting
-from Orbitool.base import BaseRowStructure, NdArray, BaseStructure
+from Orbitool.base import BaseRowStructure, NdArray, BaseStructure, BaseDatasetStructure
 from ..formula import Formula, FormulaType
 from ..spectrum import Spectrum
 from ..file import FileSpectrumInfo
@@ -16,11 +16,11 @@ class NoiseFormulaParameter(BaseRowStructure):
 
     useable: bool = True
     selected: bool = True
-    param: NdArray[float, (2, 3)] = np.zeros((2, 3), float)
+    param: NdArray[float, (2, 3)] = np.empty((2, 3), float)
 
 
 def default_formula_parameter():
-    return [NoiseFormulaParameter(Formula(f)) for f in setting.denoise.noise_formulas]
+    return [NoiseFormulaParameter(formula=Formula(f)) for f in setting.denoise.noise_formulas]
 
 
 class NoiseGeneralSetting(BaseStructure):
@@ -56,23 +56,29 @@ class NoiseGeneralSetting(BaseStructure):
 
         return params, points, deltas
 
+EmptyNdArray = np.empty(0, float)
+
+class NoiseArray(BaseDatasetStructure):
+    noise: NdArray[float, -1] = EmptyNdArray
+    LOD: NdArray[float, -1] = EmptyNdArray
+
+
+class MzIntensity(BaseDatasetStructure):
+    mz: NdArray[float, -1] = EmptyNdArray
+    intensity: NdArray[float, -1] = EmptyNdArray
+
 
 class NoiseGeneralResult(BaseStructure):
-    h5_type = "noise general result"
-
-    poly_coef: np.ndarray = None
+    poly_coef: NdArray[float, -1] = EmptyNdArray
     global_noise_std: float = 0
-    noise: np.ndarray = None
-    LOD: np.ndarray = None
-    spectrum_mz: np.ndarray = None
-    spectrum_intensity: np.ndarray = None
-    noise_mz: np.ndarray = None
-    noise_intensity: np.ndarray = None
+    noise: NoiseArray = NoiseArray()
+    spectrum_split: MzIntensity = MzIntensity()
+    noise_split: MzIntensity = MzIntensity()
 
 
 class NoiseTabInfo(BaseInfo):
     skip: bool = False
-    current_spectrum: Spectrum = None
+    current_spectrum: Optional[Spectrum] = None
 
     general_setting: NoiseGeneralSetting = NoiseGeneralSetting()
 

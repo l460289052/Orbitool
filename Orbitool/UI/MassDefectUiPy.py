@@ -114,7 +114,7 @@ class Widget(QtWidgets.QWidget):
         plot.clear()
 
         info = self.info
-        if len(info.clr_x) == 0 and len(info.gry_x) == 0:
+        if len(info.clr.x) == 0 and len(info.gry.x) == 0:
             return
 
         ui = self.ui

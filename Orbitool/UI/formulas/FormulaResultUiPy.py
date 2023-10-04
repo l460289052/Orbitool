@@ -1,16 +1,17 @@
 from copy import deepcopy
 from typing import List
 
-from PyQt6 import QtWidgets, QtCore
+from PyQt6 import QtCore, QtWidgets
 from pyteomics.mass.mass import isotopologues
 
+from Orbitool.models.formula import Formula
 from Orbitool.models.spectrum.spectrum import FittedPeak
-from Orbitool.functions import binary_search
-from Orbitool.utils.formula import Formula
-from . import FormulaResultUi
-from Orbitool.UI.manager import Manager, state_node
 from Orbitool.UI.component import Plot
+from Orbitool.UI.manager import Manager, state_node
 from Orbitool.UI.utils import get_tablewidget_selected_row
+from Orbitool.utils import binary_search
+
+from . import FormulaResultUi
 
 
 class Window(QtWidgets.QMainWindow):

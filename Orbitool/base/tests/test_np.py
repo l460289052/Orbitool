@@ -66,9 +66,7 @@ def test_dt():
     f = H5File()
 
     dt = datetime(2020, 1, 1, 1, 1, 1)
-    a = DT(dts=None)
-    assert a.dts is None
-    a.dts = np.array([dt] * 10, "datetime64[us]")
+    a = DT(dts=np.array([dt] * 10, "datetime64[us]"))
 
     f.write("dt", a)
     b = f.read("dt", DT)

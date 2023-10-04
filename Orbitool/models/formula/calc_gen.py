@@ -20,6 +20,12 @@ class IsotopeNum(BaseRowStructure):
     max: int = 0
     global_limit: bool = False
 
+    @classmethod
+    def init(cls, e_num:int, i_num:int, min:int, max:int, global_limit:bool=False):
+        return cls(
+            e_num=e_num,i_num=i_num, min=min, max=max, global_limit=global_limit
+        )
+
 
 class State(BaseRowStructure):
     DBE2: float = 0
@@ -27,6 +33,15 @@ class State(BaseRowStructure):
     HMax: float = 0
     OMin: float = 0
     OMax: float = 0
+
+    @classmethod
+    def fromParam(cls, param: Tuple[float]):
+        return cls(
+            DBE2=param[0],
+            HMin=param[1],
+            HMax=param[2],
+            OMin=param[3],
+            OMax=param[4])
 
     def to_list(self):
         return [self.DBE2, self.HMin, self.HMax, self.OMin, self.OMax]

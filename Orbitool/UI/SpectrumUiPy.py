@@ -13,8 +13,8 @@ class Widget(QtWidgets.QWidget):
     def __init__(self, manager: Manager, parent: Optional['QWidget'] = None) -> None:
         super().__init__()
         self.ui = SpectrumUi.Ui_Form()
-        self.setupUi()
         self.manager = manager
+        self.setupUi()
         manager.init_or_restored.connect(self.restore)
 
     def setupUi(self):

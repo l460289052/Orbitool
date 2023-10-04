@@ -183,18 +183,18 @@ class HeteroGeneousArrayHelper:
         if self.has_s:
             h5_dtype_list = self.h5_dtype_list
             columns = [cvt.convert_to_h5(column) for cvt, column in zip(
-                self.converters, columns)]
+                self.converters, columns, strict=True)]
             h5_dtype = [(dtype[0], col.dtype if s else dtype[1], *dtype[2:])
-                        for dtype, s, col in zip(h5_dtype_list, self.s_type, columns)]
+                        for dtype, s, col in zip(h5_dtype_list, self.s_type, columns, strict=True)]
             ds = h5g.create_dataset(key, length, h5_dtype, **H5_DT_ARGS)
-            for dtype, column in zip(self.h5_dtype_list, columns):
+            for dtype, column in zip(self.h5_dtype_list, columns, strict=True):
                 ds[dtype[0]] = column
         else:
             ds = h5g.create_dataset(key, length, self.h5_dtype, **H5_DT_ARGS)
-            for dtype, cvt, column in zip(self.h5_dtype_list, self.converters, columns):
+            for dtype, cvt, column in zip(self.h5_dtype_list, self.converters, columns, strict=True):
                 ds[dtype[0]] = cvt.convert_to_h5(column)
         return ds
 
     def columns_read(self, dataset: H5Dataset):
-        for dtype, cvt in zip(self.h5_dtype_list, self.converters):
+        for dtype, cvt in zip(self.h5_dtype_list, self.converters, strict=True):
             yield cvt.convert_from_h5(dataset[dtype[0]])

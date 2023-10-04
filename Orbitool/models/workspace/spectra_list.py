@@ -4,4 +4,4 @@ from .base import BaseInfo
 
 
 class SpectraListInfo(BaseInfo):
-    shown_indexes: Array('i') =  array('i')
+    shown_indexes: Array['i'] = array('i')

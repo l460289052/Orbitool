@@ -1,12 +1,11 @@
+from typing import Optional
 from ..spectrum import Spectrum
 from ..peakfit import PeaksManager, normal_distribution
 from .base import BaseInfo
 
 
 class PeakShapeInfo(BaseInfo):
-    h5_type = "peak shape tab"
+    spectrum: Optional[Spectrum] = None
 
-    spectrum: Spectrum = None
-
-    peaks_manager: PeaksManager = None
-    func: normal_distribution.NormalDistributionFunc = None
+    peaks_manager: Optional[PeaksManager] = None
+    func: Optional[normal_distribution.NormalDistributionFunc] = None

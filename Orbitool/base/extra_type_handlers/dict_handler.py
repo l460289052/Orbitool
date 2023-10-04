@@ -64,6 +64,8 @@ class DictRowTypeHandler(DatasetTypeHandler):
         Put in a single function to gc `rows`
         """
         titles = self.titles
+        if not value:
+            return [()] * len(titles)
         rows = [(k, *(getattr(v, t) for t in titles))
                 for k, v in value.items()]
         return list(zip(*rows))

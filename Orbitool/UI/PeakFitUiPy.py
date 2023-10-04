@@ -323,9 +323,9 @@ class Widget(QtWidgets.QWidget):
 
         info = self.info
         raw_peaks = info.raw_peaks
-        original_indexes = cast(array[int], info.original_indexes)
+        original_indexes = cast(List[int], info.original_indexes)
         peaks = info.peaks
-        indexes = cast(array[int], info.shown_indexes)
+        indexes = cast(List[int], info.shown_indexes)
 
         (x_min, x_max), (y_min, y_max) = now_lim
 

@@ -139,7 +139,7 @@ class ColumnsHelper:
     def __init__(self, titles: Tuple[str], types: tuple) -> None:
         handlers: List[ColumnCellTypeHandler] = []
         dtypes = []
-        for title, typ in zip(titles, types):
+        for title, typ in zip(titles, types, strict=True):
             handler = get_handler(typ)
             assert isinstance(handler, ColumnCellTypeHandler)
             handlers.append(handler)
@@ -152,13 +152,13 @@ class ColumnsHelper:
 
     def write_columns_to_h5(self, h5g: H5Group, key: str, length: int, columns: Iterable[list]):
         h5_columns = []
-        for handler, column in zip(self.handlers, columns):
+        for handler, column in zip(self.handlers, columns, strict=True):
             h5_columns.append(handler.convert_to_column(column))
         return self.array_helper.columns_write(h5g, key, length, h5_columns)
 
     def read_columns_from_h5(self, dataset: H5Dataset):
         columns_iter = self.array_helper.columns_read(dataset)
         columns = []
-        for handler, column in zip(self.handlers, columns_iter):
+        for handler, column in zip(self.handlers, columns_iter, strict=True):
             columns.append(handler.convert_from_column(column))
         return columns

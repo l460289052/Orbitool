@@ -9,15 +9,15 @@ from .base import BaseInfo
 def Factory():
     ins = CalculatorGenerator(
         element_states={
-            row[0]: ElementState(*row[1:]) for row in GenInitParams},
+            row[0]: ElementState.fromParam(row[1:]) for row in GenInitParams},
         isotope_usable={
-            "C": IsotopeNum(12, 0, 0, 20, False),
-            # "C[12]": IsotopeNum(12, 12, 0, 10, False),
-            "C[13]": IsotopeNum(12, 13, 0, 3, True),
-            "H": IsotopeNum(1, 0, 0, 40, False),
-            "O": IsotopeNum(16, 0, 0, 15, False),
-            "O[18]": IsotopeNum(16, 18, 0, 2, True),
-            "N": IsotopeNum(14, 0, 0, 3, False)
+            "C": IsotopeNum.init(12, 0, 0, 20, False),
+            # "C[12]": IsotopeNum.init(12, 12, 0, 10, False),
+            "C[13]": IsotopeNum.init(12, 13, 0, 3, True),
+            "H": IsotopeNum.init(1, 0, 0, 40, False),
+            "O": IsotopeNum.init(16, 0, 0, 15, False),
+            "O[18]": IsotopeNum.init(16, 18, 0, 2, True),
+            "N": IsotopeNum.init(14, 0, 0, 3, False)
         }
     )
     return ins
