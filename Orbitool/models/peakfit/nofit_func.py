@@ -46,9 +46,9 @@ class NoFitFunc(BaseFunc):
     def generate_peak(self, mz: np.ndarray, intensity: np.ndarray):
         pos = np.where(getPeaksPositions(intensity))[0][0] + 1
         return FittedPeak(
-            mz, intensity,
-            np.zeros((0,), dtype=float),
-            mz[pos],
-            intensity[pos],
-            np.trapz(intensity, mz)
+            mz=mz, intensity=intensity,
+            fitted_param=np.zeros((0,), dtype=float),
+            peak_position=mz[pos],
+            peak_intensity=intensity[pos],
+            area=np.trapz(intensity, mz)
         )

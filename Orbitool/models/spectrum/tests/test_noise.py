@@ -6,7 +6,7 @@ import pathlib
 import numpy as np
 from numpy import testing as nptest
 
-from ....utils.formula import Formula
+from ...formula import Formula
 
 from ..denoise import (
     denoise, denoiseWithParams, noiseLODFunc,

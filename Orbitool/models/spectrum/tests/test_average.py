@@ -7,7 +7,7 @@ from typing import List
 import numpy as np
 from numpy import testing as nptest
 
-from ...binary_search import indexNearest_np
+from Orbitool.utils.binary_search import indexNearest_np
 from .. import removeZeroPositions, averageSpectra, getPeaksPositions
 
 path = os.path.join(os.path.dirname(__file__), 'average_test.pickle')

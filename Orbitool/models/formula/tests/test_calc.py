@@ -4,7 +4,7 @@ from .. import Formula
 
 
 def test_state():
-    s = State(1, 1, 1, 1, 1)
+    s = State.fromParam((1, 1, 1, 1, 1))
     s2 = s + s
     assert s2.DBE2 == s2.HMin == s2.HMax == s2.OMin == s2.OMax == 2
     s3 = s * 4
@@ -12,6 +12,11 @@ def test_state():
     s4 = s3 - s3
     assert s4.DBE2 == s4.HMin == s4.HMax == s4.OMin == s4.OMax == 0
 
+def generate_calc_isotope_num(e, e_num, i_num, global_limit, i_min, i_max, e_min, e_max):
+    return CalcIsotopeNum(
+        element=e, e_num=e_num, i_num=i_num,
+        global_limit=global_limit, i_min=i_min, i_max=i_max,
+        e_min=e_min, e_max=e_max)
 
 def test_set():
     gen = CalculatorGenerator.Factory()
@@ -38,10 +43,10 @@ def test_set():
     calc = gen.generate(Calculator)
 
     assert calc.isotope_nums == [
-        CalcIsotopeNum("C", 12, 13, True, 0, 5, 0, 20),
-        CalcIsotopeNum("O", 16, 18, True, 0, 2, 0, 15),
-        CalcIsotopeNum("O", 16, 16, False, 0, 15, 0, 15),
-        CalcIsotopeNum("H", 1, 1, False, 0, 40, 0, 40),
+        generate_calc_isotope_num("C", 12, 13, True, 0, 5, 0, 20),
+        generate_calc_isotope_num("O", 16, 18, True, 0, 2, 0, 15),
+        generate_calc_isotope_num("O", 16, 16, False, 0, 15, 0, 15),
+        generate_calc_isotope_num("H", 1, 1, False, 0, 40, 0, 40),
     ]
 
 

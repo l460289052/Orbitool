@@ -1,20 +1,15 @@
-import io
-import h5py
 from pydantic import BaseModel, ValidationError
 import pytest
 from numpy import testing as nptest
 
+from Orbitool.base import BaseRowStructure, H5File
 from ..h5handlers import *
-from ..formula_list import *
-from ....structures import HDF5, field
 
 formula_list = [Formula('C7H8O2'), Formula('C3H3Ti-'), Formula('CC[13]H[2]')]
 
 
-class FormulaItem(BaseRowItem):
-    item_name = "test_formula_item"
-
-    formula: Formula
+class FormulaItem(BaseRowStructure):
+    formula: FormulaType
 
 
 def test_pydantic_validate():
@@ -27,29 +22,25 @@ def test_pydantic_validate():
 
 
 def test_formula():
-    f = HDF5.H5File()
+    f = H5File()
 
-    row = Row((FormulaItem,))
-    row.write_to_h5(f._obj, "table", [FormulaItem(
-        formula=formula) for formula in formula_list])
+    f.write("fs", [FormulaItem(formula=formula) for formula in formula_list], List[FormulaItem])
 
-    formulas = row.read_from_h5(f._obj, "table")
+    formulas = f.read("fs", List[FormulaItem])
     for f1, f2 in zip(formulas, formula_list):
         assert f1.formula == f2
 
 
-class FormulasItem(BaseRowItem):
-    item_name = "test formulas item"
-    formulas: FormulaList = field(list)
+class FormulasItem(BaseRowStructure):
+    formulas: FormulaList = []
 
 
 def test_formulas():
-    f = HDF5.H5File()
+    f = H5File()
 
-    row = Row((FormulasItem,))
-    row.write_to_h5(f._obj, "table", [FormulasItem(
-        formulas=formula_list)] * 10)
+    f.write("fss",[FormulasItem(
+        formulas=formula_list)]*10, List[FormulasItem])
 
-    formulas_table = row.read_from_h5(f._obj, "table")
+    formulas_table = f.read("fss", List[FormulasItem])
     for formulas in formulas_table:
         assert formulas.formulas == formula_list

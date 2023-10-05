@@ -5,7 +5,7 @@ from ..nofit_func import NoFitFunc, Peak, np
 def test_single_peak():
     mz = np.array([0.01, 0.02, 0.03, 0.04, 0.05])
     intensity = np.array([0, 1, 10, 1, 0], dtype=float)
-    p = Peak(mz, intensity)
+    p = Peak(mz=mz, intensity=intensity)
     func = NoFitFunc()
 
     fp = func.splitPeak(p, 1)[0]
@@ -28,7 +28,7 @@ def test_two_peak():
     #                     1  2  3  4  5  6  7  8  9  a  b
     intensity = np.array([0, 1, 2, 3, 2, 3, 2, 3, 2, 1, 0], dtype=float)
 
-    p = Peak(mz, intensity)
+    p = Peak(mz=mz,intensity=intensity)
     func = NoFitFunc()
 
     fp1, fp2, fp3 = func.splitPeak(p, 2)

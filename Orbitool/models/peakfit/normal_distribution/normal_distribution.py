@@ -177,7 +177,9 @@ class NormalDistributionFunc(BaseFunc, BaseRowStructure):
             new_intensity[-1] = 0
             new_intensity[0] = 0
             new_peak = FittedPeak(
-                mz[select], new_intensity, p, p[1], peak_intensity, p[0], tag)
+                mz=mz[select], intensity=new_intensity,
+                fitted_param=p, peak_position=p[1],
+                peak_intensity=peak_intensity, area=p[0], tags=tag)
             peaks.append(new_peak)
         if len(peaks) > 1:
             peaks.sort(key=lambda peak: peak.peak_position)

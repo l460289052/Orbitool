@@ -6,7 +6,7 @@ import pytest
 
 
 from .._functions import safeCutSpectrum, safeSplitSpectrum
-from Orbitool.functions import binary_search
+from Orbitool.utils import binary_search
 
 data_path = pathlib.Path(__file__).absolute(
 ).parent.joinpath("savecut_test.csv")

@@ -138,12 +138,12 @@ class CalculatorGenerator(BaseStructure):
     def Factory(cls):
         ins = cls(
             element_states={
-                row[0]: State(*row[1:]) for row in InitParams},
+                row[0]: State.fromParam(row[1:]) for row in InitParams},
             isotope_usable={
-                "C": IsotopeNum(12, 0, 0, 20, False),
+                "C": IsotopeNum.init(12, 0, 0, 20, False),
                 # "C[12]": IsotopeNum(12, 12, 0, 10, False),
-                "H": IsotopeNum(1, 0, 0, 40, False),
-                "O": IsotopeNum(16, 0, 0, 15, False),
+                "H": IsotopeNum.init(1, 0, 0, 40, False),
+                "O": IsotopeNum.init(16, 0, 0, 15, False),
             }
         )
         return ins
@@ -162,7 +162,7 @@ class CalculatorGenerator(BaseStructure):
                 i_num.global_limit = True
             self.isotope_usable[key] = i_num
         else:
-            self.isotope_usable[key] = IsotopeNum(get_num(key), 0, 0, 3, False)
+            self.isotope_usable[key] = IsotopeNum.init(get_num(key), 0, 0, 3, False)
 
     def del_EI(self, key: str):
         _ = parse_element(key)
@@ -189,7 +189,7 @@ class CalculatorGenerator(BaseStructure):
         assert min >= 0 and max >= 0, f"Isotope {key}'s min/max should be non-negative"
         assert not (
             i_num.i_num == 0 and global_limit), f"Cannot set global_limit to a whole element"
-        self.isotope_usable[key] = IsotopeNum(
+        self.isotope_usable[key] = IsotopeNum.init(
             i_num.e_num, i_num.i_num, min, max, global_limit)
 
     def get_EI_num(self, key: str):
@@ -222,11 +222,15 @@ class CalculatorGenerator(BaseStructure):
                     continue
                 (ret if i_num.global_limit else no_isotope).append(
                     CalcIsotopeNum(
-                        e, e_mass_num, i_mass_num, i_num.global_limit, i_num.min, i_num.max, e_num.min, e_num.max))
+                        element=e, e_num=e_mass_num, i_num=i_mass_num,
+                        global_limit=i_num.global_limit, i_min=i_num.min,
+                        i_max=i_num.max, e_min=e_num.min, e_max=e_num.max))
             ret.extend(no_isotope)
             if not flag:
                 i_num = CalcIsotopeNum(
-                    e, e_mass_num, e_mass_num, False, 0, e_num.max, e_num.min, e_num.max)
+                    element=e, e_num=e_mass_num, i_num=e_mass_num,
+                    global_limit=False, i_min=0, i_max=e_num.max,
+                    e_min=e_num.min, e_max=e_num.max)
                 ret.append(i_num)
             return ret
 

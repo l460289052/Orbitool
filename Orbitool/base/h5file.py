@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import io
 from pathlib import Path
-from typing import List, Literal, Type, TypeVar
+from typing import List, Literal, Optional, Type, TypeVar
 
 import h5py
 
@@ -15,8 +15,8 @@ class H5Obj:
     def __init__(self, obj) -> None:
         self._obj: h5py.Group = obj
 
-    def write(self, path: str, value):
-        get_handler(type(value)).write_to_h5(self._obj, path, value)
+    def write(self, path: str, value: T, typ: Optional[Type[T]] = None):
+        get_handler(typ or type(value)).write_to_h5(self._obj, path, value)
 
     def read(self, path: str, typ: Type[T]) -> T:
         return get_handler(typ).read_from_h5(self._obj, path)
