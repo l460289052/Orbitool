@@ -119,10 +119,19 @@ class StringConverter(Converter):
         self.h5_dtype = np.dtype("S")
 
     def convert_to_h5(self, value: np.ndarray):
-        return value.astype(self.h5_dtype)
+        """
+            https://github.com/numpy/numpy/issues/13156
+        """
+        if len(value):
+            return np.char.encode(value, encoding='utf-8')
+        else:
+            return np.empty_like(value, dtype=self.h5_dtype)
 
     def convert_from_h5(self, value: np.ndarray):
-        return value.astype(self.dtype)
+        if len(value):
+            return np.char.decode(value, encoding='utf-8')
+        else:
+            return np.empty_like(value, dtype=self.dtype)
 
 
 @lru_cache(None)
@@ -154,7 +163,7 @@ class HomogeneousArrayHelper:
 
 class HeteroGeneousArrayHelper:
     def __init__(self, dtype_list: List[Union[Tuple[str, np.dtype], Tuple[str, np.dtype, Union[int, Tuple[int]]]]]) -> None:
-        converters:List[Converter] = []
+        converters: List[Converter] = []
         h5_dtype = []
         s_type = []
         has_s = False

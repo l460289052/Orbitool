@@ -35,9 +35,11 @@ class Path(BaseRowStructure):
     def fromThermoFile(cls, filepath):
         handler = ThermoFile(filepath)
         return cls(
-            f"{PATH_TYPE.THERMO.value}:{filepath}",
-            handler.creationDatetime, handler.startDatetime,
-            handler.endDatetime, handler.totalScanNum)
+            path=f"{PATH_TYPE.THERMO.value}:{filepath}",
+            createDatetime=handler.creationDatetime,
+            startDatetime=handler.startDatetime,
+            endDatetime=handler.endDatetime,
+            scanNum=handler.totalScanNum)
 
     def get_show_name(self):
         typ, path = self.path.split(":", 1)

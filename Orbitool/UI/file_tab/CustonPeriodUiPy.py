@@ -66,7 +66,7 @@ class Dialog(QtWidgets.QDialog):
     def init_periods(self, start_time, end_time, time_interval):
         if self.periods is None:
             self.periods = [
-                PeriodItem(s, e) for s, e in generage_periods(
+                PeriodItem(start_time=s, end_time=e) for s, e in generage_periods(
                     start_time, end_time, str2timedelta(time_interval))]
 
     def show_periods(self):
@@ -218,7 +218,7 @@ class Dialog(QtWidgets.QDialog):
     def generate_time_periods(self):
         ui = self.ui
         self.periods = [
-            PeriodItem(s, e) for s, e in generage_periods(
+            PeriodItem(start_time=s, end_time=e) for s, e in generage_periods(
                 ui.startDateTimeEdit.dateTime().toPyDateTime(),
                 ui.endDateTimeEdit.dateTime().toPyDateTime(),
                 str2timedelta(ui.timeIntervalLineEdit.text())
@@ -299,15 +299,10 @@ class Dialog(QtWidgets.QDialog):
                 next(it)  # skip row
                 for row in it:
                     if row[0]:
-                        times = (setting.parse_time(
-                            row[0]), setting.parse_time(row[1]))
+                        item = PeriodItem(start_time=row[0], end_time=row[1])
                     else:
-                        times = (None, None)
-                    if len(row) == 4:
-                        nums = (int(row[2]), int(row[3]))
-                    else:
-                        nums = ()
-                    item = PeriodItem(*(times + nums))
+                        assert len(row) == 4, "csv's format could be (time, time) or (time, time, num, num)"
+                        item = PeriodItem(start_num=int(row[2]), stop_num=int(row[3]))
                     ret.append(item)
             return ret
         self.periods = yield func, "Read periods"
@@ -327,7 +322,7 @@ class Dialog(QtWidgets.QDialog):
                 writer.writerow(
                     ('start time', 'end time', 'start num', 'end num'))
                 for p in periods:
-                    if p.start_time:
+                    if p.use_time():
                         writer.writerow(
                             (setting.format_time(p.start_time), setting.format_time(p.end_time), -1, -1))
                     else:

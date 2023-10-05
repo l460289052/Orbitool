@@ -128,8 +128,9 @@ class Widget(QtWidgets.QWidget):
                     spectrum[0], spectrum[1]), spectrum[2]) for spectrum in spectra]
                 mz, intensity = spectrum_func.averageSpectra(
                     spectra, rtol, True)
-                spectrum = Spectrum('none:', mz, intensity,
-                                    infos[0].start_time, infos[-1].end_time)
+                spectrum = Spectrum(
+                    mz=mz, intensity=intensity, path='none:',
+                    start_time=infos[0].start_time, end_time=infos[-1].end_time)
                 return True, spectrum
             else:
                 return False, None
@@ -357,9 +358,9 @@ class Widget(QtWidgets.QWidget):
             ax.yaxis.set_major_formatter(
                 matplotlib.ticker.FormatStrFormatter(r"%.1e"))
 
-        ax.plot(spectrum.mz, result.noise.LOD,
+        ax.plot(spectrum.mz, result.noise.LOD, zorder=2.5,
                 linewidth=1, color='k', label='LOD')
-        ax.plot(spectrum.mz, result.noise.noise,
+        ax.plot(spectrum.mz, result.noise.noise, zorder=2.5,
                 linewidth=1, color='b', label='noise')
         spectrum_split = result.spectrum_split
         noise_split = result.noise_split
@@ -396,8 +397,9 @@ class Widget(QtWidgets.QWidget):
                 info.general_result.global_noise_std, params, points, deltas,
                 noise_setting.n_sigma, subtract)
 
-            s = Spectrum(spectrum.path, mz, intensity,
-                         spectrum.start_time, spectrum.end_time)
+            s = Spectrum(
+                mz=mz, intensity=intensity, path=spectrum.path,
+                start_time=spectrum.start_time, end_time=spectrum.end_time)
 
             return s
 
@@ -454,8 +456,9 @@ class Widget(QtWidgets.QWidget):
                 info.general_result.global_noise_std, params, points, deltas,
                 noise_setting.n_sigma, subtract)
 
-            s = Spectrum(spectrum.path, mz, intensity,
-                         spectrum.start_time, spectrum.end_time)
+            s = Spectrum(
+                mz=mz, intensity=intensity, path=spectrum.path,
+                start_time=spectrum.start_time, end_time=spectrum.end_time)
 
             return s
 
@@ -487,6 +490,7 @@ class Widget(QtWidgets.QWidget):
             return
         if not info.general_setting.params_inited:
             return
+        is_log = self.ui.yLogCheckBox.isChecked()
 
         noise_setting = info.general_setting
         result = info.general_result
@@ -502,13 +506,22 @@ class Widget(QtWidgets.QWidget):
             x_max = point + param.delta * 2
             xrange = [x_min, x_max]
             global_range = polyval(xrange, result.poly_coef)
+            global_lod_max = global_range.max() + noise_setting.n_sigma * result.global_noise_std
             if param.useable:
-                y_min = global_range.min()
-                _, y_max = spectrum_func.getNoiseLODFromParam(
+                y_min, y_max = spectrum_func.getNoiseLODFromParam(
                     param.param, noise_setting.n_sigma)
+                y_min = min(global_range.min(), y_min)
+                y_max = max(global_lod_max, y_max)
             else:  # global noise
-                y_min = global_range.min()
-                y_max = global_range.max() + noise_setting.n_sigma * result.global_noise_std
+                y_min = global_range.min() / 2
+                y_max = global_lod_max
+            
+            if is_log:
+                y_min = max(y_min, 0) * 0.5
+                y_max *= 10
+            else:
+                y_min = min(y_min, 0)
+                y_max *= 1.5
 
             plot.ax.set_xlim(x_min, x_max)
             plot.ax.set_ylim(y_min, y_max)
@@ -624,8 +637,9 @@ class ReadFromFile(MultiProcess):
     def func(data: Tuple[FileSpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
         info, (mz, intensity) = data
         mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
-        spectrum = Spectrum(info.path, mz, intensity,
-                            info.start_time, info.end_time)
+        spectrum = Spectrum(
+            mz=mz, intensity=intensity, path=info.path,
+            start_time=info.start_time, end_time=info.end_time)
         return info, spectrum
 
     @staticmethod

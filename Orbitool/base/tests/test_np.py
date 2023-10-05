@@ -94,3 +94,18 @@ def test_attr():
     tb = f.read("ta", TA)
 
     assert ta == tb
+
+def test_unicode_str():
+    class US(BaseStructure):
+        s: NdArray[str, -1]
+    a = US(
+        s = np.array(["质谱"] * 10, str)
+    )
+
+    f = H5File()
+
+    f.write("ta", a)
+
+    b = f.read("ta", US)
+
+    assert a == b

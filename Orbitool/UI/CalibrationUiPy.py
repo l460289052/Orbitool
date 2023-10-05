@@ -525,9 +525,9 @@ class CalibrateMergeDenoise(MultiProcess):
             mz, intensity = spectrum_func.denoiseWithParams(
                 mz, intensity, poly_coef, std, params, points, deltas, n_sigma, subtract)
 
-        start_time = min(start_times)
-        end_time = max(end_times)
-        spectrum = Spectrum(path, mz, intensity, start_time, end_time)
+        spectrum = Spectrum(
+            mz=mz, intensity=intensity, path=path,
+            start_time=min(start_times), end_time=max(end_times))
         return spectrum
 
     @staticmethod
@@ -539,7 +539,7 @@ class CalibrateMergeDenoise(MultiProcess):
         def it():
             for spectrum in rets:
                 infos.append(SpectrumInfo(
-                    spectrum.start_time, spectrum.end_time))
+                    start_time=spectrum.start_time, end_time=spectrum.end_time))
                 yield spectrum
         tmp.extend(it())
         file.info.calibration_tab.calibrated_spectrum_infos = infos
