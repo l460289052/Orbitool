@@ -79,11 +79,11 @@ class Widget(QtWidgets.QWidget):
             try:
                 mass = float(item)
                 MassListHelper.addMassTo(
-                    masslist, MassListItem(mass), rtol)
+                    masslist, MassListItem(position=mass), rtol)
             except:
                 formula = Formula(item)
                 MassListHelper.addMassTo(
-                    masslist, MassListItem(formula.mass(), [formula]), rtol)
+                    masslist, MassListItem(position=formula.mass(), formulas=[formula]), rtol)
 
         self.showMasslist()
 
@@ -132,7 +132,7 @@ class Widget(QtWidgets.QWidget):
                 formulas = row[1]
                 formulas = [Formula(f)
                             for formula in formulas.split('/') if (f := formula.strip())]
-                item = MassListItem(position, formulas)
+                item = MassListItem(position=position, formulas=formulas)
                 MassListHelper.addMassTo(ret, item, rtol)
         return ret
 

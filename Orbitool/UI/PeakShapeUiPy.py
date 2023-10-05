@@ -104,7 +104,7 @@ class Widget(QtWidgets.QWidget):
                         peakfit_func.normal_distribution.getNormalizedPeak(peak))
                 except:
                     pass
-            manager = peakfit_func.PeaksManager(norm_peaks)
+            manager = peakfit_func.PeaksManager(peaks=norm_peaks)
             func = peakfit_func.normal_distribution.NormalDistributionFunc.FromNormPeaks(
                 norm_peaks)
             return manager, func

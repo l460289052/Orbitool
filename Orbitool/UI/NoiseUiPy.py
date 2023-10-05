@@ -157,7 +157,7 @@ class Widget(QtWidgets.QWidget):
     def addFormula(self):
         formula = Formula(self.ui.lineEdit.text())
         self.info.general_setting.noise_formulas.append(
-            NoiseFormulaParameter(formula))
+            NoiseFormulaParameter(formula=formula))
         self.showNoiseFormula()
 
     addFormula.except_node(showNoiseFormula)

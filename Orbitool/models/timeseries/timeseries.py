@@ -27,7 +27,7 @@ class TimeSeries(BaseDatasetStructure):
     @classmethod
     def FactoryPositionRtol(cls, position: float, rtol: float, formulas: List[Formula] = []):
         delta = position * rtol
-        return cls(position - delta, position + delta, False, formulas.copy())
+        return cls(position_min=position - delta,position_max=position + delta, range_sum=False, formulas=formulas.copy())
 
     def get_deviations(self):
         mid = (self.position_min + self.position_max) / 2

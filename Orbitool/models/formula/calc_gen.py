@@ -94,9 +94,6 @@ class CalcIsotopeNum(BaseRowStructure):
     e_min: int
     e_max: int
 
-    def __repr__(self) -> str:
-        return f"IsotopeNum({self.element},{self.e_num},{self.i_num},{self.global_limit},{self.i_min},{self.i_max},{self.element_min},{self.element_max})"
-
 
 @lru_cache(None)
 def get_num(key: str, num=0):

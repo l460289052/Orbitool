@@ -595,7 +595,7 @@ class Widget(QtWidgets.QWidget):
         rtol = self.manager.workspace.info.masslist_docker.rtol
 
         yield from self._general_action(lambda fp: MassListHelper.addMassTo(
-            masslist, MassListItem(fp.peak_position, fp.formulas), rtol=rtol), "add to mass list")
+            masslist, MassListItem(position=fp.peak_position, formulas=fp.formulas), rtol=rtol), "add to mass list")
 
         self.show_masslist.emit()
 

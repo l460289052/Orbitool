@@ -36,7 +36,8 @@ def getNormalizedPeak(peak: Peak, param=None) -> FittedPeak:
     # move to 0 and change peak width
     mz_new = (mz / mu - 1) / math.sqrt(mu / 200)
     intensity_new = intensity / peakHeight
-    peak = FittedPeak(mz_new, intensity_new, param, 0, 1, 1)
+    peak = FittedPeak(mz=mz_new, intensity=intensity_new,
+                      fitted_param=param, peak_position=0, peak_intensity=1, area=1)
     return peak
 
 
