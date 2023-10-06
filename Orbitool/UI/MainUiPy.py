@@ -6,8 +6,9 @@ from typing import Dict, Union
 from matplotlib.pyplot import get
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from ..structures.HDF5 import h5_brokens
-from ..workspace import VERSION, WorkSpace, updater
+from Orbitool.base.structure import broken_entries as h5_brokens
+from Orbitool.models.workspace import WorkSpace, updater
+from ..version import VERSION
 from . import (CalibrationUiPy, file_tab, formulas, MainUi, MassDefectUiPy,
                MassListUiPy, NoiseUiPy, PeakFitUiPy, PeakListUiPy,
                PeakShapeUiPy, SpectraListUiPy, SpectrumUiPy, TimeseriesesUiPy,

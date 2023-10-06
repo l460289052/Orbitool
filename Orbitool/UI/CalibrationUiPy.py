@@ -1,27 +1,29 @@
-from functools import partial
 import math
 from enum import Enum
+from functools import partial
+from itertools import chain
 from pathlib import Path
 from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
-from itertools import chain
 
 import numpy as np
-from PyQt6 import QtCore, QtWidgets, QtGui
+from PyQt6 import QtCore, QtGui, QtWidgets
 
-from ..functions import spectrum as spectrum_func, binary_search, peakfit as peakfit_func
-from ..functions.calibration import Calibrator
-from ..functions.peakfit.normal_distribution import NormalDistributionFunc
-from ..structures.HDF5 import StructureListView, DiskListDirectView
-from ..structures.spectrum import Spectrum, SpectrumInfo
-from ..workspace import WorkSpace
-from ..workspace.calibration import CalibratorInfoSegment
+from Orbitool import setting
+from Orbitool.base.disk_structure import DiskListDirectView
+from Orbitool.models import peakfit, spectrum as spectrum_func
+from Orbitool.models.spectrum import Spectrum, SpectrumInfo
+from Orbitool.models.calibration import Calibrator
+from Orbitool.models.peakfit.normal_distribution import NormalDistributionFunc
+from Orbitool.models.workspace import WorkSpace
+from Orbitool.models.workspace.calibration import CalibratorInfoSegment
+from Orbitool.utils import binary_search
+
 from . import CalibrationUi
+from .CalibrationDetailUiPy import Widget as CalibrationDetailWin
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
-from .utils import get_tablewidget_selected_row, showInfo, DragHelper, openfile, savefile
-from Orbitool import setting
-
-from .CalibrationDetailUiPy import Widget as CalibrationDetailWin
+from .utils import (DragHelper, get_tablewidget_selected_row, openfile,
+                    savefile, showInfo)
 
 
 class ShownState(int, Enum):
@@ -394,11 +396,11 @@ class Widget(QtWidgets.QWidget):
 
 class SplitAndFitPeak(MultiProcess):
     @staticmethod
-    def read(h5_spectra: StructureListView[Spectrum], **kwargs) -> Generator:
+    def read(h5_spectra: DiskListDirectView[Spectrum], **kwargs) -> Generator:
         return h5_spectra
 
     @staticmethod
-    def read_len(h5_spectra: StructureListView[Spectrum], **kwargs) -> int:
+    def read_len(h5_spectra: DiskListDirectView[Spectrum], **kwargs) -> int:
         return len(h5_spectra)
 
     @staticmethod
@@ -523,21 +525,21 @@ class CalibrateMergeDenoise(MultiProcess):
             mz, intensity = spectrum_func.denoiseWithParams(
                 mz, intensity, poly_coef, std, params, points, deltas, n_sigma, subtract)
 
-        start_time = min(start_times)
-        end_time = max(end_times)
-        spectrum = Spectrum(path, mz, intensity, start_time, end_time)
+        spectrum = Spectrum(
+            mz=mz, intensity=intensity, path=path,
+            start_time=min(start_times), end_time=max(end_times))
         return spectrum
 
     @staticmethod
     def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
         obj = (file.proxy_file or file.file)._obj
-        tmp = DiskListDirectView(obj, "tmp")
+        tmp = DiskListDirectView(SpectrumInfo, obj, "tmp")
         infos = []
 
         def it():
             for spectrum in rets:
                 infos.append(SpectrumInfo(
-                    spectrum.start_time, spectrum.end_time))
+                    start_time=spectrum.start_time, end_time=spectrum.end_time))
                 yield spectrum
         tmp.extend(it())
         file.info.calibration_tab.calibrated_spectrum_infos = infos

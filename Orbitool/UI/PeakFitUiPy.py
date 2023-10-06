@@ -1,3 +1,4 @@
+from array import array
 from enum import Enum
 from itertools import chain
 from typing import Callable, List, Optional, Set, Tuple, cast
@@ -7,16 +8,15 @@ import matplotlib.ticker
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
-from ..functions import binary_search
-from ..functions import formula as formula_func
-from ..functions import peakfit as peakfit_func
-from ..functions import spectrum as spectrum_func
-from ..functions.peakfit import masslist as masslist_func
-from ..structures.spectrum import (FittedPeak, MassListItem, Peak, PeakTags,
-                                   Spectrum)
-from ..utils.formula import Formula, formula_range
-from . import PeakFitUi
 from Orbitool import setting
+from Orbitool.models import peakfit as peakfit_func
+from Orbitool.models import spectrum as spectrum_func
+from Orbitool.models.formula import Formula, correct_formula, formula_range
+from Orbitool.models.peakfit import MassListHelper, MassListItem
+from Orbitool.models.spectrum import FittedPeak, Peak, PeakTags, Spectrum
+from Orbitool.utils import binary_search
+
+from . import PeakFitUi
 from .component import Plot
 from .manager import Manager, MultiProcess, state_node
 
@@ -158,7 +158,7 @@ class Widget(QtWidgets.QWidget):
                 peak.formulas = calc_get(peak.peak_position)
             if distribution:
                 for peak in manager.tqdm(peaks, msg="correct formulas to natural distribution"):
-                    peak.formulas = formula_func.correct(peak, peaks, rtol)
+                    peak.formulas = correct_formula(peak, peaks, rtol)
 
             mz, residual = peakfit_func.calculateResidual(
                 raw_peaks, original_indexes, peaks, workspace.info.peak_shape_tab.func)
@@ -323,9 +323,9 @@ class Widget(QtWidgets.QWidget):
 
         info = self.info
         raw_peaks = info.raw_peaks
-        original_indexes = info.original_indexes
+        original_indexes = cast(List[int], info.original_indexes)
         peaks = info.peaks
-        indexes = info.shown_indexes
+        indexes = cast(List[int], info.shown_indexes)
 
         (x_min, x_max), (y_min, y_max) = now_lim
 
@@ -345,6 +345,7 @@ class Widget(QtWidgets.QWidget):
             del ann
 
         cnt = 0
+        arg: int
         for arg in args:
             index, peak = index_peaks_pair[arg]
             if len(peak.formulas) == 0:
@@ -554,18 +555,16 @@ class Widget(QtWidgets.QWidget):
             indexes = manager.getters.peak_list_selected_true_index.get()
         distribution = ui.calcDistributionCheckBox.isChecked()
 
-
         def func():
             index: int
             for index in manager.tqdm(indexes, msg="calc formula"):
                 peak = peaks[index]
                 peak.formulas = calc_get(peak.peak_position)
 
-
             if distribution:
                 for index in manager.tqdm(indexes, msg="correct formulas to natural distribution"):
                     peak = peaks[index]
-                    peak.formulas = formula_func.correct(peak, peaks, rtol)
+                    peak.formulas = correct_formula(peak, peaks, rtol)
 
         yield func, "fit use calc"
 
@@ -576,7 +575,7 @@ class Widget(QtWidgets.QWidget):
         masslist = self.manager.workspace.info.masslist_docker.masslist
 
         def proc(fp: FittedPeak):
-            fp.formulas = masslist_func.fitUseMassList(
+            fp.formulas = MassListHelper.fitUseMassList(
                 fp.peak_position, masslist, rtol)
 
         yield from self._general_action(proc, "fit use mass list")
@@ -595,8 +594,8 @@ class Widget(QtWidgets.QWidget):
         masslist = self.manager.workspace.info.masslist_docker.masslist
         rtol = self.manager.workspace.info.masslist_docker.rtol
 
-        yield from self._general_action(lambda fp: masslist_func.addMassTo(
-            masslist, MassListItem(fp.peak_position, fp.formulas), rtol=rtol), "add to mass list")
+        yield from self._general_action(lambda fp: MassListHelper.addMassTo(
+            masslist, MassListItem(position=fp.peak_position, formulas=fp.formulas), rtol=rtol), "add to mass list")
 
         self.show_masslist.emit()
 

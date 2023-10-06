@@ -4,7 +4,7 @@ from typing import Callable, List, Union, Optional
 
 from PyQt6 import QtWidgets, QtCore, QtGui
 from Orbitool.UI.manager import Manager, state_node
-from Orbitool.utils.formula import Formula, parse_element, ElementState
+from Orbitool.models.formula import Formula, parse_element, ElementState
 from Orbitool.UI.utils import get_tablewidget_selected_row, showInfo
 from . import FormulaResultUiPy
 

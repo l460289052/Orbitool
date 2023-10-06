@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from functools import cached_property
-from ... import functions
+from ..binary_search import indexBetween
 
 import os
 from datetime import datetime, timedelta
@@ -133,7 +133,7 @@ class File:
         return self.timeRange2ScanNumRange((datetimeRange[0] - self.creationDatetime, datetimeRange[1] - self.creationDatetime))
 
     def timeRange2ScanNumRange(self, timeRange: Tuple[timedelta, timedelta]):
-        s: slice = functions.binary_search.indexBetween(
+        s: slice = indexBetween(
             self, timeRange, (0, self.totalScanNum),
             method=(lambda _, i: self.getSpectrumRetentionTime(i)))
         return (s.start, s.stop)

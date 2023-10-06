@@ -20,9 +20,9 @@ class Tab(BaseTab):
 
         timeseries = setting.timeseries
 
-        ui.mzRangeTargetComboBox.addItems(get_args(timeseries.__fields__["mz_sum_target"].type_))
+        ui.mzRangeTargetComboBox.addItems(get_args(timeseries.model_fields["mz_sum_target"].annotation))
         ui.mzRangeTargetComboBox.setCurrentText(timeseries.mz_sum_target)
-        ui.mzRangePeakfitFuncCommboBox.addItems(get_args(timeseries.__fields__["mz_sum_func"].type_))
+        ui.mzRangePeakfitFuncCommboBox.addItems(get_args(timeseries.model_fields["mz_sum_func"].annotation))
         ui.mzRangePeakfitFuncCommboBox.setCurrentText(timeseries.mz_sum_func)
 
 

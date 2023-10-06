@@ -1,7 +1,7 @@
-from copy import copy
 import csv
 from collections import deque
-from datetime import datetime
+from copy import copy
+from tkinter import W
 from typing import Generator, Iterable, List, Optional, Tuple, Union
 
 import matplotlib.ticker
@@ -9,13 +9,16 @@ import numpy as np
 from numpy.polynomial.polynomial import polyval
 from PyQt6 import QtCore, QtWidgets
 
-from .. import workspace, setting
-from ..functions import spectrum as spectrum_func, binary_search
-from ..structures.file import FileSpectrumInfo
-from ..structures.HDF5 import StructureListView, DiskListDirectView
-from ..structures.spectrum import Spectrum
-from ..utils.formula import Formula
-from ..workspace import WorkSpace
+from Orbitool import setting
+from Orbitool.base.disk_structure import DiskListDirectView
+from Orbitool.models.workspace.noise_tab import MzIntensity, NoiseArray, NoiseFormulaParameter
+from Orbitool.models import spectrum as spectrum_func
+from Orbitool.models.file import FileSpectrumInfo
+from Orbitool.models.formula import Formula
+from Orbitool.models.spectrum import Spectrum
+from Orbitool.models.workspace import WorkSpace
+from Orbitool.utils import binary_search
+
 from . import NoiseUi, component
 from .component import factory
 from .manager import Manager, MultiProcess, state_node
@@ -125,8 +128,9 @@ class Widget(QtWidgets.QWidget):
                     spectrum[0], spectrum[1]), spectrum[2]) for spectrum in spectra]
                 mz, intensity = spectrum_func.averageSpectra(
                     spectra, rtol, True)
-                spectrum = Spectrum('none:', mz, intensity,
-                                    infos[0].start_time, infos[-1].end_time)
+                spectrum = Spectrum(
+                    mz=mz, intensity=intensity, path='none:',
+                    start_time=infos[0].start_time, end_time=infos[-1].end_time)
                 return True, spectrum
             else:
                 return False, None
@@ -153,7 +157,7 @@ class Widget(QtWidgets.QWidget):
     def addFormula(self):
         formula = Formula(self.ui.lineEdit.text())
         self.info.general_setting.noise_formulas.append(
-            workspace.noise_tab.NoiseFormulaParameter(formula))
+            NoiseFormulaParameter(formula=formula))
         self.showNoiseFormula()
 
     addFormula.except_node(showNoiseFormula)
@@ -203,8 +207,11 @@ class Widget(QtWidgets.QWidget):
         rets, noises, noise_split = yield func, "get noise infomations"
 
         result.poly_coef, result.global_noise_std, slt, params = rets
-        result.noise, result.LOD = noises
-        result.spectrum_mz, result.spectrum_intensity, result.noise_mz, result.noise_intensity = noise_split
+        result.noise = NoiseArray(noise=noises[0], LOD=noises[1])
+        result.spectrum_split = MzIntensity(
+            mz=noise_split[0], intensity=noise_split[1])
+        result.noise_split = MzIntensity(
+            mz=noise_split[2], intensity=noise_split[3])
 
         noise_setting = info.general_setting
 
@@ -252,7 +259,6 @@ class Widget(QtWidgets.QWidget):
 
         noise_setting = info.general_setting
         spectrum = info.current_spectrum
-        result.spectrum_mz, result.spectrum_intensity, result.noise_mz, result.noise_intensity = noise_split
 
         def func():
             params, points, deltas = noise_setting.get_params()
@@ -266,7 +272,12 @@ class Widget(QtWidgets.QWidget):
             else:
                 noise_split = (None,) * 4
             return noise, LOD, noise_split
-        result.noise, result.LOD, noise_split = yield func, "recalc noise"
+        noise, LOD, noise_split = yield func, "recalc noise"
+        result.noise = NoiseArray(noise=noise, LOD=LOD)
+        result.spectrum_split = MzIntensity(
+            mz=noise_split[0], intensity=noise_split[1])
+        result.noise_split = MzIntensity(
+            mz=noise_split[2], intensity=noise_split[3])
 
         self.showNoise()
 
@@ -330,8 +341,8 @@ class Widget(QtWidgets.QWidget):
         if spectrum is None:
             return
         result = info.general_result
-        if result.LOD is not None and spectrum.mz.shape != result.LOD.shape:
-            return # show another spectrum after calc noise
+        if not len(result.noise.LOD) or spectrum.mz.shape != result.noise.LOD.shape:
+            return  # show another spectrum after calc noise
 
         is_log = self.ui.yLogCheckBox.isChecked()
         plot = self.plot
@@ -347,14 +358,16 @@ class Widget(QtWidgets.QWidget):
             ax.yaxis.set_major_formatter(
                 matplotlib.ticker.FormatStrFormatter(r"%.1e"))
 
-        ax.plot(spectrum.mz, result.LOD,
+        ax.plot(spectrum.mz, result.noise.LOD, zorder=2.5,
                 linewidth=1, color='k', label='LOD')
-        ax.plot(spectrum.mz, result.noise,
+        ax.plot(spectrum.mz, result.noise.noise, zorder=2.5,
                 linewidth=1, color='b', label='noise')
-        if setting.denoise.plot_noise_in_diff_color and result.spectrum_mz is not None:
-            ax.plot(result.spectrum_mz, result.spectrum_intensity,
+        spectrum_split = result.spectrum_split
+        noise_split = result.noise_split
+        if setting.denoise.plot_noise_in_diff_color and spectrum_split.mz is not None:
+            ax.plot(spectrum_split.mz, spectrum_split.intensity,
                     linewidth=1, color="#1f77b4", label="Spectrum")
-            ax.plot(result.noise_mz, result.noise_intensity,
+            ax.plot(noise_split.mz, noise_split.intensity,
                     linewidth=1, color="#BF2138", label="Noise")
         else:
             ax.plot(spectrum.mz, spectrum.intensity,
@@ -384,8 +397,9 @@ class Widget(QtWidgets.QWidget):
                 info.general_result.global_noise_std, params, points, deltas,
                 noise_setting.n_sigma, subtract)
 
-            s = Spectrum(spectrum.path, mz, intensity,
-                         spectrum.start_time, spectrum.end_time)
+            s = Spectrum(
+                mz=mz, intensity=intensity, path=spectrum.path,
+                start_time=spectrum.start_time, end_time=spectrum.end_time)
 
             return s
 
@@ -442,8 +456,9 @@ class Widget(QtWidgets.QWidget):
                 info.general_result.global_noise_std, params, points, deltas,
                 noise_setting.n_sigma, subtract)
 
-            s = Spectrum(spectrum.path, mz, intensity,
-                         spectrum.start_time, spectrum.end_time)
+            s = Spectrum(
+                mz=mz, intensity=intensity, path=spectrum.path,
+                start_time=spectrum.start_time, end_time=spectrum.end_time)
 
             return s
 
@@ -475,6 +490,7 @@ class Widget(QtWidgets.QWidget):
             return
         if not info.general_setting.params_inited:
             return
+        is_log = self.ui.yLogCheckBox.isChecked()
 
         noise_setting = info.general_setting
         result = info.general_result
@@ -490,13 +506,22 @@ class Widget(QtWidgets.QWidget):
             x_max = point + param.delta * 2
             xrange = [x_min, x_max]
             global_range = polyval(xrange, result.poly_coef)
+            global_lod_max = global_range.max() + noise_setting.n_sigma * result.global_noise_std
             if param.useable:
-                y_min = global_range.min()
-                _, y_max = spectrum_func.getNoiseLODFromParam(
+                y_min, y_max = spectrum_func.getNoiseLODFromParam(
                     param.param, noise_setting.n_sigma)
+                y_min = min(global_range.min(), y_min)
+                y_max = max(global_lod_max, y_max)
             else:  # global noise
-                y_min = global_range.min()
-                y_max = global_range.max() + noise_setting.n_sigma * result.global_noise_std
+                y_min = global_range.min() / 2
+                y_max = global_lod_max
+            
+            if is_log:
+                y_min = max(y_min, 0) * 0.5
+                y_max *= 10
+            else:
+                y_min = min(y_min, 0)
+                y_max *= 1.5
 
             plot.ax.set_xlim(x_min, x_max)
             plot.ax.set_ylim(y_min, y_max)
@@ -612,8 +637,9 @@ class ReadFromFile(MultiProcess):
     def func(data: Tuple[FileSpectrumInfo, Tuple[np.ndarray, np.ndarray, float]], **kwargs):
         info, (mz, intensity) = data
         mz, intensity = spectrum_func.removeZeroPositions(mz, intensity)
-        spectrum = Spectrum(info.path, mz, intensity,
-                            info.start_time, info.end_time)
+        spectrum = Spectrum(
+            mz=mz, intensity=intensity, path=info.path,
+            start_time=info.start_time, end_time=info.end_time)
         return info, spectrum
 
     @staticmethod
@@ -638,7 +664,7 @@ class ReadFromFile(MultiProcess):
     @staticmethod
     def write(file: WorkSpace, rets: Iterable[Tuple[FileSpectrumInfo, Spectrum]], **kwargs):
         obj = (file.proxy_file or file.file)._obj
-        tmp = DiskListDirectView[Spectrum](obj, "tmp")
+        tmp = DiskListDirectView(Spectrum, obj, "tmp")
         infos = []
 
         def it():

@@ -13,7 +13,7 @@ import numpy as np
 from PyQt6.QtCore import QObject, QThread, QTimer, pyqtSignal
 from PyQt6.QtWidgets import QMainWindow, QTableWidget
 
-from ...workspace import WorkSpace
+from Orbitool.models.workspace import WorkSpace
 
 
 class BindData:

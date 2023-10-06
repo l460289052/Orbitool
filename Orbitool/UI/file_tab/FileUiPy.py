@@ -3,9 +3,10 @@ from typing import Iterable, List, Optional, Union
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from ... import utils
-from ...functions.file import generage_periods
-from ...structures.file import FileSpectrumInfo, Path, PathList, PeriodItem
+from Orbitool import utils
+from Orbitool.models.file import (FileSpectrumInfo, Path, PathList, PeriodItem,
+                                  generage_periods)
+
 from .. import utils as UiUtils
 from ..manager import Manager, Thread, state_node
 from ..utils import DragHelper, set_header_sizes, showInfo

@@ -10,8 +10,8 @@ import numpy as np
 
 from Orbitool import setting
 from Orbitool.UI import Manager
-from Orbitool.structures.file import PeriodItem
-from Orbitool.functions.file import generage_periods, generate_num_periods, get_num_range_from_ranges
+from Orbitool.models.file.file import PeriodItem
+from Orbitool.models.file import PeriodItem, generage_periods, generate_num_periods, get_num_range_from_ranges
 
 from .CustomPeriodUi import Ui_Dialog
 from .utils import str2timedelta, timedelta2str
@@ -66,7 +66,7 @@ class Dialog(QtWidgets.QDialog):
     def init_periods(self, start_time, end_time, time_interval):
         if self.periods is None:
             self.periods = [
-                PeriodItem(s, e) for s, e in generage_periods(
+                PeriodItem(start_time=s, end_time=e) for s, e in generage_periods(
                     start_time, end_time, str2timedelta(time_interval))]
 
     def show_periods(self):
@@ -218,7 +218,7 @@ class Dialog(QtWidgets.QDialog):
     def generate_time_periods(self):
         ui = self.ui
         self.periods = [
-            PeriodItem(s, e) for s, e in generage_periods(
+            PeriodItem(start_time=s, end_time=e) for s, e in generage_periods(
                 ui.startDateTimeEdit.dateTime().toPyDateTime(),
                 ui.endDateTimeEdit.dateTime().toPyDateTime(),
                 str2timedelta(ui.timeIntervalLineEdit.text())
@@ -269,14 +269,13 @@ class Dialog(QtWidgets.QDialog):
         last_num: PeriodItem = None
         new_periods = deepcopy(self.periods)
         for period in new_periods:
-            if period.end_time is not None:
+            if period.use_time():
                 period.end_time += delta
                 assert period.start_time < period.end_time
                 if last_time:
                     assert period.start_time > last_time.end_time
                 last_time = period
             elif period.stop_num >= 0:
-                period: PeriodItem
                 period.stop_num += delta
                 assert period.start_num < period.stop_num
                 if last_num:
@@ -300,15 +299,10 @@ class Dialog(QtWidgets.QDialog):
                 next(it)  # skip row
                 for row in it:
                     if row[0]:
-                        times = (setting.parse_time(
-                            row[0]), setting.parse_time(row[1]))
+                        item = PeriodItem(start_time=row[0], end_time=row[1])
                     else:
-                        times = (None, None)
-                    if len(row) == 4:
-                        nums = (int(row[2]), int(row[3]))
-                    else:
-                        nums = ()
-                    item = PeriodItem(*(times + nums))
+                        assert len(row) == 4, "csv's format could be (time, time) or (time, time, num, num)"
+                        item = PeriodItem(start_num=int(row[2]), stop_num=int(row[3]))
                     ret.append(item)
             return ret
         self.periods = yield func, "Read periods"
@@ -328,7 +322,7 @@ class Dialog(QtWidgets.QDialog):
                 writer.writerow(
                     ('start time', 'end time', 'start num', 'end num'))
                 for p in periods:
-                    if p.start_time:
+                    if p.use_time():
                         writer.writerow(
                             (setting.format_time(p.start_time), setting.format_time(p.end_time), -1, -1))
                     else:

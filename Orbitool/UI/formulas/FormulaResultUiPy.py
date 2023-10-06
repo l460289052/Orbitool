@@ -1,16 +1,18 @@
 from copy import deepcopy
+import re
 from typing import List
 
-from PyQt6 import QtWidgets, QtCore
+from PyQt6 import QtCore, QtWidgets
 from pyteomics.mass.mass import isotopologues
 
-from Orbitool.structures.spectrum import FittedPeak
-from Orbitool.functions import binary_search
-from Orbitool.utils.formula import Formula
-from . import FormulaResultUi
-from Orbitool.UI.manager import Manager, state_node
+from Orbitool.models.formula import Formula
+from Orbitool.models.spectrum import FittedPeak
 from Orbitool.UI.component import Plot
+from Orbitool.UI.manager import Manager, state_node
 from Orbitool.UI.utils import get_tablewidget_selected_row
+from Orbitool.utils import binary_search
+
+from . import FormulaResultUi
 
 
 class Window(QtWidgets.QMainWindow):
@@ -230,12 +232,16 @@ def peak_position(peaks: List[FittedPeak], index: int):
     return peaks[index].peak_position
 
 
+flt_pattern = re.compile(r"\d+(.\d+)")
+
+
 def calc(manager: Manager, input: str):
     info = manager.workspace.info
-    try:
+    if flt_pattern.match(input):
         mass = float(input)
-        formulas = info.formula_docker.calc_gen.generate().get(mass, info.formula_docker.charge)
-    except ValueError:
+        formulas = info.formula_docker.calc_gen.generate().get(
+            mass, info.formula_docker.charge)
+    else:
         formula = Formula(input)
         formulas = [formula]
         mass = formula.mass()

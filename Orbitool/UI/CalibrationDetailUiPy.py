@@ -6,8 +6,7 @@ import matplotlib.ticker
 
 
 from PyQt6 import QtWidgets, QtGui
-from ..structures.spectrum import Spectrum
-from ..functions import spectrum as spectrum_func
+from Orbitool.models.spectrum import Spectrum, safeCutSpectrum, safeSplitSpectrum
 from . import CalibrationDetailUi
 from .component import Plot
 
@@ -93,7 +92,7 @@ class Widget(QtWidgets.QWidget):
                 break
 
         self.spectrum = spectrum
-        self.inner_index = index
+        self.inner_index = inner_index
         self.current_ion_index = None
 
         table = self.ui.spectrumIonsTableWidget
@@ -115,7 +114,7 @@ class Widget(QtWidgets.QWidget):
         if True:
             cali_mz = []
             for mz_part, calibrator in zip(
-                    spectrum_func.safeSplitSpectrum(
+                    safeSplitSpectrum(
                         spectrum.mz, spectrum.intensity, 
                         np.array([info.end_point for info in info.last_calibrate_info_segments])),
                     info.calibrator_segments[spectrum.path]):

@@ -1,16 +1,18 @@
 import csv
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import List, Literal, Optional, Union
-import os
 
 from PyQt6 import QtCore, QtWidgets
 
+from Orbitool.models.file import FileSpectrumInfo
+
 from .. import setting
-from ..structures.file import FileSpectrumInfo
 from . import SpectraListUi, utils
 from .manager import Manager, state_node
-from .utils import openfolder, set_header_sizes, showInfo, get_tablewidget_selected_row
+from .utils import (get_tablewidget_selected_row, openfolder, set_header_sizes,
+                    showInfo)
 
 FILE_TAB = 0
 CALIBRATE_TAB = 1

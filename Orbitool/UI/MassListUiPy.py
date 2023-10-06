@@ -4,9 +4,8 @@ from functools import partial
 
 from PyQt6 import QtCore, QtWidgets
 
-from ..functions.peakfit import masslist as masslist_func
-from ..structures.spectrum import MassListItem
-from ..utils.formula import Formula
+from Orbitool.models.peakfit import MassListItem, MassListHelper
+from Orbitool.models.formula import Formula
 from . import MassListUi
 from .manager import Manager, state_node
 from .utils import get_tablewidget_selected_row, openfile, savefile
@@ -79,12 +78,12 @@ class Widget(QtWidgets.QWidget):
                 continue
             try:
                 mass = float(item)
-                masslist_func.addMassTo(
-                    masslist, MassListItem(mass), rtol)
+                MassListHelper.addMassTo(
+                    masslist, MassListItem(position=mass), rtol)
             except:
                 formula = Formula(item)
-                masslist_func.addMassTo(
-                    masslist, MassListItem(formula.mass(), [formula]), rtol)
+                MassListHelper.addMassTo(
+                    masslist, MassListItem(position=formula.mass(), formulas=[formula]), rtol)
 
         self.showMasslist()
 
@@ -133,8 +132,8 @@ class Widget(QtWidgets.QWidget):
                 formulas = row[1]
                 formulas = [Formula(f)
                             for formula in formulas.split('/') if (f := formula.strip())]
-                item = MassListItem(position, formulas)
-                masslist_func.addMassTo(ret, item, rtol)
+                item = MassListItem(position=position, formulas=formulas)
+                MassListHelper.addMassTo(ret, item, rtol)
         return ret
 
     @state_node
@@ -148,7 +147,7 @@ class Widget(QtWidgets.QWidget):
 
         def func():
             imported = self.read_masslist_from(f)
-            masslist_func.MergeInto(masslist, imported, rtol)
+            MassListHelper.mergeInto(masslist, imported, rtol)
 
         yield func
         self.showMasslist()
