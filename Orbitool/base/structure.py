@@ -9,6 +9,13 @@ from pydantic import BaseModel, ConfigDict, Field
 STRUCT_BASE = "_struct_base"
 
 
+class _MISSING:
+    pass
+
+
+MISSING = _MISSING()
+
+
 class BaseStructure(BaseModel):
     model_config = ConfigDict(
         # arbitrary_types_allowed=True,
@@ -86,7 +93,7 @@ class AttrTypeHandler(_BaseTypeHandler):
     @final
     def read_from_h5(self, h5g: H5Group, key: str) -> Any:
         if key not in h5g.attrs:
-            return None
+            return MISSING
         return self.convert_from_attr(h5g.attrs[key])
 
     @abc.abstractmethod
@@ -107,7 +114,7 @@ class GroupTypeHandler(_BaseTypeHandler):
     @final
     def read_from_h5(self, h5g: H5Group, key: str) -> Any:
         if key not in h5g:
-            return None
+            return MISSING
         return self.read_group_from_h5(h5g[key])
 
     @abc.abstractmethod
@@ -126,7 +133,7 @@ class DatasetTypeHandler(_BaseTypeHandler):
     @final
     def read_from_h5(self, h5g: H5Group, key: str) -> Any:
         if key not in h5g:
-            return None
+            return MISSING
         return self.read_dataset_from_h5(h5g[key])
 
     @abc.abstractmethod
@@ -153,6 +160,8 @@ class StructureTypeHandler(GroupTypeHandler):
             handler = get_handler(field.annotation)
             try:
                 v = handler.read_from_h5(group, k)
+                if v is MISSING:
+                    v = field.get_default(call_default_factory=True)
             except:
                 broken_entries.append('/'.join((group.name, k)))
                 v = field.get_default(call_default_factory=True)

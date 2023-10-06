@@ -5,7 +5,7 @@ from typing import Any, List, Type, final, get_args, get_origin, Dict
 import numpy as np
 
 from Orbitool.base.extra_type_handlers.np_handler import NdArray
-from .structure import AttrTypeHandler, BaseStructure, DatasetTypeHandler, get_handler, broken_entries
+from .structure import MISSING, AttrTypeHandler, BaseStructure, DatasetTypeHandler, get_handler, broken_entries
 from .extra_type_handlers import np_helper, Array
 from .extra_type_handlers.column_handler import ColumnCellTypeHandler, ColumnHandler
 
@@ -107,6 +107,8 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
             handler = get_handler(annotation)
             try:
                 v = handler.read_from_h5(dataset, k)
+                if v is MISSING:
+                    v = cls.model_fields[k].get_default(call_default_factory=True)
             except:
                 broken_entries.append('/'.join(dataset.name, f"attr:{k}"))
                 v = cls.model_fields[k].get_default(call_default_factory=True)

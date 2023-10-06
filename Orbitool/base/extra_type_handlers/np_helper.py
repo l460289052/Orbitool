@@ -129,6 +129,8 @@ class StringConverter(Converter):
 
     def convert_from_h5(self, value: np.ndarray):
         if len(value):
+            if value.dtype.char != 'S': # reading old files
+                value = value.astype("S")
             return np.char.decode(value, encoding='utf-8')
         else:
             return np.empty_like(value, dtype=self.dtype)
