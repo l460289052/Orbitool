@@ -96,7 +96,7 @@ class StorageFittedPeak(StoragePeak):
     area: float
 
     tags: str
-    formulas: str
+    formulas: FormulaList
 
     def to_peak(self, mz: np.ndarray, intensity: np.ndarray):
         return FittedPeak(
@@ -144,9 +144,13 @@ class PeaksTypeHandler(GroupTypeHandler):
             peaks.append(peak.to_storage(ind, ind + length))
             ind += length
 
-        smi = StorageMzIntensity(
-            mz=np.concatenate(mz, dtype=float),
-            intensity=np.concatenate(intensity, dtype=float))
+        if mz:
+            smi = StorageMzIntensity(
+                mz=np.concatenate(mz, dtype=float),
+                intensity=np.concatenate(intensity, dtype=float))
+        else:
+            smi = StorageMzIntensity(
+                mz=np.empty(0, float), intensity=np.empty(0, float))
 
         self.data_handler.write_to_h5(group, "spectrum", smi)
 

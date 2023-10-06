@@ -24,10 +24,6 @@ class UiNameGetter:
 class UiState(BaseDatasetStructure):
     states: Dict[str, str] = {}
 
-    @classmethod
-    def h5_type_handler(cls):
-        return super().h5_type_handler()
-
     def store_state(self, ui: object):
         types = tuple(state_handlers)
         states = {}

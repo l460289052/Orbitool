@@ -5,7 +5,7 @@ from PyQt6 import QtCore, QtWidgets
 from pyteomics.mass.mass import isotopologues
 
 from Orbitool.models.formula import Formula
-from Orbitool.models.spectrum.spectrum import FittedPeak
+from Orbitool.models.spectrum import FittedPeak
 from Orbitool.UI.component import Plot
 from Orbitool.UI.manager import Manager, state_node
 from Orbitool.UI.utils import get_tablewidget_selected_row
