@@ -1,4 +1,5 @@
 from copy import deepcopy
+import re
 from typing import List
 
 from PyQt6 import QtCore, QtWidgets
@@ -231,12 +232,16 @@ def peak_position(peaks: List[FittedPeak], index: int):
     return peaks[index].peak_position
 
 
+flt_pattern = re.compile(r"\d+(.\d+)")
+
+
 def calc(manager: Manager, input: str):
     info = manager.workspace.info
-    try:
+    if flt_pattern.match(input):
         mass = float(input)
-        formulas = info.formula_docker.calc_gen.generate().get(mass, info.formula_docker.charge)
-    except ValueError:
+        formulas = info.formula_docker.calc_gen.generate().get(
+            mass, info.formula_docker.charge)
+    else:
         formula = Formula(input)
         formulas = [formula]
         mass = formula.mass()

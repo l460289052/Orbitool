@@ -92,7 +92,7 @@ class Widget(QtWidgets.QWidget):
                 break
 
         self.spectrum = spectrum
-        self.inner_index = index
+        self.inner_index = inner_index
         self.current_ion_index = None
 
         table = self.ui.spectrumIonsTableWidget
