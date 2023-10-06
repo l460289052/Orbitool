@@ -46,7 +46,7 @@ class FormulaCellTypeHandler(StrCellTypeHandler):
 
 def validate_formula_list(value):
     if isinstance(value, str):
-        value = [vv for v in value.split(', ') if (vv:=v.strip())]
+        value = [vv for v in value.split(',') if (vv:=v.strip())]
     if isinstance(value, Iterable):
         return list(map(validate_formula, value))
     assert False
@@ -65,7 +65,7 @@ class FormulaListTypeHandler(StrTypeHandler):
     target_type = FormulaList
 
     def convert_to_attr(self, value: List[Formula]):
-        return ', '.join(map(str, value))
+        return ','.join(map(str, value))
 
     def convert_from_attr(self, value):
         return validate_formula_list(value)
@@ -74,7 +74,7 @@ class FormulaListCellTypeHandler(StrCellTypeHandler):
     column_target = FormulaList
 
     def convert_to_column(self, value: List[List[Formula]]) -> np.ndarray:
-        return np.array([', '.join(map(str, v)) for v in value], self.dtype)
+        return np.array([','.join(map(str, v)) for v in value], self.dtype)
     
     def convert_from_column(self, value: np.ndarray) -> list:
         return list(map(validate_formula_list, value.tolist()))

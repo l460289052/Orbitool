@@ -127,7 +127,7 @@ class PeriodItem(BaseRowStructure):
     stop_num: int = -1
 
     def use_time(self):
-        return self.start_time > base_dt
+        return self.start_num == -1
 
     def length(self):
         return self.use_time() and (self.end_time - self.start_time) or (self.stop_num - self.start_num)

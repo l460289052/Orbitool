@@ -19,7 +19,8 @@ def update(path: str):
         start_versions, version, method=lambda a, i: a[i][0])
 
     for version, updater in start_versions[posi:]:
-        updater(path)
+        with h5py.File(path, 'r+') as f:
+            updater(f)
     set_version(path)
 
 
