@@ -45,6 +45,13 @@ class StrTypeHandler(AttrTypeHandler):
     def convert_from_attr(self, value):
         return value
 
+class BytesTypeHandler(AttrTypeHandler):
+    target_type = bytes
+    def convert_to_attr(self, value):
+        return value
+    
+    def convert_from_attr(self, value):
+        return value
 
 class DatetimeTypeHandler(AttrTypeHandler):
     target_type = datetime

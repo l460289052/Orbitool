@@ -30,6 +30,9 @@ def SeqTypeHandler(origin, args):
     inner_type = args[0]
     # if inner_type is List[...], it is not a type!
     if isinstance(inner_type, type) and issubclass(inner_type, BaseRowStructure):
+        Handler = inner_type.h5_rows_handler()
+        if Handler is not None:
+            return Handler(origin, args)
         return SeqRowTypeHandler(origin, args)
     handler = get_column_handler(inner_type)
     if isinstance(handler, ColumnCellTypeHandler):
@@ -67,7 +70,7 @@ class SeqRowTypeHandler(DatasetTypeHandler):
         self.titles = titles
         self.column_helper = ColumnsHelper(tuple(titles), tuple(types))
 
-    def write_dataset_to_h5(self, h5g: H5Group, key: str, value: Iterable[BaseRowStructure]):
+    def write_dataset_to_h5(self, h5g: H5Group, key: str, value: List[BaseRowStructure]):
         return self.column_helper.write_columns_to_h5(
             h5g, key, len(value), self.get_columns_from_objs(value)
         )

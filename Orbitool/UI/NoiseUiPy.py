@@ -664,7 +664,7 @@ class ReadFromFile(MultiProcess):
     @staticmethod
     def write(file: WorkSpace, rets: Iterable[Tuple[FileSpectrumInfo, Spectrum]], **kwargs):
         obj = (file.proxy_file or file.file)._obj
-        tmp = DiskListDirectView[Spectrum](obj, "tmp")
+        tmp = DiskListDirectView(Spectrum, obj, "tmp")
         infos = []
 
         def it():

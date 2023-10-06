@@ -1,5 +1,5 @@
 from typing import List
-from ...models.spectrum.spectrum import Peak, FittedPeak
+from ...models.spectrum import Peak, FittedPeak
 from .base_fit_func import BaseFunc
 import numpy as np
 

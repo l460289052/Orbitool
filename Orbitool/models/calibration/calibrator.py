@@ -39,7 +39,10 @@ class PathIonInfo(BaseDatasetStructure):
         else:
             position = np.nan
         rtol = 1 - mass / position
-        return cls(raw_position, raw_intensity, position, rtol)
+        return cls(
+            raw_position=raw_position,
+            raw_intensity=raw_intensity,
+            position=position, rtol=rtol)
 
 
 class Calibrator(BaseStructure):
@@ -72,7 +75,10 @@ class Calibrator(BaseStructure):
             points = np.array([start_point])
         poly_coef = polyfit_with_fixed_points(
             ions_position[used_indexes], ions_rtol[used_indexes], degree, points)
-        return cls([ion.formula for ion in ions], used_indexes, unused_indexes, poly_coef)
+        return cls(
+            formulas=[ion.formula for ion in ions],
+            used_indexes=used_indexes, unused_indexes=unused_indexes,
+            poly_coef=poly_coef)
 
     def predict_point(self, x: float):
         return polynomial.polyval(x, self.poly_coef)

@@ -8,7 +8,6 @@ from ..row_structure import BaseRowStructure
 from ..structure import get_handler, handlers
 from .base import *
 from .column_handler import ColumnCellTypeHandler
-from .column_handler import ListTypeHandler as SimpleListTypeHandler
 from .column_handler import ColumnsHelper
 from .column_handler import get_handler as get_column_handler
 
@@ -16,6 +15,9 @@ from .column_handler import get_handler as get_column_handler
 def DictTypeHandler(origin, args):
     inner_type = args[1]
     if isinstance(inner_type, type) and issubclass(inner_type, BaseRowStructure):
+        Handler = inner_type.h5_rows_handler() 
+        if Handler is not None:
+            return Handler(origin, args)
         return DictRowTypeHandler(origin, args)
     handler = get_column_handler(inner_type)
     if isinstance(handler, ColumnCellTypeHandler):

@@ -161,7 +161,7 @@ class StructureTypeHandler(GroupTypeHandler):
 
 
 @lru_cache(None)  # TODO: clear after r/w
-def get_handler(typ: type) -> _BaseTypeHandler:
+def get_handler(typ: Type[T]) -> _BaseTypeHandler[T]:
     if hasattr(typ, "h5_type_handler"):
         Handler = getattr(typ, "h5_type_handler")()
     else:

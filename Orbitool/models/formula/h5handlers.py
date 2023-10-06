@@ -46,7 +46,7 @@ class FormulaCellTypeHandler(StrCellTypeHandler):
 
 def validate_formula_list(value):
     if isinstance(value, str):
-        value = [v.strip() for v in value.split(', ')]
+        value = [vv for v in value.split(', ') if (vv:=v.strip())]
     if isinstance(value, Iterable):
         return list(map(validate_formula, value))
     assert False

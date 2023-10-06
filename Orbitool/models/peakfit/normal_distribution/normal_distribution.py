@@ -6,7 +6,7 @@ from scipy.optimize import curve_fit
 
 from Orbitool.base import BaseRowStructure
 
-from ....models.spectrum.spectrum import FittedPeak, Peak, PeakTags
+from ....models.spectrum import FittedPeak, Peak, PeakTags
 from .nd import func, maxFitNum, mergePeaksParam
 from ..base_fit_func import BaseFunc
 

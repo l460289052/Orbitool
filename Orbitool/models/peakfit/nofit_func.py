@@ -1,7 +1,7 @@
 from typing import List
 import numpy as np
 
-from ...models.spectrum.spectrum import FittedPeak, Peak
+from ...models.spectrum import FittedPeak, Peak
 from ..spectrum import getPeaksPositions
 from .base_fit_func import BaseFunc
 

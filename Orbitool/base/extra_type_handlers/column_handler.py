@@ -73,6 +73,9 @@ class StrTypeHandler(ColumnCellTypeHandler):
     column_target = str
     dtype = np.dtype("U")
 
+class BytesTypeHandler(ColumnCellTypeHandler):
+    column_target = bytes
+    dtype = np.dtype("S")
 
 class DatetimeTypeHandler(ColumnCellTypeHandler):
     column_target = datetime

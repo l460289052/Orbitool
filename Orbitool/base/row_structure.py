@@ -1,5 +1,7 @@
-from .structure import BaseStructure
+from .structure import BaseStructure, _BaseTypeHandler
 
 
 class BaseRowStructure(BaseStructure):
-    pass
+    @classmethod
+    def h5_rows_handler(cls) -> _BaseTypeHandler:
+        pass

@@ -95,11 +95,14 @@ def test_attr():
 
     assert ta == tb
 
+
 def test_unicode_str():
     class US(BaseStructure):
         s: NdArray[str, -1]
+        b: NdArray[bytes, -1]
     a = US(
-        s = np.array(["质谱"] * 10, str)
+        s=np.array(["质谱"] * 10, str),
+        b=np.array([b"123"] * 10, bytes)
     )
 
     f = H5File()

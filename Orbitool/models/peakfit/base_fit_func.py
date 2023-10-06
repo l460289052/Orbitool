@@ -5,7 +5,7 @@ import numpy as np
 
 from Orbitool.base import BaseStructure
 
-from ..spectrum.spectrum import FittedPeak, Peak, Spectrum
+from ..spectrum import FittedPeak, Peak, Spectrum
 from Orbitool.utils.binary_search import indexBetween_np, indexNearest, indexFirstBiggerThan
 
 

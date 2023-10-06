@@ -106,7 +106,7 @@ class Widget(QtWidgets.QWidget):
             info.clr_title = "atoms"
 
         info.clr = Clr(x=clr_x, y=clr_y, size=clr_size,
-                       color=clr_color, labels=clr_labels)
+                       color=clr_color, labels=clr_labels or [])
         info.gry = Gry(x=gry_x, y=gry_y, size=gry_size)
 
     def plotMassDefect(self):
@@ -171,7 +171,7 @@ class Widget(QtWidgets.QWidget):
                         cmap=rainbow_color_map, linewidths=0.5, edgecolors='k', alpha=alpha)
         clrb = plot.fig.colorbar(sc)
         clrb.ax.set_title(info.clr_title)
-        if clr.labels is not None:
+        if clr.labels:
             clrb.ax.set_yticklabels(clr.labels)
 
         ax.autoscale(True)

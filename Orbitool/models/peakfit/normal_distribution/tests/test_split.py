@@ -1,5 +1,5 @@
 from ..normal_distribution import NormalDistributionFunc
-from .....models.spectrum.spectrum import Peak
+from .....models.spectrum import Peak
 import pandas as pd
 import pathlib
 

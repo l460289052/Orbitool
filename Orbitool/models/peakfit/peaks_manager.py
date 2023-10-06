@@ -1,13 +1,13 @@
 from typing import List, Union, Iterable
 
 from Orbitool.base import BaseStructure
-from ...models.spectrum import spectrum
+from ...models import spectrum
 import numpy as np
 
 
 class PeaksManager(BaseStructure):
     peaks: List[spectrum.FittedPeak]
-    canceled: List[List[spectrum.FittedPeak]]
+    canceled: List[List[spectrum.FittedPeak]] = []
 
     def rm(self, index: Union[int, List[int]]):
         indexes = index if isinstance(index, Iterable) else (index,)
