@@ -176,6 +176,10 @@ class Widget(QtWidgets.QWidget):
         info = self.info
         spectrum = info.current_spectrum
 
+        if spectrum is None:
+            showInfo("Please show a spectrum first")
+            return
+
         ui = self.ui
         quantile = ui.quantileDoubleSpinBox.value()
         n_sigma = ui.nSigmaDoubleSpinBox.value()

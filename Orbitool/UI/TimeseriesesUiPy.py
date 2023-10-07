@@ -247,10 +247,10 @@ class Widget(QtWidgets.QWidget):
     def export(self, target: Literal["intensity", "deviation"]):
         infos = self.info.timeseries_infos
         series = self.timeseries
-        if len(infos) == 0 or all(info.time_min == 0 for info in infos):
+        if len(infos) == 0 or all(info.valid() for info in infos):
             return
-        time_min = min(info.time_min for info in infos if info.time_min)
-        time_max = max(info.time_max for info in infos if info.time_max)
+        time_min = min(info.time_min for info in infos if info.valid())
+        time_max = max(info.time_max for info in infos if info.valid())
 
         ret, file = savefile("Timeseries", "CSV file(*.csv)",
                              f"timeseries {target} {time_min.strftime(setting.general.export_time_format)}-{time_max.strftime(setting.general.export_time_format)}.csv")
