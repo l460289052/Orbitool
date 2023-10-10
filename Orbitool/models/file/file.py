@@ -9,7 +9,7 @@ from Orbitool.base import BaseRowStructure, BaseDatasetStructure
 from Orbitool.utils.readers import ThermoFile
 
 from ..spectrum import spectrum
-from .part_file import (generage_periods, generate_num_periods,
+from .part_file import (generate_periods, generate_num_periods,
                         get_num_range_from_ranges)
 
 
@@ -153,7 +153,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
     def infosFromTimeInterval(cls, paths: List[Path], interval: timedelta, polarity, timeRange):
         periods = [PeriodItem(
             start_time=s, end_time=e
-        ) for s, e in generage_periods(timeRange[0], timeRange[1], interval)]
+        ) for s, e in generate_periods(timeRange[0], timeRange[1], interval)]
         return cls.infosFromPeriods(paths, polarity, periods)
 
     @classmethod
@@ -167,41 +167,58 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
         i = 0
         period = periods[i]
         average_index = 0
-        next_period = False
+
+        generate_flag = False
+        next_period_flag = False
+        next_file_flag = False
 
         for path in paths:
             handler = path.getFileHandler()
-            while True:
-                if period.start_num >= 0:
-                    if period.start_num < scan_num_sum + handler.totalScanNum and period.stop_num > scan_num_sum:
-                        time_range = handler.scanNumRange2DatetimeRange(
-                            (max(period.start_num - scan_num_sum, 0),
-                             min(period.stop_num - scan_num_sum, handler.totalScanNum - 1)))
-                        next_period = period.stop_num <= scan_num_sum + handler.totalScanNum
-                    else:
-                        break
+            while not next_file_flag:
+                if period.use_time():
+                    match (period.start_time < handler.endDatetime, period.end_time > handler.startDatetime):
+                        case (True, True):
+                            time_range = (
+                                max(period.start_time, handler.startDatetime),
+                                min(period.end_time, handler.endDatetime))
+                            generate_flag = True
+                            next_period_flag = period.end_time <= handler.endDatetime
+                            next_file_flag = not next_period_flag
+                        case (False, True):
+                            next_file_flag = True
+                        case (True, False):
+                            next_period_flag = True
                 else:
-                    if period.start_time < handler.endDatetime and period.end_time > handler.startDatetime:
-                        time_range = (
-                            max(period.start_time, handler.startDatetime),
-                            min(period.end_time, handler.endDatetime))
-                        next_period = period.end_time <= handler.endDatetime
-                    else:
-                        break
+                    match (period.start_num < scan_num_sum + handler.totalScanNum, period.stop_num > scan_num_sum):
+                        case (True, True):
+                            time_range = handler.scanNumRange2DatetimeRange(
+                                (max(period.start_num - scan_num_sum, 0),
+                                 min(period.stop_num - scan_num_sum, handler.totalScanNum - 1)))
+                            generate_flag = True
+                            next_period_flag = period.stop_num <= scan_num_sum + handler.totalScanNum
+                            next_file_flag = period.stop_num >= scan_num_sum + handler.totalScanNum
+                        case (False, True):
+                            next_file_flag = True
+                        case (True, False):
+                            next_period_flag = True
 
-                info = cls(
-                    start_time=time_range[0] - delta_time, end_time=time_range[1] + delta_time,
-                    path=path.path, polarity=polarity, average_index=average_index)
-                results.append(info)
-                if next_period:
+                if generate_flag:
+                    info = cls(
+                        start_time=time_range[0] - delta_time, end_time=time_range[1] + delta_time,
+                        path=path.path, polarity=polarity, average_index=average_index)
+                    results.append(info)
+
+                if next_period_flag:
                     average_index = 0
                     i += 1
                     if i >= len(periods):
                         return results
                     period = periods[i]
-                else:  # next file
+                elif next_file_flag: # same period with next file
                     average_index += 1
-                    break
+                next_period_flag = False
+                generate_flag = False
+            next_file_flag = False
 
             scan_num_sum += handler.totalScanNum
         return results

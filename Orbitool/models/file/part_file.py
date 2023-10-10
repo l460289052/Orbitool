@@ -10,7 +10,7 @@ class IFileHandler:
         pass
 
 
-def generage_periods(start_point: datetime, end_point: datetime, interval: timedelta) -> Iterable[Tuple[datetime, datetime]]:
+def generate_periods(start_point: datetime, end_point: datetime, interval: timedelta) -> Iterable[Tuple[datetime, datetime]]:
     times = np.arange(start_point, end_point + interval, interval)
     times[-1] = end_point
     times = times.astype(datetime)

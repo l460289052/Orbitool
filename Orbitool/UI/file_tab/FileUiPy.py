@@ -4,8 +4,7 @@ from typing import Iterable, List, Optional, Union
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from Orbitool import utils
-from Orbitool.models.file import (FileSpectrumInfo, Path, PathList, PeriodItem,
-                                  generage_periods)
+from Orbitool.models.file import (FileSpectrumInfo, Path, PathList)
 
 from .. import utils as UiUtils
 from ..manager import Manager, Thread, state_node
