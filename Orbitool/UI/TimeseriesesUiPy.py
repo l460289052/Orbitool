@@ -23,7 +23,7 @@ from ..utils.time_format.time_convert import converters
 from . import TimeseriesesUi
 from .component import Plot, factory
 from .manager import Manager, MultiProcess, state_node
-from .utils import get_tablewidget_selected_row, savefile
+from .utils import get_tablewidget_selected_row, savefile, showInfo
 
 
 class Widget(QtWidgets.QWidget):
@@ -121,6 +121,9 @@ class Widget(QtWidgets.QWidget):
 
         spectra = self.manager.workspace.data.calibrated_spectra
 
+        if not series:
+            showInfo("get no time series")
+            return 
         position_list = [(s.position_min, s.position_max) for s in series]
         position_min = min(p for p, _ in position_list)
         position_max = max(p for _, p in position_list)
@@ -247,7 +250,7 @@ class Widget(QtWidgets.QWidget):
     def export(self, target: Literal["intensity", "deviation"]):
         infos = self.info.timeseries_infos
         series = self.timeseries
-        if len(infos) == 0 or all(info.valid() for info in infos):
+        if len(infos) == 0 or all(not info.valid() for info in infos):
             return
         time_min = min(info.time_min for info in infos if info.valid())
         time_max = max(info.time_max for info in infos if info.valid())
