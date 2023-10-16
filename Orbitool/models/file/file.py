@@ -178,9 +178,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
                 if period.use_time():
                     match (period.start_time < handler.endDatetime, period.end_time > handler.startDatetime):
                         case (True, True):
-                            time_range = (
-                                max(period.start_time, handler.startDatetime),
-                                min(period.end_time, handler.endDatetime))
+                            time_range = (period.start_time, period.end_time)
                             generate_flag = True
                             next_period_flag = period.end_time <= handler.endDatetime
                             next_file_flag = not next_period_flag
@@ -204,7 +202,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
 
                 if generate_flag:
                     info = cls(
-                        start_time=time_range[0] - delta_time, end_time=time_range[1] + delta_time,
+                        start_time=time_range[0], end_time=time_range[1],
                         path=path.path, polarity=polarity, average_index=average_index)
                     results.append(info)
 
