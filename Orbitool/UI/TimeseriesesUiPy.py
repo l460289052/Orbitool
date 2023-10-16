@@ -123,7 +123,7 @@ class Widget(QtWidgets.QWidget):
 
         if not series:
             showInfo("get no time series")
-            return 
+            return
         position_list = [(s.position_min, s.position_max) for s in series]
         position_min = min(p for p, _ in position_list)
         position_max = max(p for _, p in position_list)
@@ -185,14 +185,20 @@ class Widget(QtWidgets.QWidget):
         table.setRowCount(len(self.info.timeseries_infos))
         shown_series = self.shown_series
         for index, s in enumerate(self.info.timeseries_infos):
-            chb = factory.CheckBox(index in shown_series)
-            chb.toggled.connect(partial(self.showTimeseriesAt, index))
-            table.setCellWidget(index, 0, chb)
+            if s.valid():
+                chb = factory.CheckBox(index in shown_series)
+                chb.toggled.connect(partial(self.showTimeseriesAt, index))
+                table.setCellWidget(index, 0, chb)
+            else:
+                i = QtWidgets.QTableWidgetItem("E")
+                i.setToolTip("Empty timeseries")
+                table.setItem(index, 0, i)
             table.setItem(index, 1, QtWidgets.QTableWidgetItem(s.get_name()))
             table.setItem(index, 2, QtWidgets.QTableWidgetItem(
                 format(s.position_min, '.5f')))
             table.setItem(index, 3, QtWidgets.QTableWidgetItem(
                 format(s.position_max, '.5f')))
+        table.resizeColumnsToContents()
 
     @state_node(withArgs=True)
     def showTimeseriesAt(self, index: int, checked: bool):
@@ -202,8 +208,10 @@ class Widget(QtWidgets.QWidget):
             if index in shown_series:
                 return
 
-            s = self.timeseries[index]
             i = self.info.timeseries_infos[index]
+            if not i.valid():
+                return
+            s = self.timeseries[index]
             kwds = {}
             if len(s.times) == 1:
                 kwds["marker"] = '.'

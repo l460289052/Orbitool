@@ -62,6 +62,10 @@ class Widget(QtWidgets.QWidget):
             table.setItem(index, 1, QtWidgets.QTableWidgetItem(
                 ', '.join(str(f) for f in mass.formulas)))
 
+    @state_node(mode="e")
+    def showMassList_CatchException(self):
+        self.showMasslist()
+
     @state_node
     def updateRtol(self):
         self.info.rtol = self.ui.doubleSpinBox.value() * 1e-6
