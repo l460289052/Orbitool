@@ -1,8 +1,17 @@
-__pycache__
+# vscode
 .vscode/.*
+.vscode
 .vs
+# tmp files
 TestResults
+__pycache__
 *~
+tmptest
+.pytest_cache
+.coverage
+htmlcov
+.VSCodeCounter
+# data
 *.RAW
 data
 ref
@@ -13,20 +22,18 @@ log.txt
 *.Orbit*
 *.csv
 *.pdf
-.vscode
-build
-/dist
 *.c
 *.cpp
 *.pyd
 code
-tmptest
-.pytest_cache
-.coverage
-htmlcov
 *.sqlite3
 collect.txt
+/setting.json
+# build files
+build
+/dist
 /build-config.json
 .VSCodeCounter
 /setting.json
-external-tools
+# other
+/external-tools

@@ -37,10 +37,10 @@ class FormulaTypeHandler(StrTypeHandler):
 class FormulaCellTypeHandler(StrCellTypeHandler):
     column_target = FormulaType
 
-    def convert_to_column(self, value: List[Formula]) -> np.ndarray:
+    def convert_to_npcolumn(self, value: List[Formula]) -> np.ndarray:
         return np.array(list(map(str, value)), self.dtype)
 
-    def convert_from_column(self, value: np.ndarray) -> List[Formula]:
+    def convert_from_npcolumn(self, value: np.ndarray) -> List[Formula]:
         return list(map(Formula, value.tolist()))
 
 
@@ -73,8 +73,8 @@ class FormulaListTypeHandler(StrTypeHandler):
 class FormulaListCellTypeHandler(StrCellTypeHandler):
     column_target = FormulaList
 
-    def convert_to_column(self, value: List[List[Formula]]) -> np.ndarray:
+    def convert_to_npcolumn(self, value: List[List[Formula]]) -> np.ndarray:
         return np.array([','.join(map(str, v)) for v in value], self.dtype)
     
-    def convert_from_column(self, value: np.ndarray) -> list:
+    def convert_from_npcolumn(self, value: np.ndarray) -> list:
         return list(map(validate_formula_list, value.tolist()))

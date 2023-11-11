@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path as FilePath
+import random
 from typing import Dict, Iterable, List, Tuple, Union
 
 import numpy as np
 
-from Orbitool.base import BaseRowStructure, BaseDatasetStructure
+from Orbitool.base import BaseRowStructure, BaseDatasetStructure, BaseStructure, JSONObject
 from Orbitool.utils.readers import ThermoFile
 
 from ..spectrum import spectrum
@@ -20,6 +21,7 @@ class PATH_TYPE(str, Enum):
 
 class Path(BaseRowStructure):
     path: str
+    key: str
     createDatetime: datetime
     startDatetime: datetime
     endDatetime: datetime
@@ -32,14 +34,23 @@ class Path(BaseRowStructure):
                 return ThermoFile(path)
 
     @classmethod
-    def fromThermoFile(cls, filepath):
+    def fromThermoFile(cls, filepath, other_paths: Iterable["Path"]):
         handler = ThermoFile(filepath)
+        stem = FilePath(filepath).stem
+        key = stem
+        other_keys = set(p.key for p in other_paths)
+        while True:
+            if key not in other_keys:
+                break
+            key = f"{stem}-{random.randbytes(4).hex()}"
         return cls(
             path=f"{PATH_TYPE.THERMO.value}:{filepath}",
+            key=key,
             createDatetime=handler.creationDatetime,
             startDatetime=handler.startDatetime,
             endDatetime=handler.endDatetime,
-            scanNum=handler.totalScanNum)
+            scanNum=handler.totalScanNum
+        )
 
     def get_show_name(self):
         typ, path = self.path.split(":", 1)
@@ -48,7 +59,7 @@ class Path(BaseRowStructure):
                 return FilePath(path).stem
 
 
-class PathList(BaseDatasetStructure):
+class PathList(BaseStructure):
     paths: List[Path] = []
 
     def _crossed(self, start: datetime, end: datetime) -> Tuple[bool, str]:
@@ -72,7 +83,7 @@ class PathList(BaseDatasetStructure):
         return start, end
 
     def addThermoFile(self, filepath):
-        path = Path.fromThermoFile(filepath)
+        path = Path.fromThermoFile(filepath, self.paths)
 
         crossed, crossed_file = self._crossed(
             path.startDatetime, path.endDatetime)
@@ -81,6 +92,7 @@ class PathList(BaseDatasetStructure):
                 f'file "{filepath}" and "{crossed_file}" have crossed scan time')
 
         self.paths.append(path)
+        return path
 
     def addCsv(self, *args):
         path = Path(path=f"h5:{path}")
@@ -92,8 +104,7 @@ class PathList(BaseDatasetStructure):
         if isinstance(indexes, int):
             indexes = (indexes, )
         indexes = np.unique(indexes)[::-1]
-        for index in indexes:
-            del self.paths[index]
+        return list(map(self.paths.pop, indexes))
 
     def subList(self, indexes: Union[int, Iterable[int]]):
         if isinstance(indexes, int):
@@ -135,26 +146,26 @@ class PeriodItem(BaseRowStructure):
 
 class FileSpectrumInfo(spectrum.SpectrumInfo):
     path: str
-    polarity: int
+    filter: JSONObject
 
     # index from 0, 1, 2, 3... with different times together to make up a whole spectrum
     average_index: int
 
     @classmethod
-    def infosFromNumInterval(cls, paths: List[Path], N: int, polarity, timeRange):
+    def infosFromNumInterval(cls, paths: List[Path], N: int, filters, timeRange):
         start_scan_num, stop_scan_num, total_scan_num = get_num_range_from_ranges(
             (p.getFileHandler() for p in paths), timeRange)
         periods = [PeriodItem(
             start_num=int(s), stop_num=int(e)
         ) for s, e in generate_num_periods(start_scan_num, stop_scan_num, N)]
-        return cls.infosFromPeriods(paths, polarity, periods)
+        return cls.infosFromPeriods(paths, filters, periods)
 
     @classmethod
-    def infosFromTimeInterval(cls, paths: List[Path], interval: timedelta, polarity, timeRange):
+    def infosFromTimeInterval(cls, paths: List[Path], interval: timedelta, filters, timeRange):
         periods = [PeriodItem(
             start_time=s, end_time=e
         ) for s, e in generate_periods(timeRange[0], timeRange[1], interval)]
-        return cls.infosFromPeriods(paths, polarity, periods)
+        return cls.infosFromPeriods(paths, filters, periods)
 
     @classmethod
     def infosFromPeriods(cls, paths: List[Path], polarity, periods: List[PeriodItem]):

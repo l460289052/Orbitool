@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from functools import cached_property
+
 from ..binary_search import indexBetween
 
 import os
 from datetime import datetime, timedelta
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 from Orbitool import setting
+from .spectrum_filter import SpectrumFilter
+
 match setting.file.dotnet_driver:
     case ".net framework":
         pass
@@ -37,10 +40,6 @@ from ThermoFisher.CommonCore.Data.FilterEnums import IonizationModeType, MSOrder
 from ThermoFisher.CommonCore.Data.Business import ChromatogramSignal, ChromatogramTraceSettings, \
     DataUnits, Device, GenericDataTypes, SampleType, Scan, TraceType, MassOptions
 from ThermoFisher.CommonCore.Data import ToleranceUnits, Extensions
-
-convertPolarity = {PolarityType.Any: 0,
-                   PolarityType.Positive: 1,
-                   PolarityType.Negative: -1}
 
 
 def initRawFile(path):
@@ -99,7 +98,7 @@ class File:
         return timedelta(minutes=self.rawfile.RetentionTimeFromScanNumber(rawScanNum))
 
     def getSpectrumRetentionTimes(self):
-        return [self.getSpectrumRetentionTime(raw_scan_num) for raw_scan_num in range(self.firstRawScanNum, self.lastRawScanNum + 1)]
+        return [self.getSpectrumRetentionTime(scan_num) for scan_num in range(self.totalScanNum)]
 
     def getSpectrumDatetime(self, scanNum):
         return self.creationDatetime + self.getSpectrumRetentionTime(scanNum)
@@ -110,13 +109,21 @@ class File:
                 return True
         return False
 
-    def getFilter(self, start, stop, polarity):
-        scanfilters = self.rawfile.GetFiltersForScanRange(start, stop - 1)
-        # if convertPolarity[scanfilter.Polarity] == polarity:
-        #     return scanfilter
-        return None
+    def getFilterList(self):
+        f = self.rawfile
+        filters = f.GetFilters() 
+        if len(filters) == 1:
+            filter = ToSpectrumFitler(filters[0])
+            for i in range(self.firstRawScanNum, self.lastRawScanNum + 1):
+                yield filter
+        else:
+            for i in range(self.firstRawScanNum, self.lastRawScanNum + 1):
+                yield ToSpectrumFitler(f.GetFilterForScanNumber(i))
 
-    def getFilterInTimeRange(self, start: float, end: float, polarity):
+    def getUniqueFilters(self):
+        return list(map(ToSpectrumFitler, self.rawfile.GetFilters()))
+
+    def _getFilterInTimeRange(self, start: float, end: float, polarity):
         scanfilters = Extensions.GetFiltersForTimeRange(
             self.rawfile, start, end)
         for filter in scanfilters:
@@ -161,7 +168,7 @@ class File:
     def getAveragedSpectrumInTimeRange(self, start: datetime, end: datetime, rtol, polarity):
         startFloat = (start - self.creationDatetime).total_seconds() / 60
         endFloat = (end - self.creationDatetime).total_seconds() / 60
-        if (scanfilter := self.getFilterInTimeRange(startFloat, endFloat, polarity)) is None:
+        if (scanfilter := self._getFilterInTimeRange(startFloat, endFloat, polarity)) is None:
             return
         # Due to a bug related to scan time during data acquisition, AverageScansInTimeRange should not be used
         # averaged = Extensions.AverageScansInTimeRange(self.rawfile, start, end, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
@@ -179,3 +186,17 @@ class File:
 
     def __del__(self):
         self.rawfile.Dispose()
+
+def ToSpectrumFitler(rawfilter) -> SpectrumFilter:
+    r = rawfilter.GetMassRange(0)
+    return dict(
+        string=rawfilter.ToString(),
+        polarity=str(convertPolarity[rawfilter.Polarity]),
+        mass_range=f"{r.Low:.1f}-{r.High:.1f}",
+        higher_energy_CiD="off" if rawfilter.HigherEnergyCiD.ToString() == "Off" else format(rawfilter.HigherEnergyCiDValue, ".2f"),
+        scan=f"{rawfilter.ScanMode.ToString()} {rawfilter.ScanData.ToString()}"
+    )
+
+convertPolarity = {PolarityType.Any: 0,
+                   PolarityType.Positive: 1,
+                   PolarityType.Negative: -1}

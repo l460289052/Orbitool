@@ -1,10 +1,13 @@
 from functools import partial
-from typing import Iterable, List, Optional, Union
+from typing import DefaultDict, Dict, Iterable, List, Optional, Union, cast
+from collections import Counter
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from Orbitool import utils
+from Orbitool.UI.utils.utils import TableUtils
 from Orbitool.models.file import (FileSpectrumInfo, Path, PathList)
+from Orbitool.utils.readers import SpectrumFilter
 
 from .. import utils as UiUtils
 from ..manager import Manager, Thread, state_node
@@ -25,21 +28,27 @@ class Widget(QtWidgets.QWidget):
 
         manager.init_or_restored.connect(self.init_or_restore)
         manager.save.connect(self.updateState)
+        self.current_edit_filter = None
+        self.current_filter_combobox: Union[QtWidgets.QComboBox, None] = None
 
     def setupUi(self):
         self.ui.setupUi(self)
 
         ui = self.ui
 
+        ui.tableWidget.itemDoubleClicked.connect(self.showFileDetail)
         ui.tableWidget.dragEnterEvent = self.tableDragEnterEvent
         ui.tableWidget.dragMoveEvent = self.tableDragMoveEvent
         ui.tableWidget.dropEvent = self.tableDropEvent
+
+        ui.filterTableWidget.itemDoubleClicked.connect(self.editFilter)
 
         ui.addFilePushButton.clicked.connect(self.addThermoFile)
         ui.addFolderPushButton.clicked.connect(self.addFolder)
         ui.removeFilePushButton.clicked.connect(self.removePath)
 
         ui.timeAdjustPushButton.clicked.connect(self.adjust_time)
+        ui.refreshFilterPushButton.clicked.connect(self.refreshFilter)
 
         ui.periodToolButton.clicked.connect(self.edit_period)
 
@@ -64,7 +73,7 @@ class Widget(QtWidgets.QWidget):
 
     @state_node
     def edit_period(self):
-        from .CustonPeriodUiPy import Dialog
+        from .CustomPeriodUiPy import Dialog
         ui = self.ui
         start_time = ui.startDateTimeEdit.dateTime().toPyDateTime()
         end_time = ui.endDateTimeEdit.dateTime().toPyDateTime()
@@ -75,7 +84,6 @@ class Widget(QtWidgets.QWidget):
         dialog.init_periods(start_time, end_time, time_interval)
         dialog.show_periods()
         dialog.exec()
-        
 
     @state_node
     def addThermoFile(self):
@@ -83,15 +91,22 @@ class Widget(QtWidgets.QWidget):
             "Select one or more files", "RAW files(*.RAW)")
         pathlist = self.pathlist
 
+        info = self.info
+
         def func():
             for f in files:
-                pathlist.addThermoFile(f)
+                path = pathlist.addThermoFile(f)
+                for filter in path.getFileHandler().getUniqueFilters():
+                    info.addFilter(filter)
+
             pathlist.sort()
+            self.refreshFilterPolarity()
             return len(pathlist.paths)
 
         length = yield func, "read files"
 
         self.showPaths()
+        self.showFilter()
 
     @addThermoFile.except_node
     def addThermoFile(self):
@@ -103,21 +118,32 @@ class Widget(QtWidgets.QWidget):
         if not ret:
             return
         pathlist = self.pathlist
+        info = self.info
 
         manager = self.manager
 
         def func():
             for path in manager.tqdm(utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.ui.recursionCheckBox.isChecked())):
-                pathlist.addThermoFile(path)
+                p = pathlist.addThermoFile(path)
+                for filter in p.getFileHandler().getUniqueFilters():
+                    info.addFilter(filter)
             pathlist.sort()
+            self.refreshFilterPolarity()
 
         yield func, "read folders"
 
         self.showPaths()
+        self.showFilter()
 
     @addFolder.except_node
     def addFolder(self):
         self.showPaths()
+        self.showFilter()
+
+    @state_node(withArgs=True)
+    def showFileDetail(self, item: QtWidgets.QTableWidgetItem):
+        from .FileDetailUiPy import Dialog
+        Dialog(self.manager, item.row()).exec()
 
     def tableDragEnterEvent(self, event: QtGui.QDragEnterEvent):
         if self.drag_helper.accept(event.mimeData()):
@@ -131,28 +157,44 @@ class Widget(QtWidgets.QWidget):
     def tableDropEvent(self, event: QtGui.QDropEvent):
         data = event.mimeData()
         paths = list(self.drag_helper.yield_file(data))
+        info = self.info
+
         def func():
             pathlist = self.pathlist
             for p in paths:
                 if p.is_dir():
                     for path in self.manager.tqdm(utils.files.FolderTraveler(str(p), ext=".RAW", recurrent=self.ui.recursionCheckBox.isChecked())):
-                        pathlist.addThermoFile(path)
+                        for filter in pathlist.addThermoFile(path).getFileHandler().getUniqueFilters():
+                            info.addFilter(filter)
                 elif p.suffix.lower() == ".raw":
-                    pathlist.addThermoFile(str(p))
+                    for filter in pathlist.addThermoFile(str(p)).getFileHandler().getUniqueFilters():
+                        info.addFilter(filter)
             pathlist.sort()
+            self.refreshFilterPolarity()
         yield func, "read files"
 
         self.showPaths()
+        self.showFilter()
 
     @state_node
     def removePath(self):
-        indexes = UiUtils.get_tablewidget_selected_row(self.ui.tableWidget)
-        self.pathlist.rmPath(indexes)
+        indexes = TableUtils.getSelectedRow(self.ui.tableWidget)
+        paths = self.pathlist.rmPath(indexes)
+        info = self.info
+
+        def func():
+            for path in paths:
+                for f in path.getFileHandler().getUniqueFilters():
+                    info.rmFilter(f)
+        yield func
+
         self.showPaths()
+        self.showFilter()
 
     @removePath.except_node
     def removePath(self):
         self.showPaths()
+        self.showFilter()
 
     def showPaths(self):
         ui = self.ui
@@ -179,13 +221,130 @@ class Widget(QtWidgets.QWidget):
     @state_node
     def adjust_time(self):
         ui = self.ui
-        slt = UiUtils.get_tablewidget_selected_row(ui.tableWidget)
+        slt = TableUtils.getSelectedRow(ui.tableWidget)
         paths = self.pathlist.subList(slt)
         start, end = paths.timeRange
         if start is None:
             return
         ui.startDateTimeEdit.setDateTime(start)
         ui.endDateTimeEdit.setDateTime(end)
+
+    @state_node
+    def refreshFilter(self):
+        ui = self.ui
+        info = self.info
+        file_filters = info.getCastedFilesSpectrumFilters()
+        file_filters.clear()
+        for path in info.pathlist:
+            for filter in path.getFileHandler().getUniqueFilters():
+                info.addFilter(filter)
+        self.showFilter()
+
+    def refreshFilterPolarity(self):
+        file_filters = self.info.getCastedFilesSpectrumFilters()
+        used_filters = self.info.getCastedUsedSpectrumFilters()
+        key = "polarity"
+        if key not in used_filters and file_filters.get(key, False):
+            used_filters[key] = file_filters[key].most_common(1)[0][0]
+
+    def showFilter(self):
+        table = self.ui.filterTableWidget
+        use_filter = self.info.getCastedUsedSpectrumFilters()
+        scanstats_filter = self.info.getCastedScanstatsFilters()
+        TableUtils.clearAndSetRowCount(table, len(
+            use_filter) + sum(map(len, scanstats_filter.values())))
+
+        for row, (name, value) in enumerate(use_filter.items()):
+            TableUtils.setRow(
+                table, row,
+                name,
+                "==",
+                value)
+
+        row = len(use_filter)
+        for name, ops in scanstats_filter.items():
+            for op, value in ops.items():
+                row += 1
+                TableUtils.setRow(
+                    table, row,
+                    name,
+                    op,
+                    value)
+        table.resizeColumnsToContents()
+
+    @state_node(withArgs=True, mode="e")
+    def editFilter(self, item: QtWidgets.QTableWidgetItem):
+        table = self.ui.filterTableWidget
+        file_filter = self.info.getCastedFilesSpectrumFilters()
+        use_filter = self.info.getCastedUsedSpectrumFilters()
+        row = item.row()
+        col = item.column()
+
+        key = table.item(row, 0).text()
+        op = table.item(row, 1).text()
+        value = table.item(row, 2).text()
+
+        previous = item.text()
+
+        combobox = QtWidgets.QComboBox()
+
+        def textChanged(e):
+            cur_key = key
+            cur_op = op
+            cur_value = value
+            self.current_edit_filter = None
+            print(f"delete {row} {col}")
+            table.removeCellWidget(row, col)
+            self.current_filter_combobox = None
+            if previous != combobox.currentText():
+                current = combobox.currentText()
+                match col:
+                    case 0:
+                        del use_filter[key]
+                        cur_key = current
+                        cur_value = use_filter[cur_key] = file_filter[cur_key].most_common(1)[
+                            0][0]
+                    case 1:
+                        pass
+                    case 2:
+                        cur_value = use_filter[cur_key] = current
+            TableUtils.setRow(
+                table, row,
+                cur_key,
+                cur_op,
+                cur_value
+            )
+            table.resizeColumnsToContents()
+        if self.current_edit_filter:
+            self.current_filter_combobox.textActivated.emit(
+                self.current_filter_combobox.currentText())
+            # textActivated may delete current item
+            item = table.item(row, col)
+        self.current_edit_filter = (row, col)
+        self.current_filter_combobox = combobox
+
+        match col:
+            case 0:
+                keys = set(file_filter.keys())
+                keys -= use_filter.keys()
+                keys.add(previous)
+                combobox.addItems(keys)
+                combobox.setCurrentText(item.text())
+                combobox.textActivated.connect(textChanged)
+                table.setCellWidget(item.row(), 0, combobox)
+            case 1:
+                combobox.addItem("==")
+                combobox.setCurrentText(item.text())
+                combobox.textActivated.connect(textChanged)
+                table.setCellWidget(item.row(), 1, combobox)
+            case 2:
+                combobox.addItems(file_filter[key].keys())
+                combobox.setCurrentText(item.text())
+                combobox.textActivated.connect(textChanged)
+                table.setCellWidget(item.row(), 2, combobox)
+        table.resizeColumnsToContents()
+        combobox.setFocus()
+        combobox.showPopup()
 
     @state_node
     def processSelected(self):
@@ -212,26 +371,22 @@ class Widget(QtWidgets.QWidget):
         paths = self.manager.tqdm(paths)
 
         self.info.rtol = ui.rtolDoubleSpinBox.value() * 1e-6
-        if ui.positiveRadioButton.isChecked():
-            polarity = 1
-        elif ui.negativeRadioButton.isChecked():
-            polarity = -1
-        else:
-            raise ValueError("Please select a polarity")
 
-        if ui.averageCheckBox.isChecked():
+        filters = self.info.getCastedUsedSpectrumFilters()
+        if ui.averageGroupBox.isChecked():
             if ui.nSpectraRadioButton.isChecked():
                 num = ui.nSpectraSpinBox.value()
                 func = partial(FileSpectrumInfo.infosFromNumInterval,
-                               paths, num, polarity, time_range)
+                               paths, num, filters, time_range)
             elif ui.nMinutesRadioButton.isChecked():
                 interval = str2timedelta(ui.nMinutesLineEdit.text())
                 func = partial(FileSpectrumInfo.infosFromTimeInterval,
-                               paths, interval, polarity, time_range)
+                               paths, interval, filters, time_range)
             elif ui.periodRadioButton.isChecked():
-                func = partial(FileSpectrumInfo.infosFromPeriods, paths, polarity, self.info.periods)
+                func = partial(FileSpectrumInfo.infosFromPeriods,
+                               paths, filters, self.info.periods)
         else:
             func = partial(FileSpectrumInfo.infosFromPath_withoutAveraging,
-                           paths, polarity, time_range)
+                           paths, filters, time_range)
 
         return func
