@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from ..part_file import generage_periods
+from ..part_file import generate_periods
 
 delta = timedelta(seconds=1)
 

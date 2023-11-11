@@ -53,6 +53,9 @@ class Widget(QtWidgets.QWidget):
         table.setRowCount(0)
         table.setRowCount(len(series.times))
 
+        if not self.info.timeseries_infos[index].valid():
+            return
+
         positions = series.positions
         deviation = series.get_deviations()
         begin = series.times[0]
@@ -67,6 +70,10 @@ class Widget(QtWidgets.QWidget):
                     format(positions[index], '.5f')))
                 table.setItem(index, 3, QtWidgets.QTableWidgetItem(
                     format(deviation[index], '.3f')))
+    
+    @state_node(mode='e')
+    def showSeries_CatchException(self):
+        self.showSeries()
 
     @state_node
     def export(self):

@@ -11,7 +11,7 @@ import numpy as np
 from Orbitool import setting
 from Orbitool.UI import Manager
 from Orbitool.models.file.file import PeriodItem
-from Orbitool.models.file import PeriodItem, generage_periods, generate_num_periods, get_num_range_from_ranges
+from Orbitool.models.file import PeriodItem, generate_periods, generate_num_periods, get_num_range_from_ranges
 
 from .CustomPeriodUi import Ui_Dialog
 from .utils import str2timedelta, timedelta2str
@@ -66,7 +66,7 @@ class Dialog(QtWidgets.QDialog):
     def init_periods(self, start_time, end_time, time_interval):
         if self.periods is None:
             self.periods = [
-                PeriodItem(start_time=s, end_time=e) for s, e in generage_periods(
+                PeriodItem(start_time=s, end_time=e) for s, e in generate_periods(
                     start_time, end_time, str2timedelta(time_interval))]
 
     def show_periods(self):
@@ -218,7 +218,7 @@ class Dialog(QtWidgets.QDialog):
     def generate_time_periods(self):
         ui = self.ui
         self.periods = [
-            PeriodItem(start_time=s, end_time=e) for s, e in generage_periods(
+            PeriodItem(start_time=s, end_time=e) for s, e in generate_periods(
                 ui.startDateTimeEdit.dateTime().toPyDateTime(),
                 ui.endDateTimeEdit.dateTime().toPyDateTime(),
                 str2timedelta(ui.timeIntervalLineEdit.text())

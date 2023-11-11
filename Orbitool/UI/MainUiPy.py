@@ -78,7 +78,7 @@ class Window(QtWidgets.QMainWindow):
         self.massListDw = self.add_dock_widget(
             "Mass List", self.masslist, self.formulaDw)
 
-        self.peakFitTab.show_masslist.connect(self.masslist.showMasslist)
+        self.peakFitTab.show_masslist.connect(self.masslist.showMassList_CatchException)
 
         self.spectraList = SpectraListUiPy.Widget(manager)
         self.spectraListDw = self.add_dock_widget(
@@ -96,7 +96,7 @@ class Window(QtWidgets.QMainWindow):
         self.timeseries = TimeseriesUiPy.Widget(manager)
         self.timeseriesDw = self.add_dock_widget(
             "Timeseries", self.timeseries, self.peakListDw)
-        self.timeseriesesTab.click_series.connect(self.timeseries.showSeries)
+        self.timeseriesesTab.click_series.connect(self.timeseries.showSeries_CatchException)
 
         ui.tabWidget.setCurrentIndex(0)
         ui.tabWidget.currentChanged.connect(self.tab_changed)

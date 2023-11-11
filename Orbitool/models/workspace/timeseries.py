@@ -1,11 +1,13 @@
 from typing import List
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from Orbitool.base import BaseRowStructure
 from ..formula import FormulaList
 from ..timeseries import TimeSeries
 from .base import BaseInfo
 
+validated_datetime = datetime(1900, 1, 1)
+invalid_datetime = validated_datetime - timedelta(1000)
 
 class TimeSeriesInfoRow(BaseRowStructure):
     position_min: float
@@ -21,10 +23,13 @@ class TimeSeriesInfoRow(BaseRowStructure):
             position_min=timeseries.position_min,
             position_max=timeseries.position_max,
             range_sum=timeseries.range_sum,
-            time_min=timeseries.times[0] if timeseries.times else None,
-            time_max=timeseries.times[-1] if timeseries.times else None,
+            time_min=timeseries.times[0] if timeseries.times else invalid_datetime,
+            time_max=timeseries.times[-1] if timeseries.times else invalid_datetime,
             formulas=timeseries.formulas
         )
+    
+    def valid(self):
+        return self.time_min > validated_datetime
 
     def get_name(self):
         if self.formulas:
