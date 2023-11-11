@@ -12,7 +12,7 @@ from pydantic_core import CoreSchema, core_schema
 
 from .base import *
 from .column_handler import ColumnCellTypeHandler, ColumnHandler
-from .np_helper import HomogeneousArrayHelper, get_converter, support
+from .np_helper import HomogeneousNdArrayHelper, get_converter, support
 
 
 class ParsedArgs(NamedTuple):
@@ -103,7 +103,7 @@ class NdArrayTypeHandler(ColumnHandler):
 
     def __post_init__(self):
         self.dtype, self.shape, self.index = parse_args(self.args)
-        self.helper = HomogeneousArrayHelper(self.dtype)
+        self.helper = HomogeneousNdArrayHelper(self.dtype)
 
     def get_cell_shape(self):
         shape = self.shape
@@ -132,14 +132,14 @@ class NdArrayTypeHandler(ColumnHandler):
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any:
         return self.helper.read(dataset)
 
-    def convert_to_array(self, value: np.ndarray):
+    def convert_to_ndarray(self, value: np.ndarray):
         shape = self.shape
         if shape is None or len(shape) == 1:
             assert len(value.shape) == 1
             return value
         return value.reshape(value.shape[0], -1)
 
-    def convert_from_array(self, value: np.ndarray):
+    def convert_from_ndarray(self, value: np.ndarray):
         shape = self.shape
         if shape is None or len(shape) == 1:
             return value
@@ -155,10 +155,10 @@ class NdArrayCellTypeHandler(ColumnCellTypeHandler[NdArray]):
         self.shape = (reduce(operator.mul, shape), )
         assert ind < 0, "shape must be specific"
 
-    def convert_to_column(self, value: List[NdArray]) -> np.ndarray:
+    def convert_to_npcolumn(self, value: List[NdArray]) -> np.ndarray:
         return np.stack(value, 0, dtype=self.dtype).reshape(len(value), -1)
 
-    def convert_from_column(self, value: np.ndarray) -> List[NdArray]:
+    def convert_from_npcolumn(self, value: np.ndarray) -> List[NdArray]:
         return list(value.reshape(-1, *self.args[1]))
 
 

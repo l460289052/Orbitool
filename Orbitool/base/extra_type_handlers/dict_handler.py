@@ -40,13 +40,18 @@ class DictRowTypeHandler(DatasetTypeHandler):
 
         titles = []
         types = []
+        default_factories = []
         for key, field in vt.model_fields.items():
             titles.append(key)
             annotation = field.annotation
             types.append(annotation)
+            if field.is_required():
+                default_factories.append(None)
+            else:
+                default_factories.append(field.get_default)
         self.titles = titles
         self.column_helper = ColumnsHelper(
-            ("_key_index", *titles), (kt, *types))
+            ("_key_index", *titles), (kt, *types), (None, *default_factories))
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value: Dict[Any, BaseRowStructure]):
         return self.column_helper.write_columns_to_h5(
@@ -73,9 +78,12 @@ class DictRowTypeHandler(DatasetTypeHandler):
         return list(zip(*rows))
 
     def get_rows_from_dataset(self, dataset: H5Dataset):
-        columns = self.column_helper.read_columns_from_h5(dataset)
-        index = columns.pop(0)
-        return index, list(zip(*columns))
+        try:
+            columns = self.column_helper.read_columns_from_h5(dataset)
+            index = columns.pop(0)
+            return index, list(zip(*columns))
+        except Exception as e:
+            raise ValueError(f"Error while reading Dict[{self.args[0]}, {self.args[1]}] at {dataset.name}") from e
 
 
 class DictSimpleTypeHandler(DatasetTypeHandler):

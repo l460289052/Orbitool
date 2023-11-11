@@ -9,7 +9,7 @@ from pydantic_core import CoreSchema, core_schema
 import numpy as np
 
 from .base import *
-from .np_helper import HomogeneousArrayHelper
+from .np_helper import HomogeneousNdArrayHelper
 from .column_handler import ColumnHandler
 
 array_dtypes = {
@@ -84,7 +84,7 @@ class ArrayTypeHandler(ColumnHandler):
     def __post_init__(self):
         self.type_code: _TypeCode = self.args[0]
         self.dtype = np.dtype(self.type_code)
-        self.helper = HomogeneousArrayHelper(self.dtype)
+        self.helper = HomogeneousNdArrayHelper(self.dtype)
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value):
         return self.helper.write(h5g, key, value)
@@ -92,8 +92,8 @@ class ArrayTypeHandler(ColumnHandler):
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any:
         return array(self.type_code, self.helper.read(dataset))
 
-    def convert_to_array(self, value: array) -> np.ndarray:
+    def convert_to_ndarray(self, value: array) -> np.ndarray:
         return np.array(value, dtype=self.dtype)
 
-    def convert_from_array(self, value: np.ndarray) -> array:
+    def convert_from_ndarray(self, value: np.ndarray) -> array:
         return array(self.type_code, value)
