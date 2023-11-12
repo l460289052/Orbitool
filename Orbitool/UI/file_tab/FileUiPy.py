@@ -1,4 +1,5 @@
 from functools import partial
+from stat import FILE_ATTRIBUTE_SPARSE_FILE
 from typing import DefaultDict, Dict, Iterable, List, Optional, Union, cast
 from collections import Counter
 
@@ -41,8 +42,6 @@ class Widget(QtWidgets.QWidget):
         ui.tableWidget.dragMoveEvent = self.tableDragMoveEvent
         ui.tableWidget.dropEvent = self.tableDropEvent
 
-        ui.filterTableWidget.itemDoubleClicked.connect(self.editFilter)
-
         ui.addFilePushButton.clicked.connect(self.addThermoFile)
         ui.addFolderPushButton.clicked.connect(self.addFolder)
         ui.removeFilePushButton.clicked.connect(self.removePath)
@@ -51,6 +50,10 @@ class Widget(QtWidgets.QWidget):
         ui.refreshFilterPushButton.clicked.connect(self.refreshFilter)
 
         ui.periodToolButton.clicked.connect(self.edit_period)
+
+        ui.filterTableWidget.itemDoubleClicked.connect(self.editFilter)
+        ui.addFilterToolButton.clicked.connect(self.addFilter)
+        ui.delFilterToolButton.clicked.connect(self.delFilter)
 
         ui.selectedPushButton.clicked.connect(self.processSelected)
         ui.allPushButton.clicked.connect(self.processAll)
@@ -251,6 +254,8 @@ class Widget(QtWidgets.QWidget):
         table = self.ui.filterTableWidget
         use_filter = self.info.getCastedUsedSpectrumFilters()
         scanstats_filter = self.info.getCastedScanstatsFilters()
+        self.current_filter_combobox = None
+        self.current_edit_filter = None
         TableUtils.clearAndSetRowCount(table, len(
             use_filter) + sum(map(len, scanstats_filter.values())))
 
@@ -345,6 +350,32 @@ class Widget(QtWidgets.QWidget):
         table.resizeColumnsToContents()
         combobox.setFocus()
         combobox.showPopup()
+
+    @state_node
+    def addFilter(self):
+        file_filter = self.info.getCastedFilesSpectrumFilters()
+        use_filter = self.info.getCastedUsedSpectrumFilters()
+        if len(file_filter) == len(use_filter):
+            self.manager.msg.emit("All filter are added")
+            return
+        
+        for key in file_filter.keys():
+            if key not in use_filter:
+                use_filter[key] = file_filter[key].most_common(1)[0][0]
+                break
+        
+        self.showFilter()
+
+    @state_node
+    def delFilter(self):
+        table = self.ui.filterTableWidget
+        slt = TableUtils.getSelectedRow(table)
+        use_filter = self.info.getCastedUsedSpectrumFilters()
+        for index in slt:
+            key = table.item(index, 0).text()
+            use_filter.pop(key)
+        
+        self.showFilter()
 
     @state_node
     def processSelected(self):

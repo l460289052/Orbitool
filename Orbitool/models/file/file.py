@@ -7,7 +7,7 @@ from typing import Dict, Iterable, List, Tuple, Union
 import numpy as np
 
 from Orbitool.base import BaseRowStructure, BaseDatasetStructure, BaseStructure, JSONObject
-from Orbitool.utils.readers import ThermoFile
+from Orbitool.utils.readers import ThermoFile, spectrum_filter
 
 from ..spectrum import spectrum
 from .part_file import (generate_periods, generate_num_periods,
@@ -146,29 +146,29 @@ class PeriodItem(BaseRowStructure):
 
 class FileSpectrumInfo(spectrum.SpectrumInfo):
     path: str
-    filter: JSONObject
+    filter: JSONObject = {}
 
     # index from 0, 1, 2, 3... with different times together to make up a whole spectrum
     average_index: int
 
     @classmethod
-    def infosFromNumInterval(cls, paths: List[Path], N: int, filters, timeRange):
+    def infosFromNumInterval(cls, paths: List[Path], N: int, filter, timeRange):
         start_scan_num, stop_scan_num, total_scan_num = get_num_range_from_ranges(
             (p.getFileHandler() for p in paths), timeRange)
         periods = [PeriodItem(
             start_num=int(s), stop_num=int(e)
         ) for s, e in generate_num_periods(start_scan_num, stop_scan_num, N)]
-        return cls.infosFromPeriods(paths, filters, periods)
+        return cls.infosFromPeriods(paths, filter, periods)
 
     @classmethod
-    def infosFromTimeInterval(cls, paths: List[Path], interval: timedelta, filters, timeRange):
+    def infosFromTimeInterval(cls, paths: List[Path], interval: timedelta, filter, timeRange):
         periods = [PeriodItem(
             start_time=s, end_time=e
         ) for s, e in generate_periods(timeRange[0], timeRange[1], interval)]
-        return cls.infosFromPeriods(paths, filters, periods)
+        return cls.infosFromPeriods(paths, filter, periods)
 
     @classmethod
-    def infosFromPeriods(cls, paths: List[Path], polarity, periods: List[PeriodItem]):
+    def infosFromPeriods(cls, paths: List[Path], filter, periods: List[PeriodItem]):
         delta_time = timedelta(seconds=1)
 
         results: List[cls] = []
@@ -214,7 +214,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
                 if generate_flag:
                     info = cls(
                         start_time=time_range[0], end_time=time_range[1],
-                        path=path.path, polarity=polarity, average_index=average_index)
+                        path=path.path, filter=filter, average_index=average_index)
                     results.append(info)
 
                 if next_period_flag:
@@ -233,17 +233,18 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
         return results
 
     @classmethod
-    def infosFromPath_withoutAveraging(cls, paths: List[Path], polarity, timeRange):
+    def infosFromPath_withoutAveraging(cls, paths: List[Path], filter, timeRange):
         delta_time = timedelta(seconds=1)
         info_list: List[cls] = []
         for path in paths:
             handler = path.getFileHandler()
             creationTime = handler.creationDatetime
             for i in range(*handler.timeRange2ScanNumRange((timeRange[0] - creationTime, timeRange[1] - creationTime))):
-                if handler.getSpectrumPolarity(i) == polarity:
+                i_filter = handler.getSpectrumFilter(i)
+                if spectrum_filter.match(i_filter, filter):
                     time = creationTime + handler.getSpectrumRetentionTime(i)
                     info = FileSpectrumInfo(
-                        time - delta_time, time + delta_time, path.path, polarity, 0)
+                        time - delta_time, time + delta_time, path.path, filter, 0)
                     info_list.append(info)
         return info_list
 
@@ -252,7 +253,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
         if origin == PATH_TYPE.THERMO.value:
             reader = ThermoFile(realpath)
             ret = reader.getAveragedSpectrumInTimeRange(
-                self.start_time, self.end_time, rtol, self.polarity)
+                self.start_time, self.end_time, rtol, self.filter)
             if ret is None:
                 return None
             mz, intensity = ret
