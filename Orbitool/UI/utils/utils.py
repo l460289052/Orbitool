@@ -34,6 +34,11 @@ class TableUtils:
         table.setRowCount(0)
 
     @staticmethod
+    def clearAndSetColumnCount(table: QtWidgets.QTableWidget, count: int):
+        table.clearContents()
+        table.setColumnCount(0)
+        table.setColumnCount(count)
+    @staticmethod
     def clearAndSetRowCount(table: QtWidgets.QTableWidget, count: int):
         table.clearContents()
         table.setRowCount(0)

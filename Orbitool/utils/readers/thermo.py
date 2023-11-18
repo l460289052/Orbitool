@@ -9,7 +9,7 @@ import numpy as np
 from Orbitool import setting
 
 from ..binary_search import indexBetween
-from .spectrum_filter import SpectrumFilter
+from .spectrum_filter import SpectrumFilter, SpectrumStats
 from . import spectrum_filter
 
 match setting.file.dotnet_driver:
@@ -66,6 +66,9 @@ class File:
             minutes=self.rawfile.RunHeader.EndTime)
         self.firstRawScanNum = self.rawfile.RunHeader.FirstSpectrum
         self.lastRawScanNum = self.rawfile.RunHeader.LastSpectrum
+        """
+        include last scan num
+        """
         extra_info = self.rawfile.GetTrailerExtraInformation(1)
         extra_info_dict = dict(zip(extra_info.Labels, extra_info.Values))
         self.massResolution = float(extra_info_dict.get("FT Resolution:"))
@@ -122,30 +125,29 @@ class File:
         f = self.rawfile
         filters = f.GetFilters()
         if len(filters) == 1:
-            filter = ToSpectrumFilter(filters[0])
+            filter = to_spectrum_filter(filters[0])
             for i in range(*raw_num_range):
                 yield filter
         else:
             for i in range(*raw_num_range):
-                yield ToSpectrumFilter(f.GetFilterForScanNumber(i))
+                yield to_spectrum_filter(f.GetFilterForScanNumber(i))
 
     def getUniqueFilters(self):
-        return list(map(ToSpectrumFilter, self.rawfile.GetFilters()))
+        return list(map(to_spectrum_filter, self.rawfile.GetFilters()))
 
     def _getMostFilterInRawNumRange(self, start: int, stop: int, target_filter: SpectrumFilter):
         f = self.rawfile
         filters = f.GetFilters()
         if len(filters) == 1:
             rawfilter = filters[0]
-            filter = ToSpectrumFilter(rawfilter)
+            filter = to_spectrum_filter(rawfilter)
             return rawfilter if spectrum_filter.match(filter, target_filter) else None
-
 
         counter = Counter[str]()
         raw_map: Dict[str, Any] = {}
         for i in range(start, stop):
             rawfilter = f.GetFilterForScanNumber(i)
-            filter = ToSpectrumFilter(rawfilter)
+            filter = to_spectrum_filter(rawfilter)
             if spectrum_filter.match(filter, target_filter):
                 counter[filter["string"]] += 1
                 raw_map.setdefault(filter["string"], rawfilter)
@@ -157,7 +159,7 @@ class File:
     def getSpectrumFilter(self, scan_num):
         rawScanNum = self.getRawScanNum(scan_num)
         scanfilter = self.rawfile.GetFilterForScanNumber(rawScanNum)
-        return ToSpectrumFilter(scanfilter)
+        return to_spectrum_filter(scanfilter)
 
     def datetimeRange2ScanNumRange(self, datetimeRange: Tuple[datetime, datetime]):
         """
@@ -202,7 +204,7 @@ class File:
         if (scanfilter := self._getMostFilterInRawNumRange(startNum, stopNum, filter)) is None:
             return
         averaged = Extensions.AverageScansInScanRange(
-            self.rawfile, startNum, stopNum-1, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
+            self.rawfile, startNum, stopNum - 1, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
         if averaged is None:
             return
         # if (averaged := Extensions.AverageScansInTimeRange(self.rawfile, start, end, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))) is None:
@@ -215,16 +217,27 @@ class File:
     def __del__(self):
         self.rawfile.Dispose()
 
+    def get_stats_list(self):
+        rawfile = self.rawfile
+        for index in range(self.firstRawScanNum, self.lastRawScanNum + 1):
+            yield to_spectrum_stats(rawfile.GetScanStatsForScanNumber(index))
 
-def ToSpectrumFilter(rawfilter) -> SpectrumFilter:
+
+def to_spectrum_filter(rawfilter) -> SpectrumFilter:
     r = rawfilter.GetMassRange(0)
-    return dict(
+    return SpectrumFilter(
         string=rawfilter.ToString(),
         polarity=str(convertPolarity[rawfilter.Polarity]),
-        mass_range=f"{r.Low:.1f}-{r.High:.1f}",
-        higher_energy_CiD="off" if rawfilter.HigherEnergyCiD.ToString(
+        mass=f"{r.Low:.1f}-{r.High:.1f}",
+        CiD="off" if rawfilter.HigherEnergyCiD.ToString(
         ) == "Off" else format(rawfilter.HigherEnergyCiDValue, ".2f"),
         scan=f"{rawfilter.ScanMode.ToString()} {rawfilter.ScanData.ToString()}"
+    )
+
+
+def to_spectrum_stats(rawstats) -> SpectrumStats:
+    return SpectrumStats(
+        TIC=rawstats.TIC
     )
 
 

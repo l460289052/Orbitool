@@ -6,8 +6,11 @@ from Orbitool.config import setting
 from Orbitool.UI.utils import TableUtils
 
 from Orbitool.models.file import Path
+from Orbitool.utils.readers import spectrum_filter
 from . import FileDetailUi
 from ..manager import Manager
+
+COL_HEADER = ["datetime", "rtime"]
 
 
 class Dialog(QtWidgets.QDialog):
@@ -25,18 +28,21 @@ class Dialog(QtWidgets.QDialog):
         handler = file.getFileHandler()
 
         table = self.ui.spectraListTableWidget
-        TableUtils.clearAndSetRowCount(table,handler.totalScanNum)
+        header = [*COL_HEADER, *spectrum_filter.filter_headers.values(), *spectrum_filter.stats_header.values()]
+        TableUtils.clearAndSetColumnCount(table, len(header))
+        TableUtils.clearAndSetRowCount(table, handler.totalScanNum)
+
+        table.setHorizontalHeaderLabels(header)
         counter: Counter[str] = Counter()
-        for row, (time, filter) in enumerate(zip(handler.getSpectrumRetentionTimes(), handler.getFilterList())):
+        for row, (time, filter, stats) in enumerate(zip(handler.getSpectrumRetentionTimes(), handler.getFilterList(), handler.get_stats_list())):
             counter[filter["string"]] += 1
-            TableUtils.setRow(table, row,
+            TableUtils.setRow(
+                table, row,
+                setting.format_time(
+                    (handler.startDatetime+time).replace(microsecond=0)),
                 timedelta(seconds=int(time.total_seconds())),
-                setting.format_time((handler.startDatetime+time).replace(microsecond=0)),
-                filter["mass_range"],
-                filter["polarity"],
-                filter["higher_energy_CiD"],
-                filter["scan"],
-                filter["string"]
+                *spectrum_filter.filter_to_row(filter),
+                *spectrum_filter.stats_to_row(stats)
             )
 
         table.resizeColumnsToContents()

@@ -22,7 +22,7 @@ class FileTabInfo(BaseInfo):
         example:
             files_spectrum_filters["MassRange"]["50-750"] += 1
     """
-    files_spectrum_filters: JSONObject = defaultdict(Counter)
+    files_spectrum_filters: JSONObject = {}
     """
         name -> value
         Dict[str, str]
@@ -38,12 +38,16 @@ class FileTabInfo(BaseInfo):
     """
     spectrum_scanstats_filters: JSONObject = {}
 
-    def addFilter(self, filter: SpectrumFilter):
-        current = self.files_spectrum_filters
+    def add_filter(self, filter: SpectrumFilter):
+        current = self.getCastedFilesSpectrumFilters()
         for key, value in filter.items():
-            current[key][value] += 1
+            counts = current.setdefault(key, {})
+            if value in counts:
+                counts[value] += 1
+            else:
+                counts[value] = 1
 
-    def rmFilter(self, filter: SpectrumFilter):
+    def rm_filter(self, filter: SpectrumFilter):
         current = self.files_spectrum_filters
         for key, value in filter.items():
             current[key][value] -= 1
@@ -53,11 +57,15 @@ class FileTabInfo(BaseInfo):
                     del current[key]
 
     def getCastedFilesSpectrumFilters(self):
-        return cast(DefaultDict[str, Counter[str]], self.files_spectrum_filters)
+        return cast(Dict[str, Dict[str, int]], self.files_spectrum_filters)
+
+    def getMostCommonValue_forFilter(self, filter: str):
+        filters = self.getCastedFilesSpectrumFilters()
+        assert filter in filters, f"{filter} not in file filters "
+        return max(filters[filter].items(), key=lambda item: item[1])[0]
 
     def getCastedUsedSpectrumFilters(self):
         return cast(Dict[str, str], self.use_spectrum_filters)
 
     def getCastedScanstatsFilters(self):
         return cast(Dict[str, Dict[str, Any]], self.spectrum_scanstats_filters)
-    
