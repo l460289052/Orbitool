@@ -21,7 +21,6 @@ class PATH_TYPE(str, Enum):
 
 class Path(BaseRowStructure):
     path: str
-    key: str
     createDatetime: datetime
     startDatetime: datetime
     endDatetime: datetime
@@ -37,15 +36,15 @@ class Path(BaseRowStructure):
     def fromThermoFile(cls, filepath, other_paths: Iterable["Path"]):
         handler = ThermoFile(filepath)
         stem = FilePath(filepath).stem
-        key = stem
-        other_keys = set(p.key for p in other_paths)
-        while True:
-            if key not in other_keys:
-                break
-            key = f"{stem}-{random.randbytes(4).hex()}"
+        # key = stem
+        # other_keys = set(p.key for p in other_paths)
+        # while True:
+        #     if key not in other_keys:
+        #         break
+        #     key = f"{stem}-{random.randbytes(4).hex()}"
         return cls(
             path=f"{PATH_TYPE.THERMO.value}:{filepath}",
-            key=key,
+            # key=key,
             createDatetime=handler.creationDatetime,
             startDatetime=handler.startDatetime,
             endDatetime=handler.endDatetime,
@@ -59,7 +58,7 @@ class Path(BaseRowStructure):
                 return FilePath(path).stem
 
 
-class PathList(BaseStructure):
+class PathList(BaseDatasetStructure):
     paths: List[Path] = []
 
     def _crossed(self, start: datetime, end: datetime) -> Tuple[bool, str]:
