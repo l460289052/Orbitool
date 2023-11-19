@@ -9,7 +9,7 @@ import numpy as np
 from Orbitool import setting
 
 from ..binary_search import indexBetween
-from .spectrum_filter import SpectrumFilter, SpectrumStats
+from .spectrum_filter import SpectrumFilter, SpectrumStats, StatsFilters
 from . import spectrum_filter
 
 match setting.file.dotnet_driver:
@@ -31,6 +31,9 @@ clr.AddReference(os.path.join(
     pwd, 'ThermoFisher.CommonCore.MassPrecisionEstimator.dll'))
 
 clr.AddReference('System.Collections')
+
+from System.Collections.Generic import List as CSharpList
+from System import Int32
 
 from ThermoFisher.CommonCore.RawFileReader import RawFileReaderAdapter
 from ThermoFisher.CommonCore.MassPrecisionEstimator import PrecisionEstimate
@@ -135,30 +138,19 @@ class File:
     def getUniqueFilters(self):
         return list(map(to_spectrum_filter, self.rawfile.GetFilters()))
 
-    def _getMostFilterInRawNumRange(self, start: int, stop: int, target_filter: SpectrumFilter):
+    def _getFirstFilterInRawNumRange(self, start: int, stop: int, target_filter: SpectrumFilter):
         f = self.rawfile
         filters = f.GetFilters()
-        if len(filters) == 1:
-            rawfilter = filters[0]
+        for rawfilter in filters:
             filter = to_spectrum_filter(rawfilter)
-            return rawfilter if spectrum_filter.match(filter, target_filter) else None
+            if spectrum_filter.filter_match(filter, target_filter):
+                return rawfilter
+        return None
 
-        counter = Counter[str]()
-        raw_map: Dict[str, Any] = {}
-        for i in range(start, stop):
-            rawfilter = f.GetFilterForScanNumber(i)
-            filter = to_spectrum_filter(rawfilter)
-            if spectrum_filter.match(filter, target_filter):
-                counter[filter["string"]] += 1
-                raw_map.setdefault(filter["string"], rawfilter)
-        if not counter:
-            return None
-        string = counter.most_common(1)[0][0]
-        return raw_map[string]
-
-    def getSpectrumFilter(self, scan_num):
-        rawScanNum = self.getRawScanNum(scan_num)
-        scanfilter = self.rawfile.GetFilterForScanNumber(rawScanNum)
+    def getSpectrumFilter(self, scan_num, is_raw_scan_num=False):
+        if not is_raw_scan_num:
+            scan_num = self.getRawScanNum(scan_num)
+        scanfilter = self.rawfile.GetFilterForScanNumber(scan_num)
         return to_spectrum_filter(scanfilter)
 
     def datetimeRange2ScanNumRange(self, datetimeRange: Tuple[datetime, datetime]):
@@ -192,23 +184,32 @@ class File:
                 "`timeRange` or `numRange` must be provided and only one can be provided")
 
         for i in range(start, end):
-            if spectrum_filter.match(self.getSpectrumFilter(i), filter):
+            if spectrum_filter.filter_match(self.getSpectrumFilter(i), filter):
                 return False
         return True
 
-    def getAveragedSpectrumInTimeRange(self, start: datetime, end: datetime, rtol, filter: SpectrumFilter):
+    def getAveragedSpectrumInTimeRange(self, start: datetime, end: datetime, rtol, filter: SpectrumFilter, stats_filter: StatsFilters):
         # Due to a bug related to scan time during data acquisition, AverageScansInTimeRange should not be used
         # averaged = Extensions.AverageScansInTimeRange(self.rawfile, start, end, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
         startNum, stopNum = list(
             map(self.getRawScanNum, self.datetimeRange2ScanNumRange((start, end))))
-        if (scanfilter := self._getMostFilterInRawNumRange(startNum, stopNum, filter)) is None:
+        if self._getFirstFilterInRawNumRange(startNum, stopNum, filter) is None:
             return
-        averaged = Extensions.AverageScansInScanRange(
-            self.rawfile, startNum, stopNum - 1, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))
+        average_list = CSharpList[Int32]()
+        for i in range(startNum, stopNum):
+            i_filter = self.getSpectrumFilter(i, True)
+            if not spectrum_filter.filter_match(i_filter, filter):
+                continue
+            if stats_filter:
+                i_stats = to_spectrum_stats(self.get_spectrum_stats(i, True))
+                if not spectrum_filter.stats_match(i_stats, stats_filter):
+                    continue
+            average_list.Add(i)
+
+        averaged = Extensions.AverageScans(
+            self.rawfile, average_list, MassOptions(rtol, ToleranceUnits.ppm))
         if averaged is None:
             return
-        # if (averaged := Extensions.AverageScansInTimeRange(self.rawfile, start, end, scanfilter, MassOptions(rtol, ToleranceUnits.ppm))) is None:
-        #    return
         averaged = averaged.SegmentedScan
         mass = np.fromiter(averaged.Positions, np.float64)
         intensity = np.fromiter(averaged.Intensities, np.float64)
@@ -216,6 +217,11 @@ class File:
 
     def __del__(self):
         self.rawfile.Dispose()
+
+    def get_spectrum_stats(self, scan_num, is_raw_scan_num=False):
+        if not is_raw_scan_num:
+            scan_num = self.getRawScanNum(scan_num)
+        return to_spectrum_stats(self.rawfile.GetScanStatsForScanNumber(scan_num))
 
     def get_stats_list(self):
         rawfile = self.rawfile

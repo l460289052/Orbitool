@@ -533,7 +533,7 @@ class CalibrateMergeDenoise(MultiProcess):
     @staticmethod
     def write(file: WorkSpace, rets: Iterable[Spectrum], **kwargs):
         obj = (file.proxy_file or file.file)._obj
-        tmp = DiskListDirectView(SpectrumInfo, obj, "tmp")
+        tmp = DiskListDirectView(Spectrum, obj, "tmp")
         infos = []
 
         def it():

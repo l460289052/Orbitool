@@ -4,7 +4,7 @@ from typing import Any, DefaultDict, Dict, List, Literal, cast
 from Orbitool.base.extra_type_handlers import JSONObject
 
 from Orbitool.base.structure import BaseStructure
-from Orbitool.utils.readers.spectrum_filter import SpectrumFilter
+from Orbitool.utils.readers.spectrum_filter import SpectrumFilter, StatsFilters
 
 from .base import BaseInfo
 from ..file import FileSpectrumInfo, PathList, PeriodItem
@@ -68,4 +68,4 @@ class FileTabInfo(BaseInfo):
         return cast(Dict[str, str], self.use_spectrum_filters)
 
     def getCastedScanstatsFilters(self):
-        return cast(Dict[str, Dict[str, Any]], self.spectrum_scanstats_filters)
+        return cast(StatsFilters, self.spectrum_scanstats_filters)

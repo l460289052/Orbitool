@@ -28,7 +28,7 @@ class Dialog(QtWidgets.QDialog):
         handler = file.getFileHandler()
 
         table = self.ui.spectraListTableWidget
-        header = [*COL_HEADER, *spectrum_filter.filter_headers.values(), *spectrum_filter.stats_header.values()]
+        header = [*COL_HEADER, *spectrum_filter.filter_headers, *spectrum_filter.stats_header]
         TableUtils.clearAndSetColumnCount(table, len(header))
         TableUtils.clearAndSetRowCount(table, handler.totalScanNum)
 

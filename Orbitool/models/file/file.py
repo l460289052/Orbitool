@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path as FilePath
 import random
-from typing import Dict, Iterable, List, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Tuple, TypedDict, Union
 
 import numpy as np
 
@@ -147,6 +147,7 @@ class PeriodItem(BaseRowStructure):
 class FileSpectrumInfo(spectrum.SpectrumInfo):
     path: str
     filter: JSONObject = {}
+    stats_filter: JSONObject = {}
 
     # index from 0, 1, 2, 3... with different times together to make up a whole spectrum
     average_index: int
@@ -223,7 +224,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
                     if i >= len(periods):
                         return results
                     period = periods[i]
-                elif next_file_flag: # same period with next file
+                elif next_file_flag:  # same period with next file
                     average_index += 1
                 next_period_flag = False
                 generate_flag = False
@@ -233,7 +234,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
         return results
 
     @classmethod
-    def infosFromPath_withoutAveraging(cls, paths: List[Path], filter, timeRange):
+    def infosFromPath_withoutAveraging(cls, paths: List[Path], filter, stats_filter, timeRange):
         delta_time = timedelta(seconds=1)
         info_list: List[cls] = []
         for path in paths:
@@ -241,24 +242,37 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
             creationTime = handler.creationDatetime
             for i in range(*handler.timeRange2ScanNumRange((timeRange[0] - creationTime, timeRange[1] - creationTime))):
                 i_filter = handler.getSpectrumFilter(i)
-                if spectrum_filter.match(i_filter, filter):
+                if spectrum_filter.filter_match(i_filter, filter):
+                    if stats_filter:
+                        i_stats = handler.get_spectrum_stats(i)
+                        if not spectrum_filter.stats_match(i_stats, stats_filter):
+                            continue
                     time = creationTime + handler.getSpectrumRetentionTime(i)
-                    info = FileSpectrumInfo(
-                        time - delta_time, time + delta_time, path.path, filter, 0)
+                    info = cls(
+                        start_time=time - delta_time, end_time=time + delta_time,
+                        path=path.path, filter=filter, stats_filter=stats_filter, average_index=0)
                     info_list.append(info)
         return info_list
 
-    def get_spectrum_from_info(self, rtol: float = 1e-6, with_minutes=False):
-        origin, realpath = self.path.split(':', 1)
-        if origin == PATH_TYPE.THERMO.value:
-            reader = ThermoFile(realpath)
-            ret = reader.getAveragedSpectrumInTimeRange(
-                self.start_time, self.end_time, rtol, self.filter)
-            if ret is None:
-                return None
-            mz, intensity = ret
-            if not with_minutes:
-                return mz, intensity
-            minutes = min(self.end_time, reader.endDatetime) - \
-                max(self.start_time, reader.startDatetime)
-            return mz, intensity, minutes.total_seconds() / 60
+    def get_spectrum_from_info(self, rtol: float = 1e-6, with_minutes=False, last_reader: Optional["LastReader"] = None):
+        if last_reader and last_reader.get("path", None) == self.path:
+            reader = last_reader["reader"]
+        else:
+            origin, realpath = self.path.split(':', 1)
+            if origin == PATH_TYPE.THERMO.value:
+                reader = ThermoFile(realpath)
+        ret = reader.getAveragedSpectrumInTimeRange(
+            self.start_time, self.end_time, rtol, self.filter, self.stats_filter)
+        if ret is None:
+            return None
+        mz, intensity = ret
+        if not with_minutes:
+            return (mz, intensity), LastReader(path=self.path, reader=reader)
+        minutes = min(self.end_time, reader.endDatetime) - \
+            max(self.start_time, reader.startDatetime)
+        return (mz, intensity, minutes.total_seconds() / 60), LastReader(path=self.path, reader=reader)
+
+
+class LastReader(TypedDict):
+    path: str
+    reader: ThermoFile
