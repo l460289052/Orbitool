@@ -11,7 +11,7 @@ def update(f: h5py.File):
     source = "info/time_series_tab/series"
     target = "data/time_series"
     move_to(f, source, target)
-    create_group(target)
+    create_group(f, target)
     f[target].attrs["keys"] = sorted(list(map(int, f[target].keys())))
     series: h5py.Group
     for series in f[target].values():

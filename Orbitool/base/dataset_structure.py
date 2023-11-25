@@ -132,7 +132,7 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
                 if v is MISSING:
                     v = cls.model_fields[k].get_default(call_default_factory=True)
             except:
-                broken_entries.append('/'.join(dataset.name, f"attr:{k}"))
+                broken_entries.append(f"{dataset.name}/attr:{k}")
                 v = cls.model_fields[k].get_default(call_default_factory=True)
             values[k] = v
         return cls(**values)

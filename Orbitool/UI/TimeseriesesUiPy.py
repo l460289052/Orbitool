@@ -147,7 +147,7 @@ class Widget(QtWidgets.QWidget):
         mz_min = ui.rangeMinDoubleSpinBox.value()
         mz_max = ui.rangeMaxDoubleSpinBox.value()
 
-        series = TimeSeries(mz_min, mz_max, True)
+        series = TimeSeries(position_min=mz_min, position_max=mz_max, range_sum=True)
 
         spectra = self.manager.workspace.data.calibrated_spectra
 

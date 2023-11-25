@@ -93,9 +93,6 @@ class PathList(BaseDatasetStructure):
         self.paths.append(path)
         return path
 
-    def addCsv(self, *args):
-        path = Path(path=f"h5:{path}")
-
     def _addPath(self, p: Path):
         self.paths.append(p)
 
