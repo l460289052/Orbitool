@@ -142,7 +142,7 @@ you can choose what rainbow stand for, DBE or certain element's num. And you can
 
 The program is developed and maintained by students of Shanghai Jiao Tong University. Runlong acts as a chemical advisor during program development.
 
-+ Developer: Yihao Li<liyihao321@sjtu.edu.cn, liyihc@outlook.com>
++ Developer: Yihao Li<liyihc@outlook.com>
 + Chemical advisor: Runlong Cai<>
 
 ## Contributors
