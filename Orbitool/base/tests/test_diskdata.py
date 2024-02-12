@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 from numpy import testing as nptest
 
-from ..disk_structure import BaseDiskData, DiskDict, DiskList
+from ..disk_structure import KEYS_H5_NAME, BaseDiskData, DiskDict, DiskList
 from ..h5file import H5File
 from .spectrum import Spectrum
 
@@ -27,7 +27,7 @@ def test_dict_direct():
         proxy.spectrum_dict[str(i)] = Spectrum(mz=mz, intensity=intensity,
                                                time=datetime(2000, 1, i + 1))
 
-    assert len(fo[key]) == 10
+    assert len(fo[key]) == 10 + 1
     assert len(proxy.spectrum_dict) == 10
 
     for i, spectrum in proxy.spectrum_dict.items():
@@ -36,14 +36,15 @@ def test_dict_direct():
         assert datetime(2000, 1, i + 1) == spectrum.time
 
     for i in range(0, 10, 2):
-        del proxy.spectrum_dict[i]
+        del proxy.spectrum_dict[str(i)]
 
-    assert len(fo[key]) == 5
+    assert len(fo[key]) == 5 + 1
     assert len(proxy.spectrum_dict) == 5
-    assert set(fo[key].keys()) == set(map(str, range(1, 10, 2)))
+    assert set(fo[key].keys()) - {KEYS_H5_NAME} == set(map(str, range(1, 10, 2)))
 
     proxy.spectrum_dict.clear()
-    assert len(fo[key]) == 0
+    assert len(fo[key]) == 1
+    assert len(fo[key][KEYS_H5_NAME][:]) == 0
 
 
 def test_dict_proxy():
@@ -64,8 +65,8 @@ def test_dict_proxy():
 
     assert key in to
 
-    assert len(fo[key]) == 0
-    assert len(to[key]) == 10
+    assert len(fo[key]) == 0 + 1
+    assert len(to[key]) == 10 + 1
     assert len(proxy.spectrum_dict) == 10
 
     for i, spectrum in proxy.spectrum_dict.items():
@@ -74,19 +75,19 @@ def test_dict_proxy():
         assert datetime(2000, 1, i + 1) == spectrum.time
 
     for i in range(0, 10, 2):
-        del proxy.spectrum_dict[i]
+        del proxy.spectrum_dict[str(i)]
 
     proxy.save_to_disk()
 
     assert key in to
-    assert len(to[key]) == 0
-    assert len(fo[key]) == 5
+    assert len(to[key]) == 1
+    assert len(fo[key]) == 5 + 1
     assert len(proxy.spectrum_dict) == 5
-    assert set(fo[key].keys()) == set(map(str, range(1, 10, 2)))
+    assert set(fo[key].keys()) - {KEYS_H5_NAME} == set(map(str, range(1, 10, 2)))
 
     proxy.spectrum_dict.clear()
     proxy.save_to_disk()
-    assert len(fo[key]) == 0
+    assert len(fo[key]) == 1
 
 
 def test_list_direct():
@@ -105,7 +106,7 @@ def test_list_direct():
 
     spectrum_list = list(proxy.spectrum_list)
 
-    assert len(fo[key]) == 10
+    assert len(fo[key]) == 10 + 1
     assert len(proxy.spectrum_list) == 10
 
     for i, spectrum in enumerate(proxy.spectrum_list):
@@ -114,10 +115,7 @@ def test_list_direct():
 
     proxy.spectrum_list = spectrum_list
 
-    assert len(fo[key]) == 10
-    assert len(proxy.spectrum_list) == 10
-
-    assert len(fo[key]) == 10
+    assert len(fo[key]) == 10 + 1
     assert len(proxy.spectrum_list) == 10
 
     for i, spectrum in enumerate(proxy.spectrum_list):
@@ -127,7 +125,7 @@ def test_list_direct():
     for i in reversed(range(0, 10, 2)):
         del proxy.spectrum_list[i]
 
-    assert len(fo[key]) == 5
+    assert len(fo[key]) == 5 + 1
     assert len(proxy.spectrum_list) == 5
     for i, spectrum in enumerate(proxy.spectrum_list):
         i = 2 * i + 1
@@ -135,7 +133,7 @@ def test_list_direct():
         assert datetime(2000, 1, i + 1) == spectrum.time
 
     proxy.spectrum_list.clear()
-    assert len(fo[key]) == 0
+    assert len(fo[key]) == 1
 
 
 def test_list_proxy():
@@ -158,8 +156,8 @@ def test_list_proxy():
 
     assert key in to
 
-    assert len(fo[key]) == 0
-    assert len(to[key]) == 10
+    assert len(fo[key]) == 0 + 1
+    assert len(to[key]) == 10 + 1
     assert len(proxy.spectrum_list) == 10
 
     proxy.save_to_disk()
@@ -170,14 +168,14 @@ def test_list_proxy():
 
     proxy.spectrum_list = spectrum_list
 
-    assert len(fo[key]) == 10
-    assert len(to[key]) == 10
+    assert len(fo[key]) == 10 + 1
+    assert len(to[key]) == 10 + 1
     assert len(proxy.spectrum_list) == 10
 
     proxy.save_to_disk()
 
-    assert len(fo[key]) == 10
-    assert len(to[key]) == 0
+    assert len(fo[key]) == 10 + 1
+    assert len(to[key]) == 0 + 1
     assert len(proxy.spectrum_list) == 10
 
     for i, spectrum in enumerate(proxy.spectrum_list):
@@ -190,8 +188,8 @@ def test_list_proxy():
     proxy.save_to_disk()
 
     assert key in to
-    assert len(to[key]) == 0
-    assert len(fo[key]) == 5
+    assert len(to[key]) == 0 + 1
+    assert len(fo[key]) == 5 + 1
     assert len(proxy.spectrum_list) == 5
     for i, spectrum in enumerate(proxy.spectrum_list):
         i = 2 * i + 1
@@ -200,4 +198,4 @@ def test_list_proxy():
 
     proxy.spectrum_list.clear()
     proxy.save_to_disk()
-    assert len(fo[key]) == 0
+    assert len(fo[key]) == 0 + 1

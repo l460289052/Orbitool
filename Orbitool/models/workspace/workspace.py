@@ -48,7 +48,7 @@ class WorkspaceData(BaseDiskData):
 
 
 class WorkSpace:
-    def __init__(self, path: Union[str, Path] = None, use_proxy=True) -> None:
+    def __init__(self, path: Union[str, Path, None] = None, use_proxy=True) -> None:
         if path is not None:
             path = Path(path)
         else:
@@ -57,13 +57,12 @@ class WorkSpace:
 
         info = None
         if use_proxy:
+            assert path is not None
             self.file = H5File(path, 'r')
             self.proxy_file = H5File(path.with_suffix(".orbt-temp"))
             if "info" in self.proxy_file:
                 info = self.proxy_file.read("info", WorkspaceInfo)
-            self.data = WorkspaceData(
-                self.file.get_h5group("data"),
-                self.proxy_file.get_h5group("data"))
+            self.data = WorkspaceData(self.file.get_h5group("data"), self.proxy_file.get_h5group("data"))
         else:
             self.file = H5File(path, 'a')
             self.proxy_file = None
@@ -90,8 +89,7 @@ class WorkSpace:
 
             self.file = H5File(self.file._io, 'r')
             self.proxy_file = H5File(self.proxy_file._io)
-            self.data = WorkspaceData(self.file.get_h5group(
-                "data"), self.proxy_file.get_h5group("data"))
+            self.data = WorkspaceData(self.file.get_h5group("data"), self.proxy_file.get_h5group("data"))
         else:
             self.file.write("info", self.info)
 
@@ -107,8 +105,7 @@ class WorkSpace:
     def close_as(self, path):
         path = Path(path)
         if self.file._file and path.exists():
-            assert not self.file._io.samefile(
-                path), "please choose another destination"
+            assert not self.file._io.samefile(path), "please choose another destination"
         if path.exists():
             path.unlink()
         new_space = WorkSpace(path, False)
