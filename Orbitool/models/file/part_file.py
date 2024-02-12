@@ -6,7 +6,7 @@ from typing import overload, List, Tuple, Iterable
 class IFileHandler:
     totalScanNum: int
 
-    def datetimeRange2ScanNumRange(timeRange: Tuple[datetime, datetime]) -> Tuple[int, int]:
+    def datetimeRange2ScanNumRange(self, timeRange: Tuple[datetime, datetime]) -> Tuple[int, int]:
         pass
 
 

@@ -1,15 +1,17 @@
 from functools import partial
-from typing import Iterable, List, Optional, Union
+from typing import DefaultDict, Dict, Iterable, List, Optional, Union, cast
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from Orbitool import utils
-from Orbitool.models.file import (FileSpectrumInfo, Path, PathList)
+from Orbitool.models.file import FileSpectrumInfo, Path, PathList
+from Orbitool.UI.utils.utils import TableUtils
 
 from .. import utils as UiUtils
 from ..manager import Manager, Thread, state_node
 from ..utils import DragHelper, set_header_sizes, showInfo
 from . import FileUi
+from .table_filter_helper import TableFilterHelper
 from .utils import str2timedelta
 
 
@@ -31,6 +33,7 @@ class Widget(QtWidgets.QWidget):
 
         ui = self.ui
 
+        ui.tableWidget.itemDoubleClicked.connect(self.showFileDetail)
         ui.tableWidget.dragEnterEvent = self.tableDragEnterEvent
         ui.tableWidget.dragMoveEvent = self.tableDragMoveEvent
         ui.tableWidget.dropEvent = self.tableDropEvent
@@ -42,6 +45,11 @@ class Widget(QtWidgets.QWidget):
         ui.timeAdjustPushButton.clicked.connect(self.adjust_time)
 
         ui.periodToolButton.clicked.connect(self.edit_period)
+
+        self.filter_helper = TableFilterHelper(self.manager, self.ui.filterTableWidget)
+        ui.refreshFilterPushButton.clicked.connect(self.filter_helper.refresh_filter)
+        ui.addFilterToolButton.clicked.connect(self.filter_helper.add_filter)
+        ui.delFilterToolButton.clicked.connect(self.filter_helper.del_filter)
 
         ui.selectedPushButton.clicked.connect(self.processSelected)
         ui.allPushButton.clicked.connect(self.processAll)
@@ -64,7 +72,7 @@ class Widget(QtWidgets.QWidget):
 
     @state_node
     def edit_period(self):
-        from .CustonPeriodUiPy import Dialog
+        from .CustomPeriodUiPy import Dialog
         ui = self.ui
         start_time = ui.startDateTimeEdit.dateTime().toPyDateTime()
         end_time = ui.endDateTimeEdit.dateTime().toPyDateTime()
@@ -75,7 +83,6 @@ class Widget(QtWidgets.QWidget):
         dialog.init_periods(start_time, end_time, time_interval)
         dialog.show_periods()
         dialog.exec()
-        
 
     @state_node
     def addThermoFile(self):
@@ -83,15 +90,22 @@ class Widget(QtWidgets.QWidget):
             "Select one or more files", "RAW files(*.RAW)")
         pathlist = self.pathlist
 
+        info = self.info
+
         def func():
             for f in files:
-                pathlist.addThermoFile(f)
+                path = pathlist.addThermoFile(f)
+                for filter in path.getFileHandler().getUniqueFilters():
+                    info.add_filter(filter)
+
             pathlist.sort()
+            self.filter_helper.refresh_filter_polarity()
             return len(pathlist.paths)
 
         length = yield func, "read files"
 
         self.showPaths()
+        self.filter_helper.show_filter()
 
     @addThermoFile.except_node
     def addThermoFile(self):
@@ -103,21 +117,32 @@ class Widget(QtWidgets.QWidget):
         if not ret:
             return
         pathlist = self.pathlist
+        info = self.info
 
         manager = self.manager
 
         def func():
             for path in manager.tqdm(utils.files.FolderTraveler(folder, ext=".RAW", recurrent=self.ui.recursionCheckBox.isChecked())):
-                pathlist.addThermoFile(path)
+                p = pathlist.addThermoFile(path)
+                for filter in p.getFileHandler().getUniqueFilters():
+                    info.add_filter(filter)
             pathlist.sort()
+            self.filter_helper.refresh_filter_polarity()
 
         yield func, "read folders"
 
         self.showPaths()
+        self.filter_helper.show_filter()
 
     @addFolder.except_node
     def addFolder(self):
         self.showPaths()
+        self.filter_helper.show_filter()
+
+    @state_node(withArgs=True)
+    def showFileDetail(self, item: QtWidgets.QTableWidgetItem):
+        from .FileDetailUiPy import Dialog
+        Dialog(self.manager, item.row()).exec()
 
     def tableDragEnterEvent(self, event: QtGui.QDragEnterEvent):
         if self.drag_helper.accept(event.mimeData()):
@@ -131,28 +156,44 @@ class Widget(QtWidgets.QWidget):
     def tableDropEvent(self, event: QtGui.QDropEvent):
         data = event.mimeData()
         paths = list(self.drag_helper.yield_file(data))
+        info = self.info
+
         def func():
             pathlist = self.pathlist
             for p in paths:
                 if p.is_dir():
                     for path in self.manager.tqdm(utils.files.FolderTraveler(str(p), ext=".RAW", recurrent=self.ui.recursionCheckBox.isChecked())):
-                        pathlist.addThermoFile(path)
+                        for filter in pathlist.addThermoFile(path).getFileHandler().getUniqueFilters():
+                            info.add_filter(filter)
                 elif p.suffix.lower() == ".raw":
-                    pathlist.addThermoFile(str(p))
+                    for filter in pathlist.addThermoFile(str(p)).getFileHandler().getUniqueFilters():
+                        info.add_filter(filter)
             pathlist.sort()
+            self.filter_helper.refresh_filter_polarity()
         yield func, "read files"
 
         self.showPaths()
+        self.filter_helper.show_filter()
 
     @state_node
     def removePath(self):
-        indexes = UiUtils.get_tablewidget_selected_row(self.ui.tableWidget)
-        self.pathlist.rmPath(indexes)
+        indexes = TableUtils.getSelectedRow(self.ui.tableWidget)
+        paths = self.pathlist.rmPath(indexes)
+        info = self.info
+
+        def func():
+            for path in paths:
+                for f in path.getFileHandler().getUniqueFilters():
+                    info.rm_filter(f)
+        yield func
+
         self.showPaths()
+        self.showFilter()
 
     @removePath.except_node
     def removePath(self):
         self.showPaths()
+        self.showFilter()
 
     def showPaths(self):
         ui = self.ui
@@ -179,13 +220,14 @@ class Widget(QtWidgets.QWidget):
     @state_node
     def adjust_time(self):
         ui = self.ui
-        slt = UiUtils.get_tablewidget_selected_row(ui.tableWidget)
+        slt = TableUtils.getSelectedRow(ui.tableWidget)
         paths = self.pathlist.subList(slt)
         start, end = paths.timeRange
         if start is None:
             return
         ui.startDateTimeEdit.setDateTime(start)
         ui.endDateTimeEdit.setDateTime(end)
+
 
     @state_node
     def processSelected(self):
@@ -212,26 +254,22 @@ class Widget(QtWidgets.QWidget):
         paths = self.manager.tqdm(paths)
 
         self.info.rtol = ui.rtolDoubleSpinBox.value() * 1e-6
-        if ui.positiveRadioButton.isChecked():
-            polarity = 1
-        elif ui.negativeRadioButton.isChecked():
-            polarity = -1
-        else:
-            raise ValueError("Please select a polarity")
 
-        if ui.averageCheckBox.isChecked():
+        filters = self.info.getCastedUsedSpectrumFilters()
+        if ui.averageGroupBox.isChecked():
             if ui.nSpectraRadioButton.isChecked():
                 num = ui.nSpectraSpinBox.value()
                 func = partial(FileSpectrumInfo.infosFromNumInterval,
-                               paths, num, polarity, time_range)
+                               paths, num, filters, time_range)
             elif ui.nMinutesRadioButton.isChecked():
                 interval = str2timedelta(ui.nMinutesLineEdit.text())
                 func = partial(FileSpectrumInfo.infosFromTimeInterval,
-                               paths, interval, polarity, time_range)
+                               paths, interval, filters, time_range)
             elif ui.periodRadioButton.isChecked():
-                func = partial(FileSpectrumInfo.infosFromPeriods, paths, polarity, self.info.periods)
+                func = partial(FileSpectrumInfo.infosFromPeriods,
+                               paths, filters, self.info.periods)
         else:
             func = partial(FileSpectrumInfo.infosFromPath_withoutAveraging,
-                           paths, polarity, time_range)
+                           paths, filters, time_range)
 
         return func

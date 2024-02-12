@@ -120,7 +120,7 @@ class Widget(QtWidgets.QWidget):
         def read_and_average():
             spectra: List[Tuple[np.ndarray, np.ndarray, float]] = []
             for info in infos:
-                spectrum = info.get_spectrum_from_info(rtol, True)
+                spectrum, _ = info.get_spectrum_from_info(rtol, True)
                 if spectrum is not None:
                     spectra.append(spectrum)
             if len(spectra) > 0:
@@ -650,8 +650,9 @@ class ReadFromFile(MultiProcess):
     def read(file: WorkSpace, **kwargs) -> Generator:
         rtol = file.info.file_tab.rtol
         cnt = 0
+        last_reader = None
         for info in file.info.file_tab.spectrum_infos:
-            data = info.get_spectrum_from_info(rtol)
+            data, last_reader = info.get_spectrum_from_info(rtol, last_reader=last_reader)
             if info.average_index and info.average_index != cnt:
                 info = copy(info)
                 info.average_index = cnt

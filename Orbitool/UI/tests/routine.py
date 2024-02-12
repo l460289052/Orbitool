@@ -48,7 +48,7 @@ def fileui(window: MainUiPy.Window):
     fileui = window.fileTab
     manager = fileui.manager
     workspace = manager.workspace
-    test.input(True, config.ROOT_PATH.parent / 'data')
+    test.input(config.ROOT_PATH.parent / 'data')
     sleep()
     fileui.addFolder()
 

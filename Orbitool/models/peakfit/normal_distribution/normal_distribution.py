@@ -75,8 +75,11 @@ class NormalDistributionFunc(BaseFunc, BaseRowStructure):
         peak_intensity = self._funcFit(peak_position, *param)
         tags = set(peak1.tags)
         tags.update(peak2.tags)
-        peak = FittedPeak(mz, intensity, param, peak_position, peak_intensity,
-                          area, ''.join(tags))
+        peak = FittedPeak(
+            mz=mz, intensity=intensity, fitted_param=param,
+            peak_position=peak_position, peak_intensity=peak_intensity,
+            area=area, tags="".join(tags)
+        )
         return peak
 
     def normFunc(self, x):

@@ -1,24 +1,27 @@
 from datetime import datetime
+
 from .base import state_handlers, BaseStateHandler
 
 def init_handlers():
     from PyQt6.QtWidgets import (
         QCheckBox, QDateTimeEdit, QDoubleSpinBox, QLineEdit,
-        QSpinBox, QRadioButton, QComboBox, QSlider)
+        QSpinBox, QRadioButton, QComboBox, QSlider, QGroupBox)
 
     class CheckBoxHandler(BaseStateHandler):
         @staticmethod
-        def get(obj: QCheckBox) -> str:
+        def get(obj: QCheckBox | QGroupBox | QRadioButton) -> str:
             return "checked" if obj.isChecked() else "unchecked"
 
         @staticmethod
-        def set(obj: QCheckBox, value):
+        def set(obj: QCheckBox | QGroupBox | QRadioButton, value):
             if value == "checked":
                 obj.setChecked(True)
             elif value == "unchecked":
                 obj.setChecked(False)
     state_handlers[QCheckBox] = CheckBoxHandler
     state_handlers[QRadioButton] = CheckBoxHandler
+    state_handlers[QGroupBox] = CheckBoxHandler
+
 
     class SpinBoxHandler(BaseStateHandler):
         @staticmethod
@@ -75,4 +78,3 @@ def init_handlers():
         def set(obj: QSlider, value: str):
             obj.setValue(int(value))
     state_handlers[QSlider] = SliderHandler
-

@@ -6,6 +6,7 @@ from typing import Dict, Union
 from matplotlib.pyplot import get
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+from Orbitool import setting
 from Orbitool.base.structure import broken_entries as h5_brokens
 from Orbitool.models.workspace import WorkSpace, updater
 from ..version import VERSION
@@ -230,7 +231,7 @@ class Window(QtWidgets.QMainWindow):
 
     def showMsg(self, msg):
         self.ui.statusbar.showMessage(
-            f"{datetime.now().replace(microsecond=0).isoformat(sep=' ')} | {msg}")
+            f"{setting.format_time(datetime.now())} | {msg}")
 
     def showBarLabelMessage(self, label: int, percent: int, msg: str):
         if (bar := self.progress_bars.get(label, None)) is None:

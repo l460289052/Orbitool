@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path as FilePath
-from typing import Dict, Iterable, List, Tuple, Union
+import random
+from typing import Dict, Iterable, List, Optional, Tuple, TypedDict, Union
 
 import numpy as np
 
-from Orbitool.base import BaseRowStructure, BaseDatasetStructure
-from Orbitool.utils.readers import ThermoFile
+from Orbitool.base import BaseRowStructure, BaseDatasetStructure, BaseStructure, JSONObject
+from Orbitool.utils.readers import ThermoFile, spectrum_filter
 
 from ..spectrum import spectrum
 from .part_file import (generate_periods, generate_num_periods,
@@ -32,14 +33,23 @@ class Path(BaseRowStructure):
                 return ThermoFile(path)
 
     @classmethod
-    def fromThermoFile(cls, filepath):
+    def fromThermoFile(cls, filepath, other_paths: Iterable["Path"]):
         handler = ThermoFile(filepath)
+        stem = FilePath(filepath).stem
+        # key = stem
+        # other_keys = set(p.key for p in other_paths)
+        # while True:
+        #     if key not in other_keys:
+        #         break
+        #     key = f"{stem}-{random.randbytes(4).hex()}"
         return cls(
             path=f"{PATH_TYPE.THERMO.value}:{filepath}",
+            # key=key,
             createDatetime=handler.creationDatetime,
             startDatetime=handler.startDatetime,
             endDatetime=handler.endDatetime,
-            scanNum=handler.totalScanNum)
+            scanNum=handler.totalScanNum
+        )
 
     def get_show_name(self):
         typ, path = self.path.split(":", 1)
@@ -72,7 +82,7 @@ class PathList(BaseDatasetStructure):
         return start, end
 
     def addThermoFile(self, filepath):
-        path = Path.fromThermoFile(filepath)
+        path = Path.fromThermoFile(filepath, self.paths)
 
         crossed, crossed_file = self._crossed(
             path.startDatetime, path.endDatetime)
@@ -81,9 +91,7 @@ class PathList(BaseDatasetStructure):
                 f'file "{filepath}" and "{crossed_file}" have crossed scan time')
 
         self.paths.append(path)
-
-    def addCsv(self, *args):
-        path = Path(path=f"h5:{path}")
+        return path
 
     def _addPath(self, p: Path):
         self.paths.append(p)
@@ -92,8 +100,7 @@ class PathList(BaseDatasetStructure):
         if isinstance(indexes, int):
             indexes = (indexes, )
         indexes = np.unique(indexes)[::-1]
-        for index in indexes:
-            del self.paths[index]
+        return list(map(self.paths.pop, indexes))
 
     def subList(self, indexes: Union[int, Iterable[int]]):
         if isinstance(indexes, int):
@@ -135,29 +142,30 @@ class PeriodItem(BaseRowStructure):
 
 class FileSpectrumInfo(spectrum.SpectrumInfo):
     path: str
-    polarity: int
+    filter: JSONObject = {}
+    stats_filter: JSONObject = {}
 
     # index from 0, 1, 2, 3... with different times together to make up a whole spectrum
     average_index: int
 
     @classmethod
-    def infosFromNumInterval(cls, paths: List[Path], N: int, polarity, timeRange):
+    def infosFromNumInterval(cls, paths: List[Path], N: int, filter, timeRange):
         start_scan_num, stop_scan_num, total_scan_num = get_num_range_from_ranges(
             (p.getFileHandler() for p in paths), timeRange)
         periods = [PeriodItem(
             start_num=int(s), stop_num=int(e)
         ) for s, e in generate_num_periods(start_scan_num, stop_scan_num, N)]
-        return cls.infosFromPeriods(paths, polarity, periods)
+        return cls.infosFromPeriods(paths, filter, periods)
 
     @classmethod
-    def infosFromTimeInterval(cls, paths: List[Path], interval: timedelta, polarity, timeRange):
+    def infosFromTimeInterval(cls, paths: List[Path], interval: timedelta, filter, timeRange):
         periods = [PeriodItem(
             start_time=s, end_time=e
         ) for s, e in generate_periods(timeRange[0], timeRange[1], interval)]
-        return cls.infosFromPeriods(paths, polarity, periods)
+        return cls.infosFromPeriods(paths, filter, periods)
 
     @classmethod
-    def infosFromPeriods(cls, paths: List[Path], polarity, periods: List[PeriodItem]):
+    def infosFromPeriods(cls, paths: List[Path], filter, periods: List[PeriodItem]):
         delta_time = timedelta(seconds=1)
 
         results: List[cls] = []
@@ -203,7 +211,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
                 if generate_flag:
                     info = cls(
                         start_time=time_range[0], end_time=time_range[1],
-                        path=path.path, polarity=polarity, average_index=average_index)
+                        path=path.path, filter=filter, average_index=average_index)
                     results.append(info)
 
                 if next_period_flag:
@@ -212,7 +220,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
                     if i >= len(periods):
                         return results
                     period = periods[i]
-                elif next_file_flag: # same period with next file
+                elif next_file_flag:  # same period with next file
                     average_index += 1
                 next_period_flag = False
                 generate_flag = False
@@ -222,31 +230,45 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
         return results
 
     @classmethod
-    def infosFromPath_withoutAveraging(cls, paths: List[Path], polarity, timeRange):
+    def infosFromPath_withoutAveraging(cls, paths: List[Path], filter, stats_filter, timeRange):
         delta_time = timedelta(seconds=1)
         info_list: List[cls] = []
         for path in paths:
             handler = path.getFileHandler()
             creationTime = handler.creationDatetime
             for i in range(*handler.timeRange2ScanNumRange((timeRange[0] - creationTime, timeRange[1] - creationTime))):
-                if handler.getSpectrumPolarity(i) == polarity:
+                i_filter = handler.getSpectrumFilter(i)
+                if spectrum_filter.filter_match(i_filter, filter):
+                    if stats_filter:
+                        i_stats = handler.get_spectrum_stats(i)
+                        if not spectrum_filter.stats_match(i_stats, stats_filter):
+                            continue
                     time = creationTime + handler.getSpectrumRetentionTime(i)
-                    info = FileSpectrumInfo(
-                        time - delta_time, time + delta_time, path.path, polarity, 0)
+                    info = cls(
+                        start_time=time - delta_time, end_time=time + delta_time,
+                        path=path.path, filter=filter, stats_filter=stats_filter, average_index=0)
                     info_list.append(info)
         return info_list
 
-    def get_spectrum_from_info(self, rtol: float = 1e-6, with_minutes=False):
-        origin, realpath = self.path.split(':', 1)
-        if origin == PATH_TYPE.THERMO.value:
-            reader = ThermoFile(realpath)
-            ret = reader.getAveragedSpectrumInTimeRange(
-                self.start_time, self.end_time, rtol, self.polarity)
-            if ret is None:
-                return None
-            mz, intensity = ret
-            if not with_minutes:
-                return mz, intensity
-            minutes = min(self.end_time, reader.endDatetime) - \
-                max(self.start_time, reader.startDatetime)
-            return mz, intensity, minutes.total_seconds() / 60
+    def get_spectrum_from_info(self, rtol: float = 1e-6, with_minutes=False, last_reader: Optional["LastReader"] = None):
+        if last_reader and last_reader.get("path", None) == self.path:
+            reader = last_reader["reader"]
+        else:
+            origin, realpath = self.path.split(':', 1)
+            if origin == PATH_TYPE.THERMO.value:
+                reader = ThermoFile(realpath)
+        ret = reader.getAveragedSpectrumInTimeRange(
+            self.start_time, self.end_time, rtol, self.filter, self.stats_filter)
+        if ret is None:
+            return None
+        mz, intensity = ret
+        if not with_minutes:
+            return (mz, intensity), LastReader(path=self.path, reader=reader)
+        minutes = min(self.end_time, reader.endDatetime) - \
+            max(self.start_time, reader.startDatetime)
+        return (mz, intensity, minutes.total_seconds() / 60), LastReader(path=self.path, reader=reader)
+
+
+class LastReader(TypedDict):
+    path: str
+    reader: ThermoFile

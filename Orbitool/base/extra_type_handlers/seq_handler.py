@@ -64,11 +64,16 @@ class SeqRowTypeHandler(DatasetTypeHandler):
 
         titles = []
         types = []
+        default_factories = []
         for key, field in vt.model_fields.items():
             titles.append(key)
             types.append(field.annotation)
+            if field.is_required():
+                default_factories.append(None)
+            else:
+                default_factories.append(field.get_default)
         self.titles = titles
-        self.column_helper = ColumnsHelper(tuple(titles), tuple(types))
+        self.column_helper = ColumnsHelper(tuple(titles), tuple(types), default_factories)
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value: List[BaseRowStructure]):
         return self.column_helper.write_columns_to_h5(
@@ -78,8 +83,11 @@ class SeqRowTypeHandler(DatasetTypeHandler):
     def read_dataset_from_h5(self, dataset: H5Dataset) -> Any:
         cls: Type[BaseRowStructure] = self.args[0]
         titles = self.titles
-        rows = zip(*self.column_helper.read_columns_from_h5(dataset))
-        return self.origin(cls(**dict(zip(titles, row))) for row in rows)
+        try:
+            rows = zip(*self.column_helper.read_columns_from_h5(dataset))
+            return self.origin(cls(**dict(zip(titles, row))) for row in rows)
+        except Exception as e:
+            raise ValueError(f"Error while reading Seq[{self.args[0]}] at {dataset.name}") from e
 
     def get_columns_from_objs(self, value: Iterable[BaseRowStructure]):
         """
@@ -129,7 +137,7 @@ class AttrSeqTypeHandler(AttrTypeHandler):
         self.converter = get_converter(self.list_handler.dtype)
 
     def convert_to_attr(self, value):
-        return self.converter.convert_to_h5(self.list_handler.convert_to_array(value))
+        return self.converter.convert_to_h5(self.list_handler.convert_to_ndarray(value))
 
     def convert_from_attr(self, value):
-        return self.list_handler.convert_from_array(self.converter.convert_from_h5(value))
+        return self.list_handler.convert_from_ndarray(self.converter.convert_from_h5(value))

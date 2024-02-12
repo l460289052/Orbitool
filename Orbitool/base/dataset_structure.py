@@ -17,6 +17,28 @@ SUPPORT_DATA = {
 
 
 class BaseDatasetStructure(BaseStructure):
+    """
+    The whole will be converted into a numpy dataset
+
+    Example A:
+        class NewStructure(BaseDatasetStructure):
+            a: List[int]
+            b: List[float]
+            attr_a: int
+            attr_b: float
+    Example B:
+        class NewStructure(BaseDatasetStructure):
+            a: List[OtherRowType] # OtherRowType is subclass of BaseRowStructure
+            attr_a: int
+            attr_b: float
+    Error A:
+        # a and b will conflict
+        class NewStructure(BaseDatasetStructure):
+            a: List[OtherRowType] # OtherRowType is subclass of BaseRowStructure
+            b: List[int]
+            attr_a: int
+            attr_b: float
+    """
     @classmethod
     def h5_type_handler(cls):
         return DatasetStructureTypeHandler
@@ -66,7 +88,7 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
             assert len(
                 dataset_fields) == 1, f"{self.origin}: Dataset cannot exist with other lists or arrays {dataset_fields}"
         else:
-            self.helper = np_helper.HeteroGeneousArrayHelper(dtypes)
+            self.helper = np_helper.HeteroGeneousNdArrayHelper(dtypes)
 
     def write_dataset_to_h5(self, h5g: H5Group, key: str, value: BaseDatasetStructure):
         origin = self.origin
@@ -77,7 +99,7 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
                 h5g, key, length, [
                     get_not_none_attr(value, df, origin)
                     if (handler := handlers.get(df, None)) is None
-                    else handler.convert_to_array(get_not_none_attr(value, df, origin))
+                    else handler.convert_to_ndarray(get_not_none_attr(value, df, origin))
                     for df in self.dataset_fields]
             )
         else:
@@ -98,7 +120,7 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
             columns_iter = self.helper.columns_read(dataset)
             values = dict(zip(self.dataset_fields, columns_iter))
             for key, handler in self.handlers.items():
-                values[key] = handler.convert_from_array(values[key])
+                values[key] = handler.convert_from_ndarray(values[key])
         else:
             key = self.dataset_fields[0]
             values = {key: self.dataset_handler.read_dataset_from_h5(dataset)}
@@ -110,7 +132,7 @@ class DatasetStructureTypeHandler(DatasetTypeHandler):
                 if v is MISSING:
                     v = cls.model_fields[k].get_default(call_default_factory=True)
             except:
-                broken_entries.append('/'.join(dataset.name, f"attr:{k}"))
+                broken_entries.append(f"{dataset.name}/attr:{k}")
                 v = cls.model_fields[k].get_default(call_default_factory=True)
             values[k] = v
         return cls(**values)

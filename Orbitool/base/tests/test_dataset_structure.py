@@ -80,10 +80,40 @@ def test_dataset_dict():
         a=1, b=2.5, c="123", d=datetime.now()
     )
 
-    a = DD(dd={str(i):Item(**values) for i in range(10)}, **values)
+    a = DD(dd={str(i): Item(**values) for i in range(10)}, **values)
 
     f = H5File()
     f.write("dd", a)
     b = f.read("dd", DD)
 
     assert a == b
+
+
+def test_dataset_compatibility():
+    class Item(BaseRowStructure):
+        a: int
+        b: float
+        c: str
+        d: datetime
+
+    class NewItem(BaseRowStructure):
+        a: int
+        b: float
+        c: str
+        # d: datetime # delete
+        e: str = "123"
+
+    class DD(BaseDatasetStructure):
+        dd: Dict[str, Item]
+
+    class NewDD(BaseDatasetStructure):
+        dd: Dict[str, NewItem]
+
+    values = dict(a=1, b=2.5, c="123", d=datetime.now())
+    a = DD(dd={str(i): Item(**values) for i in range(10)}, **values)
+
+    f = H5File()
+    f.write("dd", a)
+    b = f.read("dd", NewDD)
+    assert b.dd["1"].e == "123"
+

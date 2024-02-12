@@ -146,7 +146,7 @@ def get_converter(dtype: np.dtype):
     return Converter(dtype)
 
 
-class HomogeneousArrayHelper:
+class HomogeneousNdArrayHelper:
     def __init__(self, dtype: np.dtype) -> None:
         assert support(dtype)
         self.dtype = dtype
@@ -163,7 +163,7 @@ class HomogeneousArrayHelper:
         return self.converter.convert_from_h5(dataset[()])
 
 
-class HeteroGeneousArrayHelper:
+class HeteroGeneousNdArrayHelper:
     def __init__(self, dtype_list: List[Union[Tuple[str, np.dtype], Tuple[str, np.dtype, Union[int, Tuple[int]]]]]) -> None:
         converters: List[Converter] = []
         h5_dtype = []
@@ -207,5 +207,6 @@ class HeteroGeneousArrayHelper:
         return ds
 
     def columns_read(self, dataset: H5Dataset):
+        names = set(dataset.dtype.names)
         for dtype, cvt in zip(self.h5_dtype_list, self.converters, strict=True):
-            yield cvt.convert_from_h5(dataset[dtype[0]])
+            yield cvt.convert_from_h5(dataset[dtype[0]]) if dtype[0] in names else None

@@ -55,9 +55,10 @@ def indexNearest(array: Sequence[T], value: K, indexRange: Tuple[int, int] = Non
 
 def indexBetween(array: Sequence[T], valueRange: Tuple[K, K], indexRange: Tuple[int, int] = None, method: Callable[[Sequence[T], int], K] = defaultMethod) -> slice:
     """
-    get range from sorted array for value in [l, r] (contains both)
+    get range from sorted array for value in [value_l, value_r] (contains both value)
     `indexRange`: (start,stop), contain array[start] to array[stop-1]
-    make list = [index for index, item in enumerate(array) if l<item and item<r]
+    return slice
+    array[slice] equal to [index for index, item in enumerate(array) if l <= item <= r]
     """
     lvalue, rvalue = valueRange
     if indexRange is None:
