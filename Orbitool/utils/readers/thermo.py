@@ -196,16 +196,20 @@ class File:
         if self._getFirstFilterInRawNumRange(startNum, stopNum, filter) is None:
             return
         average_list = CSharpList[Int32]()
+        cnt = 0
         for i in range(startNum, stopNum):
             i_filter = self.getSpectrumFilter(i, True)
             if not spectrum_filter.filter_match(i_filter, filter):
                 continue
             if stats_filter:
-                i_stats = to_spectrum_stats(self.get_spectrum_stats(i, True))
+                i_stats = self.get_spectrum_stats(i, True)
                 if not spectrum_filter.stats_match(i_stats, stats_filter):
                     continue
             average_list.Add(i)
+            cnt += 1
 
+        if cnt == 0:
+            return
         averaged = Extensions.AverageScans(
             self.rawfile, average_list, MassOptions(rtol, ToleranceUnits.ppm))
         if averaged is None:

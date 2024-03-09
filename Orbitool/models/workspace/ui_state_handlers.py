@@ -5,7 +5,7 @@ from .base import state_handlers, BaseStateHandler
 def init_handlers():
     from PyQt6.QtWidgets import (
         QCheckBox, QDateTimeEdit, QDoubleSpinBox, QLineEdit,
-        QSpinBox, QRadioButton, QComboBox, QSlider, QGroupBox)
+        QSpinBox, QRadioButton, QComboBox, QSlider, QGroupBox) 
 
     class CheckBoxHandler(BaseStateHandler):
         @staticmethod
@@ -72,7 +72,7 @@ def init_handlers():
     class SliderHandler(BaseStateHandler):
         @staticmethod
         def get(obj: QSlider) -> str:
-            return obj.value()
+            return str(obj.value())
 
         @staticmethod
         def set(obj: QSlider, value: str):

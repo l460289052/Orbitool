@@ -13,8 +13,8 @@ class TimeSeriesInfoRow(BaseRowStructure):
     position_min: float
     position_max: float
     range_sum: bool = False
-    time_min: datetime = None
-    time_max: datetime = None
+    time_min: datetime = invalid_datetime
+    time_max: datetime = invalid_datetime
     formulas: FormulaList = []
 
     @classmethod

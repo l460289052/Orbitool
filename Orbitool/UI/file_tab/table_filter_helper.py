@@ -124,7 +124,6 @@ class TableFilterHelper:
         else:
             widget.focusOutEvent = self.text_changed
 
-
     @state_node(mode='e')
     def text_changed(self):
         if self.current_previous_pair is None:
@@ -145,6 +144,8 @@ class TableFilterHelper:
             current = widget.currentText()
         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
             current = widget.text()
+        else:
+            current = None
         is_stats = key in spectrum_filter.stats_header
         use_filter = self.info.getCastedUsedSpectrumFilters()
         stats_filter = self.info.getCastedScanstatsFilters()
@@ -170,7 +171,7 @@ class TableFilterHelper:
                 if is_stats:
                     del stats_filter[key][op]
                     op = current
-                    stats_filter[key][op] = value
+                    stats_filter[key][op] = float(value)
                 else:
                     pass
             case 2:
@@ -204,8 +205,13 @@ class TableFilterHelper:
         table = self.table
         slt = TableUtils.getSelectedRow(table)
         use_filter = self.info.getCastedUsedSpectrumFilters()
+        stats_filter = self.info.getCastedScanstatsFilters()
         for index in slt:
             key = table.item(index, 0).text()
-            use_filter.pop(key)
+            if key in use_filter:
+                use_filter.pop(key)
+            elif key in stats_filter:
+                sub_key = table.item(index, 1).text()
+                stats_filter.get(key, {}).pop(sub_key, None) # type: ignore
 
         self.show_filter()

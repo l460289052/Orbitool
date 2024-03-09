@@ -16,7 +16,7 @@ from .np_helper import HomogeneousNdArrayHelper, get_converter, support
 
 
 class ParsedArgs(NamedTuple):
-    dtype: Union[np.dtype, EllipsisType]
+    dtype: np.dtype
     shape: Union[Tuple[int], EllipsisType]
     index: Union[int, Literal[-1]]
 
@@ -57,7 +57,6 @@ class NdArray(np.ndarray):
     NdArray[int, -1]
     NdArray[int, 100]
     NdArray[int, ...]
-    NdArray[..., (2, 3, -1)]
     NdArray[int, (2, 3, -1)]
     """
     @overload
