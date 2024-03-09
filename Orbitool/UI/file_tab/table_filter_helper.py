@@ -1,11 +1,14 @@
 from typing import Union
 
 from PyQt6 import QtCore, QtWidgets, QtGui
+from Orbitool import logger
 
 from Orbitool.utils.readers import spectrum_filter
 
 from .. import Manager, state_node
 from ..utils import TableUtils
+
+TAG = "TableFilterHelper"
 
 
 class TableFilterHelper:
@@ -44,6 +47,7 @@ class TableFilterHelper:
         table = self.table
         use_filter = self.info.getCastedUsedSpectrumFilters()
         scanstats_filter = self.info.getCastedScanstatsFilters()
+        logger.d(TAG, f"showFilter() {use_filter=} {scanstats_filter=}")
         self.current_filter_widget = None
         self.current_edit_filter_pos = None
         TableUtils.clearAndSetRowCount(table, len(
@@ -209,9 +213,14 @@ class TableFilterHelper:
         for index in slt:
             key = table.item(index, 0).text()
             if key in use_filter:
-                use_filter.pop(key)
+                filter = use_filter.pop(key)
+                logger.d(TAG, f"delFilter() useFilter:{key=} {filter=}")
             elif key in stats_filter:
                 sub_key = table.item(index, 1).text()
-                stats_filter.get(key, {}).pop(sub_key, None) # type: ignore
+                sub_filter = stats_filter.get(key, {})
+                value = sub_filter.pop(sub_key, None)  # type: ignore
+                if not sub_filter:
+                    stats_filter.pop(key, None)
+                logger.d(TAG, f"delFilter() statsFilter:{key=} {sub_key=} {value=}")
 
         self.show_filter()

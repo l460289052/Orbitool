@@ -9,7 +9,7 @@ import numpy as np
 from numpy.polynomial.polynomial import polyval
 from PyQt6 import QtCore, QtWidgets
 
-from Orbitool import setting
+from Orbitool import logger, setting
 from Orbitool.base.disk_structure import DiskListDirectView
 from Orbitool.models.workspace.noise_tab import MzIntensity, NoiseArray, NoiseFormulaParameter
 from Orbitool.models import spectrum as spectrum_func
@@ -22,9 +22,11 @@ from Orbitool.utils import binary_search
 from . import NoiseUi, component
 from .component import factory
 from .manager import Manager, MultiProcess, state_node
-from .utils import (get_tablewidget_selected_row, savefile, set_header_sizes,
+from .utils import (TableUtils, get_tablewidget_selected_row, savefile, set_header_sizes,
                     showInfo)
 
+
+TAG = "NoiseUiPy"
 
 class Widget(QtWidgets.QWidget):
     selected_spectrum_average = QtCore.pyqtSignal(Spectrum)
@@ -108,14 +110,13 @@ class Widget(QtWidgets.QWidget):
         info_list = workspace.info.file_tab.spectrum_infos
 
         left = index
-        while left > 0 and info_list[left].average_index != 0:
-            index -= 1
-        right = index + 1
+        right = left + 1
         while right < len(info_list) and info_list[right].average_index != 0:
             right += 1
 
         rtol = workspace.info.file_tab.rtol
         infos: List[FileSpectrumInfo] = list(info_list[left:right])
+        logger.d(TAG, f"readSelectedSpectrum() info[{left},{right}] {len(infos)=}")
 
         def read_and_average():
             spectra: List[Tuple[np.ndarray, np.ndarray, float]] = []
@@ -143,7 +144,7 @@ class Widget(QtWidgets.QWidget):
             self.selected_spectrum_average.emit(spectrum)
             self.ui.denoisePushButton.setEnabled(False)
         else:
-            showInfo("failed")
+            showInfo("Spectra all may be filtered", "Empty spectra")
 
     def plotSelectSpectrum(self):
         spectrum = self.info.current_spectrum
@@ -164,7 +165,7 @@ class Widget(QtWidgets.QWidget):
 
     @state_node
     def delFormula(self):
-        indexes = get_tablewidget_selected_row(self.ui.tableWidget)
+        indexes = TableUtils.getSelectedRow(self.ui.tableWidget)
         for index in reversed(indexes):
             del self.info.general_setting.noise_formulas[index]
         self.showNoiseFormula()
@@ -688,4 +689,4 @@ class ReadFromFile(MultiProcess):
     def exception(file: WorkSpace, **kwargs):
         obj = (file.proxy_file or file.file)._obj
         if "tmp" in obj:
-            del file["tmp"]
+            del obj["tmp"]

@@ -1,6 +1,3 @@
-import logging
-import multiprocessing
-import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from multiprocessing import cpu_count
@@ -17,18 +14,7 @@ class TempFile:
 
 ROOT_PATH = Path(__file__).parent.parent
 
-LOG_PATH = ROOT_PATH / 'log.txt'
 RESOURCE_PATH = ROOT_PATH / "resources"
-
-logLevel = "DEBUG"
-
-formatter = logging.Formatter(
-    "\n%(asctime)s - %(filename)s - %(levelname)s \n %(message)s")
-log_file_handler = logging.FileHandler(LOG_PATH, encoding='utf-8')
-log_file_handler.setFormatter(formatter)
-logger = logging.getLogger("Orbitool")
-logger.setLevel(logLevel)
-logger.addHandler(log_file_handler)
 
 config_path = ROOT_PATH / "setting.json"
 

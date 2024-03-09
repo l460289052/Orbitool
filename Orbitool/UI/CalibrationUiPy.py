@@ -470,8 +470,7 @@ class CalibrateMergeDenoise(MultiProcess):
         batch = []
         calibrators_segments = file.info.calibration_tab.calibrator_segments
         for info, spectrum in zip(noise_tab.denoised_spectrum_infos, data.raw_spectra):
-            item = (spectrum, separators,
-                    calibrators_segments.get(spectrum.path, None))
+            item = (spectrum, separators, calibrators_segments.get(spectrum.path, None))
             if info.average_index:
                 batch.append(item)
             else:

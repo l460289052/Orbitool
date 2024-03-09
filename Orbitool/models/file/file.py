@@ -259,7 +259,7 @@ class FileSpectrumInfo(spectrum.SpectrumInfo):
         ret = reader.getAveragedSpectrumInTimeRange(
             self.start_time, self.end_time, rtol, self.filter, self.stats_filter)  # type: ignore
         if ret is None:
-            return None
+            return None, None
         mz, intensity = ret
         if not with_minutes:
             return (mz, intensity), LastReader(path=self.path, reader=reader)
