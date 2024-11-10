@@ -23,7 +23,7 @@ from ..utils.time_format.time_convert import converters
 from . import TimeseriesesUi
 from .component import Plot, factory
 from .manager import Manager, MultiProcess, state_node
-from .utils import get_tablewidget_selected_row, savefile, showInfo
+from .utils import TableUtils, savefile, showInfo
 
 
 class Widget(QtWidgets.QWidget):
@@ -236,7 +236,7 @@ class Widget(QtWidgets.QWidget):
 
     @state_node
     def removeSelect(self):
-        indexes = get_tablewidget_selected_row(self.ui.tableWidget)
+        indexes = TableUtils.getSelectedRow(self.ui.tableWidget)
         timeseries = self.timeseries
         infos = self.info.timeseries_infos
         for index in reversed(indexes):
@@ -271,7 +271,7 @@ class Widget(QtWidgets.QWidget):
         manager = self.manager
 
         def func():
-            delta_time = timedelta(seconds=3)
+            delta_time = timedelta(seconds=1)
             times = list(chain.from_iterable([s.times for s in series]))
             times.sort()
             last = times[-1]

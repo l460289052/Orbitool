@@ -17,6 +17,7 @@ data
 ref
 error.txt
 log.txt
+log.txt.*
 *.wks
 *.Oribit*
 *.Orbit*
