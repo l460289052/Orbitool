@@ -16,6 +16,7 @@ class FileTabInfo(BaseInfo):
     pathlist: PathList = PathList()
     periods: List[PeriodItem] = []
     """
+        counter of file available filters
             name  ->  { value  ->  count in files }
         Dict[str, Dict[str, int]]
 

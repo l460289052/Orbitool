@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple, Counter, Any
 import os
 
 import numpy as np
-from Orbitool import setting
+from Orbitool import logger, setting
 
 from ..binary_search import indexBetween
 from .spectrum_filter import SpectrumFilter, SpectrumStats, StatsFilters
@@ -43,6 +43,8 @@ from ThermoFisher.CommonCore.Data.FilterEnums import IonizationModeType, MSOrder
 from ThermoFisher.CommonCore.Data.Business import ChromatogramSignal, ChromatogramTraceSettings, \
     DataUnits, Device, GenericDataTypes, SampleType, Scan, TraceType, MassOptions
 from ThermoFisher.CommonCore.Data import ToleranceUnits, Extensions
+
+TAG = "ThermoReader"
 
 
 def initRawFile(path):
@@ -196,16 +198,21 @@ class File:
         if self._getFirstFilterInRawNumRange(startNum, stopNum, filter) is None:
             return
         average_list = CSharpList[Int32]()
+        cnt = 0
         for i in range(startNum, stopNum):
             i_filter = self.getSpectrumFilter(i, True)
             if not spectrum_filter.filter_match(i_filter, filter):
                 continue
             if stats_filter:
-                i_stats = to_spectrum_stats(self.get_spectrum_stats(i, True))
+                i_stats = self.get_spectrum_stats(i, True)
                 if not spectrum_filter.stats_match(i_stats, stats_filter):
                     continue
             average_list.Add(i)
+            cnt += 1
 
+        if cnt == 0:
+            logger.d(TAG, "getAveragedSpectrumInTimeRange() empty list, skip")
+            return
         averaged = Extensions.AverageScans(
             self.rawfile, average_list, MassOptions(rtol, ToleranceUnits.ppm))
         if averaged is None:

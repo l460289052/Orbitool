@@ -11,7 +11,7 @@ from Orbitool.models.file import FileSpectrumInfo
 from .. import setting
 from . import SpectraListUi, utils
 from .manager import Manager, state_node
-from .utils import (get_tablewidget_selected_row, openfolder, set_header_sizes,
+from .utils import (TableUtils, get_tablewidget_selected_row, openfolder, set_header_sizes,
                     showInfo)
 
 FILE_TAB = 0
@@ -124,12 +124,12 @@ class Widget(QtWidgets.QWidget):
         comboBox.addItem("Calibrate tab", CALIBRATE_TAB)
 
     def get_selected_index(self):
-        indexes = utils.get_tablewidget_selected_row(self.ui.tableWidget)
+        indexes = TableUtils.getSelectedRow(self.ui.tableWidget)
         if len(indexes) == 0:
             if setting.general.default_select:
                 return 0
             raise ValueError("Please select a spectrum in spectra list")
-        return indexes[0]
+        return self.info.shown_indexes[indexes[0]]
 
     @state_node(withArgs=True)
     def export(self, mode: Literal["select", "all"]):
@@ -154,7 +154,7 @@ class Widget(QtWidgets.QWidget):
         elif data == CALIBRATE_TAB:
             spectra = self.manager.workspace.data.calibrated_spectra
 
-        rows = get_tablewidget_selected_row(self.ui.tableWidget)
+        rows = TableUtils.getSelectedRow(self.ui.tableWidget)
 
         if mode == "select":
             def iter_select():

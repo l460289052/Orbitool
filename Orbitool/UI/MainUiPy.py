@@ -173,7 +173,7 @@ class Window(QtWidgets.QMainWindow):
     def _load_workspace(self, f: str):
         version = updater.get_version(f)
         if updater.need_update(version):
-            ret, n = UiUtils.savefile( "Update workspace and save as a new file", "Orbitool Workspace file(*.Orbitool)")
+            ret, n = UiUtils.savefile("Update workspace and save as a new file", "Orbitool Workspace file(*.Orbitool)")
             if not ret:
                 return
             shutil.copy(f, n)

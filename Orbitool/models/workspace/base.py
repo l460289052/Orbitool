@@ -43,15 +43,12 @@ class UiState(BaseDatasetStructure):
 
 class BaseStateHandler:
     @staticmethod
-    def get(obj) -> str:
-        pass
-
+    def get(obj) -> str: ...
     @staticmethod
-    def set(obj, value: str):
-        pass
+    def set(obj, value: str): ...
 
 
-state_handlers: Dict[Type, BaseStateHandler] = {}
+state_handlers: Dict[Type, Type[BaseStateHandler]] = {}
 
 
 class BaseInfo(BaseStructure):

@@ -65,6 +65,7 @@ class Widget(QtWidgets.QWidget):
     def init_or_restore(self):
         self.showPaths()
         self.info.ui_state.restore_state(self.ui)
+        self.filter_helper.show_filter()
 
     def updateState(self):
         ui = self.ui
@@ -188,12 +189,12 @@ class Widget(QtWidgets.QWidget):
         yield func
 
         self.showPaths()
-        self.showFilter()
+        self.filter_helper.show_filter()
 
     @removePath.except_node
     def removePath(self):
         self.showPaths()
-        self.showFilter()
+        self.filter_helper.show_filter()
 
     def showPaths(self):
         ui = self.ui
@@ -231,45 +232,44 @@ class Widget(QtWidgets.QWidget):
 
     @state_node
     def processSelected(self):
-        indexes = UiUtils.get_tablewidget_selected_row(self.ui.tableWidget)
+        indexes = TableUtils.getSelectedRow(self.ui.tableWidget)
         if len(indexes) == 0:
             return None
 
         paths = self.pathlist.subList(indexes)
-        self.info.spectrum_infos = yield self.processPaths(paths.paths), "get infomations from selected spectra"
+        self.info.spectrum_infos = yield self._process_paths(paths.paths), "get infomations from selected spectra"
 
         self.callback.emit()
 
     @state_node
     def processAll(self):
-        self.info.spectrum_infos = yield self.processPaths(self.pathlist.paths), "get infomations from spectra"
+        self.info.spectrum_infos = yield self._process_paths(self.pathlist.paths), "get infomations from spectra"
 
         self.callback.emit()
 
-    def processPaths(self, paths: List[Path]):
+    def _process_paths(self, paths: List[Path]):
         ui = self.ui
         time_range = (ui.startDateTimeEdit.dateTime().toPyDateTime(),
                       ui.endDateTimeEdit.dateTime().toPyDateTime())
 
-        paths = self.manager.tqdm(paths)
-
         self.info.rtol = ui.rtolDoubleSpinBox.value() * 1e-6
 
         filters = self.info.getCastedUsedSpectrumFilters()
+        stats_filters = self.info.getCastedScanstatsFilters()
         if ui.averageGroupBox.isChecked():
             if ui.nSpectraRadioButton.isChecked():
                 num = ui.nSpectraSpinBox.value()
                 func = partial(FileSpectrumInfo.infosFromNumInterval,
-                               paths, num, filters, time_range)
+                               paths, num, filters, stats_filters, time_range)
             elif ui.nMinutesRadioButton.isChecked():
                 interval = str2timedelta(ui.nMinutesLineEdit.text())
                 func = partial(FileSpectrumInfo.infosFromTimeInterval,
-                               paths, interval, filters, time_range)
+                               paths, interval, filters, stats_filters, time_range)
             elif ui.periodRadioButton.isChecked():
                 func = partial(FileSpectrumInfo.infosFromPeriods,
-                               paths, filters, self.info.periods)
+                               paths, filters, stats_filters, self.info.periods)
         else:
             func = partial(FileSpectrumInfo.infosFromPath_withoutAveraging,
-                           paths, filters, time_range)
+                           paths, filters, stats_filters, time_range)
 
         return func

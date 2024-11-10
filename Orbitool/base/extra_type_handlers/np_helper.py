@@ -129,7 +129,7 @@ class StringConverter(Converter):
 
     def convert_from_h5(self, value: np.ndarray):
         if len(value):
-            if value.dtype.char != 'S': # reading old files
+            if value.dtype.char != 'S':  # reading old files
                 value = value.astype("S")
             return np.char.decode(value, encoding='utf-8')
         else:
@@ -186,15 +186,16 @@ class HeteroGeneousNdArrayHelper:
         self.converters = converters
         self.h5_dtype_list = h5_dtype
         self.h5_dtype = np.dtype(h5_dtype)
-        self.h5_dtype = h5_dtype
         self.s_type = s_type
         self.has_s = has_s
 
     def columns_write(self, h5g: H5Group, key: str, length: int, columns: Iterable[np.ndarray]):
         if self.has_s:
             h5_dtype_list = self.h5_dtype_list
-            columns = [cvt.convert_to_h5(column) for cvt, column in zip(
-                self.converters, columns, strict=True)]
+            columns = [cvt.convert_to_h5(column) for cvt, column in zip(self.converters, columns, strict=True)]
+            if columns:
+                col_len = np.array([len(col) for col in columns]) 
+                assert (col_len == length).all(), f"Error length: {h5g.name=} {key=} {length=} {col_len=}"
             h5_dtype = [(dtype[0], col.dtype if s else dtype[1], *dtype[2:])
                         for dtype, s, col in zip(h5_dtype_list, self.s_type, columns, strict=True)]
             ds = h5g.create_dataset(key, length, h5_dtype, **H5_DT_ARGS)
@@ -203,6 +204,7 @@ class HeteroGeneousNdArrayHelper:
         else:
             ds = h5g.create_dataset(key, length, self.h5_dtype, **H5_DT_ARGS)
             for dtype, cvt, column in zip(self.h5_dtype_list, self.converters, columns, strict=True):
+                assert len(column) == length, f"Error length: {h5g.name} {key=} {length=} {dtype[0]=} {len(column)=}"
                 ds[dtype[0]] = cvt.convert_to_h5(column)
         return ds
 

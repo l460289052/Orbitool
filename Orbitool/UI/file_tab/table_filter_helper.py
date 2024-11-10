@@ -1,11 +1,14 @@
 from typing import Union
 
 from PyQt6 import QtCore, QtWidgets, QtGui
+from Orbitool import logger
 
 from Orbitool.utils.readers import spectrum_filter
 
 from .. import Manager, state_node
 from ..utils import TableUtils
+
+TAG = "TableFilterHelper"
 
 
 class TableFilterHelper:
@@ -44,6 +47,7 @@ class TableFilterHelper:
         table = self.table
         use_filter = self.info.getCastedUsedSpectrumFilters()
         scanstats_filter = self.info.getCastedScanstatsFilters()
+        logger.d(TAG, f"showFilter() {use_filter=} {scanstats_filter=}")
         self.current_filter_widget = None
         self.current_edit_filter_pos = None
         TableUtils.clearAndSetRowCount(table, len(
@@ -124,7 +128,6 @@ class TableFilterHelper:
         else:
             widget.focusOutEvent = self.text_changed
 
-
     @state_node(mode='e')
     def text_changed(self):
         if self.current_previous_pair is None:
@@ -145,6 +148,8 @@ class TableFilterHelper:
             current = widget.currentText()
         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
             current = widget.text()
+        else:
+            current = None
         is_stats = key in spectrum_filter.stats_header
         use_filter = self.info.getCastedUsedSpectrumFilters()
         stats_filter = self.info.getCastedScanstatsFilters()
@@ -170,7 +175,7 @@ class TableFilterHelper:
                 if is_stats:
                     del stats_filter[key][op]
                     op = current
-                    stats_filter[key][op] = value
+                    stats_filter[key][op] = float(value)
                 else:
                     pass
             case 2:
@@ -204,8 +209,18 @@ class TableFilterHelper:
         table = self.table
         slt = TableUtils.getSelectedRow(table)
         use_filter = self.info.getCastedUsedSpectrumFilters()
+        stats_filter = self.info.getCastedScanstatsFilters()
         for index in slt:
             key = table.item(index, 0).text()
-            use_filter.pop(key)
+            if key in use_filter:
+                filter = use_filter.pop(key)
+                logger.d(TAG, f"delFilter() useFilter:{key=} {filter=}")
+            elif key in stats_filter:
+                sub_key = table.item(index, 1).text()
+                sub_filter = stats_filter.get(key, {})
+                value = sub_filter.pop(sub_key, None)  # type: ignore
+                if not sub_filter:
+                    stats_filter.pop(key, None)
+                logger.d(TAG, f"delFilter() statsFilter:{key=} {sub_key=} {value=}")
 
         self.show_filter()

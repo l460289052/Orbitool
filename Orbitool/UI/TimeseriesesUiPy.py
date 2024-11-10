@@ -412,6 +412,7 @@ class CalcSumTimeSeries(MultiProcess):
 
     @staticmethod
     def write(file, rets: Iterable[Tuple[datetime, float]], series: TimeSeries):
+        mid = (series.position_min + series.position_max) / 2
         for dt, s in rets:
-            series.append(dt, s)
+            series.append(dt, s, mid)
         return series
