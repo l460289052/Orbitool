@@ -230,7 +230,7 @@ class Widget(QtWidgets.QWidget):
             return
 
         peaks = info.peaks
-        shown_indexes = cast(array[int], info.shown_indexes)
+        shown_indexes = info.shown_indexes
 
         formula_map: Dict[Formula, List[Tuple[int, Formula]]] = {}
         for index, peak in enumerate(peaks):
